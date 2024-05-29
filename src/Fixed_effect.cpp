@@ -183,7 +183,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       //t4 = clock();
       crit = norm(v*d_beta, "inf");
       if (message == true) {
-        cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+        cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is" << setprecision(3) << scientific << crit << ";" << endl;
       }
     }
   } else if (backtrack==0) {
@@ -208,6 +208,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       // regression parameter update
       p = 1/(1+exp(-gamma_obs-Z_beta)); // update p
       pq = p % (1-p);
+      Yp = Y-p;
       arma::vec score_beta = Z.t() * Yp;
       // info_beta = info_beta_tbb(Z, pq); // tbb
       arma::mat info_beta = Z.t() * (Z.each_col()%pq); // serial
@@ -284,6 +285,7 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
       gamma_tmp = gamma + v * d_gamma;
       gamma_obs_tmp = rep(gamma_tmp, n_prov);
       arma::vec Z_beta_tmp = Z * (beta+v*d_beta);
+      d_loglkd = Loglkd(Y, Z_beta_tmp, gamma_obs_tmp) - loglkd;
       lambda = dot(score_gamma, d_gamma) + dot(score_beta, d_beta);
       while (d_loglkd < s*v*lambda) {
         v = t*v;
@@ -298,8 +300,25 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
     beta += v * d_beta;
     crit = norm(v*d_beta, "inf");
 
+    // if (stop == "beta"){
+    //   crit = norm(v*d_beta, "inf");
+    // }
+    // else if (stop == "relch") {
+    //   crit = abs(d_loglkd/(d_loglkd+loglkd));
+    // }
+    // else if (stop == "ratch") {
+    //   crit = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+    // }
+    // else if (stop == "all") {
+    //   arma::vec crits(3);
+    //   crits(0) = norm(v*d_beta, "inf");
+    //   crits(1) = abs(d_loglkd/(d_loglkd+loglkd));
+    //   crits(2) = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+    //   crit = crits.max();
+    // }
+
     if (message == true) {
-      cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << scientific << setprecision(3) << crit << ";";
+      cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << scientific << setprecision(3) << crit << ";" << endl;
     }
   }
   if (message == true) {

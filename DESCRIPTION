@@ -30,8 +30,8 @@ Depends:
 Suggests: 
     knitr, rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.2.3
-URL: https://github.com/UM-KevinHe/srrFE
+RoxygenNote: 7.3.1
+URL: https://github.com/UM-KevinHe/ppsrr
 Encoding: UTF-8
 SystemRequirements: GNU make
 Roxygen: list(markdown = TRUE)

@@ -5,7 +5,9 @@
 \title{Main function for fitting fixed effects model}
 \usage{
 logis_fe(
-  data.prep,
+  Y,
+  Z,
+  ID,
   algorithm = "SerBIN",
   max.iter = 10000,
   tol = 1e-05,
@@ -13,11 +15,16 @@ logis_fe(
   backtrack = TRUE,
   Rcpp = TRUE,
   AUC = FALSE,
-  message = FALSE
+  message = TRUE,
+  cutoff = 10
 )
 }
 \arguments{
-\item{data.prep}{an object from the \code{fe_data_prep()} function.}
+\item{Y}{a numerical vector, with values of 0 or 1, indicating the outcome variable.}
+
+\item{Z}{a matrix or data frame containing covariates.}
+
+\item{ID}{a vector representing the provider id. Its elements can be either numeric values or characters.}
 
 \item{algorithm}{a string specifying the algorithm to be used. Defaulting to "SerBIN".
 \itemize{
@@ -31,13 +38,15 @@ logis_fe(
 
 \item{bound}{a positive number to avoid inflation of provider effect. Defaulting to 10.}
 
-\item{backtrack}{a boolean indicating whether backtracking line search is implemented. Defaulting to FALSE.}
+\item{backtrack}{a Boolean indicating whether backtracking line search is implemented. Defaulting to FALSE.}
 
 \item{Rcpp}{a Boolean indicating whether the Rcpp function is used. Defaulting to TRUE.}
 
 \item{AUC}{a Boolean indicating whether report AUC. Defaulting to FALSE.}
 
-\item{message}{a Boolean indicating whether track the fitting process. Defaulting to TRUE.}
+\item{message}{a Boolean indicating whether print out the information of the data preparation process and track the fitting process. Defaulting to FALSE.}
+
+\item{cutoff}{an integer as cutoff of provider size with 10 as default. Providers with observations fewer than the "cutoff" value will be labeled as "include = 0".}
 
 \item{...}{}
 }
@@ -81,8 +90,7 @@ For a deeper understanding, please consult the original article for detailed ins
 }
 \examples{
 data(data_FE)
-data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID)
-fit_fe <- logis_fe(data.prep)
+fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID)
 
 }
 \references{

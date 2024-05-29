@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // computeDirectExp
 arma::vec computeDirectExp(const arma::vec& gamma_prov, const arma::vec& Z_beta, const int& threads);
-RcppExport SEXP _srrFE_computeDirectExp(SEXP gamma_provSEXP, SEXP Z_betaSEXP, SEXP threadsSEXP) {
+RcppExport SEXP _ppsrr_computeDirectExp(SEXP gamma_provSEXP, SEXP Z_betaSEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,7 +26,7 @@ END_RCPP
 }
 // logis_fe_prov
 List logis_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int backtrack, int max_iter, double bound, double tol, bool message);
-RcppExport SEXP _srrFE_logis_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP) {
+RcppExport SEXP _ppsrr_logis_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -46,7 +46,7 @@ END_RCPP
 }
 // logis_BIN_fe_prov
 List logis_BIN_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int parallel, int threads, double tol, int max_iter, double bound, bool message, bool backtrack);
-RcppExport SEXP _srrFE_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP) {
+RcppExport SEXP _ppsrr_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,7 +68,7 @@ END_RCPP
 }
 // logis_firth_prov
 List logis_firth_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int n_obs, int m, int parallel, int threads, double tol, int max_iter, double bound, bool message, bool backtrack);
-RcppExport SEXP _srrFE_logis_firth_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP n_obsSEXP, SEXP mSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP) {
+RcppExport SEXP _ppsrr_logis_firth_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP n_obsSEXP, SEXP mSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -92,7 +92,7 @@ END_RCPP
 }
 // wald_covar
 List wald_covar(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec& gamma, arma::vec& beta, arma::uvec& indices, double null, double alpha);
-RcppExport SEXP _srrFE_wald_covar(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP nullSEXP, SEXP alphaSEXP) {
+RcppExport SEXP _ppsrr_wald_covar(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP nullSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -110,7 +110,7 @@ END_RCPP
 }
 // Modified_score
 arma::vec Modified_score(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, double gamma_null, int m, arma::vec parm, int threads);
-RcppExport SEXP _srrFE_Modified_score(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP mSEXP, SEXP parmSEXP, SEXP threadsSEXP) {
+RcppExport SEXP _ppsrr_Modified_score(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP mSEXP, SEXP parmSEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -129,7 +129,7 @@ END_RCPP
 }
 // saddlepoint_score
 arma::vec saddlepoint_score(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec beta, double gamma_null, int m, int threads, double root_tol);
-RcppExport SEXP _srrFE_saddlepoint_score(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP mSEXP, SEXP threadsSEXP, SEXP root_tolSEXP) {
+RcppExport SEXP _ppsrr_saddlepoint_score(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP mSEXP, SEXP threadsSEXP, SEXP root_tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -147,17 +147,17 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_srrFE_computeDirectExp", (DL_FUNC) &_srrFE_computeDirectExp, 3},
-    {"_srrFE_logis_fe_prov", (DL_FUNC) &_srrFE_logis_fe_prov, 10},
-    {"_srrFE_logis_BIN_fe_prov", (DL_FUNC) &_srrFE_logis_BIN_fe_prov, 12},
-    {"_srrFE_logis_firth_prov", (DL_FUNC) &_srrFE_logis_firth_prov, 14},
-    {"_srrFE_wald_covar", (DL_FUNC) &_srrFE_wald_covar, 8},
-    {"_srrFE_Modified_score", (DL_FUNC) &_srrFE_Modified_score, 9},
-    {"_srrFE_saddlepoint_score", (DL_FUNC) &_srrFE_saddlepoint_score, 8},
+    {"_ppsrr_computeDirectExp", (DL_FUNC) &_ppsrr_computeDirectExp, 3},
+    {"_ppsrr_logis_fe_prov", (DL_FUNC) &_ppsrr_logis_fe_prov, 10},
+    {"_ppsrr_logis_BIN_fe_prov", (DL_FUNC) &_ppsrr_logis_BIN_fe_prov, 12},
+    {"_ppsrr_logis_firth_prov", (DL_FUNC) &_ppsrr_logis_firth_prov, 14},
+    {"_ppsrr_wald_covar", (DL_FUNC) &_ppsrr_wald_covar, 8},
+    {"_ppsrr_Modified_score", (DL_FUNC) &_ppsrr_Modified_score, 9},
+    {"_ppsrr_saddlepoint_score", (DL_FUNC) &_ppsrr_saddlepoint_score, 8},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_srrFE(DllInfo *dll) {
+RcppExport void R_init_ppsrr(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
