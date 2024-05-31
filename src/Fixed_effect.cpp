@@ -137,6 +137,9 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       arma::vec Z_beta = Z * beta;
       arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
       arma::vec Yp = Y - p, pq = p % (1-p);
+      if (any(pq == 0)) {
+        pq.replace(0, 1e-20);
+      }
       arma::vec score_gamma(m), d_gamma(m);
       ind = 0;
       for (int i = 0; i < m; i++) {
@@ -183,7 +186,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       //t4 = clock();
       crit = norm(v*d_beta, "inf");
       if (message == true) {
-        cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is" << setprecision(3) << scientific << crit << ";" << endl;
+        cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
       }
     }
   } else if (backtrack==0) {
@@ -197,6 +200,9 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       arma::vec Z_beta = Z * beta;
       arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
       arma::vec Yp = Y - p, pq = p % (1-p);
+      if (any(pq == 0)) {
+        pq.replace(0, 1e-20);
+      }
       ind = 0;
       for (int i = 0; i < m; i++) {
         gamma(i) += sum(Yp(span(ind,ind+n_prov(i)-1))) /
@@ -254,6 +260,9 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
     arma::vec Z_beta = Z * beta;
     arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
     arma::vec Yp = Y - p, pq = p % (1-p);
+    if (any(pq == 0)) {
+      pq.replace(0, 1e-20);
+    }
     arma::vec score_gamma(m), info_gamma_inv(m);
     arma::mat info_betagamma(Z.n_cols,m);
     ind = 0;

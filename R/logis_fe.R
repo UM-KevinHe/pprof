@@ -24,9 +24,11 @@
 #'
 #' @param AUC a Boolean indicating whether report AUC. Defaulting to FALSE.
 #'
-#' @param message a Boolean indicating whether print out the information of the data preparation process and track the fitting process. Defaulting to FALSE.
+#' @param message a Boolean indicating whether print out the information of the data preparation process and track the fitting process. Defaulting to TRUE.
 #'
 #' @param cutoff an integer as cutoff of provider size with 10 as default. Providers with observations fewer than the "cutoff" value will be labeled as "include = 0".
+#'
+#' @param  check  a Boolean indicating whether to the `data_check` function and to check the data quality. Defaulting to FALSE
 #'
 #' @param ...
 #'
@@ -89,9 +91,11 @@
 #' @keywords Cost-Efficient Newton-Raphson (CENR) Algorithm, Fixed Provider Effects
 #'
 #' @export
+#'
+#' @useDynLib ppsrr, .registration = TRUE
 
 logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
-                     backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10){
+                     backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10, check = FALSE){
 
   # Check input
   if (missing(Y) || missing(Z) || missing(ID))
@@ -103,6 +107,9 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
   if (length(Y) != length(ID) | length(ID) != nrow(Z)){
     stop("Dimensions of the input data do not match!!", call.=F)
   }
+
+  if (check == TRUE)
+    data_check(Y, Z, ID)
 
   # Data Preparation
   data <- as.data.frame(cbind(Y, ID, Z))
@@ -169,12 +176,13 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
         iter <- iter + 1
         gamma.obs <- rep(gamma.prov, n.prov)
         p <- c(plogis(gamma.obs+Z%*%beta))
-        q <- p*(1-p)
+        pq <- p*(1-p)
+        pq[pq == 0] <- 1e-20
         score.gamma <- sapply(split(data[,Y.char]-p, data[,prov.char]), sum)
         score.beta <- t(Z)%*%(data[,Y.char]-p)
-        info.gamma.inv <- 1/sapply(split(q, data[,prov.char]),sum) #I_11^(-1)
-        info.betagamma <- sapply(by(q*Z,data[,prov.char],identity),colSums) #I_21
-        info.beta <- t(Z)%*%(q*Z) #I_22
+        info.gamma.inv <- 1/sapply(split(pq, data[,prov.char]),sum) #I_11^(-1)
+        info.betagamma <- sapply(by(pq*Z,data[,prov.char],identity),colSums) #I_21
+        info.beta <- t(Z)%*%(pq*Z) #I_22
         mat.tmp1 <- info.gamma.inv*t(info.betagamma) #J_1^T
         schur.inv <- solve(info.beta-info.betagamma%*%mat.tmp1) #S^-1
         mat.tmp2 <- mat.tmp1%*%schur.inv #J_2^T
@@ -232,6 +240,7 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
         gamma.obs <- rep(gamma.prov, n.prov)
         Z.beta <- Z%*%beta
         p <- c(plogis(gamma.obs+Z.beta)); pq <- p*(1-p)
+        pq[pq == 0] <- 1e-20
         score.gamma.prov <- sapply(split(data[,Y.char]-p, data[,prov.char]), sum)
         d.gamma.prov <- score.gamma.prov / sapply(split(pq, data[,prov.char]), sum)
         v <- 1 # initialize step size

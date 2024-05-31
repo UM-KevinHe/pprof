@@ -2,3 +2,18 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# Ignore object files and archive files
+*.o
+*.so
+*.dll
+
+# Ignore compiled static synamtic libraries
+*.a
+
+# Ignore compiled dynamic libraries
+*.dylib
+
+# Ignore package tarballs
+*.tar.gz
+```

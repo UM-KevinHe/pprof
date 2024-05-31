@@ -4,7 +4,7 @@
 \alias{data_check}
 \title{Data Quality Check including}
 \usage{
-data_check(Y, Z, ID, message = TRUE)
+data_check(Y, Z, ID)
 }
 \arguments{
 \item{Y}{a numerical vector, with values of 0 or 1, indicating the outcome variable.}
@@ -13,14 +13,10 @@ data_check(Y, Z, ID, message = TRUE)
 
 \item{ID}{a vector representing the provider id. Its elements can be either numeric values or characters.}
 
-\item{message}{a Boolean indicating whether printing out the information of the data preparation process. Defaulting to "TRUE".}
-
 \item{...}{}
 }
 \value{
-\item{data}{a sorted data frame including response, provider identifiers, covariates, and additional provider information.}
-
-\item{char_list}{a list including variable names.}
+No return value, called for side effects.
 }
 \description{
 Data Quality Check including
@@ -34,23 +30,10 @@ The function performs the following checks:
 \item \strong{VIF}: Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.
 }
 
-The \code{fe_data_prep()} function returns data sorted by the provider identifiers,
-accompanied by additional provider-related information indicating whether the provider's size exceeds a specified "cutoff"
-and whether the respective provider has experienced either zero or all events.
-The reason behind introducing a "cutoff" lies in findings from both simulated and real data studies,
-revealing the instability of coefficient estimates for providers with small sizes.
-Consequently, we recommend excluding small providers during the model fitting process.
-It is important to note that the resultant data frame retains all providers, including small ones,
-but utilizes the "included = 0" label to signify the small providers. Subsequently, during the model fitting stage,
-the \code{logis_fe()} function disregards records marked with "included = 0".
-}
-\examples{
-data(data_FE)
-results <- data_check(data_FE$Y, data_FE$Z, data_FE$ID)
-head(data.prep$data)
-data.prep$char_list
-
+The \code{data_check} function is intended to be private within the \code{ppsrr} package and should not be called directly by users.
+Instead, if issues are encountered with the \code{logis_fe} function, users can set \code{check=TRUE} in the \code{logis_fe} function to invoke this function.
 }
 \keyword{check}
 \keyword{data}
+\keyword{internal,}
 \keyword{quality,}

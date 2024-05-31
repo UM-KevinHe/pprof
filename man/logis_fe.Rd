@@ -16,7 +16,8 @@ logis_fe(
   Rcpp = TRUE,
   AUC = FALSE,
   message = TRUE,
-  cutoff = 10
+  cutoff = 10,
+  check = FALSE
 )
 }
 \arguments{
