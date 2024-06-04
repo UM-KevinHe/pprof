@@ -5,12 +5,12 @@ computeDirectExp <- function(gamma_prov, Z_beta, threads) {
     .Call(`_ppsrr_computeDirectExp`, gamma_prov, Z_beta, threads)
 }
 
-logis_fe_prov <- function(Y, Z, n_prov, gamma, beta, backtrack = 0L, max_iter = 10000L, bound = 10.0, tol = 1e-5, message = TRUE) {
-    .Call(`_ppsrr_logis_fe_prov`, Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message)
+logis_fe_prov <- function(Y, Z, n_prov, gamma, beta, backtrack = 0L, max_iter = 10000L, bound = 10.0, tol = 1e-5, message = TRUE, stop = "beta") {
+    .Call(`_ppsrr_logis_fe_prov`, Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message, stop)
 }
 
-logis_BIN_fe_prov <- function(Y, Z, n_prov, gamma, beta, parallel = 1L, threads = 1L, tol = 1e-8, max_iter = 10000L, bound = 10.0, message = TRUE, backtrack = FALSE) {
-    .Call(`_ppsrr_logis_BIN_fe_prov`, Y, Z, n_prov, gamma, beta, parallel, threads, tol, max_iter, bound, message, backtrack)
+logis_BIN_fe_prov <- function(Y, Z, n_prov, gamma, beta, parallel = 1L, threads = 1L, tol = 1e-8, max_iter = 10000L, bound = 10.0, message = TRUE, backtrack = FALSE, stop = "beta") {
+    .Call(`_ppsrr_logis_BIN_fe_prov`, Y, Z, n_prov, gamma, beta, parallel, threads, tol, max_iter, bound, message, backtrack, stop)
 }
 
 logis_firth_prov <- function(Y, Z, n_prov, gamma, beta, n_obs, m, parallel = 1L, threads = 1L, tol = 1e-8, max_iter = 10000L, bound = 10.0, message = TRUE, backtrack = FALSE) {

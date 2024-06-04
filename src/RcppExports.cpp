@@ -25,8 +25,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // logis_fe_prov
-List logis_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int backtrack, int max_iter, double bound, double tol, bool message);
-RcppExport SEXP _ppsrr_logis_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP) {
+List logis_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int backtrack, int max_iter, double bound, double tol, bool message, const std::string stop);
+RcppExport SEXP _ppsrr_logis_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP, SEXP stopSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -40,13 +40,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< bool >::type message(messageSEXP);
-    rcpp_result_gen = Rcpp::wrap(logis_fe_prov(Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message));
+    Rcpp::traits::input_parameter< const std::string >::type stop(stopSEXP);
+    rcpp_result_gen = Rcpp::wrap(logis_fe_prov(Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message, stop));
     return rcpp_result_gen;
 END_RCPP
 }
 // logis_BIN_fe_prov
-List logis_BIN_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int parallel, int threads, double tol, int max_iter, double bound, bool message, bool backtrack);
-RcppExport SEXP _ppsrr_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP) {
+List logis_BIN_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int parallel, int threads, double tol, int max_iter, double bound, bool message, bool backtrack, const std::string stop);
+RcppExport SEXP _ppsrr_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP, SEXP stopSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -62,7 +63,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
     Rcpp::traits::input_parameter< bool >::type message(messageSEXP);
     Rcpp::traits::input_parameter< bool >::type backtrack(backtrackSEXP);
-    rcpp_result_gen = Rcpp::wrap(logis_BIN_fe_prov(Y, Z, n_prov, gamma, beta, parallel, threads, tol, max_iter, bound, message, backtrack));
+    Rcpp::traits::input_parameter< const std::string >::type stop(stopSEXP);
+    rcpp_result_gen = Rcpp::wrap(logis_BIN_fe_prov(Y, Z, n_prov, gamma, beta, parallel, threads, tol, max_iter, bound, message, backtrack, stop));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -148,8 +150,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ppsrr_computeDirectExp", (DL_FUNC) &_ppsrr_computeDirectExp, 3},
-    {"_ppsrr_logis_fe_prov", (DL_FUNC) &_ppsrr_logis_fe_prov, 10},
-    {"_ppsrr_logis_BIN_fe_prov", (DL_FUNC) &_ppsrr_logis_BIN_fe_prov, 12},
+    {"_ppsrr_logis_fe_prov", (DL_FUNC) &_ppsrr_logis_fe_prov, 11},
+    {"_ppsrr_logis_BIN_fe_prov", (DL_FUNC) &_ppsrr_logis_BIN_fe_prov, 13},
     {"_ppsrr_logis_firth_prov", (DL_FUNC) &_ppsrr_logis_firth_prov, 14},
     {"_ppsrr_wald_covar", (DL_FUNC) &_ppsrr_wald_covar, 8},
     {"_ppsrr_Modified_score", (DL_FUNC) &_ppsrr_Modified_score, 9},

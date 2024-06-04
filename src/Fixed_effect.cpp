@@ -112,12 +112,16 @@ arma::vec computeDirectExp(const arma::vec& gamma_prov, const arma::vec& Z_beta,
 }
 
 // [[Rcpp::export]]
-List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamma, arma::vec beta, int backtrack=0,
-                   int max_iter=10000, double bound=10.0, double tol=1e-5, bool message = true) {
+List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamma, arma::vec beta,
+                   int backtrack=0, int max_iter=10000, double bound=10.0, double tol=1e-5,
+                   bool message = true, const std::string stop = "beta") {
 
   int iter = 0, n = Z.n_rows, m = n_prov.n_elem, ind;
   arma::vec gamma_obs(n);
   double crit = 100.0;
+
+  gamma_obs = rep(gamma, n_prov);
+  double loglkd_init = Loglkd(Y, Z*beta, gamma_obs);
 
   if (message == true) {
     cout << "Implementing BAN algorithm (Rcpp) for fixed provider effects model ..." << endl;
@@ -125,7 +129,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
 
   //double meanratio = 0.0;
   if (backtrack==1) {
-    double loglkd, d_loglkd, v, lambda, s = 0.01, t = 0.6;
+    double loglkd, d_loglkd, loglkd_old, v, lambda, s = 0.01, t = 0.6;
     arma::vec gamma_obs_tmp(n), gamma_tmp(m), beta_tmp(Z.n_cols);
     while (iter < max_iter) {
       if (crit < tol) {
@@ -135,6 +139,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       // provider effect update
       gamma_obs = rep(gamma, n_prov);
       arma::vec Z_beta = Z * beta;
+      loglkd_old = Loglkd(Y, Z_beta, gamma_obs);
       arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
       arma::vec Yp = Y - p, pq = p % (1-p);
       if (any(pq == 0)) {
@@ -184,12 +189,52 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       }
       beta += v * d_beta;
       //t4 = clock();
-      crit = norm(v*d_beta, "inf");
-      if (message == true) {
-        cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+
+      d_loglkd = Loglkd(Y, Z*beta, gamma_obs) - loglkd_old;
+
+      // Stopping Criterion
+      if (stop == "beta"){
+        crit = norm(v*d_beta, "inf");
+        if (message == true) {
+          cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
       }
+      else if (stop == "relch"){
+        crit = abs(d_loglkd/(d_loglkd+loglkd_old));
+        if (message == true) {
+          cout << "Iter " << iter << ": Relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+      else if (stop == "ratch") {
+        crit = abs(d_loglkd/(d_loglkd+loglkd_old-loglkd_init));
+        if (message == true) {
+          cout << "Iter " << iter << ": Adjusted relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+      else if (stop == "all") {
+        arma::vec crits(3);
+        crits(0) = norm(v*d_beta, "inf");
+        crits(1) = abs(d_loglkd/(d_loglkd+loglkd_old));
+        crits(2) = abs(d_loglkd/(d_loglkd+loglkd_old-loglkd_init));
+        crit = crits.max();
+        if (message == true) {
+          cout << "Iter " << iter << ": Maximum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+      else if (stop == "or") {
+        arma::vec crits(3);
+        crits(0) = norm(v*d_beta, "inf");
+        crits(1) = abs(d_loglkd/(d_loglkd+loglkd_old));
+        crits(2) = abs(d_loglkd/(d_loglkd+loglkd_old-loglkd_init));
+        crit = crits.min();
+        if (message == true) {
+          cout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+
     }
   } else if (backtrack==0) {
+    double loglkd, d_loglkd;
     while (iter < max_iter) {
       if (crit < tol) {
         break;
@@ -198,6 +243,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       // provider effect update
       gamma_obs = rep(gamma, n_prov);
       arma::vec Z_beta = Z * beta;
+      loglkd = Loglkd(Y, Z_beta, gamma_obs);
       arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
       arma::vec Yp = Y - p, pq = p % (1-p);
       if (any(pq == 0)) {
@@ -209,6 +255,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
           sum(pq(span(ind,ind+n_prov(i)-1)));
         ind += n_prov(i);
       }
+
       gamma = clamp(gamma, median(gamma)-bound, median(gamma)+bound);
       gamma_obs = rep(gamma, n_prov);
       // regression parameter update
@@ -220,9 +267,47 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       arma::mat info_beta = Z.t() * (Z.each_col()%pq); // serial
       arma::vec d_beta = solve(info_beta, score_beta, solve_opts::fast+solve_opts::likely_sympd);
       beta += d_beta;
-      crit = norm(d_beta, "inf");
-      if (message == true) {
-        cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+
+      d_loglkd = Loglkd(Y, Z*beta, gamma_obs)-loglkd;
+
+      // Stopping Criterion
+      if (stop == "beta"){
+        crit = norm(d_beta, "inf");
+        if (message == true) {
+          cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+      else if (stop == "relch"){
+        crit = abs(d_loglkd/(d_loglkd+loglkd));
+        if (message == true) {
+          cout << "Iter " << iter << ": Relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+      else if (stop == "ratch") {
+        crit = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+        if (message == true) {
+          cout << "Iter " << iter << ": Adjusted relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+      else if (stop == "all") {
+        arma::vec crits(3);
+        crits(0) = norm(d_beta, "inf");
+        crits(1) = abs(d_loglkd/(d_loglkd+loglkd));
+        crits(2) = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+        crit = crits.max();
+        if (message == true) {
+          cout << "Iter " << iter << ": Maximum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
+      }
+      else if (stop == "or") {
+        arma::vec crits(3);
+        crits(0) = norm(d_beta, "inf");
+        crits(1) = abs(d_loglkd/(d_loglkd+loglkd));
+        crits(2) = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+        crit = crits.min();
+        if (message == true) {
+          cout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+        }
       }
     }
   }
@@ -237,12 +322,16 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
 // [[Rcpp::export]]
 List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamma, arma::vec beta,
                        int parallel=1, int threads=1, double tol=1e-8, int max_iter=10000,
-                       double bound=10.0, bool message = true, bool backtrack = false) {
+                       double bound=10.0, bool message = true, bool backtrack = false,
+                       const std::string stop = "beta") {
 
   int iter = 0, n = Z.n_rows, m = n_prov.n_elem, ind;
   double v;
   arma::vec gamma_obs(n);
   double crit = 100.0;
+  gamma_obs = rep(gamma, n_prov);
+  double loglkd_init = Loglkd(Y, Z*beta, gamma_obs);
+
   if (message == true) {
     cout << "Implementing SerBIN algorithm (Rcpp) for fixed provider effects model ..." << endl;
   }
@@ -258,6 +347,7 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
     iter++;
     gamma_obs = rep(gamma, n_prov);
     arma::vec Z_beta = Z * beta;
+    loglkd = Loglkd(Y, Z_beta, gamma_obs);
     arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
     arma::vec Yp = Y - p, pq = p % (1-p);
     if (any(pq == 0)) {
@@ -290,7 +380,6 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
 
     v = 1.0; // initialize step size
     if (backtrack == true){
-      loglkd = Loglkd(Y, Z * beta, rep(gamma, n_prov));
       gamma_tmp = gamma + v * d_gamma;
       gamma_obs_tmp = rep(gamma_tmp, n_prov);
       arma::vec Z_beta_tmp = Z * (beta+v*d_beta);
@@ -306,29 +395,51 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
     }
     gamma += v * d_gamma;
     gamma = clamp(gamma, median(gamma)-bound, median(gamma)+bound);
+    gamma_obs = rep(gamma, n_prov);
     beta += v * d_beta;
-    crit = norm(v*d_beta, "inf");
 
-    // if (stop == "beta"){
-    //   crit = norm(v*d_beta, "inf");
-    // }
-    // else if (stop == "relch") {
-    //   crit = abs(d_loglkd/(d_loglkd+loglkd));
-    // }
-    // else if (stop == "ratch") {
-    //   crit = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
-    // }
-    // else if (stop == "all") {
-    //   arma::vec crits(3);
-    //   crits(0) = norm(v*d_beta, "inf");
-    //   crits(1) = abs(d_loglkd/(d_loglkd+loglkd));
-    //   crits(2) = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
-    //   crit = crits.max();
-    // }
+    d_loglkd = Loglkd(Y, Z*beta, gamma_obs)-loglkd;
 
-    if (message == true) {
-      cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << scientific << setprecision(3) << crit << ";" << endl;
+    // Stopping Criterion
+    if (stop == "beta"){
+      crit = norm(v*d_beta, "inf");
+      if (message == true) {
+        cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+      }
     }
+    else if (stop == "relch"){
+      crit = abs(d_loglkd/(d_loglkd+loglkd));
+      if (message == true) {
+        cout << "Iter " << iter << ": Relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+      }
+    }
+    else if (stop == "ratch") {
+      crit = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+      if (message == true) {
+        cout << "Iter " << iter << ": Adjusted relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+      }
+    }
+    else if (stop == "all") {
+      arma::vec crits(3);
+      crits(0) = norm(v*d_beta, "inf");
+      crits(1) = abs(d_loglkd/(d_loglkd+loglkd));
+      crits(2) = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+      crit = crits.max();
+      if (message == true) {
+        cout << "Iter " << iter << ": Maximum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+      }
+    }
+    else if (stop == "or") {
+      arma::vec crits(3);
+      crits(0) = norm(v*d_beta, "inf");
+      crits(1) = abs(d_loglkd/(d_loglkd+loglkd));
+      crits(2) = abs(d_loglkd/(d_loglkd+loglkd-loglkd_init));
+      crit = crits.min();
+      if (message == true) {
+        cout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+      }
+    }
+
   }
   if (message == true) {
     cout << "serBIN (Rcpp) algorithm converged after " << iter << " iterations!" << endl;

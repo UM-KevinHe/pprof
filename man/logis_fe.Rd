@@ -17,6 +17,7 @@ logis_fe(
   AUC = FALSE,
   message = TRUE,
   cutoff = 10,
+  stop = "beta",
   check = FALSE
 )
 }
@@ -45,9 +46,21 @@ logis_fe(
 
 \item{AUC}{a Boolean indicating whether report AUC. Defaulting to FALSE.}
 
-\item{message}{a Boolean indicating whether print out the information of the data preparation process and track the fitting process. Defaulting to FALSE.}
+\item{message}{a Boolean indicating whether print out the information of the data preparation process and track the fitting process. Defaulting to TRUE.}
 
 \item{cutoff}{an integer as cutoff of provider size with 10 as default. Providers with observations fewer than the "cutoff" value will be labeled as "include = 0".}
+
+\item{stop}{a character string specifying the stopping rule to determine convergence.
+\code{"incre"} means we stop the algorithm when the infinity norm of the difference between current and previous beta coefficients is less than the \code{tol}.
+\code{"relch"} means we stop the algorithm when the \eqn{(loglik(m)-loglik(m-1))/(loglik(m))} is less than the \code{tol},
+where \eqn{loglik(m)} denotes the log-partial likelihood at iteration step m.
+\code{"ratch"} means we stop the algorithm when \eqn{(loglik(m)-loglik(m-1))/(loglik(m)-loglik(0))} is less than the \code{tol}.
+\code{"all"} means we stop the algorithm when all the stopping rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) are met.
+\verb{"or} means we stop the algorithm if any one of the rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) is met.
+The default value is \code{beta}.
+If \code{iter.max} is achieved, it overrides any stop rule for algorithm termination.}
+
+\item{check}{a Boolean indicating whether to the \code{data_check} function and to check the data quality. Defaulting to FALSE}
 
 \item{...}{}
 }

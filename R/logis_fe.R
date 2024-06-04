@@ -28,6 +28,16 @@
 #'
 #' @param cutoff an integer as cutoff of provider size with 10 as default. Providers with observations fewer than the "cutoff" value will be labeled as "include = 0".
 #'
+#' @param stop a character string specifying the stopping rule to determine convergence.
+#' `"incre"` means we stop the algorithm when the infinity norm of the difference between current and previous beta coefficients is less than the `tol`.
+#' `"relch"` means we stop the algorithm when the \eqn{(loglik(m)-loglik(m-1))/(loglik(m))} is less than the `tol`,
+#'  where \eqn{loglik(m)} denotes the log-partial likelihood at iteration step m.
+#' `"ratch"` means we stop the algorithm when \eqn{(loglik(m)-loglik(m-1))/(loglik(m)-loglik(0))} is less than the `tol`.
+#' `"all"` means we stop the algorithm when all the stopping rules (`"beta"`, `"relch"`, `"ratch"`) are met.
+#' `"or` means we stop the algorithm if any one of the rules (`"beta"`, `"relch"`, `"ratch"`) is met.
+#' The default value is `beta`.
+#' If `iter.max` is achieved, it overrides any stop rule for algorithm termination.
+#'
 #' @param  check  a Boolean indicating whether to the `data_check` function and to check the data quality. Defaulting to FALSE
 #'
 #' @param ...
@@ -95,7 +105,8 @@
 #' @useDynLib ppsrr, .registration = TRUE
 
 logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
-                     backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10, check = FALSE){
+                     backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10,
+                     stop = "beta", check = FALSE){
 
   # Check input
   if (missing(Y) || missing(Z) || missing(ID))
@@ -149,17 +160,21 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
   gamma.prov <- rep(log(mean(data[,Y.char])/(1-mean(data[,Y.char]))), length(n.prov))
   beta <- rep(0, NCOL(Z))
 
+  Loglkd <- function(gamma.obs, beta) {
+    sum((gamma.obs+Z%*%beta)*data[,Y.char]-log(1+exp(gamma.obs+Z%*%beta)))
+  }
+  loglkd_init = Loglkd(rep(gamma.prov, n.prov), beta)
 
   # Model
   if (algorithm == "SerBIN") {
     if (Rcpp) { #Rcpp always use "backtrack"
       ls <- logis_BIN_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,
-                              0,1,tol,max.iter, bound, message, backtrack)
+                              0,1,tol,max.iter, bound, message, backtrack, stop)
       gamma.prov <- as.numeric(ls$gamma)
       beta <- as.numeric(ls$beta)
     } else {
       iter <- 0
-      beta.crit <- 100 # initialize stop criterion
+      crit <- 100 # initialize stop criterion
       if (message){
         message("Implementing SerBIN algorithm for fixed provider effects model ...")
       }
@@ -167,14 +182,12 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
       if (backtrack){ # initialize parameters for backtracking line search
         s <- 0.01
         t <- 0.6
-        Loglkd <- function(gamma.obs, beta) {
-          sum((gamma.obs+Z%*%beta)*data[,Y.char]-log(1+exp(gamma.obs+Z%*%beta)))
-        }
       }
 
-      while (iter<=max.iter & beta.crit>=tol) {
+      while (iter<=max.iter & crit>=tol) {
         iter <- iter + 1
         gamma.obs <- rep(gamma.prov, n.prov)
+        loglkd = Loglkd(gamma.obs, beta)
         p <- c(plogis(gamma.obs+Z%*%beta))
         pq <- p*(1-p)
         pq[pq == 0] <- 1e-20
@@ -192,7 +205,6 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
         d.beta <- -t(mat.tmp2)%*%score.gamma+schur.inv%*%score.beta
         v <- 1 # initialize step size
         if (backtrack) {
-          loglkd <- Loglkd(rep(gamma.prov, n.prov), beta)
           d.loglkd <- Loglkd(rep(gamma.prov+v*d.gamma.prov, n.prov), beta+v*d.beta) - loglkd
           lambda <- c(score.gamma,score.beta)%*%c(d.gamma.prov,d.beta)
           while (d.loglkd < s*v*lambda) {  #update step size
@@ -203,14 +215,52 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
         gamma.prov <- gamma.prov + v * d.gamma.prov
         gamma.prov <- pmin(pmax(gamma.prov, median(gamma.prov)-bound), median(gamma.prov)+bound)
         beta.new <- beta + v * d.beta
-        beta.crit <- norm(matrix(beta-beta.new),"I") # stopping criterion
+
+        d.loglkd = Loglkd(rep(gamma.prov, n.prov), beta.new) - loglkd
+
+        # stopping criterion
+        if (stop=="beta"){
+          crit <- norm(matrix(beta-beta.new),"I")
+          if (message){
+            cat(paste0("Iter ",iter,": Inf norm of running diff in est reg parm is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="relch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd))
+          if (message) {
+            cat(paste0("Iter ",iter,": Relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="ratch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd-loglkd_init))
+          if (message) {
+            cat(paste0("Iter ",iter,": Adjusted relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="all"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd-loglkd_init))
+          crit <- max(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Maximum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+        else if (stop=="or"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd-loglkd_init))
+          crit <- min(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Minimum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+
         beta <- beta.new
 
-
-        if (message){
-          cat(paste0("Iter ",iter,": Inf norm of running diff in est reg parm is ",
-                     formatC(beta.crit,digits=3,format="e"),";\n"))
-        }
       }
       if (message){
         message("\n SerBIN algorithm converged after ",iter," iterations!")
@@ -218,26 +268,24 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
     }
   } else if (algorithm == "BAN"){
     if (Rcpp) {
-      ls <- logis_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,backtrack,max.iter,bound,tol)
+      ls <- logis_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,backtrack,max.iter,bound,tol,message,stop)
       gamma.prov <- as.numeric(ls$gamma); beta <- as.numeric(ls$beta)
     } else {
       iter <- 0
-      beta.crit <- 100 # initialize stop criterion
+      crit <- 100 # initialize stop criterion
       if (message){
         message("Implementing BAN algorithm for fixed provider effects model ...")
       }
       if (backtrack){ # initialize parameters for backtracking line search
         s <- 0.01
         t <- 0.8
-        Loglkd <- function(gamma.obs, beta) {
-          sum((gamma.obs+Z%*%beta)*data[,Y.char]-log(1+exp(gamma.obs+Z%*%beta)))
-        }
       }
 
-      while (iter<=max.iter & beta.crit>=tol) {
+      while (iter<=max.iter & crit>=tol) {
         iter <- iter + 1
         # provider effect update
         gamma.obs <- rep(gamma.prov, n.prov)
+        loglkd.old = Loglkd(gamma.obs, beta)
         Z.beta <- Z%*%beta
         p <- c(plogis(gamma.obs+Z.beta)); pq <- p*(1-p)
         pq[pq == 0] <- 1e-20
@@ -273,13 +321,50 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
           }
         }
         beta.new <- beta + v * d.beta
-        beta.crit <- norm(matrix(beta-beta.new),"I") # stopping criterion
-        beta <- beta.new
+        d.loglkd = Loglkd(rep(gamma.prov, n.prov), beta.new) - loglkd.old
 
-        if (message){
-          cat(paste0("Iter ",iter,": Inf norm of running diff in est reg parm is ",
-                     formatC(beta.crit,digits=3,format="e"),";\n"))
+        # stopping criterion
+        if (stop=="beta"){
+          crit <- norm(matrix(beta-beta.new),"I")
+          if (message){
+            cat(paste0("Iter ",iter,": Inf norm of running diff in est reg parm is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
         }
+        else if (stop=="relch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd.old))
+          if (message) {
+            cat(paste0("Iter ",iter,": Relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="ratch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd.old-loglkd_init))
+          if (message) {
+            cat(paste0("Iter ",iter,": Adjusted relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="all"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd.old))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd.old-loglkd_init))
+          crit <- max(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Maximum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+        else if (stop=="or"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd.old))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd.old-loglkd_init))
+          crit <- min(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Minimum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+
+        beta <- beta.new
       }
       if (message){
         message("\n BAN algorithm converged after ",iter," iterations!")
