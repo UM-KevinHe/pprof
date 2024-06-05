@@ -3,6 +3,7 @@
 S3method(coef,logis_fe)
 S3method(confint,logis_fe)
 export(SR_output)
+export(data_check)
 export(fe_data_prep)
 export(logis_fe)
 export(logis_firth)

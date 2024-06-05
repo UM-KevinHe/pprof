@@ -18,9 +18,8 @@
 #'     \item \strong{VIF}: Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.
 #'   }
 #'
-#' The `data_check` function is intended to be private within the `ppsrr` package and should not be called directly by users.
-#' Instead, if issues are encountered with the `logis_fe` function, users can set `check=TRUE` in the `logis_fe` function to invoke this function.
-#'
+#' Users can either set `check=TRUE` in the `logis_fe` function to invoke this function,
+#' or directly call this function for data quality checking purposes.
 #'
 #' @return No return value, called for side effects.
 #'
@@ -29,6 +28,8 @@
 #' @importFrom olsrr ols_vif_tol
 #'
 #' @keywords internal, data quality, check
+#'
+#' @export
 
 data_check <- function(Y, Z, ID) {
   data <- as.data.frame(cbind(Y, ID, Z))

@@ -17,8 +17,6 @@
 #'
 #' @param null if "stdz = indirect", a character string or real number specifying null hypotheses of fixed provider effects for calculating standardized rate/ratio. Defaulting to "median".
 #'
-#' @param Rcpp a boolean indicating whether to use Rcpp. Defaulting to TRUE.
-#'
 #' @param threads an integer specifying the number of threads to use. Defaulting to 2.
 #'
 #' @param ...
@@ -102,16 +100,7 @@ SR_output <- function(fit, stdz = "indirect", measure = c("rate", "ratio"), null
   }
 
   if ("direct" %in% stdz) {
-    if (Rcpp) {
-      Exp <- computeDirectExp(gamma.prov, Z_beta, threads)
-    } else {
-      exp_ZB <- exp(Z_beta)
-      Exp.direct <- function(gamma){
-        numer <- exp(gamma) * exp_ZB
-        sum(1/(1 + 1/numer))
-      }
-      Exp <- sapply(gamma.prov, Exp.direct)
-    }
+    Exp <- computeDirectExp(gamma.prov, Z_beta, threads)
 
     df.prov <- data.frame(Obs_all = rep(sum(fit$obs), length(gamma.prov)), #denominator
                           Exp.direct_all = Exp)  #numerator

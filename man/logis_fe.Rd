@@ -13,7 +13,6 @@ logis_fe(
   tol = 1e-05,
   bound = 10,
   backtrack = TRUE,
-  Rcpp = TRUE,
   AUC = FALSE,
   message = TRUE,
   cutoff = 10,
@@ -42,8 +41,6 @@ logis_fe(
 
 \item{backtrack}{a Boolean indicating whether backtracking line search is implemented. Defaulting to FALSE.}
 
-\item{Rcpp}{a Boolean indicating whether the Rcpp function is used. Defaulting to TRUE.}
-
 \item{AUC}{a Boolean indicating whether report AUC. Defaulting to FALSE.}
 
 \item{message}{a Boolean indicating whether print out the information of the data preparation process and track the fitting process. Defaulting to TRUE.}
@@ -60,7 +57,9 @@ where \eqn{loglik(m)} denotes the log-partial likelihood at iteration step m.
 The default value is \code{beta}.
 If \code{iter.max} is achieved, it overrides any stop rule for algorithm termination.}
 
-\item{check}{a Boolean indicating whether to the \code{data_check} function and to check the data quality. Defaulting to FALSE}
+\item{check}{a Boolean indicating whether to invoke the \code{data_check} function and to check the data quality. Defaulting to FALSE}
+
+\item{Rcpp}{a Boolean indicating whether the Rcpp function is used. Defaulting to TRUE.}
 
 \item{...}{}
 }

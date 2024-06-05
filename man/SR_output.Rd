@@ -31,8 +31,6 @@ SR_output(
 
 \item{null}{if "stdz = indirect", a character string or real number specifying null hypotheses of fixed provider effects for calculating standardized rate/ratio. Defaulting to "median".}
 
-\item{Rcpp}{a boolean indicating whether to use Rcpp. Defaulting to TRUE.}
-
 \item{threads}{an integer specifying the number of threads to use. Defaulting to 2.}
 
 \item{...}{}
