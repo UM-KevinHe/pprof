@@ -26,7 +26,7 @@
 #'   }
 #'
 #' The `fe_data_prep()` function returns data sorted by the provider identifiers,
-#' accompanied by additional provider-related information indicating whether the provider's size exceeds a specified "cutoff"
+#' accompanied by additional provider-related information indicating whether the provider's size is smaller than a specified "cutoff"
 #' and whether the respective provider has experienced either zero or all events.
 #' The reason behind introducing a "cutoff" lies in findings from both simulated and real data studies,
 #' revealing the instability of coefficient estimates for providers with small sizes.
@@ -56,21 +56,28 @@
 #'
 #' @export
 
-fe_data_prep <- function(Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE) {
-  data <- as.data.frame(cbind(Y, ID, Z))
-  Y.char <- colnames(data)[1]
-  prov.char <- colnames(data)[2]
-  Z.char <- colnames(Z)
+fe_data_prep <- function(N, Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE) {
+  if (missing(N)) {
+    N <- rep(1, length(Y))
+    if (message == TRUE) message("No number of trails provided. Defaulting to 1.")
+  }
 
   #check dimensions of the input data
-  if (length(Y) != length(ID) | length(ID) != nrow(Z)){
+  if (length(N) != length(Y) | length(Y) != length(ID) | length(ID) != nrow(Z)){
     stop("Dimensions of the input data do not match!!", call.=F)
   }
+
+  N <- data.frame(N)
+  data <- as.data.frame(cbind(N, Y, ID, Z))
+  N.char <- colnames(data)[1]
+  Y.char <- colnames(data)[2]
+  prov.char <- colnames(data)[3]
+  Z.char <- colnames(Z)
 
   if (check) {
     ## check missingness of variables
     if (message == TRUE) message("Checking missingness of variables ... ")
-    if (sum(complete.cases(data[,c(Y.char,Z.char,prov.char)]))==NROW(data)) {
+    if (sum(complete.cases(data[,c(N.char,Y.char,Z.char,prov.char)]))==NROW(data)) {
       if (message == TRUE) message("Missing values NOT found. Checking missingness of variables completed!")
     } else {
       check.na <- function(name) {
@@ -78,8 +85,8 @@ fe_data_prep <- function(Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE) {
           warning(sum(is.na(data[,name]))," out of ",NROW(data[,name])," in '",name,"' missing!",immediate.=T,call.=F)
         }
       }
-      invisible(sapply(c(Y.char,Z.char,prov.char), check.na))
-      missingness <- (1 - sum(complete.cases(data[,c(Y.char,Z.char,prov.char)])) / NROW(data)) * 100
+      invisible(sapply(c(N.char,Y.char,Z.char,prov.char), check.na))
+      missingness <- (1 - sum(complete.cases(data[,c(N.char,Y.char,Z.char,prov.char)])) / NROW(data)) * 100
       stop(paste(round(missingness,2), "% of all observations are missing!",sep=""),call.=F)
     }
     ## check variation in covariates
@@ -123,8 +130,8 @@ fe_data_prep <- function(Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE) {
   data <- data[order(factor(data[,prov.char])),] # sort data by provider ID
   prov.size <- as.integer(table(data[,prov.char])) # provider sizes
   prov.size.long <- rep(prov.size,prov.size) # provider sizes assigned to patients
-  data$included <- 1 * (prov.size.long > cutoff) # create variable 'included' as an indicator
-  if (message == TRUE) warning(sum(prov.size<=cutoff)," out of ",length(prov.size),
+  data$included <- 1 * (prov.size.long >= cutoff) # create variable 'included' as an indicator
+  if (message == TRUE) warning(sum(prov.size < cutoff)," out of ",length(prov.size),
           " providers considered small and filtered out!",immediate.=T,call.=F)
 
 
@@ -136,7 +143,7 @@ fe_data_prep <- function(Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE) {
   if (message == TRUE) message(paste(length(prov.no.events),"out of",length(prov.list),
                 "remaining providers with no events."))
   prov.all.events <-     # providers with all events
-    prov.list[sapply(split(1-data[data$included==1,Y.char],factor(data[data$included==1,prov.char])),sum)==0]
+    prov.list[sapply(split(N-data[data$included==1,Y.char],factor(data[data$included==1,prov.char])),sum)==0]
   data$all.events <- 0
   data$all.events[data[,prov.char]%in%c(prov.all.events)] <- 1
   if (message == TRUE) message(paste(length(prov.all.events),"out of",length(prov.list),
@@ -145,7 +152,8 @@ fe_data_prep <- function(Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE) {
                  "% of all records exhibit occurrences of events (Y = 1)"))
 
 
-  char_list <- list(Y.char = Y.char,
+  char_list <- list(N.char = N.char,
+                    Y.char = Y.char,
                     prov.char = prov.char,
                     Z.char = Z.char)
 

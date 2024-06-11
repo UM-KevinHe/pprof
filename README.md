@@ -1,6 +1,6 @@
-# srrFE
+# ppsrr
 
-The `srrFE` software package is designed to implement the SerBIN method proposed by [Wu et al. (2022)](doi:10.1002/sim.9387), specifically tailored to address the computational challenges inherent in large-scale provider data. Additionally, the package is equipped with functions designed to estimate standardized ratios and rates and conduct hypothesis testing.
+The `ppsrr` software package is designed to implement the SerBIN method proposed by [Wu et al. (2022)](doi:10.1002/sim.9387), specifically tailored to address the computational challenges inherent in large-scale provider data. Additionally, the package is equipped with functions designed to estimate standardized ratios and rates and conduct hypothesis testing.
 
 ## Introduction
 
@@ -14,16 +14,16 @@ Beyond the computational challenge, the current literature lacks a suitable infe
 ```
 require("devtools")
 require("remotes")
-remotes::install_github("UM-KevinHe/srrFE", ref = "main")
+remotes::install_github("UM-KevinHe/ppsrr", ref = "main")
 ```
 
 ## Getting started
 
-See ["Getting Started with srrFE"](https://um-kevinhe.github.io/srrFE/articles/srrFE.html)
+See ["Getting Started with ppsrr"](https://um-kevinhe.github.io/ppsrr/articles/ppsrr.html)
 
 ## Details of the algorithms
 
-See ["Models"](https://um-kevinhe.github.io/srrFE/articles/Models.html) or [original articles](https://um-kevinhe.github.io/srrFE/articles/Articles.html)
+See ["Models"](https://um-kevinhe.github.io/ppsrr/articles/Models.html) or [original articles](https://um-kevinhe.github.io/ppsrr/articles/Articles.html)
 
 ## Getting Help
 

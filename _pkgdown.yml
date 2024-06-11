@@ -1,4 +1,4 @@
-url: https://um-kevinhe.github.io/srrFE/
+url: https://um-kevinhe.github.io/ppsrr/
 template:
   bootstrap: 5
   bootswatch: lumen
@@ -18,8 +18,6 @@ authors:
     href: "https://www.um-kevinhe-group.org/"
   Wenbo Wu:
     href: "https://www.wenbowu.me/"
-  Tao Xu:
-    href: "https://mcommunity.umich.edu/person/taoxu/"
 
 navbar:
  components:
