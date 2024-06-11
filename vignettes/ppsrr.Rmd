@@ -68,7 +68,7 @@ data(data_FE)
 Typically, users should employ the `fe_data_prep()` function to preprocess their data. We advise users to review the data and consider making adjustments based on the output information if necessary. (*Please know that the subsequent functions should be used based on this processed data*)
 
 ```{r}
-data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID)
+data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID)
 head(data.prep$data)
 ```
 
@@ -84,13 +84,6 @@ Users most commonly utilize the output to obtain estimates of the provider effec
 
 ```{r}
 coef(fit_fe)
-```
-
-The firth's bias-corrected estimate can be obtained by using the `logis_firth()` function:
-
-```{r}
-fit_firth <- logis_firth(data.prep)
-coef(fit_firth)
 ```
 
 ### Measures Output

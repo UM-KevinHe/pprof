@@ -4,7 +4,7 @@
 \alias{fe_data_prep}
 \title{Data preparation before modelling}
 \usage{
-fe_data_prep(Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE)
+fe_data_prep(N, Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE)
 }
 \arguments{
 \item{Y}{a numerical vector, with values of 0 or 1, indicating the outcome variable.}
@@ -50,7 +50,7 @@ the \code{logis_fe()} function disregards records marked with "included = 0".
 }
 \examples{
 data(data_FE)
-data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID)
+data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID)
 head(data.prep$data)
 data.prep$char_list
 

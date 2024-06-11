@@ -57,7 +57,7 @@ Users are allowed to specify \verb{"stdz = c("indirect", "direct")"} or \verb{"m
 }
 \examples{
 data(data_FE)
-data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
+data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 fit_fe <- logis_fe(data.prep)
 SR <- SR_output(fit_fe, stdz = "direct", measure = "rate")
 SR$direct.rate

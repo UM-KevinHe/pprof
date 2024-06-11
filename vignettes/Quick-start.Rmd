@@ -26,7 +26,7 @@ This document serves as a quick guide for getting started with the fundamental u
 
 If your have distinct data sets for the outcome (Y), covariate matrix (Z), and provider identifiers (ID), you can directly execute the subsequent code to do the data preparation.
 ```{r}
-data.prep <- fe_data_prep(Y, Z, ID)
+data.prep <- fe_data_prep(Y = Y, Z = Z, ID = ID)
 ```
 
 Otherwise you can split the data by specifying the variable names as follows:
@@ -35,7 +35,7 @@ Otherwise you can split the data by specifying the variable names as follows:
 Y.char <- "Y" #example variable name for outcome in your dataset
 Z.char <- c("age", "gender", "edu", ...) #example variable names for predictors in your dataset
 ID.char <- "ID" #example variable names for provider id in your dataset
-data.prep <- fe_data_prep(data[, Y.char], data[, Z.char], data[, ID.char]) # "data" is the name of your dataset
+data.prep <- fe_data_prep(Y = data[, Y.char], Z = data[, Z.char], ID = data[, ID.char]) # "data" is the name of your dataset
 ```
 
 ### 2. Model fitting

@@ -1,57 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/404.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/404.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/articles/Articles.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/articles/Articles.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/articles/index.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/articles/Models.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/articles/Models.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/articles/Quick-start.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/articles/Quick-start.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/articles/srrFE.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/articles/ppsrr.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/authors.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/articles/srrFE.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/index.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/authors.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/coef.logis_fe.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/index.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/confint.logis_fe.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/SR_output.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/data_FE.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/coef.logis_fe.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/fe_data_prep.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/confint.logis_fe.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/index.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/data_FE.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/logis_fe.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/fe_data_prep.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/logis_firth.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/SR_output.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/logis_fe.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/summary_fe_covar.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/logis_firth.html</loc>
   </url>
   <url>
-    <loc>https://um-kevinhe.github.io/srrFE/reference/test_fe.html</loc>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/summary_fe_covar.html</loc>
+  </url>
+  <url>
+    <loc>https://um-kevinhe.github.io/ppsrr/reference/test_fe.html</loc>
   </url>
 </urlset>

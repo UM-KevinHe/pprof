@@ -59,7 +59,7 @@ Main function for fitting fixed effects model with firth's bias correction
 }
 \examples{
 data(data_FE)
-data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID)
+data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 fit_firth <- logis_firth(data.prep)
 
 }
