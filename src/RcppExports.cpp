@@ -67,30 +67,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// logis_firth_prov
-List logis_firth_prov(arma::vec& N, arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int n_obs, int m, int threads, double tol, int max_iter, double bound, bool message, bool backtrack);
-RcppExport SEXP _ppsrr_logis_firth_prov(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP n_obsSEXP, SEXP mSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec& >::type N(NSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type n_prov(n_provSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< int >::type n_obs(n_obsSEXP);
-    Rcpp::traits::input_parameter< int >::type m(mSEXP);
-    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
-    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
-    Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
-    Rcpp::traits::input_parameter< bool >::type message(messageSEXP);
-    Rcpp::traits::input_parameter< bool >::type backtrack(backtrackSEXP);
-    rcpp_result_gen = Rcpp::wrap(logis_firth_prov(N, Y, Z, n_prov, gamma, beta, n_obs, m, threads, tol, max_iter, bound, message, backtrack));
-    return rcpp_result_gen;
-END_RCPP
-}
 // wald_covar
 List wald_covar(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec& gamma, arma::vec& beta, arma::uvec& indices, double null, double alpha);
 RcppExport SEXP _ppsrr_wald_covar(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP nullSEXP, SEXP alphaSEXP) {
@@ -128,33 +104,13 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// saddlepoint_score
-arma::vec saddlepoint_score(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec beta, double gamma_null, int m, int threads, double root_tol);
-RcppExport SEXP _ppsrr_saddlepoint_score(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP mSEXP, SEXP threadsSEXP, SEXP root_tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type n_prov(n_provSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< double >::type gamma_null(gamma_nullSEXP);
-    Rcpp::traits::input_parameter< int >::type m(mSEXP);
-    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
-    Rcpp::traits::input_parameter< double >::type root_tol(root_tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(saddlepoint_score(Y, Z, n_prov, beta, gamma_null, m, threads, root_tol));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_ppsrr_computeDirectExp", (DL_FUNC) &_ppsrr_computeDirectExp, 3},
     {"_ppsrr_logis_fe_prov", (DL_FUNC) &_ppsrr_logis_fe_prov, 11},
     {"_ppsrr_logis_BIN_fe_prov", (DL_FUNC) &_ppsrr_logis_BIN_fe_prov, 12},
-    {"_ppsrr_logis_firth_prov", (DL_FUNC) &_ppsrr_logis_firth_prov, 14},
     {"_ppsrr_wald_covar", (DL_FUNC) &_ppsrr_wald_covar, 8},
     {"_ppsrr_Modified_score", (DL_FUNC) &_ppsrr_Modified_score, 9},
-    {"_ppsrr_saddlepoint_score", (DL_FUNC) &_ppsrr_saddlepoint_score, 8},
     {NULL, NULL, 0}
 };
 

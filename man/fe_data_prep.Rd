@@ -7,6 +7,8 @@
 fe_data_prep(N, Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE)
 }
 \arguments{
+\item{N}{a numerical vector, with values of 1 or more, indicating the number of trials. If missing, defaulting to 1.}
+
 \item{Y}{a numerical vector, with values of 0 or 1, indicating the outcome variable.}
 
 \item{Z}{a matrix or data frame containing covariates.}

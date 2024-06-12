@@ -13,16 +13,15 @@
 #'   \item"exact.bootstrap": two-sided exact test based on bootstrap procedure
 #'   \item"wald": wald test
 #'   \item"score": score test
-#'   \item"modified.score": modified score test
 #'   }
+#'
+#' @param score_modified a logical indicating whether to use the modified score test which ignore the randomness of covariate coefficient if "test = score". Defaulting to TRUE.
 #'
 #' @param null a character string or real number specifying null hypotheses of fixed provider effects.
 #'
-#' @param saddlepoint if test = "score", a logical indicating whether to use saddlepoint approximation for the score test. Defaulting to FALSE.
-#'
 #' @param n resample size for bootstrapping. Defaulting to 10,000.
 #'
-#' @param threads an integer specifying the number of threads to use. Defaulting to 2.
+#' @param threads an integer specifying the number of threads to use. Defaulting to 1.
 #'
 #' @param ...
 #'
@@ -31,6 +30,10 @@
 #' @details
 #' By default, the function uses the `"exact.poisbinom"` method.
 #' The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
+#' For the score test, consider that when the number of tested providers is large,
+#' refitting the models to get the restricted MLEs will take a long time.
+#' Therefore, we use unrestricted MLEs to replace the restricted MLEs during the testing procedure by default.
+#' However, the user can specify 'score_modified = FALSE' to perform a standard score test.
 #'
 #'
 #'
@@ -49,7 +52,7 @@
 #' data(data_FE)
 #' data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 #' fit_fe <- logis_fe(data.prep)
-#' test_fe(fit_fe, test = "score", saddlepoint = T, parm = c(1, 3, 5, 6))
+#' test_fe(fit_fe, test = "score", parm = c(1:3))
 #'
 #' @importFrom stats plogis qnorm pnorm rbinom
 #' @importFrom poibin ppoibin
@@ -63,11 +66,11 @@
 #'
 #' @export
 
-test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", null = "median", saddlepoint = FALSE,
-                    n = 10000, threads = 2, ...) {
+test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_modified = TRUE,
+                    null = "median", n = 10000, threads = 1, ...) {
   if (missing(fit)) stop ("Argument 'fit is required!", call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
-  if (!(test %in% c("exact.binom", "exact.poisbinom", "exact.bootstrap", "score", "wald", "modified.score")))
+  if (!(test %in% c("exact.poisbinom", "exact.bootstrap", "score", "wald")))
     stop("Argument 'test' NOT as required!",call.=F)
   alpha <- 1 - level
 
@@ -81,24 +84,23 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", null = "m
   gamma.null <- ifelse(null=="median", median(gamma),
                        ifelse(is.numeric(null), null[1],
                               stop("Argument 'null' NOT as required!",call.=F)))
-  if (missing(parm)) {
-    # no operation needed, pass
-  } else {
+
+
+  if (!missing(parm)) {
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, prov.char]) & !(test %in% c("wald", "modified.score"))) {
+    if (class(parm) == class(data[, prov.char]) & !(test == "wald" | (test == "score" & !score_modified))) {
       data <- data[data[, prov.char] %in% parm, ]
-    } else if (class(parm) == class(data[, prov.char]) & (test %in% c("wald", "modified.score"))) {
+    } else if (class(parm) == class(data[, prov.char]) & (test == "wald" | (test == "score" & !score_modified))) {
       indices <- which(unique(data[, prov.char]) %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements!")
     }
   }
 
-
   if (test=="exact.bootstrap") { #should consistent to exact.poisbinom method
-    if (n<=0 | as.integer(n)!=n) stop("Argument 'n' NOT a positive integer!",call.=F)
+    if (n <= 0 | as.integer(n) != n) stop("Argument 'n' NOT a positive integer ! ",call.=F)
     exact.bootstrap <- function(df, n) {
       probs <- plogis(gamma.null + unname(as.matrix(df[, Z.char])) %*% beta)
       obs <- sum(df[,Y.char])
@@ -115,21 +117,24 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", null = "m
                       p=results[2,],
                       stat=results[3,],
                       row.names=unique(data[, prov.char])))
-  } else if (test=="score") {
-    if (saddlepoint == TRUE) {
+  } else if (test == "score") {
+    if (score_modified == FALSE) {  #standard score test
       n.prov <- sapply(split(data[, Y.char], data[, prov.char]), length)
       m <- length(n.prov)
-      z.score <- saddlepoint_score(data[,Y.char], as.matrix(data[,Z.char]), n.prov, beta,
-                                   gamma.null, m, threads, 1e-6)
+      if (missing(parm)) {
+        indices <- 1:m
+      }
+      z.score <- Modified_score(data[,Y.char], as.matrix(data[,Z.char]), n.prov, gamma, beta,
+                                gamma.null, m, indices - 1, threads)  #In cpp, indices starts from 0
       p <- pnorm(z.score, lower=F)
       flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
       p.val <- 2 * pmin(p, 1-p)
       return(data.frame(flag=factor(flag),
                         p=p.val,
                         stat=z.score,
-                        row.names=unique(data[, prov.char])))
-    } else {
-      probs <- plogis(gamma.null+unname(as.matrix(data[,Z.char]))%*%beta)
+                        row.names = unique(data[, prov.char])[indices]))
+    } else {  #modified score test
+      probs <- plogis(gamma.null + unname(as.matrix(data[, Z.char])) %*% beta)
       z.score <- sapply(split(data[,Y.char]-probs,data[,prov.char]),sum) /
         sqrt(sapply(split(probs*(1-probs),data[,prov.char]),sum))
       p <- pnorm(z.score, lower=F)
@@ -140,21 +145,6 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", null = "m
                         stat=z.score,
                         row.names=unique(data[, prov.char])))
     }
-  } else if (test == "modified.score"){
-    n.prov <- sapply(split(data[, Y.char], data[, prov.char]), length)
-    m <- length(n.prov)
-    if (missing(parm)) {
-      indices <- 1:m
-    }
-    z.score <- Modified_score(data[,Y.char], as.matrix(data[,Z.char]), n.prov, gamma, beta,
-                              gamma.null, m, indices - 1, threads)  #In cpp, indices starts from 0
-    p <- pnorm(z.score, lower=F)
-    flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
-    p.val <- 2 * pmin(p, 1-p)
-    return(data.frame(flag=factor(flag),
-                      p=p.val,
-                      stat=z.score,
-                      row.names = unique(data[, prov.char])[indices]))
   } else if (test=="exact.poisbinom") {
     exact.poisbinom <- function(df) {
       probs <- plogis(gamma.null + unname(as.matrix(df[, Z.char])) %*% beta)
