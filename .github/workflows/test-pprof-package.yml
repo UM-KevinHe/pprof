@@ -18,7 +18,7 @@ jobs:
       run: |
         install2.r --error --deps TRUE remotes
         Rscript -e 'remotes::install_deps(dependencies = TRUE)'
-        Rscript -e 'install.packages("testthat")'
+        Rscript -e 'install.packages(c("devtools", "testthat", "RcppArmadillo"))'
     - name: Run tests
       run: |
         Rscript -e 'devtools::test()'
