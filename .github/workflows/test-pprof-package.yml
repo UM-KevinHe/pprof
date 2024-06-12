@@ -9,16 +9,16 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    container:
+      image: rocker/r-ver:4.3.1
 
     steps:
     - uses: actions/checkout@v2
-    - uses: r-lib/actions/setup-r@v2
     - name: Install dependencies
       run: |
-        install.packages("remotes")
-        remotes::install_deps(dependencies = TRUE)
-    - name: Install testthat
-      run: install.packages("testthat")
+        install2.r --error --deps TRUE remotes
+        Rscript -e 'remotes::install_deps(dependencies = TRUE)'
+        Rscript -e 'install.packages("testthat")'
     - name: Run tests
       run: |
         Rscript -e 'devtools::test()'
