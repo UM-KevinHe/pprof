@@ -100,7 +100,16 @@ SR_output <- function(fit, stdz = "indirect", measure = c("rate", "ratio"), null
   }
 
   if ("direct" %in% stdz) {
-    Exp <- computeDirectExp(gamma.prov, Z_beta, threads)
+    if (Rcpp) {
+      Exp <- computeDirectExp(gamma.prov, Z_beta, threads)
+    } else {
+      exp_ZB <- exp(Z_beta)
+      Exp.direct <- function(gamma){
+        numer <- exp(gamma) * exp_ZB
+        sum(1/(1 + 1/numer))
+      }
+      Exp <- sapply(gamma.prov, Exp.direct)
+    }
 
     df.prov <- data.frame(Obs_all = rep(sum(fit$obs), length(gamma.prov)), #denominator
                           Exp.direct_all = Exp)  #numerator

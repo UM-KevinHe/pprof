@@ -38,7 +38,7 @@
 #' The default value is `beta`.
 #' If `iter.max` is achieved, it overrides any stop rule for algorithm termination.
 #'
-#' @param check a Boolean indicating whether to invoke the `data_check` function and to check the data quality. Defaulting to FALSE
+#' @param check a Boolean indicating whether to the `data_check` function and to check the data quality. Defaulting to FALSE
 #'
 #' @param ...
 #'
@@ -104,8 +104,9 @@
 #'
 #' @useDynLib ppsrr, .registration = TRUE
 
-logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10, backtrack = TRUE,
-                     AUC = FALSE, message = TRUE, cutoff = 10, stop = "beta", check = FALSE){
+logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
+                     backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10,
+                     stop = "beta", check = FALSE){
 
   # Check input
   if (missing(Y) || missing(Z) || missing(ID))
@@ -159,16 +160,216 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
   gamma.prov <- rep(log(mean(data[,Y.char])/(1-mean(data[,Y.char]))), length(n.prov))
   beta <- rep(0, NCOL(Z))
 
+  Loglkd <- function(gamma.obs, beta) {
+    sum((gamma.obs+Z%*%beta)*data[,Y.char]-log(1+exp(gamma.obs+Z%*%beta)))
+  }
+  loglkd_init = Loglkd(rep(gamma.prov, n.prov), beta)
+
   # Model
   if (algorithm == "SerBIN") {
-    #Rcpp always use "backtrack"
-    ls <- logis_BIN_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,
-                            0,1,tol,max.iter, bound, message, backtrack, stop)
-    gamma.prov <- as.numeric(ls$gamma)
-    beta <- as.numeric(ls$beta)
+    if (Rcpp) { #Rcpp always use "backtrack"
+      ls <- logis_BIN_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,
+                              0,1,tol,max.iter, bound, message, backtrack, stop)
+      gamma.prov <- as.numeric(ls$gamma)
+      beta <- as.numeric(ls$beta)
+    } else {
+      iter <- 0
+      crit <- 100 # initialize stop criterion
+      if (message){
+        message("Implementing SerBIN algorithm for fixed provider effects model ...")
+      }
+
+      if (backtrack){ # initialize parameters for backtracking line search
+        s <- 0.01
+        t <- 0.6
+      }
+
+      while (iter<=max.iter & crit>=tol) {
+        iter <- iter + 1
+        gamma.obs <- rep(gamma.prov, n.prov)
+        loglkd = Loglkd(gamma.obs, beta)
+        p <- c(plogis(gamma.obs+Z%*%beta))
+        pq <- p*(1-p)
+        pq[pq == 0] <- 1e-20
+        score.gamma <- sapply(split(data[,Y.char]-p, data[,prov.char]), sum)
+        score.beta <- t(Z)%*%(data[,Y.char]-p)
+        info.gamma.inv <- 1/sapply(split(pq, data[,prov.char]),sum) #I_11^(-1)
+        info.betagamma <- sapply(by(pq*Z,data[,prov.char],identity),colSums) #I_21
+        info.beta <- t(Z)%*%(pq*Z) #I_22
+        mat.tmp1 <- info.gamma.inv*t(info.betagamma) #J_1^T
+        schur.inv <- solve(info.beta-info.betagamma%*%mat.tmp1) #S^-1
+        mat.tmp2 <- mat.tmp1%*%schur.inv #J_2^T
+
+        d.gamma.prov <- info.gamma.inv*score.gamma +
+          mat.tmp2%*%(t(mat.tmp1)%*%score.gamma-score.beta)
+        d.beta <- -t(mat.tmp2)%*%score.gamma+schur.inv%*%score.beta
+        v <- 1 # initialize step size
+        if (backtrack) {
+          d.loglkd <- Loglkd(rep(gamma.prov+v*d.gamma.prov, n.prov), beta+v*d.beta) - loglkd
+          lambda <- c(score.gamma,score.beta)%*%c(d.gamma.prov,d.beta)
+          while (d.loglkd < s*v*lambda) {  #update step size
+            v <- t * v
+            d.loglkd <- Loglkd(rep(gamma.prov+v*d.gamma.prov, n.prov), beta+v*d.beta) - loglkd
+          }
+        }
+        gamma.prov <- gamma.prov + v * d.gamma.prov
+        gamma.prov <- pmin(pmax(gamma.prov, median(gamma.prov)-bound), median(gamma.prov)+bound)
+        beta.new <- beta + v * d.beta
+
+        d.loglkd = Loglkd(rep(gamma.prov, n.prov), beta.new) - loglkd
+
+        # stopping criterion
+        if (stop=="beta"){
+          crit <- norm(matrix(beta-beta.new),"I")
+          if (message){
+            cat(paste0("Iter ",iter,": Inf norm of running diff in est reg parm is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="relch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd))
+          if (message) {
+            cat(paste0("Iter ",iter,": Relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="ratch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd-loglkd_init))
+          if (message) {
+            cat(paste0("Iter ",iter,": Adjusted relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="all"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd-loglkd_init))
+          crit <- max(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Maximum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+        else if (stop=="or"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd-loglkd_init))
+          crit <- min(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Minimum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+
+        beta <- beta.new
+
+      }
+      if (message){
+        message("\n SerBIN algorithm converged after ",iter," iterations!")
+      }
+    }
   } else if (algorithm == "BAN"){
-    ls <- logis_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,backtrack,max.iter,bound,tol,message,stop)
-    gamma.prov <- as.numeric(ls$gamma); beta <- as.numeric(ls$beta)
+    if (Rcpp) {
+      ls <- logis_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,backtrack,max.iter,bound,tol,message,stop)
+      gamma.prov <- as.numeric(ls$gamma); beta <- as.numeric(ls$beta)
+    } else {
+      iter <- 0
+      crit <- 100 # initialize stop criterion
+      if (message){
+        message("Implementing BAN algorithm for fixed provider effects model ...")
+      }
+      if (backtrack){ # initialize parameters for backtracking line search
+        s <- 0.01
+        t <- 0.8
+      }
+
+      while (iter<=max.iter & crit>=tol) {
+        iter <- iter + 1
+        # provider effect update
+        gamma.obs <- rep(gamma.prov, n.prov)
+        loglkd.old = Loglkd(gamma.obs, beta)
+        Z.beta <- Z%*%beta
+        p <- c(plogis(gamma.obs+Z.beta)); pq <- p*(1-p)
+        pq[pq == 0] <- 1e-20
+        score.gamma.prov <- sapply(split(data[,Y.char]-p, data[,prov.char]), sum)
+        d.gamma.prov <- score.gamma.prov / sapply(split(pq, data[,prov.char]), sum)
+        v <- 1 # initialize step size
+        if (backtrack) {
+          loglkd <- Loglkd(rep(gamma.prov, n.prov), beta)
+          d.loglkd <- Loglkd(rep(gamma.prov+v*d.gamma.prov, n.prov), beta) - loglkd
+          lambda <- score.gamma.prov%*%d.gamma.prov
+          while (d.loglkd < s*v*lambda) {
+            v <- t * v
+            d.loglkd <- Loglkd(rep(gamma.prov+v*d.gamma.prov, n.prov), beta) - loglkd
+          }
+        }
+        gamma.prov <- gamma.prov + v * d.gamma.prov
+        gamma.prov <- pmin(pmax(gamma.prov, median(gamma.prov)-bound), median(gamma.prov)+bound)
+        gamma.obs <- rep(gamma.prov, n.prov)
+
+        # regression parameter update
+        p <- c(plogis(gamma.obs+Z.beta)); pq <- p*(1-p)
+        score.beta <- t(Z)%*%(data[,Y.char]-p)
+        info.beta <- t(Z)%*%(c(pq)*Z)
+        d.beta <- as.numeric(solve(info.beta)%*%score.beta)
+        v <- 1 # initialize step size
+        if (backtrack) {
+          loglkd <- Loglkd(gamma.obs, beta)
+          d.loglkd <- Loglkd(gamma.obs, beta+v*d.beta) - loglkd
+          lambda <- c(score.beta)%*%d.beta
+          while (d.loglkd < s*v*lambda) {
+            v <- t * v
+            d.loglkd <- Loglkd(gamma.obs, beta+v*d.beta) - loglkd
+          }
+        }
+        beta.new <- beta + v * d.beta
+        d.loglkd = Loglkd(rep(gamma.prov, n.prov), beta.new) - loglkd.old
+
+        # stopping criterion
+        if (stop=="beta"){
+          crit <- norm(matrix(beta-beta.new),"I")
+          if (message){
+            cat(paste0("Iter ",iter,": Inf norm of running diff in est reg parm is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="relch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd.old))
+          if (message) {
+            cat(paste0("Iter ",iter,": Relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="ratch"){
+          crit <- abs(d.loglkd/(d.loglkd+loglkd.old-loglkd_init))
+          if (message) {
+            cat(paste0("Iter ",iter,": Adjusted relative change in est log likelihood is ",
+                       formatC(crit,digits=3,format="e"),";\n"))
+          }
+        }
+        else if (stop=="all"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd.old))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd.old-loglkd_init))
+          crit <- max(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Maximum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+        else if (stop=="or"){
+          crit_beta <- norm(matrix(beta-beta.new),"I")
+          crit_relch <- abs(d.loglkd/(d.loglkd+loglkd.old))
+          crit_ratch <- abs(d.loglkd/(d.loglkd+loglkd.old-loglkd_init))
+          crit <- min(crit_beta, crit_relch, crit_ratch)
+          if (message) {
+            cat(sprintf("Iter %d: Minimum criterion across all checks is %.3e;\n", iter, crit))
+          }
+        }
+
+        beta <- beta.new
+      }
+      if (message){
+        message("\n BAN algorithm converged after ",iter," iterations!")
+      }
+    }
   } else {
     stop("Argument 'algorithm' NOT as required!")
   }

@@ -9,10 +9,10 @@ test_fe(
   parm,
   level = 0.95,
   test = "exact.poisbinom",
+  score_modified = TRUE,
   null = "median",
-  saddlepoint = FALSE,
   n = 10000,
-  threads = 2,
+  threads = 1,
   ...
 )
 }
@@ -29,16 +29,15 @@ test_fe(
 \item"exact.bootstrap": two-sided exact test based on bootstrap procedure
 \item"wald": wald test
 \item"score": score test
-\item"modified.score": modified score test
 }}
+
+\item{score_modified}{a logical indicating whether to use the modified score test which ignore the randomness of covariate coefficient if "test = score". Defaulting to TRUE.}
 
 \item{null}{a character string or real number specifying null hypotheses of fixed provider effects.}
 
-\item{saddlepoint}{if test = "score", a logical indicating whether to use saddlepoint approximation for the score test. Defaulting to FALSE.}
-
 \item{n}{resample size for bootstrapping. Defaulting to 10,000.}
 
-\item{threads}{an integer specifying the number of threads to use. Defaulting to 2.}
+\item{threads}{an integer specifying the number of threads to use. Defaulting to 1.}
 
 \item{...}{}
 }
@@ -58,12 +57,16 @@ Conduct hypothesis testing for identifying outlying providers
 \details{
 By default, the function uses the \code{"exact.poisbinom"} method.
 The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
+For the score test, consider that when the number of tested providers is large,
+refitting the models to get the restricted MLEs will take a long time.
+Therefore, we use unrestricted MLEs to replace the restricted MLEs during the testing procedure by default.
+However, the user can specify 'score_modified = FALSE' to perform a standard score test.
 }
 \examples{
 data(data_FE)
-data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
+data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 fit_fe <- logis_fe(data.prep)
-test_fe(fit_fe, test = "score", saddlepoint = T, parm = c(1, 3, 5, 6))
+test_fe(fit_fe, test = "score", parm = c(1:3))
 
 }
 \references{
