@@ -17,7 +17,7 @@ logis_fe(
   AUC = FALSE,
   message = TRUE,
   cutoff = 10,
-  stop = "beta",
+  stop = "or",
   check = FALSE
 )
 }
@@ -57,7 +57,7 @@ where \eqn{loglik(m)} denotes the log-partial likelihood at iteration step m.
 \code{"ratch"} means we stop the algorithm when \eqn{(loglik(m)-loglik(m-1))/(loglik(m)-loglik(0))} is less than the \code{tol}.
 \code{"all"} means we stop the algorithm when all the stopping rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) are met.
 \verb{"or} means we stop the algorithm if any one of the rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) is met.
-The default value is \code{beta}.
+The default value is \code{or}.
 If \code{iter.max} is achieved, it overrides any stop rule for algorithm termination.}
 
 \item{check}{a Boolean indicating whether to the \code{data_check} function and to check the data quality. Defaulting to FALSE}

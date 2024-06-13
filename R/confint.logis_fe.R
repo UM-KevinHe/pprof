@@ -53,7 +53,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
   if (! "gamma" %in% option & !"SR" %in% option) stop("Argument 'option' NOT as required!", call.=F)
-
+  if (!(test %in% c("exact", "score", "wald"))) stop("Argument 'test' NOT as required!", call.=F)
 
   alpha <- 1 - level
 

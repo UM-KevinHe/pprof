@@ -35,7 +35,7 @@
 #' `"ratch"` means we stop the algorithm when \eqn{(loglik(m)-loglik(m-1))/(loglik(m)-loglik(0))} is less than the `tol`.
 #' `"all"` means we stop the algorithm when all the stopping rules (`"beta"`, `"relch"`, `"ratch"`) are met.
 #' `"or` means we stop the algorithm if any one of the rules (`"beta"`, `"relch"`, `"ratch"`) is met.
-#' The default value is `beta`.
+#' The default value is `or`.
 #' If `iter.max` is achieved, it overrides any stop rule for algorithm termination.
 #'
 #' @param check a Boolean indicating whether to the `data_check` function and to check the data quality. Defaulting to FALSE
@@ -106,7 +106,7 @@
 
 logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
                      backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10,
-                     stop = "beta", check = FALSE){
+                     stop = "or", check = FALSE){
 
   # Check input
   if (missing(Y) || missing(Z) || missing(ID))
@@ -215,6 +215,7 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
         gamma.prov <- gamma.prov + v * d.gamma.prov
         gamma.prov <- pmin(pmax(gamma.prov, median(gamma.prov)-bound), median(gamma.prov)+bound)
         beta.new <- beta + v * d.beta
+        beta.new <- pmin(pmax(beta.new, -bound), +bound)
 
         d.loglkd = Loglkd(rep(gamma.prov, n.prov), beta.new) - loglkd
 
@@ -321,6 +322,7 @@ logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-
           }
         }
         beta.new <- beta + v * d.beta
+        beta.new <- pmin(pmax(beta.new, -bound), +bound)
         d.loglkd = Loglkd(rep(gamma.prov, n.prov), beta.new) - loglkd.old
 
         # stopping criterion
