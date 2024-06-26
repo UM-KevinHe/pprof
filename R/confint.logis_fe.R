@@ -63,7 +63,8 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
   gamma <- fit$df.prov$gamma_est
   beta <- fit$beta
   df.prov <- fit$df.prov
-  #prov.order <- rownames(fit$gamma)
+  names(gamma) <- rownames(df.prov)
+  prov.order <- rownames(fit$gamma)
 
   #confidence of gamma
   confint_fe_gamma <- function(fit, test, parm, alpha) {
@@ -93,15 +94,15 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
             p <- plogis(Gamma+Z.beta)
             return((Obs-sum(p)) / sqrt(sum(p*(1-p))) - qnorm.halfalpha)
           }
-          Obs <- df.prov[prov, "Obs_provider"]  #Number of events for "prov"
+          Obs <- df.prov[as.character(prov), "Obs_provider"]  #Number of events for "prov"
           Z.beta <- as.matrix(df[,Z.char])%*%beta
-          # gamma.lower <- uniroot(LL.gamma, gamma[prov]+c(-5,0))$root
-          # gamma.upper <- uniroot(UL.gamma, gamma[prov]+c(0,5))$root
+          # gamma.lower <- uniroot(LL.gamma, gamma[as.character(prov)]+c(-5,0))$root
+          # gamma.upper <- uniroot(UL.gamma, gamma[as.character(prov)]+c(0,5))$root
           max_attempts <- 3
           gamma.lower <- -Inf
           gamma.upper <- Inf
           for (i in 0:(max_attempts-1)) {
-            result_lower <- try(uniroot(LL.gamma, gamma[prov]+c((-5)*(i+1),(-5)*i)), silent = TRUE)
+            result_lower <- try(uniroot(LL.gamma, gamma[as.character(prov)]+c((-5)*(i+1),(-5)*i)), silent = TRUE)
             if (class(result_lower)[1] == "try-error") {
 
             } else {
@@ -110,7 +111,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
             }
           }
           for (i in 0:(max_attempts-1)) {
-            result_upper <- try(uniroot(UL.gamma, gamma[prov]+c(5*i,5*(i+1))), silent = TRUE)
+            result_upper <- try(uniroot(UL.gamma, gamma[as.character(prov)]+c(5*i,5*(i+1))), silent = TRUE)
             if (class(result_upper)[1] == "try-error") {
 
             } else {
@@ -118,7 +119,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
               break # Exit loop upon successful root finding
             }
           }
-          return_mat <- c(gamma[prov], gamma.lower, gamma.upper)
+          return_mat <- c(gamma[as.character(prov)], gamma.lower, gamma.upper)
           return(return_mat)
         }
         CL.no.events <- function(df) { #only upper bound
@@ -142,7 +143,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
               break # Exit loop upon successful root finding
             }
           }
-          return_mat <- c(gamma[prov], -Inf, gamma.upper)
+          return_mat <- c(gamma[as.character(prov)], -Inf, gamma.upper)
           return(return_mat)
         }
         CL.all.events <- function(df) { #only lower bound
@@ -152,7 +153,9 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
           max.Z.beta <- norm(Z.beta, "I")
           LL.gamma <- function(Gamma) {
             p <- plogis(Gamma+Z.beta)
-            return(sum(1-p)/sqrt(sum(p*(1-p)))-qnorm.alpha)
+            pq <- p*(1-p)
+            pq[pq == 0] <- 1e-20
+            return(sum(1-p)/sqrt(sum(pq))-qnorm.alpha)
           }
           #gamma.lower <- uniroot(LL.gamma,(10+max.Z.beta)*c(-1,1))$root
           max_attempts <- 3
@@ -166,7 +169,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
               break # Exit loop upon successful root finding
             }
           }
-          return_mat <- c(gamma[prov], gamma.lower, Inf)
+          return_mat <- c(gamma[as.character(prov)], gamma.lower, Inf)
           return(return_mat)
         }
       } else {
@@ -177,15 +180,15 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
             1-poibin::ppoibin(Obs,plogis(Gamma+Z.beta))+0.5*poibin::dpoibin(Obs,plogis(Gamma+Z.beta))-alpha/2
           prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
                          stop("Number of providers involved NOT equal to one!"))
-          Obs <- df.prov[prov, "Obs_provider"]
+          Obs <- df.prov[as.character(prov), "Obs_provider"]
           Z.beta <- as.matrix(df[,Z.char])%*%beta
-          # gamma.lower <- uniroot(LL.gamma, gamma[prov]+c(-5,0))$root
-          # gamma.upper <- uniroot(UL.gamma, gamma[prov]+c(0,5))$root
+          # gamma.lower <- uniroot(LL.gamma, gamma[as.character(prov)]+c(-5,0))$root
+          # gamma.upper <- uniroot(UL.gamma, gamma[as.character(prov)]+c(0,5))$root
           max_attempts <- 3
           gamma.lower <- -Inf
           gamma.upper <- Inf
           for (i in 0:(max_attempts-1)) {
-            result_lower <- try(uniroot(LL.gamma, gamma[prov]+c((-5)*(i+1),(-5)*i)), silent = TRUE)
+            result_lower <- try(uniroot(LL.gamma, gamma[as.character(prov)]+c((-5)*(i+1),(-5)*i)), silent = TRUE)
             if (class(result_lower)[1] == "try-error") {
 
             } else {
@@ -194,7 +197,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
             }
           }
           for (i in 0:(max_attempts-1)) {
-            result_upper <- try(uniroot(UL.gamma, gamma[prov]+c(5*i,5*(i+1))), silent = TRUE)
+            result_upper <- try(uniroot(UL.gamma, gamma[as.character(prov)]+c(5*i,5*(i+1))), silent = TRUE)
             if (class(result_upper)[1] == "try-error") {
 
             } else {
@@ -203,7 +206,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
             }
           }
 
-          return_mat <- c(gamma[prov], gamma.lower, gamma.upper)
+          return_mat <- c(gamma[as.character(prov)], gamma.lower, gamma.upper)
           return(return_mat)
         }
         CL.no.events <- function(df) {
@@ -225,7 +228,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
               break # Exit loop upon successful root finding
             }
           }
-          return_mat <- c(gamma[prov], -Inf, gamma.upper)
+          return_mat <- c(gamma[as.character(prov)], -Inf, gamma.upper)
           return(return_mat)
         }
         CL.all.events <- function(df) {
@@ -247,7 +250,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
               break # Exit loop upon successful root finding
             }
           }
-          return_mat <- c(gamma[prov], gamma.lower, Inf)
+          return_mat <- c(gamma[as.character(prov)], gamma.lower, Inf)
           return(return_mat)
         }
       }
@@ -361,10 +364,13 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       confint.finite <- sapply(by(data[(data$no.events==0) & (data$all.events==0),],
                                   data[(data$no.events==0) & (data$all.events==0),prov.char],identity),
                                FUN=function(df) SR_indirect.finite(df))
+      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),prov.char])
       confint.no.events <- sapply(by(data[data$no.events==1,], data[data$no.events==1,prov.char],identity),
                                   FUN=function(df) SR_indirect.no.events(df))
+      prov_no.events <- unique(data[data$no.events==1,prov.char])
       confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,prov.char],identity),
                                    FUN=function(df) SR_indirect.all.events(df))
+      prov_all.events <- unique(data[data$all.events==1,prov.char])
 
 
       CI.indirect_ratio <- as.numeric(rbind(t(indirect.ratio_df),
@@ -373,11 +379,11 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
                                                   confint.all.events)))
       CI.indirect_ratio <- as.data.frame(matrix(CI.indirect_ratio, ncol = 3, byrow = T))
       colnames(CI.indirect_ratio) <- c("indirect_ratio", "CI_ratio.lower", "CI_ratio.upper")
-      rownames(CI.indirect_ratio) <- names(indirect.rate_df)
+      #rownames(CI.indirect_ratio) <- names(indirect.rate_df)
+      rownames(CI.indirect_ratio) <- c(prov_finite, prov_no.events, prov_all.events)
 
       if ("ratio" %in% measure){
-        return_ls$CI.indirect_ratio <- CI.indirect_ratio
-
+        return_ls$CI.indirect_ratio <- CI.indirect_ratio[order(as.numeric(rownames(CI.indirect_ratio))),]
       }
 
       if ("rate" %in% measure){
@@ -436,10 +442,13 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
 
       confint.finite <- sapply(unique(data[(data$no.events==0) & (data$all.events==0),]$ID),
                                FUN = function(ID) SR_direct.finite(ID))
+      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),prov.char])
       confint.no.events <- sapply(unique(data[(data$no.events==1) & (data$all.events==0),]$ID),
                                   FUN = function(ID) SR_direct.no.events(ID))
+      prov_no.events <- unique(data[data$no.events==1,prov.char])
       confint.all.events <- sapply(unique(data[(data$no.events==0) & (data$all.events==1),]$ID),
                                    FUN = function(ID) SR_direct.all.events(ID))
+      prov_all.events <- unique(data[data$all.events==1,prov.char])
       CI.direct_ratio <- as.numeric(rbind(t(direct.ratio_df),
                                           cbind(confint.finite,
                                                 confint.no.events,
@@ -447,11 +456,11 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
 
       CI.direct_ratio <- as.data.frame(matrix(CI.direct_ratio, ncol = 3, byrow = T))
       colnames(CI.direct_ratio) <- c("direct_ratio", "CI_ratio.lower", "CI_ratio.upper")
-      rownames(CI.direct_ratio) <- names(direct.rate_df)
+      #rownames(CI.direct_ratio) <- names(direct.rate_df)
+      rownames(CI.direct_ratio) <- c(prov_finite, prov_no.events, prov_all.events)
 
       if ("ratio" %in% measure){
-        return_ls$CI.direct_ratio <- CI.direct_ratio
-
+        return_ls$CI.direct_ratio <- CI.direct_ratio[order(as.numeric(rownames(CI.direct_ratio))),]
       }
 
       if ("rate" %in% measure){
