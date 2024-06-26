@@ -5,7 +5,9 @@
 \title{Main function for fitting fixed effects model}
 \usage{
 logis_fe(
-  data.prep,
+  Y,
+  Z,
+  ID,
   algorithm = "SerBIN",
   max.iter = 10000,
   tol = 1e-05,
@@ -17,8 +19,6 @@ logis_fe(
 )
 }
 \arguments{
-\item{data.prep}{an object from the \code{fe_data_prep()} function.}
-
 \item{algorithm}{a string specifying the algorithm to be used. Defaulting to "SerBIN".
 \itemize{
 \item "SerBIN": using the Serial blockwise inversion Newton algorithm to fit the model (See \href{https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387}{Wu et al. (2022)}).
@@ -38,6 +38,8 @@ logis_fe(
 \item{AUC}{a Boolean indicating whether report AUC. Defaulting to FALSE.}
 
 \item{message}{a Boolean indicating whether track the fitting process. Defaulting to TRUE.}
+
+\item{data.prep}{an object from the \code{fe_data_prep()} function.}
 
 \item{...}{}
 }

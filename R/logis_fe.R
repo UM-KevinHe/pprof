@@ -85,10 +85,14 @@
 #'
 #' @export
 #'
-#'
+#' @useDynLib ppsrr, .registration = TRUE
 
 logis_fe <- function(data.prep, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
-                     backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = FALSE){
+                     backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = FALSE, solveLinear = FALSE){
+
+  print("started")
+
+
   if (missing(data.prep)) stop ("Argument 'data.prep' is required!", call.=F)
   if (!class(data.prep) %in% c("data_prep")) stop("Object 'data.prep' should be generated from 'fe_data_prep' function!", call.=F)
 
@@ -108,13 +112,20 @@ logis_fe <- function(data.prep, algorithm = "SerBIN", max.iter = 10000, tol = 1e
   gamma.prov <- rep(log(mean(data[,Y.char])/(1-mean(data[,Y.char]))), length(n.prov))
   beta <- rep(0, NCOL(Z))
 
-
+  print("started")
   if (algorithm == "SerBIN") {
-    if (Rcpp) { #Rcpp always use "backtrack"
+    if (Rcpp & !solveLinear) { #Rcpp always use "backtrack"
       ls <- logis_BIN_fe_prov(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,
                               0,1,tol,max.iter, bound, message, backtrack)
       gamma.prov <- as.numeric(ls$gamma)
       beta <- as.numeric(ls$beta)
+    } else if(Rcpp & solveLinear){
+      print("called")
+      ls <- logis_BIN_fe_prov2(as.matrix(data[,Y.char]),Z,n.prov,gamma.prov,beta,
+                              0,1,tol,max.iter, bound, message, backtrack)
+      gamma.prov <- as.numeric(ls$gamma)
+      beta <- as.numeric(ls$beta)
+      # return(ls)
     } else {
       iter <- 0
       beta.crit <- 100 # initialize stop criterion
