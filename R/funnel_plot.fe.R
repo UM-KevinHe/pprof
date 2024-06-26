@@ -49,7 +49,7 @@ calculate_scores <- function(input_data, obs, exp, ratio, test, alpha) {
     data <- input_data %>%
       mutate(
         z = ({{ obs }} - {{ exp }}) / sqrt({{ exp }}),
-        p = 2 * pmin(pnorm(z_score), 1 - pnorm(z_score)),
+        p = 2 * pmin(pnorm(z), 1 - pnorm(z)),
         flag = factor(
           ifelse(p < alpha, ifelse({{ ratio }} > 1, 1, -1), 0)
         )
@@ -238,7 +238,7 @@ create_funnel_plot <- function(processed_data,
 
 
   xmax <- max(1 / data$se^2)
-  ymax <- max(data$indicator)
+  ymax <- max(processed_data$upper)
 
   labs_linetype <- paste0((1 - alpha) * 100, "%")
 
@@ -266,15 +266,15 @@ create_funnel_plot <- function(processed_data,
       labels = labs_color,
       values = color_mapping
     ) +
-    geom_line(data = processed_data, aes(x = precision, y = lower, group = alpha, linetype = alpha), size = .6) +
-    geom_line(data = processed_data, aes(x = precision, y = upper, group = alpha, linetype = alpha), size = .6) +
+    geom_line(data = processed_data, aes(x = precision, y = lower, group = alpha, linetype = alpha), linewidth = .6) +
+    geom_line(data = processed_data, aes(x = precision, y = upper, group = alpha, linetype = alpha), linewidth = .6) +
     scale_linetype_manual(
       name =  linetype_legend_title,
       values = values_linetype,
       labels = labs_linetype
     ) +
     guides(shape = guide_legend(order = 1), color = guide_legend(order = 1), linetype = guide_legend(reverse = TRUE, order = 2)) +
-    geom_hline(yintercept = target, size = .8, linetype = "dashed") +
+    geom_hline(yintercept = target, linewidth = .8, linetype = "dashed") +
     theme_classic() +
     theme(
       legend.justification = legend_justification,
@@ -286,7 +286,7 @@ create_funnel_plot <- function(processed_data,
       axis.text = element_text(size = axis_text_size),
       plot.title = element_text(hjust = 0.5, size = plot_title_size),
       text = element_text(size = 13),
-      legend.background = element_rect(fill = "transparent", colour = NULL, size = 0, linetype = "solid"),
+      legend.background = element_rect(fill = "transparent", colour = NULL, linewidth = 0, linetype = "solid"),
     ) +
     labs(
       x = xlab,
@@ -331,7 +331,7 @@ create_funnel_plot <- function(processed_data,
 #' @export
 funnel_plot.fe <- function(fit, test = "exact", target = 1, alpha = c(0.05, 0.01),
                         color_palette = c("#E69F00", "#56B4E9", "#009E73"),
-                        labels = c("better", "expected", "worse"),
+                        labels = c("lower", "expected", "higher"),
                         shapes = c(15, 17, 19),
                         xlab = "Precision",
                         ylab = "Outcome",
