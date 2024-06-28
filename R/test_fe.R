@@ -50,8 +50,7 @@
 #'
 #' @examples
 #' data(data_FE)
-#' data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-#' fit_fe <- logis_fe(data.prep)
+#' fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
 #' test_fe(fit_fe, test = "score", parm = c(1:3))
 #'
 #' @importFrom stats plogis qnorm pnorm rbinom
@@ -118,7 +117,7 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_mod
                       stat=results[3,],
                       row.names=unique(data[, prov.char])))
   } else if (test == "score") {
-    if (score_modified == FALSE) {  #standard score test
+    if (score_modified == TRUE) {  #modified score test
       n.prov <- sapply(split(data[, Y.char], data[, prov.char]), length)
       m <- length(n.prov)
       if (missing(parm)) {
@@ -133,7 +132,7 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_mod
                         p=p.val,
                         stat=z.score,
                         row.names = unique(data[, prov.char])[indices]))
-    } else {  #modified score test
+    } else {  #standard score test
       probs <- plogis(gamma.null + unname(as.matrix(data[, Z.char])) %*% beta)
       z.score <- sapply(split(data[,Y.char]-probs,data[,prov.char]),sum) /
         sqrt(sapply(split(probs*(1-probs),data[,prov.char]),sum))
@@ -162,15 +161,7 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_mod
                       stat=results[3,],
                       row.names=unique(data[, prov.char])))
   } else if (test=="wald") { # invalid in presence of outlying providers
-    if(!missing(parm)){
-      if (sum(!is.finite(gamma[indices])) != 0){
-        stop("wald test cannot be performed on providers with zero or all events!!")
-      }
-    } else {
-      if (sum(!is.finite(gamma)) != 0){
-        stop("wald test cannot be performed on providers with zero or all events!!")
-      }
-    }
+    warning("The Wald test fails for datasets with providers having all or no events. Score test or exact test are recommended.")
 
     gamma.obs <- rep(gamma, sapply(split(data[,Y.char],data[,prov.char]),length)) #find gamma-hat
     probs <- as.numeric(plogis(gamma.obs+as.matrix(data[,Z.char])%*%beta))

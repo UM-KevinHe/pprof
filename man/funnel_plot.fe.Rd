@@ -10,7 +10,7 @@ funnel_plot.fe(
   target = 1,
   alpha = c(0.05, 0.01),
   color_palette = c("#E69F00", "#56B4E9", "#009E73"),
-  labels = c("better", "expected", "worse"),
+  labels = c("lower", "expected", "higher"),
   shapes = c(15, 17, 19),
   xlab = "Precision",
   ylab = "Outcome",

@@ -102,7 +102,7 @@
 #'
 #' @export
 #'
-#' @useDynLib ppsrr, .registration = TRUE
+#' @useDynLib pprof, .registration = TRUE
 
 logis_fe <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
                      backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10,

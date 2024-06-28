@@ -1,4 +1,4 @@
-Package: ppsrr
+Package: pprof
 Type: Package
 Title: GLM Model with Provider as Fixed Effects
 Version: 1.3
@@ -23,7 +23,13 @@ Imports:
     caret,
     olsrr,
     pROC,
-    poibin
+    poibin,
+    RColorBrewer, 
+    dplyr, 
+    ggplot2, 
+    ggpubr, 
+    rlang, 
+    tidyr
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends:
     R (>= 3.5.0)
@@ -38,3 +44,4 @@ Encoding: UTF-8
 SystemRequirements: GNU make
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
+

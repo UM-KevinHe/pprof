@@ -49,12 +49,6 @@
 #'
 #' @param errorbar_size Thickness of the error bars.
 #'
-#' @param xlab Label for the x-axis.
-#'
-#' @param ylab Label for the y-axis.
-#'
-#' @param theme The ggplot theme object used to style the plot. Defaults to `theme_minimal()`.
-#'
 #' @param ...
 #'
 #' @return A plot is produced, and nothing is returned.
@@ -62,21 +56,18 @@
 #' @importFrom ggplot2 ggplot aes theme element_text element_blank element_line margin labs ggtitle geom_hline geom_point scale_x_continuous scale_y_continuous scale_linetype_manual scale_fill_manual position_jitter geom_errorbar coord_flip theme_minimal
 #' @importFrom ggpubr annotate_figure ggarrange text_grob
 #'
-#' @exportS3Method plot logis_fe
+#' @export
 #'
 #' @examples
 #' data(data_FE)
-#' data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
-#' fit_fe <- logis_fe(data.prep)
-#' plot(fit_fe, option = "gamma")
+#' fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
+#' caterpillar_plot.fe(fit_fe, option = "gamma")
 
-plot.logis_fe <- function(fit, parm, level = 0.95, test = "exact", option = c("gamma", "SR"),
+caterpillar_plot.fe <- function(fit, parm, level = 0.95, test = "exact", option = "SR",
                           stdz = "indirect", measure = c("rate", "ratio"),
-                          title = "Provider Effects Confidence Intervals",
-                          dot_size = 2, jitter_width = 0,
-                          median_color = "red", median_linetype = "dashed", median_size = 1,
-                          errorbar_width = 0.2, errorbar_size = 0.5,
-                          xlab = "Provider ID", ylab = "Estimated Value", theme = theme_minimal()) {
+                          point_size = 2, jitter_width = 0,
+                          median_linecolor = "red", median_linetype = "dashed", median_linesize = 1,
+                          errorbar_width = 0.2, errorbar_size = 0.5) {
 
   CI = confint(fit, parm, level, test, option, stdz, measure)
 
@@ -110,12 +101,12 @@ plot.logis_fe <- function(fit, parm, level = 0.95, test = "exact", option = c("g
     CI <- CI[!is.infinite(CI$gamma.lower) & !is.infinite(CI$gamma.upper), ]
 
     p <- ggplot(CI, aes(x = reorder(prov, gamma), y = gamma)) +
-      geom_point(position = position_jitter(width = jitter_width), size = dot_size) +
+      geom_point(position = position_jitter(width = jitter_width), size = point_size) +
       geom_errorbar(aes(ymin = gamma.lower, ymax = gamma.upper), width = errorbar_width, linewidth = errorbar_size) +
-      geom_hline(aes(yintercept = median(gamma, na.rm = TRUE)), color = median_color, linetype = median_linetype, size = median_size) +
+      geom_hline(aes(yintercept = median(gamma, na.rm = TRUE)), color = median_linecolor, linetype = median_linetype, size = median_linesize) +
       coord_flip() +
-      labs(x = xlab, y = ylab, title = title) +
-      theme
+      labs(x = "Provider ID", y = "Estimated Value", title = "Provider Effects Confidence Intervals") +
+      theme_minimal()
 
     return(p)
   }
@@ -132,10 +123,10 @@ plot.logis_fe <- function(fit, parm, level = 0.95, test = "exact", option = c("g
           geom_point(position = position_jitter(width = jitter_width), size = dot_size) +
           geom_errorbar(aes(ymin = CI_ratio.lower, ymax = CI_ratio.upper), width = errorbar_width, linewidth = errorbar_size) +
           geom_hline(aes(yintercept = median(CI$CI.indirect_ratio$indirect_ratio, na.rm = TRUE)),
-                     color = median_color, linetype = median_linetype, size = median_size) +
+                     color = median_linecolor, linetype = median_linetype, size = median_linesize) +
           coord_flip() +
-          labs(x = xlab, y = ylab, title = title) +
-          theme
+          labs(x = "Provider ID", y = "Estimated Value", title = "Indirect Ratio Confidence Intervals") +
+          theme_minimal()
       }
 
       if ("rate" %in% measure) {
@@ -147,10 +138,10 @@ plot.logis_fe <- function(fit, parm, level = 0.95, test = "exact", option = c("g
           geom_point(position = position_jitter(width = jitter_width), size = dot_size) +
           geom_errorbar(aes(ymin = CI_rate.lower, ymax = CI_rate.upper), width = errorbar_width, linewidth = errorbar_size) +
           geom_hline(aes(yintercept = median(CI$CI.indirect_rate$indirect_rate, na.rm = TRUE)),
-                     color = median_color, linetype = median_linetype, size = median_size) +
+                     color = median_linecolor, linetype = median_linetype, size = median_linesize) +
           coord_flip() +
-          labs(x = xlab, y = ylab, title = title) +
-          theme
+          labs(x = "Provider ID", y = "Estimated Value", title = "Indirect Rate Confidence Intervals") +
+          theme_minimal()
       }
     }
 
@@ -164,10 +155,10 @@ plot.logis_fe <- function(fit, parm, level = 0.95, test = "exact", option = c("g
           geom_point(position = position_jitter(width = jitter_width), size = dot_size) +
           geom_errorbar(aes(ymin = CI_ratio.lower, ymax = CI_ratio.upper), width = errorbar_width, linewidth = errorbar_size) +
           geom_hline(aes(yintercept = median(CI$CI.direct_ratio$direct_ratio, na.rm = TRUE)),
-                     color = median_color, linetype = median_linetype, size = median_size) +
+                     color = median_linecolor, linetype = median_linetype, size = median_linesize) +
           coord_flip() +
-          labs(x = xlab, y = ylab, title = title) +
-          theme
+          labs(x = "Provider ID", y = "Estimated Value", title = "Direct Ratio Confidence Intervals") +
+          theme_minimal()
       }
 
       if ("rate" %in% measure) {
@@ -179,10 +170,10 @@ plot.logis_fe <- function(fit, parm, level = 0.95, test = "exact", option = c("g
           geom_point(position = position_jitter(width = jitter_width), size = dot_size) +
           geom_errorbar(aes(ymin = CI_rate.lower, ymax = CI_rate.upper), width = errorbar_width, linewidth = errorbar_size) +
           geom_hline(aes(yintercept = median(CI$CI.direct_rate$direct_rate, na.rm = TRUE)),
-                     color = median_color, linetype = median_linetype, size = median_size) +
+                     color = median_linecolor, linetype = median_linetype, size = median_linesize) +
           coord_flip() +
-          labs(x = xlab, y = ylab, title = title) +
-          theme
+          labs(x = "Provider ID", y = "Estimated Value", title = "Direct Rate Confidence Intervals") +
+          theme_minimal()
       }
     }
 

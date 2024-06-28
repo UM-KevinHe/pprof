@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 computeDirectExp <- function(gamma_prov, Z_beta, threads) {
-    .Call(`_ppsrr_computeDirectExp`, gamma_prov, Z_beta, threads)
+    .Call(`_pprof_computeDirectExp`, gamma_prov, Z_beta, threads)
 }
 
 logis_fe_prov <- function(Y, Z, n_prov, gamma, beta, backtrack = 0L, max_iter = 10000L, bound = 10.0, tol = 1e-5, message = TRUE, stop = "beta") {
-    .Call(`_ppsrr_logis_fe_prov`, Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message, stop)
+    .Call(`_pprof_logis_fe_prov`, Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message, stop)
 }
 
 logis_BIN_fe_prov <- function(Y, Z, n_prov, gamma, beta, parallel = 1L, threads = 1L, tol = 1e-8, max_iter = 10000L, bound = 10.0, message = TRUE, backtrack = FALSE, stop = "beta") {
-    .Call(`_ppsrr_logis_BIN_fe_prov`, Y, Z, n_prov, gamma, beta, parallel, threads, tol, max_iter, bound, message, backtrack, stop)
+    .Call(`_pprof_logis_BIN_fe_prov`, Y, Z, n_prov, gamma, beta, parallel, threads, tol, max_iter, bound, message, backtrack, stop)
 }
 
 wald_covar <- function(Y, Z, n_prov, gamma, beta, indices, null, alpha) {
-    .Call(`_ppsrr_wald_covar`, Y, Z, n_prov, gamma, beta, indices, null, alpha)
+    .Call(`_pprof_wald_covar`, Y, Z, n_prov, gamma, beta, indices, null, alpha)
 }
 
 Modified_score <- function(Y, Z, n_prov, gamma, beta, gamma_null, m, parm, threads = 4L) {
-    .Call(`_ppsrr_Modified_score`, Y, Z, n_prov, gamma, beta, gamma_null, m, parm, threads)
+    .Call(`_pprof_Modified_score`, Y, Z, n_prov, gamma, beta, gamma_null, m, parm, threads)
 }
 

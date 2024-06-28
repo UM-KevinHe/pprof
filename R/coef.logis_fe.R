@@ -9,8 +9,7 @@
 #'
 #' @examples
 #' data(data_FE)
-#' data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
-#' fit_fe <- logis_fe(data.prep)
+#' fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
 #' coef(fit_fe)
 
 coef.logis_fe <- function(fit, ...) {

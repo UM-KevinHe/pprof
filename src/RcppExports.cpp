@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // computeDirectExp
 arma::vec computeDirectExp(const arma::vec& gamma_prov, const arma::vec& Z_beta, const int& threads);
-RcppExport SEXP _ppsrr_computeDirectExp(SEXP gamma_provSEXP, SEXP Z_betaSEXP, SEXP threadsSEXP) {
+RcppExport SEXP _pprof_computeDirectExp(SEXP gamma_provSEXP, SEXP Z_betaSEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,7 +26,7 @@ END_RCPP
 }
 // logis_fe_prov
 List logis_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int backtrack, int max_iter, double bound, double tol, bool message, const std::string stop);
-RcppExport SEXP _ppsrr_logis_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP, SEXP stopSEXP) {
+RcppExport SEXP _pprof_logis_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP, SEXP stopSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -47,7 +47,7 @@ END_RCPP
 }
 // logis_BIN_fe_prov
 List logis_BIN_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int parallel, int threads, double tol, int max_iter, double bound, bool message, bool backtrack, const std::string stop);
-RcppExport SEXP _ppsrr_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP, SEXP stopSEXP) {
+RcppExport SEXP _pprof_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP, SEXP stopSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -70,7 +70,7 @@ END_RCPP
 }
 // wald_covar
 List wald_covar(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec& gamma, arma::vec& beta, arma::uvec& indices, double null, double alpha);
-RcppExport SEXP _ppsrr_wald_covar(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP nullSEXP, SEXP alphaSEXP) {
+RcppExport SEXP _pprof_wald_covar(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP nullSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,7 +88,7 @@ END_RCPP
 }
 // Modified_score
 arma::vec Modified_score(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, double gamma_null, int m, arma::vec parm, int threads);
-RcppExport SEXP _ppsrr_Modified_score(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP mSEXP, SEXP parmSEXP, SEXP threadsSEXP) {
+RcppExport SEXP _pprof_Modified_score(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP mSEXP, SEXP parmSEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -107,15 +107,15 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_ppsrr_computeDirectExp", (DL_FUNC) &_ppsrr_computeDirectExp, 3},
-    {"_ppsrr_logis_fe_prov", (DL_FUNC) &_ppsrr_logis_fe_prov, 11},
-    {"_ppsrr_logis_BIN_fe_prov", (DL_FUNC) &_ppsrr_logis_BIN_fe_prov, 13},
-    {"_ppsrr_wald_covar", (DL_FUNC) &_ppsrr_wald_covar, 8},
-    {"_ppsrr_Modified_score", (DL_FUNC) &_ppsrr_Modified_score, 9},
+    {"_pprof_computeDirectExp", (DL_FUNC) &_pprof_computeDirectExp, 3},
+    {"_pprof_logis_fe_prov", (DL_FUNC) &_pprof_logis_fe_prov, 11},
+    {"_pprof_logis_BIN_fe_prov", (DL_FUNC) &_pprof_logis_BIN_fe_prov, 13},
+    {"_pprof_wald_covar", (DL_FUNC) &_pprof_wald_covar, 8},
+    {"_pprof_Modified_score", (DL_FUNC) &_pprof_Modified_score, 9},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_ppsrr(DllInfo *dll) {
+RcppExport void R_init_pprof(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

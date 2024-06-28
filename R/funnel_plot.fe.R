@@ -183,21 +183,23 @@ create_funnel_plot <- function(processed_data,
                                color_palette,
                                labels,
                                shapes,
-                               xlab,
-                               ylab,
                                point_size,
                                point_alpha,
-                               legend_justification,
-                               legend_position,
-                               point_legend_title,
-                               linetype_legend_title,
-                               legend_title_size,
-                               legend_size,
-                               legend_box,
-                               axis_title_size,
-                               axis_text_size,
-                               plot_title,
-                               plot_title_size
+                               line_size,
+                               target_line_type,
+                               xlab = "Precision",
+                               ylab = "Outcome",
+                               legend_justification = c(1, 1),
+                               legend_position = c(1, 1),
+                               point_legend_title = "Flagging",
+                               linetype_legend_title = "Significance",
+                               legend_title_size = 14,
+                               legend_size = 14,
+                               legend_box = "horizontal",
+                               axis_title_size = 14,
+                               axis_text_size = 14,
+                               plot_title = "Funnel Plot",
+                               plot_title_size = 18
 ) {
 
   # Check if processed_data is a data frame
@@ -207,21 +209,32 @@ create_funnel_plot <- function(processed_data,
 
   data <- processed_data %>% filter(alpha == alpha[1])
 
-  # Ensure that data$flag is a factor with levels coded as integers starting from 1
-  data$flag <- factor(data$flag, levels = levels(data$flag))
+  # Ensure that data$flag is a factor
+  data$flag <- factor(data$flag, levels = c(-1, 0, 1))
 
-  # Calculate the number of levels in data$flag
+  # Create labels for the legend
+  labs_color <- paste0(labels, " (", table(data$flag), ")")
+
+  # Add dummy rows for missing levels with NA values
+  missing_levels <- setdiff(c(-1, 0, 1), unique(data$flag))
+  if (length(missing_levels) > 0) {
+    dummy_data <- data.frame(flag = factor(missing_levels, levels = c(-1, 0, 1)),
+                             precision = NA,
+                             indicator = NA)
+    data <- bind_rows(data, dummy_data)
+  }
+
   num_levels <- length(levels(data$flag))
 
-  # Check if the length of shapes and color_palette is the same as the number of levels
-  if (length(color_palette) != num_levels) {
-    stop("The length of color_palette must be the same as the number of levels in data$flag")
-  }
-
-  # Check if the length of labels is the same as the number of levels
-  if (length(labels) != num_levels) {
-    stop("The length of labels must be the same as the number of levels in data$flag")
-  }
+  # # Check if the length of shapes and color_palette is the same as the number of levels
+  # if (length(color_palette) != num_levels) {
+  #   stop("The length of color_palette must be the same as the number of levels in data$flag")
+  # }
+  #
+  # # Check if the length of labels is the same as the number of levels
+  # if (length(labels) != num_levels) {
+  #   stop("The length of labels must be the same as the number of levels in data$flag")
+  # }
 
 
   # Assign each level of data$flag to a color from the palette
@@ -232,9 +245,6 @@ create_funnel_plot <- function(processed_data,
 
   # Create a named vector of lables for the legend
   labels <- setNames(labels, levels(data$flag))
-
-  # Create labels for the legend
-  labs_color <- paste0(labels, " (", table(data$flag), ")")
 
 
   xmax <- max(1 / data$se^2)
@@ -247,15 +257,14 @@ create_funnel_plot <- function(processed_data,
   values_linetype <- values_linetype[order(alpha)]
   labs_linetype <- labs_linetype[order(alpha)]
 
-  plot <- ggplot() +
-    scale_x_continuous(name = xlab,
-                       limits = c(0, xmax),
+  plot <-
+    ggplot() +
+    scale_x_continuous(limits = c(0, xmax),
                        expand = c(1, 1)/50) +
-    scale_y_continuous(name = ylab,
-                       breaks = round(seq(0, ymax, by=1), 1),
+    scale_y_continuous(breaks = round(seq(0, ymax, by=1), 1),
                        limits = c(0, ymax),
                        expand = c(1, 1)/50) +
-    geom_point( data = data, aes(x = precision, y = indicator, shape = flag, color = flag), size = point_size, alpha = point_alpha) +
+    geom_point(data = data, aes(x = precision, y = indicator, shape = flag, color = flag), size = point_size, alpha = point_alpha) +
     scale_shape_manual(
       name = bquote(.(point_legend_title) ~ "(" * alpha == .(alpha[1]) * ")"),
       labels = labs_color,
@@ -266,15 +275,15 @@ create_funnel_plot <- function(processed_data,
       labels = labs_color,
       values = color_mapping
     ) +
-    geom_line(data = processed_data, aes(x = precision, y = lower, group = alpha, linetype = alpha), linewidth = .6) +
-    geom_line(data = processed_data, aes(x = precision, y = upper, group = alpha, linetype = alpha), linewidth = .6) +
+    geom_line(data = processed_data, aes(x = precision, y = lower, group = alpha, linetype = alpha), linewidth = line_size) +
+    geom_line(data = processed_data, aes(x = precision, y = upper, group = alpha, linetype = alpha), linewidth = line_size) +
     scale_linetype_manual(
       name =  linetype_legend_title,
       values = values_linetype,
       labels = labs_linetype
     ) +
     guides(shape = guide_legend(order = 1), color = guide_legend(order = 1), linetype = guide_legend(reverse = TRUE, order = 2)) +
-    geom_hline(yintercept = target, linewidth = .8, linetype = "dashed") +
+    geom_hline(yintercept = target, linewidth = line_size, linetype = target_line_type) +
     theme_classic() +
     theme(
       legend.justification = legend_justification,
@@ -291,8 +300,9 @@ create_funnel_plot <- function(processed_data,
     labs(
       x = xlab,
       y = ylab,
-      title = ifelse(missing(plot_title), waiver(), plot_title)
+      title = plot_title
     )
+
 
   return(plot)
 }
@@ -308,22 +318,6 @@ create_funnel_plot <- function(processed_data,
 #' @param color_palette A vector of colors for the plot.
 #' @param labels A vector of labels for the plot.
 #' @param shapes A vector of shapes for the plot.
-#' @param xlab A character string specifying the x-axis label.
-#' @param ylab A character string specifying the y-axis label.
-#' @param point_size A numeric value specifying the point size.
-#' @param point_alpha A numeric value specifying the point alpha.
-#' @param legend_justification A character string or numeric vector specifying the justification
-#'        of the legend relative to its position.
-#' @param legend_position A character string or numeric vector specifying the legend position.
-#' @param point_legend_title A character string specifying the point legend title.
-#' @param linetype_legend_title A character string specifying the linetype legend title.
-#' @param legend_title_size A numeric value specifying the legend title size.
-#' @param legend_size A numeric value specifying the legend size.
-#' @param legend_box A character string specifying the legend box.
-#' @param axix_title_size A numeric value specifying the axis title size.
-#' @param axis_text_size A numeric value specifying the axis text size.
-#' @param plot_title A character string specifying the plot title.
-#' @param plot_title_size A numeric value specifying the plot title size.
 #'
 #' @import dplyr rlang
 #' @return A ggplot object representing the funnel plot.
@@ -333,21 +327,10 @@ funnel_plot.fe <- function(fit, test = "exact", target = 1, alpha = c(0.05, 0.01
                         color_palette = c("#E69F00", "#56B4E9", "#009E73"),
                         labels = c("lower", "expected", "higher"),
                         shapes = c(15, 17, 19),
-                        xlab = "Precision",
-                        ylab = "Outcome",
                         point_size = 2,
-                        point_alpha = 0.5,
-                        legend_justification = c(1, 1),
-                        legend_position = c(1, 1),
-                        point_legend_title = "Flagging",
-                        linetype_legend_title = "Significance",
-                        legend_title_size = 14,
-                        legend_size = 14,
-                        legend_box = "horizontal",
-                        axis_title_size = 14,
-                        axis_text_size = 14,
-                        plot_title = "Funnel Plot",
-                        plot_title_size = 18
+                        point_alpha = 0.8,
+                        line_size = 0.8,
+                        target_line_type = "longdash"
 ) {
   if (missing(fit)) stop ("Argument 'fit' is required!", call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
@@ -355,7 +338,6 @@ funnel_plot.fe <- function(fit, test = "exact", target = 1, alpha = c(0.05, 0.01
   SR = SR_output(fit, stdz = "indirect", measure = "ratio")
   data = cbind(SR$indirect.ratio, SR$OE$OE_indirect)
   colnames(data) = c("ratio", "Obs", "Exp")
-
 
   processed_data <- data %>%
     calculate_scores(Obs, Exp, ratio, test, alpha = alpha[1]) %>%
@@ -366,21 +348,11 @@ funnel_plot.fe <- function(fit, test = "exact", target = 1, alpha = c(0.05, 0.01
                              color_palette,
                              labels,
                              shapes,
-                             xlab,
-                             ylab,
                              point_size,
                              point_alpha,
-                             legend_justification,
-                             legend_position,
-                             point_legend_title,
-                             linetype_legend_title,
-                             legend_title_size,
-                             legend_size,
-                             legend_box,
-                             axis_title_size,
-                             axis_text_size,
-                             plot_title,
-                             plot_title_size)
+                             line_size,
+                             target_line_type
+                             )
 
   return(plot)
 }

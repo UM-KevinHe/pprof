@@ -376,11 +376,16 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
       info_beta = Z.t() * (Z.each_col()%pq);
     }
     arma::mat mat_tmp1 = trans(info_betagamma.each_row()%info_gamma_inv.t());
-    arma::mat schur_inv = inv_sympd(info_beta-mat_tmp1.t()*info_betagamma.t());
-    arma::mat mat_tmp2 = mat_tmp1*schur_inv;
-    arma::vec d_gamma = info_gamma_inv%score_gamma + mat_tmp2*(mat_tmp1.t()*score_gamma-score_beta);
-    arma::vec d_beta = schur_inv*score_beta - mat_tmp2.t()*score_gamma;
+    // arma::mat schur_inv = inv_sympd(info_beta-mat_tmp1.t()*info_betagamma.t());
+    // arma::mat mat_tmp2 = mat_tmp1*schur_inv;
+    // arma::vec d_gamma = info_gamma_inv%score_gamma + mat_tmp2*(mat_tmp1.t()*score_gamma-score_beta);
+    // arma::vec d_beta = schur_inv*score_beta - mat_tmp2.t()*score_gamma;
 
+    arma::mat schur_system = info_beta - mat_tmp1.t() * info_betagamma.t();
+    arma::mat mat_tmp2 = arma::solve(schur_system, mat_tmp1.t(), solve_opts::likely_sympd);
+    arma::vec d_gamma = info_gamma_inv % score_gamma +  mat_tmp2.t() * (mat_tmp1.t() * score_gamma - score_beta);
+    arma::vec schur_system_solve = arma::solve(schur_system, score_beta, solve_opts::likely_sympd);
+    arma::vec d_beta = schur_system_solve - mat_tmp2 * score_gamma;
 
     v = 1.0; // initialize step size
     if (backtrack == true){

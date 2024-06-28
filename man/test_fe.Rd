@@ -64,8 +64,7 @@ However, the user can specify 'score_modified = FALSE' to perform a standard sco
 }
 \examples{
 data(data_FE)
-data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-fit_fe <- logis_fe(data.prep)
+fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
 test_fe(fit_fe, test = "score", parm = c(1:3))
 
 }
