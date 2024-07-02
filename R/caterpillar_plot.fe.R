@@ -33,8 +33,6 @@
 #'   \item "ratio":  output the standardized ratio
 #'   }
 #'
-#'@param title The main title for the plot.
-#'
 #' @param dot_size Size of the points in the plot.
 #'
 #' @param jitter_width Width of the jitter applied to the points to reduce overlap.

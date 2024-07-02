@@ -1,20 +1,4 @@
-#' Calculate Scores
-#'
-#' This function calculates scores, flags, and probabilities based on the input data.
-#'
-#' @param input_data A data frame or tibble containing study information.
-#' @param obs The column name for observed values.
-#' @param exp The column name for expected values.
-#' @param ratio The column name for the standard ratio.
-#' @param test a character string specifying the type of testing method. Defaulting to "exact".
-#'  \itemize{
-#'  \item "exact": exact test
-#'  \item "score": score test
-#'  }
-#' @param alpha A numeric value representing the significance level. Defaulting to 0.05.
-#'
 #' @import dplyr rlang
-#'
 calculate_scores <- function(input_data, obs, exp, ratio, test, alpha) {
 
   # Check if input_data is a data frame
@@ -59,25 +43,8 @@ calculate_scores <- function(input_data, obs, exp, ratio, test, alpha) {
   return(data)
 }
 
-#' Calculate Control Limits for Funnel Plot
-#'
-#' This function calculates control limits for a funnel plot based on the method type and input data.
-#'
-#' @param data A tibble containing input data with columns SMR and flag.
-#' @param exp The column name for expected values.
-#' @param ratio The column name for the standard ratio.
-#' @param flag The column name for the flag.
-#' @param test a character string specifying the type of testing method. Defaulting to "exact".
-#'  \itemize{
-#'  \item "exact": exact test
-#'  \item "score": score test
-#'  }
-#' @param alpha A vector of significance levels.
-#' @param target A numeric value representing the target outcome. Defaulting to 1.
-#'
-#' @import dplyr
-#' @import tidyr
-#'
+
+#' @import dplyr tidyr
 calculate_control_limits <- function(data, exp, ratio, flag, test, alpha, target) {
   if (!is.data.frame(data)) stop("data must be a data frame")
 
@@ -146,36 +113,6 @@ calculate_control_limits <- function(data, exp, ratio, flag, test, alpha, target
 }
 
 
-
-#' Create a Funnel Plot
-#'
-#' This function creates a funnel plot using the processed data.
-#'
-#' @param processed_data A data frame or tibble containing study information.
-#' @param target A numeric value representing the target outcome.
-#' @param alpha A vector of significance levels.
-#' @param color_palette A vector of colors for the plot.
-#' @param labels A vector of labels for the plot.
-#' @param shapes A vector of shapes for the plot.
-#' @param xlab A character string specifying the x-axis label.
-#' @param ylab A character string specifying the y-axis label.
-#' @param point_size A numeric value specifying the point size.
-#' @param point_alpha A numeric value specifying the point alpha.
-#' @param legend_justification A character string or numeric vector specifying the justification
-#'        of the legend relative to its position.
-#' @param legend_position A character string or numeric vector specifying the legend position.
-#' @param point_legend_title A character string specifying the point legend title.
-#' @param linetype_legend_title A character string specifying the linetype legend title.
-#' @param legend_title_size A numeric value specifying the legend title size.
-#' @param legend_size A numeric value specifying the legend size.
-#' @param legend_box A character string specifying the legend box.
-#' @param axix_title_size A numeric value specifying the axis title size.
-#' @param axis_text_size A numeric value specifying the axis text size.
-#' @param plot_title A character string specifying the plot title.
-#' @param plot_title_size A numeric value specifying the plot title size.
-#'
-#' @return A ggplot object representing the funnel plot.
-#'
 #' @import ggplot2 RColorBrewer
 create_funnel_plot <- function(processed_data,
                                target,

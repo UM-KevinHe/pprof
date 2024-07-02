@@ -65,6 +65,12 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
   names(gamma) <- rownames(df.prov)
   prov.order <- rownames(fit$gamma)
 
+  if (!missing(parm)) {
+    if (is.numeric(parm)) {  #avoid "integer" class
+      parm <- as.numeric(parm)
+    }
+  }
+
   #confidence of gamma
   confint_fe_gamma <- function(fit, test, parm, alpha) {
     data <- fit$data_include

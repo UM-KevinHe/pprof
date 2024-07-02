@@ -51,7 +51,7 @@
 #' @examples
 #' data(data_FE)
 #' fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
-#' test_fe(fit_fe, test = "score", parm = c(1:3))
+#' test_fe(fit_fe, test = "score")
 #'
 #' @importFrom stats plogis qnorm pnorm rbinom
 #' @importFrom poibin ppoibin
@@ -142,7 +142,7 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_mod
       return(data.frame(flag=factor(flag),
                         p=p.val,
                         stat=z.score,
-                        row.names=unique(data[, prov.char])))
+                        row.names = unique(data[, prov.char]))[indices, ])
     }
   } else if (test=="exact.poisbinom") {
     exact.poisbinom <- function(df) {

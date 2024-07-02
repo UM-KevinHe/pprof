@@ -12,17 +12,13 @@ caterpillar_plot.fe(
   option = "SR",
   stdz = "indirect",
   measure = c("rate", "ratio"),
-  title = "Provider Effects Confidence Intervals",
-  dot_size = 2,
+  point_size = 2,
   jitter_width = 0,
-  median_color = "red",
+  median_linecolor = "red",
   median_linetype = "dashed",
-  median_size = 1,
+  median_linesize = 1,
   errorbar_width = 0.2,
-  errorbar_size = 0.5,
-  xlab = "Provider ID",
-  ylab = "Estimated Value",
-  theme = theme_minimal()
+  errorbar_size = 0.5
 )
 }
 \arguments{
@@ -57,27 +53,19 @@ caterpillar_plot.fe(
 \item "ratio":  output the standardized ratio
 }}
 
-\item{title}{The main title for the plot.}
-
-\item{dot_size}{Size of the points in the plot.}
-
 \item{jitter_width}{Width of the jitter applied to the points to reduce overlap.}
 
-\item{median_color}{Color of the median line.}
-
 \item{median_linetype}{Type of line used for the median line, defaulting to 'dashed'.}
-
-\item{median_size}{Thickness of the median line.}
 
 \item{errorbar_width}{Width of the end caps on the error bars.}
 
 \item{errorbar_size}{Thickness of the error bars.}
 
-\item{xlab}{Label for the x-axis.}
+\item{dot_size}{Size of the points in the plot.}
 
-\item{ylab}{Label for the y-axis.}
+\item{median_color}{Color of the median line.}
 
-\item{theme}{The ggplot theme object used to style the plot. Defaults to \code{theme_minimal()}.}
+\item{median_size}{Thickness of the median line.}
 
 \item{...}{}
 }
@@ -89,7 +77,6 @@ This function creates a caterpillar plot of the provider effects or standardizat
 }
 \examples{
 data(data_FE)
-data.prep <- fe_data_prep(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
-fit_fe <- logis_fe(data.prep)
+fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
 caterpillar_plot.fe(fit_fe, option = "gamma")
 }

@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(ppsrr)
+library(pprof)
 
-test_check("ppsrr")
+test_check("pprof")
