@@ -117,7 +117,7 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_mod
                       stat=results[3,],
                       row.names=unique(data[, prov.char])))
   } else if (test == "score") {
-    if (score_modified == TRUE) {  #modified score test
+    if (score_modified == FALSE) {  #standard score test
       n.prov <- sapply(split(data[, Y.char], data[, prov.char]), length)
       m <- length(n.prov)
       if (missing(parm)) {
@@ -132,7 +132,7 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_mod
                         p=p.val,
                         stat=z.score,
                         row.names = unique(data[, prov.char])[indices]))
-    } else {  #standard score test
+    } else {  #modified score test
       probs <- plogis(gamma.null + unname(as.matrix(data[, Z.char])) %*% beta)
       z.score <- sapply(split(data[,Y.char]-probs,data[,prov.char]),sum) /
         sqrt(sapply(split(probs*(1-probs),data[,prov.char]),sum))
@@ -142,7 +142,7 @@ test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_mod
       return(data.frame(flag=factor(flag),
                         p=p.val,
                         stat=z.score,
-                        row.names = unique(data[, prov.char]))[indices, ])
+                        row.names = unique(data[, prov.char])))
     }
   } else if (test=="exact.poisbinom") {
     exact.poisbinom <- function(df) {
