@@ -575,3 +575,50 @@ arma::vec Modified_score(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::ve
   z_score = z_score.elem(arma::find_finite(z_score));
   return z_score;
 }
+
+
+// [[Rcpp::export]]
+List compute_profilkd_linear(arma::vec& Y, arma::mat& Z, arma::vec& ID, arma::vec& n_prov) {
+  if (Y.n_elem != Z.n_rows) {
+    stop("Y and Z must have the same number of rows.");
+  }
+  if (Y.n_elem != ID.n_elem) {
+    stop("Y and ID must have the same number of elements.");
+  }
+
+  int m = n_prov.n_elem;
+  int n_covariates = Z.n_cols;
+
+  arma::mat sum_first_term = arma::zeros(n_covariates, n_covariates);
+  arma::vec sum_second_term = arma::zeros(n_covariates);
+
+  for (int j = 0; j < m; ++j) {
+    arma::uvec indices = arma::find(ID == j + 1);
+    arma::mat temp_X = Z.rows(indices);
+    arma::vec temp_Y = Y.rows(indices);
+
+    int n = temp_Y.n_rows;
+    arma::mat Qn = arma::eye(n, n) - (1.0 / n) * arma::ones(n, n);
+
+    sum_first_term += temp_X.t() * Qn * temp_X;
+    sum_second_term += temp_X.t() * Qn * temp_Y;
+  }
+
+  arma::vec beta = arma::solve(sum_first_term, sum_second_term);
+
+  arma::vec gamma(m);
+
+  for (int j = 0; j < m; ++j) {
+    arma::uvec indices = arma::find(ID == j + 1);
+    arma::mat temp_X = Z.rows(indices);
+    arma::vec temp_Y = Y.rows(indices);
+
+    double temp_y_bar = arma::mean(temp_Y);
+    arma::vec temp_x_bar = arma::mean(temp_X, 0).t();
+
+    gamma[j] = temp_y_bar - arma::as_scalar(temp_x_bar.t() * beta);
+  }
+
+  List ret = List::create(_["gamma"]=gamma, _["beta"]=beta);
+  return ret;
+}

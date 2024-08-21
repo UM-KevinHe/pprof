@@ -1,4 +1,4 @@
-#=== CONFIDENCE INTERVAL FUNCTION =================================
+#=== CONFIDENCE INTERVAL FUNCTION of Logis FE Model=================================
 #' Provide confidence interval for provider effects or standardization ratios/rates
 #'
 #' @param fit an object as output of \code{logis_fe} function.

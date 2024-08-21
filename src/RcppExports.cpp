@@ -105,6 +105,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_profilkd_linear
+List compute_profilkd_linear(arma::vec& Y, arma::mat& Z, arma::vec& ID, arma::vec& n_prov);
+RcppExport SEXP _pprof_compute_profilkd_linear(SEXP YSEXP, SEXP ZSEXP, SEXP IDSEXP, SEXP n_provSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type ID(IDSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type n_prov(n_provSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_profilkd_linear(Y, Z, ID, n_prov));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pprof_computeDirectExp", (DL_FUNC) &_pprof_computeDirectExp, 3},
@@ -112,6 +126,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pprof_logis_BIN_fe_prov", (DL_FUNC) &_pprof_logis_BIN_fe_prov, 13},
     {"_pprof_wald_covar", (DL_FUNC) &_pprof_wald_covar, 8},
     {"_pprof_Modified_score", (DL_FUNC) &_pprof_Modified_score, 9},
+    {"_pprof_compute_profilkd_linear", (DL_FUNC) &_pprof_compute_profilkd_linear, 4},
     {NULL, NULL, 0}
 };
 

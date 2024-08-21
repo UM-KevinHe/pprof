@@ -29,7 +29,9 @@ Imports:
     ggplot2, 
     ggpubr, 
     rlang, 
-    tidyr
+    tidyr,
+    Matrix,
+    lme4
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends:
     R (>= 3.5.0)

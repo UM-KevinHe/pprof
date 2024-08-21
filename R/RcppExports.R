@@ -21,3 +21,7 @@ Modified_score <- function(Y, Z, n_prov, gamma, beta, gamma_null, m, parm, threa
     .Call(`_pprof_Modified_score`, Y, Z, n_prov, gamma, beta, gamma_null, m, parm, threads)
 }
 
+compute_profilkd_linear <- function(Y, Z, ID, n_prov) {
+    .Call(`_pprof_compute_profilkd_linear`, Y, Z, ID, n_prov)
+}
+
