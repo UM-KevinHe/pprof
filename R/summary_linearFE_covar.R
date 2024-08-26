@@ -24,6 +24,7 @@ summary_linearFE_covar <- function(fit, parm, level = 0.95, method = "pl", null 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!",call.=F)
 
+  Z.char <- fit$char_list$Z.char
   beta <- fit$coefficient$beta
   se.beta <- sqrt(diag(fit$variance$beta))
   m <- length(fit$coefficient$gamma)

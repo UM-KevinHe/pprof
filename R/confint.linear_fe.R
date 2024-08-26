@@ -28,7 +28,7 @@
 #' @exportS3Method confint linear_fe
 #'
 
-confint.linear_fe <- function(fit, parm, level = 0.95, ref.dis = "normal",
+confint.linear_fe <- function(fit, parm, level = 0.95, method = "pl",
                               option = c("gamma", "SR"), null = "median", stdz = "indirect") {
   return_ls <- list()
 
@@ -43,23 +43,23 @@ confint.linear_fe <- function(fit, parm, level = 0.95, ref.dis = "normal",
   m <- length(fit$coefficient$gamma)
   p <- length(fit$coefficient$beta)
   n <- nrow(fit$data_include)
-  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$prov.char]), length)
+  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
 
   # CI of Gamma
   gamma <- fit$coefficient$gamma
-  sd.gamma <- sqrt(fit$variance$gamma)
+  se.gamma <- sqrt(fit$variance$gamma)
 
-  if (ref.dis == "normal") {
+  if (method == "pl") {
     crit_value <- qnorm(1 - alpha / 2)
-  } else if (ref.dis == "t") {
+  } else if (method == "lm") {
     df <- n - m - p
     crit_value <- qt(1 - alpha / 2, df)
   } else {
     stop("Reference distribution must be either 'normal' or 't'")
   }
 
-  L_gamma <- gamma - crit_value * sd.gamma
-  U_gamma <- gamma + crit_value * sd.gamma
+  L_gamma <- gamma - crit_value * se.gamma
+  U_gamma <- gamma + crit_value * se.gamma
 
   CI_gamma <- data.frame(gamma = gamma, gamma.Lower = L_gamma, gamma.Upper = U_gamma)
   colnames(CI_gamma) <- c("gamma", "gamma.Lower", "gamma.Upper")
@@ -71,7 +71,7 @@ confint.linear_fe <- function(fit, parm, level = 0.95, ref.dis = "normal",
       parm <- as.numeric(parm)
     }
 
-    if (class(parm) == class(data[, fit$char_list$prov.char])) {
+    if (class(parm) == class(data[, fit$char_list$ID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements!")

@@ -184,20 +184,24 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
       mf <- model.frame(formula, data)
       Y <- model.response(mf)
       Z <- model.matrix(reformulate(predictors), data)[, -1, drop = FALSE]
-      ID <- data[,id_var]
+      # Z <- model.matrix(~ data[[predictors]] - 1)
+      ID <- data[,id_var, drop = F]
     }
     else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
       if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
         stop("Some of the specified columns are not in the data!", call.=FALSE)
 
       Y <- data[, Y.char]
-      Z <- as.matrix(data[, Z.char, drop = FALSE])
-      ID <- data[, ID.char]
+      Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
+      ID <- data[, ID.char, drop = F]
     }
     else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
       if (length(Y) != length(ID) | (length(ID) != nrow(Z))) {
         stop("Dimensions of the input data do not match!!", call.=F)
       }
+
+      Z.char <- colnames(Z)
+      Z <- model.matrix(reformulate(Z.char), Z)[, -1, drop = FALSE]
     }
     else {
       stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ID.char, or (3) Y, Z, and ID.", call.=FALSE)
@@ -220,7 +224,6 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
 
     Q <- lapply(n.prov, function(n) diag(n)-matrix(1, nrow = n, ncol = n)/n)
 
-
     # Coefficients
     beta <- matrix(solve(t(Z)%*%bdiag(Q)%*%Z)%*%t(Z)%*%bdiag(Q)%*%Y, ncol = 1)
     colnames(beta) <- "beta"
@@ -240,9 +243,12 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
     # Prediction
     linear_pred <- Z %*% beta
     gamma.obs <- rep(gamma.prov, n.prov)
-    pred = gamma.obs + linear_pred
+    pred <- gamma.obs + linear_pred
     colnames(pred) <- "Prediction"
-    residuals <- Y - pred
+    rownames(pred) <- seq_len(nrow(pred))
+    residuals <- matrix(Y - pred, ncol = 1)
+    colnames(residuals) <- "Residuals"
+    rownames(residuals) <- seq_len(nrow(residuals))
     sigma_hat_sq <- sum(residuals^2)/(n - m - p)
 
     # Variance
@@ -265,7 +271,7 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
   }
   else if (method == "lm") {
     if (!is.null(formula) && !is.null(data) && !is.null(ID.char)){
-      original_ID <- data[, ID.char]
+      original_ID <- data[, ID.char, drop = F]
       data[,ID.char] <- as.factor(data[,ID.char])
       formula_terms <- all.vars(formula)
       formula_terms <- formula_terms[formula_terms != ID.char]
@@ -273,18 +279,18 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
       Y.char <- formula_terms[1]
       # new_formula_terms <- c(formula_terms, ID.char)
       # ID.char is always in the last position
-      new_formula <- as.formula(paste(Y.char, "~",
-                                      paste(Z.char, collapse = " + "), "+",ID.char))
+      new_formula <- as.formula(paste(Y.char, "~", ID.char, "+",
+                                      paste(Z.char, collapse = " + ")))
 
       data <- data[order(factor(data[,ID.char])),]
       formula <- update(new_formula, . ~ . - 1)
       fit_lm <- lm(formula, data = data)
     }
     else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
-      original_ID <- data[, ID.char]
+      original_ID <- data[, ID.char, drop = F]
       data[,ID.char] <- as.factor(data[,ID.char])
       data <- data[order(factor(data[,ID.char])),]
-      formula <- as.formula(paste(Y.char, "~", paste(Z.char, collapse = " + "), "+", ID.char, "-1"))
+      formula <- as.formula(paste(Y.char, "~", ID.char, "+", paste(Z.char, collapse = " + "), "-1"))
       fit_lm <- lm(formula, data = data)
     }
     else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
@@ -295,10 +301,10 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
       Y.char <- colnames(data)[1]
       ID.char <- colnames(data)[2]
       Z.char <- colnames(Z)
-      original_ID <- data[, ID.char]
+      original_ID <- data[, ID.char, drop = F]
       data[,ID.char] <- as.factor(data[,ID.char])
       data <- data[order(factor(data[,ID.char])),]
-      formula <- as.formula(paste(Y.char, "~", paste(Z.char, collapse = " + "), "+", ID.char, "-1"))
+      formula <- as.formula(paste(Y.char, "~", ID.char, "+", paste(Z.char, collapse = " + "), "-1"))
       fit_lm <- lm(formula, data = data)
     }
     else {
@@ -306,20 +312,23 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
     }
 
     sum <- summary(fit_lm)
-
-    Z <- as.matrix(data[,Z.char], drop = F)
+    X.model <- model.matrix(fit_lm)
     Y <- as.matrix(data[, Y.char, drop = F])
     ID <- as.matrix(data[, ID.char, drop = F])
+
     n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
     m <- length(n.prov) # number of providers
     n <- sum(n.prov) # number of observations
+    Z.char <- colnames(X.model)[(m+1):length(colnames(X.model))]
+    Z <- X.model[,Z.char, drop = F]
     p <- length(Z.char) # number of covariates
+    data <- as.data.frame(cbind(Y, ID, Z))
 
     # Coefficients
-    beta <- matrix(sum$coefficients[1:p, 1], ncol = 1)
+    beta <- matrix(sum$coefficients[(m+1):(m+p), 1], ncol = 1)
     colnames(beta) <- "beta"
     rownames(beta) <- Z.char
-    gamma.prov <- matrix(sum$coefficients[(p+1):(p+m), 1], ncol = 1)
+    gamma.prov <- matrix(sum$coefficients[1:m, 1], ncol = 1)
     colnames(gamma.prov) <- "gamma"
     rownames(gamma.prov)<- names(n.prov)
 
@@ -331,11 +340,11 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
     sigma_hat_sq <- sum$sigma^2
     X <- model.matrix(fit_lm)
     varcor <- sigma_hat_sq * solve(t(X)%*%X)
-    varcor_beta <- varcor[1:p, 1:p]
+    varcor_beta <- matrix(varcor[(m+1):(m+p), (m+1):(m+p)], ncol = p, nrow = p)
     rownames(varcor_beta) <- Z.char
     colnames(varcor_beta) <- Z.char
 
-    var_gamma <- matrix(diag(varcor)[(p+1):(p+m)], ncol = 1)
+    var_gamma <- matrix(diag(varcor)[1:m], ncol = 1)
     rownames(var_gamma) <- names(n.prov)
     colnames(var_gamma) <- "Variance.Gamma"
 
@@ -344,7 +353,11 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
     variance$gamma <- var_gamma
 
     # Prediction
-    pred <- data[,Y.char] - sum$residuals
+    residuals <- matrix(sum$residuals, ncol = 1)
+    colnames(residuals) <- "Residuals"
+    rownames(residuals) <- seq_len(nrow(residuals))
+
+    pred <- Y - sum$residuals
     pred <- matrix(pred, ncol = 1)
     colnames(pred) <- "Prediction"
     rownames(pred) <- seq_len(nrow(pred))
@@ -366,6 +379,7 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
                            linear_pred = linear_pred,
                            prediction = pred,
                            observation = Y,
+                           residuals = residuals,
                            prov = data[, ID.char]),
                       class = "linear_fe")  #define a list for prediction
 

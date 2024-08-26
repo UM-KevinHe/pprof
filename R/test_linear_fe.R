@@ -5,9 +5,12 @@ test_linear_fe <- function(fit, parm, level = 0.95, null = "median", method = "p
   ID.char <- fit$char_list$ID.char
   gamma <- fit$coefficient$gamma
   se.gamma <- sqrt(fit$variance$gamma)
+  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, ID.char]), length)
+  n <- nrow(fit$data_include)
   gamma.null <- ifelse(null=="median", median(gamma),
-                       ifelse(is.numeric(null), null[1],
-                              stop("Argument 'null' NOT as required!", call.=F)))
+                       ifelse(null=="mean", sum(n.prov*gamma)/n,
+                              ifelse(class(null)=="numeric", null[1],
+                                     stop("Argument 'null' NOT as required!",call.=F))))
 
   m <- length(fit$coefficient$gamma)
   p <- length(fit$coefficient$beta)
