@@ -265,21 +265,23 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
   }
   else if (method == "lm") {
     if (!is.null(formula) && !is.null(data) && !is.null(ID.char)){
+      original_ID <- data[, ID.char]
       data[,ID.char] <- as.factor(data[,ID.char])
       formula_terms <- all.vars(formula)
       formula_terms <- formula_terms[formula_terms != ID.char]
       Z.char <- formula_terms[2:length(formula_terms)]
       Y.char <- formula_terms[1]
-      new_formula_terms <- c(formula_terms, ID.char)
+      # new_formula_terms <- c(formula_terms, ID.char)
       # ID.char is always in the last position
-      new_formula <- as.formula(paste(new_formula_terms[1], "~",
-                                      paste(new_formula_terms[2:length(new_formula_terms)], collapse = " + ")))
+      new_formula <- as.formula(paste(Y.char, "~",
+                                      paste(Z.char, collapse = " + "), "+",ID.char))
 
       data <- data[order(factor(data[,ID.char])),]
       formula <- update(new_formula, . ~ . - 1)
       fit_lm <- lm(formula, data = data)
     }
     else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
+      original_ID <- data[, ID.char]
       data[,ID.char] <- as.factor(data[,ID.char])
       data <- data[order(factor(data[,ID.char])),]
       formula <- as.formula(paste(Y.char, "~", paste(Z.char, collapse = " + "), "+", ID.char, "-1"))
@@ -293,6 +295,7 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
       Y.char <- colnames(data)[1]
       ID.char <- colnames(data)[2]
       Z.char <- colnames(Z)
+      original_ID <- data[, ID.char]
       data[,ID.char] <- as.factor(data[,ID.char])
       data <- data[order(factor(data[,ID.char])),]
       formula <- as.formula(paste(Y.char, "~", paste(Z.char, collapse = " + "), "+", ID.char, "-1"))
@@ -351,6 +354,8 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
                       ID.char = ID.char,
                       Z.char = Z.char)
 
+    # Restore the ID column to keep the original class
+    data[, ID.char] <- original_ID
   }
   else stop("Method should be either 'pl' or 'lm'")
 

@@ -18,7 +18,7 @@
 #'
 #'
 #' @export
-summary_linearFE_covar <- function(fit, parm, level = 0.95, ref.dis = "normal", null = 0) {
+summary_linearFE_covar <- function(fit, parm, level = 0.95, method = "pl", null = 0) {
   alpha <- 1 - level
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
@@ -33,10 +33,10 @@ summary_linearFE_covar <- function(fit, parm, level = 0.95, ref.dis = "normal", 
   # Test Statistics
   stat <- (beta - null) / se.beta
 
-  if (ref.dis == "normal") {
+  if (method == "pl") {
     p_value <- 2 * (1 - pnorm(abs(stat)))
     crit_value <- qnorm(1 - alpha / 2)
-  } else if (ref.dis == "t") {
+  } else if (method == "lm") {
     df <- n - p - m
     p_value <- 2 * (1 - pt(abs(stat), df))
     crit_value <- qt(1 - alpha / 2, df)
