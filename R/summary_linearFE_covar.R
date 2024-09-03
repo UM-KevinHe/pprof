@@ -18,7 +18,7 @@
 #'
 #'
 #' @export
-summary_linearFE_covar <- function(fit, parm, level = 0.95, method = "pl", null = 0) {
+summary_linearFE_covar <- function(fit, parm, level = 0.95, null = 0) {
   alpha <- 1 - level
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
@@ -34,10 +34,10 @@ summary_linearFE_covar <- function(fit, parm, level = 0.95, method = "pl", null 
   # Test Statistics
   stat <- (beta - null) / se.beta
 
-  if (method == "pl") {
+  if (fit$method == "Profile Likelihood") {
     p_value <- 2 * (1 - pnorm(abs(stat)))
     crit_value <- qnorm(1 - alpha / 2)
-  } else if (method == "lm") {
+  } else if (fit$method == "Dummy") {
     df <- n - p - m
     p_value <- 2 * (1 - pt(abs(stat), df))
     crit_value <- qt(1 - alpha / 2, df)

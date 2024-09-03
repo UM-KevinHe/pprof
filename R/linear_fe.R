@@ -268,8 +268,9 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
                       ID.char = ID.char,
                       Z.char = Z.char)
 
+    model_method <- "Profile Likelihood"
   }
-  else if (method == "lm") {
+  else if (method == "dummy") {
     if (!is.null(formula) && !is.null(data) && !is.null(ID.char)){
       original_ID <- data[, ID.char, drop = F]
       data[,ID.char] <- as.factor(data[,ID.char])
@@ -369,8 +370,10 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
 
     # Restore the ID column to keep the original class
     data[, ID.char] <- original_ID
+
+    model_method <- "Dummy"
   }
-  else stop("Method should be either 'pl' or 'lm'")
+  else stop("Method should be either 'pl' or 'dummy'")
 
 
   result <- structure(list(coefficient = coefficient,
@@ -385,6 +388,7 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
 
   result$data_include <- data
   result$char_list <- char_list
+  result$method <- model_method
 
   return(result)
 }

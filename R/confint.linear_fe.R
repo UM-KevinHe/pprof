@@ -28,8 +28,8 @@
 #' @exportS3Method confint linear_fe
 #'
 
-confint.linear_fe <- function(fit, parm, level = 0.95, method = "pl",
-                              option = c("gamma", "SR"), null = "median", stdz = "indirect") {
+confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR"), null = "median",
+                              stdz = "indirect", tail = "two", direction = "smaller") {
   return_ls <- list()
 
   alpha <- 1 - level
@@ -49,17 +49,49 @@ confint.linear_fe <- function(fit, parm, level = 0.95, method = "pl",
   gamma <- fit$coefficient$gamma
   se.gamma <- sqrt(fit$variance$gamma)
 
-  if (method == "pl") {
-    crit_value <- qnorm(1 - alpha / 2)
-  } else if (method == "lm") {
-    df <- n - m - p
-    crit_value <- qt(1 - alpha / 2, df)
-  } else {
-    stop("Reference distribution must be either 'normal' or 't'")
+
+  if (tail == "two") {
+    if (fit$method == "Profile Likelihood") {
+      crit_value <- qnorm(1 - alpha / 2)
+    } else if (fit$method == "Dummy") {
+      df <- n - m - p
+      crit_value <- qt(1 - alpha / 2, df)
+    }
+
+    U_gamma <- gamma + crit_value * se.gamma
+    L_gamma <- gamma - crit_value * se.gamma
+  }
+  else if (tail == "one") {
+    if (direction == "smaller") {
+      if (fit$method == "Profile Likelihood") {
+        crit_value <- qnorm(1 - alpha)
+      } else if (fit$method == "Dummy") {
+        df <- n - m - p
+        crit_value <- qt(1 - alpha, df)
+      }
+
+      U_gamma <- Inf
+      L_gamma <- gamma - crit_value * se.gamma
+    }
+    else if (direction == "larger") {
+      if (fit$method == "Profile Likelihood") {
+        crit_value <- qnorm(1 - alpha)
+      } else if (fit$method == "Dummy") {
+        df <- n - m - p
+        crit_value <- qt(1 - alpha, df)
+      }
+
+      U_gamma <- gamma + crit_value * se.gamma
+      L_gamma <- -Inf
+    }
+    else {
+      stop("Argument 'direction' must be either 'smaller' or 'larger' for one-tail tests.")
+    }
+  }
+  else {
+    stop("Argument 'tail' must be either 'one' or 'two'.")
   }
 
-  L_gamma <- gamma - crit_value * se.gamma
-  U_gamma <- gamma + crit_value * se.gamma
 
   CI_gamma <- data.frame(gamma = gamma, gamma.Lower = L_gamma, gamma.Upper = U_gamma)
   colnames(CI_gamma) <- c("gamma", "gamma.Lower", "gamma.Upper")
@@ -85,13 +117,37 @@ confint.linear_fe <- function(fit, parm, level = 0.95, method = "pl",
     if ("indirect" %in% stdz) {
       SR <- SR_linear(fit, stdz = "indirect", null)
 
-      L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
-      L.prov <- sapply(split(L.obs, fit$prov), sum)
-      L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
+      if (tail == "two") {
+        L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
+        L.prov <- sapply(split(L.obs, fit$prov), sum)
+        L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
 
-      U.obs <- rep(U_gamma, n.prov) + fit$linear_pred
-      U.prov <- sapply(split(U.obs, fit$prov), sum)
-      U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
+        U.obs <- rep(U_gamma, n.prov) + fit$linear_pred
+        U.prov <- sapply(split(U.obs, fit$prov), sum)
+        U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
+      }
+      else if (tail == "one") {
+        if (direction == "smaller") {
+          L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
+          L.prov <- sapply(split(L.obs, fit$prov), sum)
+          L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
+
+          U_indirect <- Inf
+        }
+        else if (direction == "larger") {
+          U.obs <- rep(U_gamma, n.prov) + fit$linear_pred
+          U.prov <- sapply(split(U.obs, fit$prov), sum)
+          U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
+
+          L_indirect <- -Inf
+        }
+        else {
+          stop("Argument 'direction' must be either 'smaller' or 'larger' for one-tail tests.")
+        }
+      }
+      else {
+        stop("Argument 'tail' must be either 'one' or 'two'.")
+      }
 
       CI_indirect <- data.frame(SR = SR$indirect.difference, indirect.Lower = L_indirect, indirect.Upper = U_indirect)
       colnames(CI_indirect) <- c("Indirect.Difference", "indirect.Lower", "indirect.Upper")
@@ -106,11 +162,33 @@ confint.linear_fe <- function(fit, parm, level = 0.95, method = "pl",
         sum(gamma + fit$linear_pred)
       }
 
-      L.prov <- sapply(L_gamma, Exp.direct)
-      L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
+      if (tail == "two") {
+        L.prov <- sapply(L_gamma, Exp.direct)
+        L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
 
-      U.prov <- sapply(U_gamma, Exp.direct)
-      U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
+        U.prov <- sapply(U_gamma, Exp.direct)
+        U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
+      }
+      else if (tail == "one") {
+        if (direction == "smaller") {
+          L.prov <- sapply(L_gamma, Exp.direct)
+          L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
+
+          U_direct <- Inf
+        }
+        else if (direction == "larger") {
+          U.prov <- sapply(U_gamma, Exp.direct)
+          U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
+
+          L_direct <- -Inf
+        }
+        else {
+          stop("Argument 'direction' must be either 'smaller' or 'larger' for one-tail tests.")
+        }
+      }
+      else {
+        stop("Argument 'tail' must be either 'one' or 'two'.")
+      }
 
       CI_direct <- data.frame(SR = SR$direct.difference, direct.Lower = L_direct, direct.Upper = U_direct)
       colnames(CI_direct) <- c("Direct.Difference", "direct.Lower", "direct.Upper")
