@@ -5,20 +5,20 @@
 #'
 #' @param parm a character vector specifies a subset of covariates. All covariates are included by default.
 #'
-#' @param level confidence level used for constructing confidence intervals. Defaulting to 0.95.
+#' @param level confidence level used for constructing confidence intervals. Default is 0.95.
 #'
 #' @param null the null value of the covariate estimate that requires testing. (e.g. test \eqn{H_0: \beta = 0})
 #'
-#' @param ...
-#'
+#' @param alternative a character string specifies the alternative hypothesis.
+#'  Must be one of \code{"two.sided"}, \code{"less"}, or \code{"greater"}.
+#'  Default is \code{"two.sided"}.
 #'
 #' @return a dataframe containing summary statistics for covariate estimates
 #'
 #' @importFrom stats pnorm qnorm pt qt
 #'
-#'
 #' @export
-summary_linearFE_covar <- function(fit, parm, level = 0.95, null = 0) {
+summary_linearFE_covar <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided") {
   alpha <- 1 - level
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
@@ -30,30 +30,49 @@ summary_linearFE_covar <- function(fit, parm, level = 0.95, null = 0) {
   m <- length(fit$coefficient$gamma)
   p <- length(fit$coefficient$beta)
   n <- nrow(fit$data_include)
+  model.method <- fit$method
 
   # Test Statistics
   stat <- (beta - null) / se.beta
 
-  if (fit$method == "Profile Likelihood") {
-    p_value <- 2 * (1 - pnorm(abs(stat)))
-    crit_value <- qnorm(1 - alpha / 2)
-  } else if (fit$method == "Dummy") {
-    df <- n - p - m
-    p_value <- 2 * (1 - pt(abs(stat), df))
-    crit_value <- qt(1 - alpha / 2, df)
-  } else {
-    stop("Reference distribution must be either 'normal' or 't'")
+  if (alternative == "two.sided") {
+    p_value <- switch(model.method,
+                      "Profile Likelihood" = 2 * (1 - pnorm(abs(stat))),
+                      "Dummy" = 2 * (1 - pt(abs(stat), df = n - p - m)))
+    crit_value <- ifelse(model.method == "Profile Likelihood", qnorm(1 - alpha / 2),
+                         qt(1 - alpha / 2, df = n - p - m))
+    lower_bound <- beta - crit_value * se.beta
+    upper_bound <- beta + crit_value * se.beta
+  }
+  else if (alternative == "greater") {
+    p_value <- switch(model.method,
+                      "Profile Likelihood" = 1 - pnorm(stat),
+                      "Dummy" = 1 - pt(stat, df = n - p - m))
+    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(level),
+                           qt(level, df = n - p - m))
+
+    lower_bound <- beta - crit_value * se.beta
+    upper_bound <- Inf
+  }
+  else if (alternative == "less") {
+    p_value <- switch(model.method,
+                      "Profile Likelihood" = pnorm(stat),
+                      "Dummy" = pt(stat, df = n - p - m))
+    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(level),
+                         qt(level, df = n - p - m))
+
+    lower_bound <- -Inf
+    upper_bound <- beta + crit_value * se.beta
+  }
+  else {
+    stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
   }
 
   p_value <- format.pval(p_value, digits = 7, eps = .Machine$double.eps)
 
-  # Confidence Interval
-  lower_bound <- beta - crit_value * se.beta
-  upper_bound <- beta + crit_value * se.beta
-
   result <- data.frame(beta = beta, se.beta = se.beta, stat = stat, p_value = p_value,
                        lower_bound = lower_bound, upper_bound = upper_bound)
-  colnames(result) <- c("Estimate", "Std.Error", "Stat", "p", "CI.Lower", "CI.Upper")
+  colnames(result) <- c("Estimate", "Std.Error", "Stat", "p value", "CI.Lower", "CI.Upper")
 
   if (missing(parm)) {
     ind <- 1:length(Z.char)

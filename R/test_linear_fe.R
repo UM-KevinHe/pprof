@@ -1,18 +1,16 @@
-test_linear_fe <- function(fit, parm, level = 0.95, null = "median",
-                           tail = "two", direction = "smaller") {
+test_linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative = "two.sided") {
   alpha <- 1 - level
 
   data <- fit$data_include
   ID.char <- fit$char_list$ID.char
   gamma <- fit$coefficient$gamma
   se.gamma <- sqrt(fit$variance$gamma)
-  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, ID.char]), length)
-  n <- nrow(fit$data_include)
   gamma.null <- ifelse(null=="median", median(gamma),
                        ifelse(null=="mean", sum(n.prov*gamma)/n,
                               ifelse(class(null)=="numeric", null[1],
                                      stop("Argument 'null' NOT as required!",call.=F))))
 
+  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, ID.char]), length)
   m <- length(fit$coefficient$gamma)
   p <- length(fit$coefficient$beta)
   n <- nrow(fit$data_include)
@@ -20,38 +18,28 @@ test_linear_fe <- function(fit, parm, level = 0.95, null = "median",
   # test statistics
   stat <- (gamma - gamma.null)/se.gamma
 
-  if (fit$method == "Profile Likelihood") {
-    p <- pnorm(stat, lower=F)
-  }
-  else if (fit$method == "Dummy") {
-    df <- n - m - p
-    p <- pt(stat, df, lower = F)
-  }
+  prob <- switch(fit$method,
+              "Profile Likelihood" = pnorm(stat, lower=F),
+              "Dummy" = pt(stat, df = n - m - p, lower = F))
 
-
-  if (tail == "two") {
-    flag <- ifelse(p < alpha/2, 1, ifelse(p <= 1-alpha/2, 0, -1))
-    p_value <- 2 * pmin(p, 1-p)
+  if (alternative == "two.sided") {
+    flag <- ifelse(prob < alpha/2, 1, ifelse(prob <= 1-alpha/2, 0, -1))
+    p_value <- 2 * pmin(prob, 1-prob)
   }
-  else if (tail == "one") {
-    if (direction == "larger") {
-      p_value <- p
-      flag <- ifelse(p < alpha, 1, 0)
-    }
-    else if (direction == "smaller") {
-      p_value <- 1 - p
-      flag <- ifelse(1-p < alpha, -1, 0)
-    }
-    else {
-      stop("Argument 'direction' must be either 'smaller' or 'larger' for one-tail tests.")
-    }
+  else if (alternative == "greater") {
+    flag <- ifelse(prob < alpha, 1, 0)
+    p_value <- prob
+  }
+  else if (alternative == "less") {
+    flag <- ifelse(1 - prob < alpha, -1, 0)
+    p_value <- 1 - prob
   }
   else {
-    stop("Argument 'tail' must be either 'one' or 'two'.")
+    stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'")
   }
 
   result <- data.frame(flag = factor(flag), p = p_value, stat = stat, Std.Error = se.gamma)
-  colnames(result) <- c("flag", "p", "stat", "Std.Error")
+  colnames(result) <- c("flag", "p value", "stat", "Std.Error")
 
   if (missing(parm)) {return(result)}
   else {

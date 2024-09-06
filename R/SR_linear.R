@@ -44,11 +44,11 @@ SR_linear <- function(fit, stdz = "indirect", null = "median") {
 
   # linear RE
   if (class(fit) == "linear_re") {
-    alpha.prov = fit$coefficient$alpha
+    alpha.prov <- fit$coefficient$RE
     if ("indirect" %in% stdz) {
       n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
 
-      Exp <- rep(fit$coefficient$mu, n) + Z_beta
+      Exp <- Z_beta
       Exp.indirect_provider <- sapply(split(Exp, fit$prov), sum)
       Obs.indirect_provider <- sapply(split(fit$prediction, fit$prov), sum)
 
@@ -61,10 +61,9 @@ SR_linear <- function(fit, stdz = "indirect", null = "median") {
     }
 
     if ("direct" %in% stdz) {
-      mu = as.vector(fit$coefficient$mu)
       Obs.direct_provider <- sum(fit$observation)
       Exp.direct <- function(alpha){
-        sum(mu + alpha + Z_beta)
+        sum(alpha + Z_beta)
       }
       Exp.direct_provider <- sapply(alpha.prov, Exp.direct)
       direct_stdz.diff <- matrix((Exp.direct_provider - Obs.direct_provider)/n)

@@ -28,8 +28,8 @@
 #' @exportS3Method confint linear_fe
 #'
 
-confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR"), null = "median",
-                              stdz = "indirect", tail = "two", direction = "smaller") {
+confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR"),
+                              null = "median", stdz = "indirect", alternative = "two.sided") {
   return_ls <- list()
 
   alpha <- 1 - level
@@ -49,49 +49,27 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR")
   gamma <- fit$coefficient$gamma
   se.gamma <- sqrt(fit$variance$gamma)
 
-
-  if (tail == "two") {
-    if (fit$method == "Profile Likelihood") {
-      crit_value <- qnorm(1 - alpha / 2)
-    } else if (fit$method == "Dummy") {
-      df <- n - m - p
-      crit_value <- qt(1 - alpha / 2, df)
-    }
-
+  if (alternative == "two.sided") {
+    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha / 2),
+                         crit_value <- qt(1 - alpha / 2, df = n - m - p))
     U_gamma <- gamma + crit_value * se.gamma
     L_gamma <- gamma - crit_value * se.gamma
   }
-  else if (tail == "one") {
-    if (direction == "smaller") {
-      if (fit$method == "Profile Likelihood") {
-        crit_value <- qnorm(1 - alpha)
-      } else if (fit$method == "Dummy") {
-        df <- n - m - p
-        crit_value <- qt(1 - alpha, df)
-      }
-
-      U_gamma <- Inf
-      L_gamma <- gamma - crit_value * se.gamma
-    }
-    else if (direction == "larger") {
-      if (fit$method == "Profile Likelihood") {
-        crit_value <- qnorm(1 - alpha)
-      } else if (fit$method == "Dummy") {
-        df <- n - m - p
-        crit_value <- qt(1 - alpha, df)
-      }
-
-      U_gamma <- gamma + crit_value * se.gamma
-      L_gamma <- -Inf
-    }
-    else {
-      stop("Argument 'direction' must be either 'smaller' or 'larger' for one-tail tests.")
-    }
+  else if (alternative == "greater") {
+    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha),
+                         crit_value <- qt(1 - alpha, df = n - m - p))
+    U_gamma <- Inf
+    L_gamma <- gamma - crit_value * se.gamma
+  }
+  else if (alternative == "less") {
+    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha),
+                         crit_value <- qt(1 - alpha, df = n - m - p))
+    U_gamma <- gamma + crit_value * se.gamma
+    L_gamma <- -Inf
   }
   else {
-    stop("Argument 'tail' must be either 'one' or 'two'.")
+    stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
   }
-
 
   CI_gamma <- data.frame(gamma = gamma, gamma.Lower = L_gamma, gamma.Upper = U_gamma)
   colnames(CI_gamma) <- c("gamma", "gamma.Lower", "gamma.Upper")
@@ -102,11 +80,10 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR")
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-
     if (class(parm) == class(data[, fit$char_list$ID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
-      stop("Argument 'parm' includes invalid elements!")
+      stop("Argument 'parm' includes invalid elements.")
     }
   }
 
@@ -117,7 +94,7 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR")
     if ("indirect" %in% stdz) {
       SR <- SR_linear(fit, stdz = "indirect", null)
 
-      if (tail == "two") {
+      if (alternative == "two.sided") {
         L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
         L.prov <- sapply(split(L.obs, fit$prov), sum)
         L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
@@ -126,27 +103,22 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR")
         U.prov <- sapply(split(U.obs, fit$prov), sum)
         U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
       }
-      else if (tail == "one") {
-        if (direction == "smaller") {
-          L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
-          L.prov <- sapply(split(L.obs, fit$prov), sum)
-          L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
+      else if (alternative == "greater") {
+        L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
+        L.prov <- sapply(split(L.obs, fit$prov), sum)
+        L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
 
-          U_indirect <- Inf
-        }
-        else if (direction == "larger") {
-          U.obs <- rep(U_gamma, n.prov) + fit$linear_pred
-          U.prov <- sapply(split(U.obs, fit$prov), sum)
-          U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
+        U_indirect <- Inf
+      }
+      else if (alternative == "less") {
+        U.obs <- rep(U_gamma, n.prov) + fit$linear_pred
+        U.prov <- sapply(split(U.obs, fit$prov), sum)
+        U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
 
-          L_indirect <- -Inf
-        }
-        else {
-          stop("Argument 'direction' must be either 'smaller' or 'larger' for one-tail tests.")
-        }
+        L_indirect <- -Inf
       }
       else {
-        stop("Argument 'tail' must be either 'one' or 'two'.")
+        stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
       }
 
       CI_indirect <- data.frame(SR = SR$indirect.difference, indirect.Lower = L_indirect, indirect.Upper = U_indirect)
@@ -162,32 +134,27 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR")
         sum(gamma + fit$linear_pred)
       }
 
-      if (tail == "two") {
+      if (alternative == "two.sided") {
         L.prov <- sapply(L_gamma, Exp.direct)
         L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
 
         U.prov <- sapply(U_gamma, Exp.direct)
         U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
       }
-      else if (tail == "one") {
-        if (direction == "smaller") {
-          L.prov <- sapply(L_gamma, Exp.direct)
-          L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
+      else if (alternative == "greater") {
+        L.prov <- sapply(L_gamma, Exp.direct)
+        L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
 
-          U_direct <- Inf
-        }
-        else if (direction == "larger") {
-          U.prov <- sapply(U_gamma, Exp.direct)
-          U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
+        U_direct <- Inf
+      }
+      else if (alternative == "less") {
+        U.prov <- sapply(U_gamma, Exp.direct)
+        U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
 
-          L_direct <- -Inf
-        }
-        else {
-          stop("Argument 'direction' must be either 'smaller' or 'larger' for one-tail tests.")
-        }
+        L_direct <- -Inf
       }
       else {
-        stop("Argument 'tail' must be either 'one' or 'two'.")
+        stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
       }
 
       CI_direct <- data.frame(SR = SR$direct.difference, direct.Lower = L_direct, direct.Upper = U_direct)

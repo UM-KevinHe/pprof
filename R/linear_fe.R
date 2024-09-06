@@ -61,9 +61,9 @@ linear_fe <- function(Y, Z, ID, Rcpp = TRUE){
     sigma_hat_sq <- sum(residuals^2)/(n - m - p)
 
     # Variance
-    varcor_beta <- matrix(sigma_hat_sq * solve(t(Z)%*%bdiag(Q)%*%Z), ncol = p, nrow = p)
-    rownames(varcor_beta) <- Z.char
-    colnames(varcor_beta) <- Z.char
+    varcov_beta <- matrix(sigma_hat_sq * solve(t(Z)%*%bdiag(Q)%*%Z), ncol = p, nrow = p)
+    rownames(varcov_beta) <- Z.char
+    colnames(varcov_beta) <- Z.char
 
     var_gamma <- matrix(sigma_hat_sq/n.prov, ncol = 1)
     rownames(var_gamma) <- names(n.prov)
@@ -204,7 +204,7 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
       Z <- model.matrix(reformulate(Z.char), Z)[, -1, drop = FALSE]
     }
     else {
-      stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ID.char, or (3) Y, Z, and ID.", call.=FALSE)
+      stop("Insufficient or incompatible arguments provided. Please provide either (1) formula, data and ID.char, (2) data, Y.char, Z.char, and ID.char, or (3) Y, Z, and ID.", call.=FALSE)
     }
 
     data <- as.data.frame(cbind(Y, ID, Z))
@@ -242,6 +242,8 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
 
     # Prediction
     linear_pred <- Z %*% beta
+    colnames(linear_pred) <- "Linear Predictor"
+    rownames(linear_pred) <- seq_len(nrow(linear_pred))
     gamma.obs <- rep(gamma.prov, n.prov)
     pred <- gamma.obs + linear_pred
     colnames(pred) <- "Prediction"
@@ -252,16 +254,16 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
     sigma_hat_sq <- sum(residuals^2)/(n - m - p)
 
     # Variance
-    varcor_beta <- matrix(sigma_hat_sq * solve(t(Z)%*%bdiag(Q)%*%Z), ncol = p, nrow = p)
-    rownames(varcor_beta) <- Z.char
-    colnames(varcor_beta) <- Z.char
+    varcov_beta <- matrix(sigma_hat_sq * solve(t(Z)%*%bdiag(Q)%*%Z), ncol = p, nrow = p)
+    rownames(varcov_beta) <- Z.char
+    colnames(varcov_beta) <- Z.char
 
     var_gamma <- matrix(sigma_hat_sq/n.prov, ncol = 1)
     rownames(var_gamma) <- names(n.prov)
     colnames(var_gamma) <- "Variance.Gamma"
 
     variance <- list()
-    variance$beta <- varcor_beta
+    variance$beta <- varcov_beta
     variance$gamma <- var_gamma
 
     char_list <- list(Y.char = Y.char,
@@ -339,18 +341,17 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
 
     # Variance
     sigma_hat_sq <- sum$sigma^2
-    X <- model.matrix(fit_lm)
-    varcor <- sigma_hat_sq * solve(t(X)%*%X)
-    varcor_beta <- matrix(varcor[(m+1):(m+p), (m+1):(m+p)], ncol = p, nrow = p)
-    rownames(varcor_beta) <- Z.char
-    colnames(varcor_beta) <- Z.char
+    varcov <- sigma_hat_sq * solve(t(X.model)%*%X.model)
+    varcov_beta <- matrix(varcov[(m+1):(m+p), (m+1):(m+p)], ncol = p, nrow = p)
+    rownames(varcov_beta) <- Z.char
+    colnames(varcov_beta) <- Z.char
 
-    var_gamma <- matrix(diag(varcor)[1:m], ncol = 1)
+    var_gamma <- matrix(diag(varcov)[1:m], ncol = 1)
     rownames(var_gamma) <- names(n.prov)
     colnames(var_gamma) <- "Variance.Gamma"
 
     variance <- list()
-    variance$beta <- varcor_beta
+    variance$beta <- varcov_beta
     variance$gamma <- var_gamma
 
     # Prediction
@@ -363,6 +364,8 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
     colnames(pred) <- "Prediction"
     rownames(pred) <- seq_len(nrow(pred))
     linear_pred <- Z %*% beta
+    colnames(linear_pred) <- "Linear Predictor"
+    rownames(linear_pred) <- seq_len(nrow(linear_pred))
 
     char_list <- list(Y.char = Y.char,
                       ID.char = ID.char,
