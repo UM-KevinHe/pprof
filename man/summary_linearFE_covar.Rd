@@ -4,18 +4,26 @@
 \alias{summary_linearFE_covar}
 \title{Provide the summary statistics for covariate estimates}
 \usage{
-summary_linearFE_covar(fit, parm, level = 0.95, ref.dis = "normal", null = 0)
+summary_linearFE_covar(
+  fit,
+  parm,
+  level = 0.95,
+  null = 0,
+  alternative = "two.sided"
+)
 }
 \arguments{
 \item{fit}{an object as output of \code{linear_fe} function.}
 
 \item{parm}{a character vector specifies a subset of covariates. All covariates are included by default.}
 
-\item{level}{confidence level used for constructing confidence intervals. Defaulting to 0.95.}
+\item{level}{confidence level used for constructing confidence intervals. Default is 0.95.}
 
 \item{null}{the null value of the covariate estimate that requires testing. (e.g. test \eqn{H_0: \beta = 0})}
 
-\item{...}{}
+\item{alternative}{a character string specifies the alternative hypothesis.
+Must be one of \code{"two.sided"}, \code{"less"}, or \code{"greater"}.
+Default is \code{"two.sided"}.}
 }
 \value{
 a dataframe containing summary statistics for covariate estimates

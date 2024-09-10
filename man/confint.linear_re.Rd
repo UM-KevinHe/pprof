@@ -9,8 +9,8 @@
   parm,
   level = 0.95,
   option = c("alpha", "SR"),
-  null = "median",
-  stdz = "indirect"
+  stdz = "indirect",
+  alternative = "two.sided"
 )
 }
 \arguments{

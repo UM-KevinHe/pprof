@@ -8,10 +8,9 @@
   fit,
   parm,
   level = 0.95,
-  ref.dis = "normal",
   option = c("gamma", "SR"),
-  null = "median",
-  stdz = "indirect"
+  stdz = "indirect",
+  alternative = "two.sided"
 )
 }
 \arguments{

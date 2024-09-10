@@ -29,7 +29,7 @@
 #'
 
 confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SR"),
-                              null = "median", stdz = "indirect", alternative = "two.sided") {
+                              stdz = "indirect", alternative = "two.sided") {
   return_ls <- list()
 
   alpha <- 1 - level

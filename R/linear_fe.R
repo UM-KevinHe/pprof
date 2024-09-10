@@ -382,10 +382,10 @@ linear_fe.complete <- function(formula = NULL, data = NULL,
   result <- structure(list(coefficient = coefficient,
                            variance = variance,
                            sigma = sqrt(sigma_hat_sq),
-                           linear_pred = linear_pred,
                            prediction = pred,
                            observation = Y,
                            residuals = residuals,
+                           linear_pred = linear_pred,
                            prov = data[, ID.char]),
                       class = "linear_fe")  #define a list for prediction
 

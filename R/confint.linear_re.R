@@ -29,7 +29,7 @@
 #'
 
 confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR"),
-                              null = "median", stdz = "indirect") {
+                              stdz = "indirect", alternative = "two.sided") {
   return_ls <- list()
 
   alpha <- 1 - level
@@ -43,8 +43,8 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR")
   Y.char <- fit$char_list$Y.char
   ID.char <- fit$char_list$ID.char
   Z.char <- fit$char_list$Z.char
-  prov.name <- rownames(fit$coefficient$alpha)
-  mu <- fit$coefficient$mu
+  prov.name <- rownames(fit$coefficient$RE)
+  REcoef <- fit$coefficient$RE
 
   var_alpha <- fit$variance$alpha
   sigma_sq <- fit$sigma^2
@@ -52,12 +52,30 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR")
   R_i <- as.vector(var_alpha) / (as.vector(var_alpha) + as.vector(sigma_sq) / n.prov)
 
   se.alpha <- sqrt(R_i * sigma_sq / n.prov)
-  crit_value <- qnorm(1 - alpha / 2)
 
-  L_alpha <- fit$coefficient$alpha - crit_value * se.alpha
-  U_alpha <- fit$coefficient$alpha + crit_value * se.alpha
+  if (alternative == "two.sided") {
+    crit_value <- qnorm(1 - alpha / 2)
 
-  CI_alpha <- data.frame(alpha = fit$coefficient$alpha, alpha.Lower = L_alpha, alpha.Upper = U_alpha)
+    U_alpha <- REcoef + crit_value * se.alpha
+    L_alpha <- REcoef - crit_value * se.alpha
+  }
+  else if (alternative == "greater") {
+    crit_value <- qnorm(1 - alpha)
+
+    U_alpha <- Inf
+    L_alpha <- REcoef - crit_value * se.alpha
+  }
+  else if (alternative == "less") {
+    crit_value <- qnorm(1 - alpha)
+
+    U_alpha <- REcoef + crit_value * se.alpha
+    L_alpha <- -Inf
+  }
+  else {
+    stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'")
+  }
+
+  CI_alpha <- data.frame(alpha = REcoef, alpha.Lower = L_alpha, alpha.Upper = U_alpha)
   colnames(CI_alpha) <- c("Estimate", "alpha.Lower", "alpha.Upper")
 
   if (missing(parm)) {
@@ -81,13 +99,32 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR")
     if ("indirect" %in% stdz) {
       SR <- SR_linear(fit, stdz = "indirect")
 
-      L.obs <- rep(mu,n) + rep(L_alpha, n.prov) + fit$linear_pred
-      L.prov <- sapply(split(L.obs, fit$prov), sum)
-      L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
+      if (alternative == "two.sided") {
+        L.obs <- rep(L_alpha, n.prov) + fit$linear_pred
+        L.prov <- sapply(split(L.obs, fit$prov), sum)
+        L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
 
-      U.obs <- rep(mu,n) + rep(U_alpha, n.prov) + fit$linear_pred
-      U.prov <- sapply(split(U.obs, fit$prov), sum)
-      U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
+        U.obs <- rep(U_alpha, n.prov) + fit$linear_pred
+        U.prov <- sapply(split(U.obs, fit$prov), sum)
+        U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
+      }
+      else if (alternative == "greater") {
+        L.obs <- rep(L_alpha, n.prov) + fit$linear_pred
+        L.prov <- sapply(split(L.obs, fit$prov), sum)
+        L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
+
+        U_indirect <- Inf
+      }
+      else if (alternative == "less") {
+        U.obs <- rep(U_alpha, n.prov) + fit$linear_pred
+        U.prov <- sapply(split(U.obs, fit$prov), sum)
+        U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
+
+        L_indirect <- -Inf
+      }
+      else {
+        stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'")
+      }
 
       CI_indirect <- data.frame(SR = SR$indirect.difference, indirect.Lower = L_indirect, indirect.Upper = U_indirect)
       colnames(CI_indirect) <- c("Indirect.Difference", "indirect.Lower", "indirect.Upper")
@@ -98,16 +135,33 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR")
     if ("direct" %in% stdz) {
       SR <- SR_linear(fit, stdz = "direct")
 
-      mu = as.vector(mu)
       Exp.direct <- function(alpha){
-        sum(mu + alpha + fit$linear_pred)
+        sum(alpha + fit$linear_pred)
       }
 
-      L.prov <- sapply(L_alpha, Exp.direct)
-      L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
+      if (alternative == "two.sided") {
+        L.prov <- sapply(L_alpha, Exp.direct)
+        L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
 
-      U.prov <- sapply(U_alpha, Exp.direct)
-      U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
+        U.prov <- sapply(U_alpha, Exp.direct)
+        U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
+      }
+      else if (alternative == "greater") {
+        L.prov <- sapply(L_alpha, Exp.direct)
+        L_direct <- (L.prov - SR$OE$OE_direct$Obs)/n
+
+        U_direct <- Inf
+      }
+      else if (alternative == "less") {
+        U.prov <- sapply(U_alpha, Exp.direct)
+        U_direct <- (U.prov - SR$OE$OE_direct$Obs)/n
+
+        L_direct <- -Inf
+      }
+      else {
+        stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'")
+      }
+
 
       CI_direct <- data.frame(SR = SR$direct.difference, direct.Lower = L_direct, direct.Upper = U_direct)
       colnames(CI_direct) <- c("Direct.Difference", "direct.Lower", "direct.Upper")

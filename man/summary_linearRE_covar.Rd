@@ -4,7 +4,7 @@
 \alias{summary_linearRE_covar}
 \title{Provide the summary statistics for covariate estimates}
 \usage{
-summary_linearRE_covar(fit, parm, level = 0.95, null = 0)
+summary_linearRE_covar(fit, parm, level = 0.95, null = 0, ref.dis = "normal")
 }
 \arguments{
 \item{fit}{an object as output of \code{linear_re} function.}

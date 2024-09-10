@@ -19,6 +19,66 @@
 #'
 #'
 #' @export
+summary_linearRE_covar.nmle <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided") {
+  alpha <- 1 - level
+
+  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
+  if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_re'!",call.=F)
+
+  covar_char <- c("(intercept)", fit$char_list$Z.char)
+
+  FE_est <- fit$coefficient$FE
+  se.FE <- sqrt(diag(fit$variance$FE))
+  stat <- (FE_est - null) / se.FE
+
+  n <- nrow(fit$data_includ)
+  df <- n - length(fit$coefficient$FE) - length(fit$coefficient$RE) + 1
+
+  if (alternative == "two.sided") {
+    p_value <- 2 * (1 - pt(abs(stat), df = df))
+    crit_value <- qt(1 - alpha / 2, df = df)
+    lower_bound <- FE_est - crit_value * se.FE
+    upper_bound <- FE_est + crit_value * se.FE
+  }
+  else if (alternative == "greater") {
+    p_value <- 1 - pt(abs(stat), df = df)
+    crit_value <- qt(1 - alpha, df = df)
+
+    lower_bound <- FE_est - crit_value * se.FE
+    upper_bound <- Inf
+  }
+  else if (alternative == "less") {
+    p_value <- pt(abs(stat), df = df)
+    crit_value <- qt(1 - alpha, df = df)
+
+    lower_bound <- -Inf
+    upper_bound <- FE_est + crit_value * se.FE
+  }
+  else {
+    stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
+  }
+
+  p_value <- format.pval(p_value, digits = 7, eps = .Machine$double.eps)
+
+  result <- data.frame(FE = FE_est, se.FE = se.FE, stat = stat, p_value = p_value,
+                       lower_bound = lower_bound, upper_bound = upper_bound)
+  colnames(result) <- c("Estimate", "Std.Error", "Stat", "p value", "CI.Lower", "CI.Upper")
+
+  if (missing(parm)) {
+    ind <- 1:length(covar_char)
+  } else if (is.character(parm)) {
+    ind <- which(covar_char %in% parm)
+  } else if (is.numeric(parm) & max(abs(as.integer(parm) - parm)) == 0 & !(0 %in% parm)) {
+    ind <- parm
+  } else {
+    stop("Argument 'parm' includes invalid elements!")
+  }
+
+  result <- result[ind, ]
+  return(result)
+}
+
+
 summary_linearRE_covar <- function(fit, parm, level = 0.95, null = 0, ref.dis = "normal") {
   alpha <- 1 - level
 
