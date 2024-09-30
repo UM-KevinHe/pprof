@@ -1,24 +1,38 @@
-#=== SUMMARY STATISTICS FOR COVARIATE ESTIMATES =================================
-#' Provide the summary statistics for covariate estimates
+#' Result Summaries of Covariate Estimates
 #'
-#' @param fit an object as output of \code{linear_fe} function.
+#' Provide the summary statistics for the covariate estimates for a fixed/random effect linear model.
 #'
-#' @param parm a character vector specifies a subset of covariates. All covariates are included by default.
+#' @param fit a model fitted from \code{linear_fe} or \code{linear_re}.
+#' @param parm Specifies a subset of covariates for which the result summaries should be output.
+#' By default, all covariates are included.
+#' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
+#' The default value is 0.95.
+#' @param null a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.
+#' @param alternative a character string specifying the alternative hypothesis, must be one of
+#' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 #'
-#' @param level confidence level used for constructing confidence intervals. Default is 0.95.
+#' @return A data frame containing summary statistics for covariate estimates, with the following columns:
+#' \item{Estimate}{the estimates of covariate coefficients.}
+#' \item{Std.Error}{the standard error of the estimate.}
+#' \item{Stat}{the test statistic.}
+#' \item{p value}{the p-value for the hypothesis test.}
+#' \item{CI.upper}{the lower bound of the confidence interval.}
+#' \item{CI.lower}{the upper bound of the confidence interval.}
 #'
-#' @param null the null value of the covariate estimate that requires testing. (e.g. test \eqn{H_0: \beta = 0})
+#' @examples
+#' data(ExampleDataLinear)
+#' Y <- ExampleDataLinear$Y
+#' Z <- ExampleDataLinear$Z
+#' ID <- ExampleDataLinear$ID
 #'
-#' @param alternative a character string specifies the alternative hypothesis.
-#'  Must be one of \code{"two.sided"}, \code{"less"}, or \code{"greater"}.
-#'  Default is \code{"two.sided"}.
-#'
-#' @return a dataframe containing summary statistics for covariate estimates
+#' fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+#' summary(fit_fe)
 #'
 #' @importFrom stats pnorm qnorm pt qt
 #'
-#' @export
-summary_linearFE_covar <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided") {
+#' @exportS3Method summary linear_fe
+
+summary.linear_fe <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided") {
   alpha <- 1 - level
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)

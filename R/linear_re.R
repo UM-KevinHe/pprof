@@ -1,90 +1,87 @@
-#' @importFrom lme4 lmer
-#' @importFrom nlme lme
-linear_re <- function(Y, Z, ID) {
-  if (missing(Y) || missing(Z) || missing(ID))
-    stop("Arguments 'Y', 'Z', and 'ID' are all required!", call.=FALSE)
-
-  if (length(Y) != length(ID) | length(ID) != nrow(Z)){
-    stop("Dimensions of the input data do not match!!", call.=F)
-  }
-
-  data <- as.data.frame(cbind(Y, ID, Z))
-  Y.char <- colnames(data)[1]
-  prov.char <- colnames(data)[2]
-  Z.char <- colnames(Z)
-  data <- data[order(factor(data[,prov.char])),]
-
-  n.prov <- sapply(split(data[, Y.char], data[, prov.char]), length)
-  m <- length(n.prov) # number of providers
-  n <- sum(n.prov) # number of observations
-  p <- length(Z.char) # number of covariates
-
-  Z <- as.matrix(data[,Z.char])
-  Y <- as.matrix(data[, Y.char, drop = F])
-  ID <- as.matrix(data[, prov.char, drop = F])
-
-  formula <- as.formula(paste(Y.char, "~ (1|", prov.char, ")+", paste0(Z.char, collapse = "+")))
-  fit_re <- lmer(formula, data)
-
-  # Coefficients
-  beta <- matrix(fixef(fit_re)[2:length(fixef(fit_re))], ncol=1)
-  colnames(beta) <- "beta"
-  rownames(beta) <- Z.char
-
-  mu <- matrix(fixef(fit_re)[1])
-  colnames(mu) <- "mu"
-  rownames(mu) <- "intercept"
-
-  alpha <- as.matrix(ranef(fit_re)$ID, ncol = 1)
-  colnames(alpha) <- "alpha"
-  rownames(alpha) <- names(n.prov)
-
-  coefficient <- list()
-  coefficient$beta <- beta
-  coefficient$mu <- mu
-  coefficient$alpha <- alpha
-
-  # Variance
-  sum = summary(fit_re)
-  var_alpha = matrix(as.data.frame(sum$varcor)[1,"sdcor"]^2)
-  colnames(var_alpha) <- "Variance.Alpha"
-  rownames(var_alpha) <- "ID"
-
-  var_beta = matrix(as.data.frame(sum$coefficients)[2:(length(Z.char)+1),2]^2)
-  colnames(var_beta) <- "Variance.Beta"
-  rownames(var_beta) <- Z.char
-
-  var_mu = matrix(as.data.frame(sum$coefficients)[1,2]^2)
-  colnames(mu) = "Variance.Mu"
-  rownames(mu) = "Intercept"
-
-  # prediction
-  linear_pred <- Z %*% beta
-  alpha.obs = rep(alpha, n.prov)
-  pred = rep(mu,n) + alpha.obs + linear_pred
-
-  char_list <- list(Y.char = Y.char,
-                    prov.char = prov.char,
-                    Z.char = Z.char)
-
-  result <- structure(list(coefficient = coefficient,
-                           prediction = pred,
-                           linear_pred = linear_pred,
-                           observation = Y,
-                           prov = data[, prov.char]),
-                      class = "linear_re")  #define a list for prediction
-
-  result$data_include <- data
-  result$char_list <- char_list
-
-  return(result)
-}
+#' Main Function for Fitting the Random Effect Linear Model
+#'
+#' Fit a random effect linear model via \code{\link{lmer}} from the \code{lme4} package.
+#'
+#' @param formula a two-sided formula object describing the model to be fitted,
+#' with the response variable on the left of a ~ operator and covariates on the right,
+#' separated by + operators. The random effect of the grouping identifier is specified using \code{(1 | )}.
+#' @param data a data frame containing the variables named in the `formula`,
+#' or the columns specified by `Y.char`, `Z.char`, and `ID.char`.
+#' @param Y.char a character string specifying the column name of the response variable in the `data`.
+#' @param Z.char a character vector specifying the column names of the covariates in the `data`.
+#' @param ID.char a character string specifying the column name of the grouping identifier in the `data`.
+#' @param Y a numeric vector representing the response variable.
+#' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
+#' @param ID a numeric vector representing the grouping identifier.
+#' @param \dots additional arguments passed to \code{\link{lmer}} for further customization.
+#'
+#' @return A list of objects with S3 class \code{"random_re"}:
+#' \item{coefficient}{a list containing the estimated coefficients:
+#'   \code{FE}, the fixed effects for each predictor and the intercept, and \code{RE}, the random effects for each group.}
+#' \item{variance}{a list containing the variance estimates:
+#'   \code{FE}, the variance-covariance matrix of the fixed effect coefficients, and \code{RE}, the variance of the random effects.}
+#' \item{sigma}{the residual standard error.}
+#' \item{fitted}{the fitted values of each individual.}
+#' \item{observation}{the original response of each individual.}
+#' \item{residuals}{the residuals of each individual, that is response minus fitted values.}
+#' \item{linear_pred}{the linear predictor of each individual.}
+#' \item{data_include}{the data used to fit the model, sorted by the group identifier.
+#' For categorical covariates, this includes the dummy variables created for
+#' all categories except the reference level.}
+#' \item{char_list}{a list of the character vectors representing the column names for
+#' the response variable, covariates, and group identifier.
+#' For categorical variables, the names reflect the dummy variables created for each category.}
+#'
+#' @details
+#' This function is used to fit a random effect linear model of the form:
+#' \deqn{Y_{ij} = \mu + \alpha_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
+#' where \eqn{Y_{ij}} is the outcome for individual \eqn{j} in group \eqn{i},
+#' \eqn{\mu} is the overall intercept, \eqn{\alpha_i} is the random effect for group \eqn{i},
+#' \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
+#'
+#' The model is fitted by overloading the \code{\link{lmer}} function from the \code{lme4} package.
+#' Three different input formats are accepted:
+#' a formula and dataset, where the formula is of the form \code{response ~ covariates + (1 | group)}, with \code{group} representing the group identifier;
+#' a dataset along with the column names of the response, covariates, and group identifier;
+#' or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the group identifier vector \eqn{\boldsymbol{\alpha}}.
+#'
+#' In addition to these input formats, all arguments from the \code{\link{lmer}} function can be modified via `\dots`,
+#' allowing for customization of model fitting options such as controlling the optimization method or adjusting convergence criteria.
+#' By default, the model is fitted using REML (restricted maximum likelihood), but this can be changed by modifying the corresponding argument in \code{lmer}.
+#'
+#' @importFrom lme4 lmer fixef ranef
+#'
+#' @export
+#'
+#' @examples
+#' data(ExampleDataLinear)
+#' Y <- ExampleDataLinear$Y
+#' Z <- ExampleDataLinear$Z
+#' ID <- ExampleDataLinear$ID
+#' data <- data.frame(Y, ID, Z)
+#' Z.char <- colnames(Z)
+#' Y.char <- "Y"
+#' ID.char <- "ID"
+#' formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ (1 | ID)"))
+#'
+#' # Fit random effect linear model using three input formats
+#' fit_re1 <- linear_re(Y = Y, Z = Z, ID = ID)
+#' fit_re2 <- linear_re(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char)
+#' fit_re3 <- linear_re(formula, data)
+#'
+#' @references
+#' Bates D, Maechler M, Bolker B, Walker S (2015). \emph{Fitting Linear Mixed-Effects Models Using lme4}.
+#' Journal of Statistical Software, 67(1), 1-48.
+#' \cr
+#'
 
 
-linear_re.complete <- function(formula = NULL, data = NULL,
+linear_re <- function(formula = NULL, data = NULL,
                       Y = NULL, Z = NULL, ID = NULL,
                       Y.char = NULL, Z.char = NULL, ID.char = NULL, ...) {
   if (!is.null(formula) && !is.null(data)) {
+    message("Input format: formula and data.")
+
     terms <- terms(formula)
     response <- as.character(attr(terms, "variables"))[2]
     predictors <- attr(terms, "term.labels")
@@ -102,6 +99,8 @@ linear_re.complete <- function(formula = NULL, data = NULL,
     fit_re <- lmer(formula, data, ...)
   }
   else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
+    message("Input format: data, Y.char, Z.char, and ID.char.")
+
     if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
     data <- data[order(factor(data[, ID.char])),]
@@ -113,6 +112,8 @@ linear_re.complete <- function(formula = NULL, data = NULL,
     fit_re <- lmer(formula, data, ...)
   }
   else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
+    message("Input format: Y, Z, and ID.")
+
     if (length(Y) != length(ID) | length(ID) != nrow(Z)){
       stop("Dimensions of the input data do not match!!", call.=F)}
 
@@ -190,12 +191,10 @@ linear_re.complete <- function(formula = NULL, data = NULL,
   result <- structure(list(coefficient = coefficient,
                            variance = variance,
                            sigma = sigma,
-                           prediction = pred,
+                           fitted = pred,
                            observation = Y,
                            residuals = res,
-                           linear_pred = linear_pred,
-                           prov = data[, ID.char],
-                           model = fit_re),
+                           linear_pred = linear_pred),
                       class = "linear_re")  #define a list for prediction
 
   result$data_include <- data
@@ -205,125 +204,126 @@ linear_re.complete <- function(formula = NULL, data = NULL,
 }
 
 
-linear_re.nlme <- function(formula = NULL, data = NULL,
-                           Y = NULL, Z = NULL, ID = NULL,
-                           Y.char = NULL, Z.char = NULL, ID.char = NULL, ...) {
-  if (!is.null(formula) && !is.null(data)) {
-    terms <- terms(formula)
-    response <- as.character(attr(terms, "variables"))[2]
-    predictors <- attr(terms, "term.labels")
-
-    RE_term <- predictors[grepl("\\|", predictors)]
-    id_var <- trimws(gsub(".*\\|", "", RE_term))
-
-    Y.char <- response
-    ID.char <- id_var
-    Z.char <- predictors[!grepl("\\|", predictors)]
-    data <- data[order(factor(data[, id_var])),]
-    # Y <- data[, Y.char, drop = F]
-    # Z <- as.matrix(data[, Z.char, drop = F])
-    # ID <- data[, ID.char, drop = F]
-    fe_formula <- reformulate(Z.char, response = Y.char)
-    re_formula <- as.formula(paste("~ 1 |", id_var))
-    fit_re <- lme(fixed = fe_formula, random = re_formula, data = data, ...)
-  }
-  else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
-    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
-      stop("Some of the specified columns are not in the data!", call.=FALSE)
-    data <- data[order(factor(data[, ID.char])),]
-    # Y <- data[, Y.char, drop = F]
-    # Z <- as.matrix(data[, Z.char, drop = F])
-    # ID <- data[, ID.char, drop = F]
-
-    fe_formula <- reformulate(Z.char, response = Y.char)
-    re_formula <- as.formula(paste("~ 1 |", ID.char))
-    fit_re <- lme(fixed = fe_formula, random = re_formula, data = data, ...)
-  }
-  else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
-    if (length(Y) != length(ID) | length(ID) != nrow(Z)){
-      stop("Dimensions of the input data do not match!!", call.=F)}
-
-    data <- as.data.frame(cbind(Y, ID, Z))
-    Y.char <- colnames(data)[1]
-    ID.char <- colnames(data)[2]
-    Z.char <- colnames(Z)
-    data <- data[order(factor(data[,ID.char])),]
-
-    # Z <- as.matrix(data[,Z.char], drop = F)
-    # Y <- as.matrix(data[, Y.char, drop = F])
-    # ID <- as.matrix(data[, ID.char, drop = F])
-
-    fe_formula <- reformulate(Z.char, response = Y.char)
-    re_formula <- as.formula(paste("~ 1 |", ID.char))
-    fit_re <- lme(fixed = fe_formula, random = re_formula, data = data, ...)
-  }
-
-  X.model <- model.matrix(formula(fit_re), data = data)
-  Y <- as.matrix(data[, Y.char, drop = F])
-  ID <- as.matrix(data[, ID.char, drop = F])
-  data <- as.data.frame(cbind(Y, ID, X.model))
-
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
-  m <- length(n.prov) # number of providers
-  n <- sum(n.prov) # number of observations
-  # p <- length(Z.char) # number of covariates
-
-  # Coefficients
-  FE_coefficient <- matrix(fixef(fit_re))
-  colnames(FE_coefficient) <- "Coefficient"
-  rownames(FE_coefficient) <- names(fixef(fit_re))
-
-  RE_coefficient <- as.matrix(ranef(fit_re), ncol = 1)
-  colnames(RE_coefficient) <- "alpha"
-  rownames(RE_coefficient) <- names(n.prov)
-
-  coefficient <- list()
-  coefficient$FE <- FE_coefficient
-  coefficient$RE <- RE_coefficient
-
-  # Variance
-  sum <- summary(fit_re)
-  var_alpha <- matrix(as.numeric(VarCorr(fit_re)[1]))
-  colnames(var_alpha) <- "Variance.Alpha"
-  rownames(var_alpha) <- "ID"
-
-  varcov_FE <- matrix(sum$varFix, ncol = length(FE_coefficient))
-  colnames(varcov_FE) <- colnames(sum$varFix)
-  rownames(varcov_FE) <- rownames(sum$varFix)
-
-  variance <- list()
-  variance$alpha <- var_alpha
-  variance$FE <- varcov_FE
-
-  sigma <- sum$sigma
-
-  # prediction
-  linear_pred <- sum$fitted[, 1, drop = FALSE]
-  colnames(linear_pred) <- "Fixed"
-  pred <- sum$fitted[, 2, drop = FALSE]
-  colnames(pred) <- "prediction"
-  res <- matrix(residuals(fit_re), ncol = 1)
-  colnames(res) <- "Residuals"
-  rownames(res) <- seq_len(nrow(res))
-
-
-  char_list <- list(Y.char = Y.char,
-                    ID.char = ID.char,
-                    Z.char = Z.char)
-
-  result <- structure(list(coefficient = coefficient,
-                           variance = variance,
-                           sigma = sigma,
-                           prediction = pred,
-                           observation = Y,
-                           residuals = res,
-                           linear_pred = linear_pred,
-                           prov = data[, ID.char],
-                           model = fit_re),
-                      class = "linear_re")  #define a list for prediction
-
-  result$data_include <- data
-  result$char_list <- char_list
-
-  return(result)
-}
+#===================COMMENT OUT TO USE LATER=========================
+# linear_re.nlme <- function(formula = NULL, data = NULL,
+#                            Y = NULL, Z = NULL, ID = NULL,
+#                            Y.char = NULL, Z.char = NULL, ID.char = NULL, ...) {
+#   if (!is.null(formula) && !is.null(data)) {
+#     terms <- terms(formula)
+#     response <- as.character(attr(terms, "variables"))[2]
+#     predictors <- attr(terms, "term.labels")
+#
+#     RE_term <- predictors[grepl("\\|", predictors)]
+#     id_var <- trimws(gsub(".*\\|", "", RE_term))
+#
+#     Y.char <- response
+#     ID.char <- id_var
+#     Z.char <- predictors[!grepl("\\|", predictors)]
+#     data <- data[order(factor(data[, id_var])),]
+#     # Y <- data[, Y.char, drop = F]
+#     # Z <- as.matrix(data[, Z.char, drop = F])
+#     # ID <- data[, ID.char, drop = F]
+#     fe_formula <- reformulate(Z.char, response = Y.char)
+#     re_formula <- as.formula(paste("~ 1 |", id_var))
+#     fit_re <- lme(fixed = fe_formula, random = re_formula, data = data, ...)
+#   }
+#   else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
+#     if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+#       stop("Some of the specified columns are not in the data!", call.=FALSE)
+#     data <- data[order(factor(data[, ID.char])),]
+#     # Y <- data[, Y.char, drop = F]
+#     # Z <- as.matrix(data[, Z.char, drop = F])
+#     # ID <- data[, ID.char, drop = F]
+#
+#     fe_formula <- reformulate(Z.char, response = Y.char)
+#     re_formula <- as.formula(paste("~ 1 |", ID.char))
+#     fit_re <- lme(fixed = fe_formula, random = re_formula, data = data, ...)
+#   }
+#   else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
+#     if (length(Y) != length(ID) | length(ID) != nrow(Z)){
+#       stop("Dimensions of the input data do not match!!", call.=F)}
+#
+#     data <- as.data.frame(cbind(Y, ID, Z))
+#     Y.char <- colnames(data)[1]
+#     ID.char <- colnames(data)[2]
+#     Z.char <- colnames(Z)
+#     data <- data[order(factor(data[,ID.char])),]
+#
+#     # Z <- as.matrix(data[,Z.char], drop = F)
+#     # Y <- as.matrix(data[, Y.char, drop = F])
+#     # ID <- as.matrix(data[, ID.char, drop = F])
+#
+#     fe_formula <- reformulate(Z.char, response = Y.char)
+#     re_formula <- as.formula(paste("~ 1 |", ID.char))
+#     fit_re <- lme(fixed = fe_formula, random = re_formula, data = data, ...)
+#   }
+#
+#   X.model <- model.matrix(formula(fit_re), data = data)
+#   Y <- as.matrix(data[, Y.char, drop = F])
+#   ID <- as.matrix(data[, ID.char, drop = F])
+#   data <- as.data.frame(cbind(Y, ID, X.model))
+#
+#   n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+#   m <- length(n.prov) # number of providers
+#   n <- sum(n.prov) # number of observations
+#   # p <- length(Z.char) # number of covariates
+#
+#   # Coefficients
+#   FE_coefficient <- matrix(fixef(fit_re))
+#   colnames(FE_coefficient) <- "Coefficient"
+#   rownames(FE_coefficient) <- names(fixef(fit_re))
+#
+#   RE_coefficient <- as.matrix(ranef(fit_re), ncol = 1)
+#   colnames(RE_coefficient) <- "alpha"
+#   rownames(RE_coefficient) <- names(n.prov)
+#
+#   coefficient <- list()
+#   coefficient$FE <- FE_coefficient
+#   coefficient$RE <- RE_coefficient
+#
+#   # Variance
+#   sum <- summary(fit_re)
+#   var_alpha <- matrix(as.numeric(VarCorr(fit_re)[1]))
+#   colnames(var_alpha) <- "Variance.Alpha"
+#   rownames(var_alpha) <- "ID"
+#
+#   varcov_FE <- matrix(sum$varFix, ncol = length(FE_coefficient))
+#   colnames(varcov_FE) <- colnames(sum$varFix)
+#   rownames(varcov_FE) <- rownames(sum$varFix)
+#
+#   variance <- list()
+#   variance$alpha <- var_alpha
+#   variance$FE <- varcov_FE
+#
+#   sigma <- sum$sigma
+#
+#   # prediction
+#   linear_pred <- sum$fitted[, 1, drop = FALSE]
+#   colnames(linear_pred) <- "Fixed"
+#   pred <- sum$fitted[, 2, drop = FALSE]
+#   colnames(pred) <- "prediction"
+#   res <- matrix(residuals(fit_re), ncol = 1)
+#   colnames(res) <- "Residuals"
+#   rownames(res) <- seq_len(nrow(res))
+#
+#
+#   char_list <- list(Y.char = Y.char,
+#                     ID.char = ID.char,
+#                     Z.char = Z.char)
+#
+#   result <- structure(list(coefficient = coefficient,
+#                            variance = variance,
+#                            sigma = sigma,
+#                            prediction = pred,
+#                            observation = Y,
+#                            residuals = res,
+#                            linear_pred = linear_pred,
+#                            prov = data[, ID.char],
+#                            model = fit_re),
+#                       class = "linear_re")  #define a list for prediction
+#
+#   result$data_include <- data
+#   result$char_list <- char_list
+#
+#   return(result)
+# }

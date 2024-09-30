@@ -2,41 +2,59 @@
 % Please edit documentation in R/confint.linear_fe.R
 \name{confint.linear_fe}
 \alias{confint.linear_fe}
-\title{Provide confidence interval for provider effects or standardization ratios/rates}
+\title{Get Confidence Intervals for Provider Effects or Standardized Measures}
 \usage{
 \method{confint}{linear_fe}(
   fit,
   parm,
   level = 0.95,
-  option = c("gamma", "SR"),
+  option = c("gamma", "SM"),
   stdz = "indirect",
+  null = "median",
   alternative = "two.sided"
 )
 }
 \arguments{
-\item{fit}{an object as output of \code{linear_fe} function.}
+\item{fit}{a model fitted from \code{linear_fe}.}
 
-\item{parm}{specify a subset of which providers are to be given confidence intervals. All providers are included by default.}
+\item{parm}{specifies a subset of providers for which confidence intervals are to be given.
+See \code{parm} argument in \code{\link{SM_output.linear_fe}}.}
 
-\item{level}{confidence level used for constructing confidence intervals. Defaulting to 0.95.}
+\item{level}{the confidence level. The default value is 0.95.}
 
-\item{option}{the confidence interval for the function's output, whether it is for gamma or standardization ratios/rates.
+\item{option}{a character string or a vector specifying whether the
+confidence intervals should be provided for provider effects, standardized measures, or both:
 \itemize{
-\item "gamma": provider effect
-\item "SR": standardization ratios/rates
+\item {\code{"gamma"}} provider effect
+\item {\code{"SM"}} standardized measures
+\item {\code{c("gamma", "SM")}} both provider effects and standardized measures
 }}
 
-\item{stdz}{if option = 'SR', a character string specifying the standardization method. Defaulting to "indirect".
-\itemize{
-\item "indirect": using indirect standardized method
-\item "direct": using direct standardized method
-}}
+\item{stdz}{a character string or a vector specifying the standardization method
+if \code{option} includes \code{"SM"}. See \code{stdz} argument in \code{\link{SM_output.linear_fe}}.}
 
-\item{...}{}
+\item{null}{a character string or a number specifying the population norm for calculating standardized measures
+if \code{option} includes \code{"SM"}. See \code{null} argument in \code{\link{SM_output.linear_fe}}.}
+
+\item{alternative}{a character string specifying the alternative hypothesis, must be one of
+\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
 }
 \value{
-A dataframe containing the point estimate, and lower and upper bounds of the estimate.
+A list of data frames containing the confidence intervals based on the values of \code{option} and \code{stdz}.
+\item{CI.gamma}{Confidence intervals for provider effects if \code{option} includes \code{"gamma"}.}
+\item{CI.indirect}{Confidence intervals for indirect standardized difference if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"indirect"}.}
+\item{CI.direct}{Confidence intervals for direct standardized difference if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"direct"}.}
 }
 \description{
-Provide confidence interval for provider effects or standardization ratios/rates
+Provide confidence interval for provider effects \eqn{\hat{\gamma}} or standardized measures from a fixed effect linear model.
+}
+\examples{
+data(ExampleDataLinear)
+Y <- ExampleDataLinear$Y
+ID <- ExampleDataLinear$ID
+Z <- ExampleDataLinear$Z
+
+fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+confint(fit_fe)
+
 }

@@ -1,0 +1,103 @@
+#' Standardized Measures Output Function
+#'
+#' Provide direct/indirect standardized difference for a random effect linear model.
+#'
+#' @param fit a model fitted from \code{linear_re}.
+#' @param parm specifies a subset of providers for which confidence intervals are to be given.
+#' See `parm` argument in \code{\link{SM_output.linear_fe}}.
+#' @param stdz a character string or a vector specifying the standardization method(s).
+#' The default value is \code{"indirect"}. The possible values are:
+#' \itemize{
+#'   \item{\code{"indirect"}} indirect standardization method.
+#'   \item{\code{"direct"}} direct standardization method.
+#'   \item{\code{c("indirect", "direct")}} outputs both direct and indirect standardized measures.
+#' }
+#'
+#' @return A list containing the standardized differences based on the method(s) specified in `stdz`,
+#' as well as the observed and expected outcomes used to calculate the standardized measures:
+#' \item{indirect.difference}{a data frame of indirect standardized differences, if `stdz` includes \code{"indirect"}.}
+#' \item{direct.difference}{a data frame of direct standardized differences, if `stdz` includes \code{"direct"}.}
+#' \item{OE}{a list of data frames containing the observed and expected outcomes used for calculating standardized measures.}
+#'
+#' @details
+#' This function computes standardized differences for a random effect linear model
+#' using either direct or indirect methods, or both when specified.
+#' The function returns both the standardized differences and the observed and expected outcomes
+#' used for their calculation.
+#'
+#' @examples
+#' data(ExampleDataLinear)
+#' Y <- ExampleDataLinear$Y
+#' Z <- ExampleDataLinear$Z
+#' ID <- ExampleDataLinear$ID
+#'
+#' # Fit a fixed linear effect model
+#' fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+#' SM_output(fit_re)
+#'
+#' @references
+#' He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects.
+#' \emph{Lifetime Data Analysis}, \strong{19}: 490-512.
+#'
+#' @exportS3Method SM_output linear_re
+
+SM_output.linear_re <- function(fit, parm, stdz = "indirect") {
+  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
+  if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_re'!",call.=F)
+  if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
+
+  data <- fit$data_include
+  prov <- data[ ,fit$char_list$ID.char]
+  prov.name <- rownames(fit$coefficient$RE)
+  alpha.prov <- fit$coefficient$RE
+  Z_beta <- fit$linear_pred
+  n <- nrow(fit$data_include)
+
+  return_ls <- list()
+  OE_list <- list()
+
+  if (missing(parm)) {
+    ind <- 1:length(prov.name)
+  } else {
+    if (is.numeric(parm)) {  #avoid "integer" class
+      parm <- as.numeric(parm)
+    }
+    if (class(parm) == class(data[, fit$char_list$ID.char])) {
+      ind <- which(prov.name %in% parm)
+    } else {
+      stop("Argument 'parm' includes invalid elements.")
+    }
+  }
+
+  if ("indirect" %in% stdz) {
+    n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
+
+    Exp <- Z_beta
+    Exp.indirect_provider <- sapply(split(Exp, prov), sum)
+    Obs.indirect_provider <- sapply(split(fit$fitted, prov), sum)
+
+    indirect_stdz.diff <- matrix((Obs.indirect_provider - Exp.indirect_provider)/n.prov)
+    dimnames(indirect_stdz.diff) <- list(rownames(alpha.prov), "Indirect_standardized.difference")
+    return_ls$indirect.difference <- indirect_stdz.diff[ind, ,drop = F]
+
+    OE.df <- data.frame(Obs = Obs.indirect_provider, Exp = Exp.indirect_provider)
+    OE_list$OE_indirect <- OE.df[ind, ]
+  }
+
+  if ("direct" %in% stdz) {
+    Obs.direct_provider <- sum(fit$observation)
+    Exp.direct <- function(alpha){
+      sum(alpha + Z_beta)
+    }
+    Exp.direct_provider <- sapply(alpha.prov, Exp.direct)
+    direct_stdz.diff <- matrix((Exp.direct_provider - Obs.direct_provider)/n)
+    dimnames(direct_stdz.diff) <- list(rownames(alpha.prov), "Direct_standardized.difference")
+    return_ls$direct.difference <- direct_stdz.diff[ind, , drop = F]
+
+    OE.df <- data.frame(Obs = Obs.direct_provider, Exp = Exp.direct_provider)
+    OE_list$OE_direct <- OE.df[ind, ]
+  }
+
+  return_ls$OE <- OE_list
+  return(return_ls)
+}

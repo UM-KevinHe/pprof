@@ -2,10 +2,97 @@
 % Please edit documentation in R/linear_fe.R
 \name{linear_fe}
 \alias{linear_fe}
-\title{Main Function for Fitting the Fixed Effect Linear Model using profile likelihood}
+\title{Main Function for Fitting the Fixed Effect Linear Model}
 \usage{
-linear_fe(Y, Z, ID, Rcpp = TRUE)
+linear_fe(
+  formula = NULL,
+  data = NULL,
+  Y = NULL,
+  Z = NULL,
+  ID = NULL,
+  Y.char = NULL,
+  Z.char = NULL,
+  ID.char = NULL,
+  method = "pl"
+)
+}
+\arguments{
+\item{formula}{a two-sided formula object describing the model to be fitted,
+with the response variable on the left of a ~ operator and covariates on the right,
+separated by + operators. The fixed effect of the grouping identifier is specified using \code{id()}.}
+
+\item{data}{a data frame containing the variables named in the \code{formula},
+or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
+
+\item{Y}{a numeric vector representing the response variable.}
+
+\item{Z}{a matrix or data frame representing the covariates, which can include both numeric and categorical variables.}
+
+\item{ID}{a numeric vector representing the grouping identifier.}
+
+\item{Y.char}{a character string specifying the column name of the response variable in the \code{data}.}
+
+\item{Z.char}{a character vector specifying the column names of the covariates in the \code{data}.}
+
+\item{ID.char}{a character string specifying the column name of the grouping identifier in the \code{data}.}
+
+\item{method}{a character string specifying the method to fit the model.
+\code{"pl"} (default) uses profile likelihood to fit the model,
+while \code{"dummy"} calls \code{\link{lm}} to fit the model using dummy variables for the grouping identifier.}
+}
+\value{
+A list of objects with S3 class \code{"linear_fe"}:
+\item{coefficient}{a list containing the estimated coefficients:
+\code{beta}, the fixed effects for each predictor, and \code{gamma}, the effect for each group.}
+\item{variance}{a list containing the variance estimates:
+\code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the group effects.}
+\item{sigma}{the residual standard error.}
+\item{fitted}{the fitted values of each individual.}
+\item{observation}{the original response of each individual.}
+\item{residuals}{the residuals of each individual, that is response minus fitted values}
+\item{linear_pred}{the linear predictor of each individual.}
+\item{data_include}{the data used to fit the model, sorted by the group identifier.
+For categorical covariates, this includes the dummy variables created for
+all categories except the reference level.}
+\item{char_list}{a list of the character vectors representing the column names for
+the response variable, covariates, and group identifier.
+For categorical variables, the names reflect the dummy variables created for each category.}
+\item{method}{the method used for model fitting, either \code{"Profile Likelihood"} or \code{"Dummy"}.}
 }
 \description{
-Main Function for Fitting the Fixed Effect Linear Model using profile likelihood
+Fit a fixed effect linear model via profile likelihood or dummy encoding.
+}
+\details{
+This function is used to fit a fixed effect linear model of the form:
+\deqn{Y_{ij} = \gamma_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
+where \eqn{Y_{ij}} is the outcome for individual \eqn{j} in group \eqn{i}, \eqn{\gamma_i} is the group-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
+The default method for fitting the model is profile likelihood, but dummy encoding can also be used by specifying the appropriate method.
+When the number of groups is very large, we recommend using the profile likelihood method, as it is significantly faster than dummy encoding.
+
+The function accepts three different input formats:
+a formula and dataset, where the formula is of the form \code{response ~ covariates + id(group)}, with \code{group} representing the group identifier;
+a dataset along with the column names of the response, covariates, and group identifier;
+or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the group identifier vector \eqn{\boldsymbol{\gamma}}.
+}
+\examples{
+data(ExampleDataLinear)
+Y <- ExampleDataLinear$Y
+Z <- ExampleDataLinear$Z
+ID <- ExampleDataLinear$ID
+data <- data.frame(Y, ID, Z)
+Z.char <- colnames(Z)
+Y.char <- "Y"
+ID.char <- "ID"
+formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ id(ID)"))
+
+# Fit fixed linear effect model using three input formats
+fit_fe1 <- linear_fe(Y = Y, Z = Z, ID = ID)
+fit_fe2 <- linear_fe(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char)
+fit_fe3 <- linear_fe(formula, data)
+
+}
+\references{
+R Core Team (2023). \emph{The R Stats Package: lm}.
+Available at: \url{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html}
+\cr
 }

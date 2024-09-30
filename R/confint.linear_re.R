@@ -1,34 +1,42 @@
-#=== CONFIDENCE INTERVAL FUNCTION of Linear FE Model=================================
-#' Provide confidence interval for provider effects or standardization ratios/rates
+#' Get Confidence Intervals for Provider Effects or Standardized Measures
 #'
-#' @param fit an object as output of \code{linear_re} function.
+#' Provide confidence interval for provider effects \eqn{\hat{\alpha}} or standardized measures from a random effect linear model.
 #'
-#' @param parm specify a subset of which providers are to be given confidence intervals. All providers are included by default.
-#'
-#' @param level confidence level used for constructing confidence intervals. Defaulting to 0.95.
-#'
-#' @param option the confidence interval for the function's output, whether it is for gamma or standardization ratios/rates.
+#' @param fit a model fitted from \code{linear_re}.
+#' @param parm specifies a subset of providers for which confidence intervals are to be given.
+#' See `parm` argument in \code{\link{SM_output.linear_fe}}.
+#' @param level the confidence level. The default value is 0.95.
+#' @param option 	a character string or a vector specifying whether the
+#' confidence intervals should be provided for provider effects, standardized measures, or both:
 #'   \itemize{
-#'   \item "alpha": provider effect
-#'   \item "SR": standardization ratios/rates
+#'   \item {\code{"alpha"}} provider effect
+#'   \item {\code{"SM"}} standardized measures
+#'   \item {\code{c("alpha", "SM")}} both provider effects and standardized measures
 #'   }
+#' @param stdz a character string or a vector specifying the standardization method
+#' if `option` includes \code{"SM"}. See `stdz` argument in \code{\link{SM_output.linear_re}}.
+#' @param alternative a character string specifying the alternative hypothesis, must be one of
+#' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 #'
-#' @param stdz if option = 'SR', a character string specifying the standardization method. Defaulting to "indirect".
-#'   \itemize{
-#'   \item "indirect": using indirect standardized method
-#'   \item "direct": using direct standardized method
-#'   }
+#' @return A list of data frames containing the confidence intervals based on the values of `option` and `stdz`.
+#' \item{CI.alpha}{Confidence intervals for provider effects if `option` includes \code{"alpha"}.}
+#' \item{CI.indirect}{Confidence intervals for indirect standardized difference if `option` includes \code{"SM"} and `stdz` includes \code{"indirect"}.}
+#' \item{CI.direct}{Confidence intervals for direct standardized difference if `option` includes \code{"SM"} and `stdz` includes \code{"direct"}.}
 #'
-#' @param ...
+#' @examples
+#' data(ExampleDataLinear)
+#' Y <- ExampleDataLinear$Y
+#' ID <- ExampleDataLinear$ID
+#' Z <- ExampleDataLinear$Z
 #'
-#' @return A dataframe containing the point estimate, and lower and upper bounds of the estimate.
+#' fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+#' confint(fit_re)
 #'
-#' @importFrom stats pnorm pt
+#' @importFrom stats pnorm qnorm pt qt
 #'
 #' @exportS3Method confint linear_re
-#'
 
-confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR"),
+confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SM"),
                               stdz = "indirect", alternative = "two.sided") {
   return_ls <- list()
 
@@ -36,9 +44,11 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR")
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_re'!",call.=F)
-  if (! "alpha" %in% option & !"SR" %in% option) stop("Argument 'option' NOT as required!", call.=F)
+  if (! "alpha" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
+  if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
 
   data <- fit$data_include
+  prov <- data[ ,fit$char_list$ID.char]
   n <- nrow(data)
   Y.char <- fit$char_list$Y.char
   ID.char <- fit$char_list$ID.char
@@ -95,29 +105,29 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR")
   if ("alpha" %in% option) {return_ls$CI.alpha <- CI_alpha[ind, ]}
 
   # CI of SR
-  if ("SR" %in% option) {
+  if ("SM" %in% option) {
     if ("indirect" %in% stdz) {
-      SR <- SR_linear(fit, stdz = "indirect")
+      SR <- SM_output(fit, stdz = "indirect")
 
       if (alternative == "two.sided") {
         L.obs <- rep(L_alpha, n.prov) + fit$linear_pred
-        L.prov <- sapply(split(L.obs, fit$prov), sum)
+        L.prov <- sapply(split(L.obs, prov), sum)
         L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
 
         U.obs <- rep(U_alpha, n.prov) + fit$linear_pred
-        U.prov <- sapply(split(U.obs, fit$prov), sum)
+        U.prov <- sapply(split(U.obs, prov), sum)
         U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
       }
       else if (alternative == "greater") {
         L.obs <- rep(L_alpha, n.prov) + fit$linear_pred
-        L.prov <- sapply(split(L.obs, fit$prov), sum)
+        L.prov <- sapply(split(L.obs, prov), sum)
         L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
 
         U_indirect <- Inf
       }
       else if (alternative == "less") {
         U.obs <- rep(U_alpha, n.prov) + fit$linear_pred
-        U.prov <- sapply(split(U.obs, fit$prov), sum)
+        U.prov <- sapply(split(U.obs, prov), sum)
         U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
 
         L_indirect <- -Inf
@@ -133,7 +143,7 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SR")
     }
 
     if ("direct" %in% stdz) {
-      SR <- SR_linear(fit, stdz = "direct")
+      SR <- SM_output(fit, stdz = "direct")
 
       Exp.direct <- function(alpha){
         sum(alpha + fit$linear_pred)
