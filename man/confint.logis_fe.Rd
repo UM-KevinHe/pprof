@@ -2,57 +2,64 @@
 % Please edit documentation in R/confint.logis_fe.R
 \name{confint.logis_fe}
 \alias{confint.logis_fe}
-\title{Provide confidence interval for provider effects or standardization ratios/rates}
+\title{Get Confidence Intervals for Provider Effects or Standardized Measures}
 \usage{
 \method{confint}{logis_fe}(
   fit,
   parm,
   level = 0.95,
   test = "exact",
-  option = c("gamma", "SR"),
+  option = "SM",
   stdz = "indirect",
-  measure = c("rate", "ratio")
+  measure = c("rate", "ratio"),
+  alternative = "two.sided"
 )
 }
 \arguments{
-\item{fit}{an object as output of \code{logis_fe} function.}
+\item{fit}{a model fitted from \code{logis_fe}.}
 
-\item{parm}{specify a subset of which providers are to be given confidence intervals. All providers are included by default.}
+\item{parm}{specifies a subset of providers for which confidence intervals are to be given.
+By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}
 
-\item{level}{confidence level used for constructing confidence intervals. Defaulting to 0.95.}
+\item{level}{the confidence level. The default value is 0.95.}
 
-\item{test}{a character string specifying the type of testing method. Defaulting to "exact".
+\item{test}{a character string specifying the type of testing method. The default is "exact".
 \itemize{
-\item "exact": exact test
-\item "wald": wald test
-\item "score": score test
+\item {\code{"exact"}} exact test
+\item {\code{"wald"}} wald test
+\item {\code{"score"}} score test
 }}
 
-\item{option}{the confidence interval for the function's output, whether it is for gamma or standardization ratios/rates.
+\item{option}{a character string specifying whether the confidence intervals
+should be provided for provider effects, standardized measures:
 \itemize{
-\item "gamma": provider effect
-\item "SR": standardization ratios/rates
+\item {\code{"gamma"}} provider effect
+\item {\code{"SM"}} standardized measures
 }}
 
-\item{stdz}{if option = 'SR', a character string specifying the standardization method. Defaulting to "indirect".
+\item{stdz}{a character string or a vector specifying the standardization method
+if \code{option = "SM"}. See \code{stdz} argument in \code{\link{SM_output.logis_fe}}.}
+
+\item{measure}{a character string or a vector indicating whether the output measure is "ratio" or "rate" if \code{option = "SM"}.
+Both "rate" and "ratio" will be provided by default.
 \itemize{
-\item "indirect": using indirect standardized method
-\item "direct": using direct standardized method
+\item {\code{"rate"}} output the standardized rate. The "rate" has been restricted to 0\% - 100\%.
+\item {\code{"ratio"}}  output the standardized ratio
+\item {\code{c("ratio", "rate")}} output both the standardized rate and ratio
 }}
 
-\item{measure}{if option = 'SR', a boolean indicating whether the output measure is "ratio" or "rate". Both "rate" and "ratio" will be provided by default.
-\itemize{
-\item "rate": output the standardized rate. The "rate" has been restricted to 0\% - 100\%.
-\item "ratio":  output the standardized ratio
-}}
-
-\item{...}{}
+\item{alternative}{a character string specifying the alternative hypothesis, must be one of
+\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
 }
 \value{
-A dataframe containing the point estimate, and lower and upper bounds of the estimate.
+A dataframe (\code{option = "gamma"}) or a list of data frames (\code{option = "SM"}) containing the point estimate, and lower and upper bounds of the estimate.
 }
 \description{
-Provide confidence interval for provider effects or standardization ratios/rates
+Provide confidence interval for provider effects \eqn{\hat{\gamma}} or standardized measures from a fixed effect logistic model.
+}
+\details{
+The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
+We suggest using score or exact test to generate the confidence interval.
 }
 \examples{
 data(data_FE)

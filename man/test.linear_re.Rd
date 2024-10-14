@@ -10,7 +10,7 @@
 \item{fit}{a model fitted from \code{linear_re}.}
 
 \item{parm}{specifies a subset of providers for which confidence intervals are to be given.
-See \code{parm} argument in \code{\link{SM_output.linear_fe}}.}
+By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}
 
 \item{level}{the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
 The default value is 0.95.}

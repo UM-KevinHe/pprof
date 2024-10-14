@@ -235,6 +235,9 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
           cout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
         }
       }
+      else {
+        Rcpp::stop("Argument 'stop' NOT as required!");
+      }
 
     }
   } else if (backtrack==0) {
@@ -313,6 +316,9 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
           cout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
         }
       }
+      else {
+        Rcpp::stop("Argument 'stop' NOT as required!");
+      }
     }
   }
   if (message == true) {
@@ -325,7 +331,7 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
 
 // [[Rcpp::export]]
 List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamma, arma::vec beta,
-                       int parallel=1, int threads=1, double tol=1e-8, int max_iter=10000,
+                       int threads=1, double tol=1e-8, int max_iter=10000,
                        double bound=10.0, bool message = true, bool backtrack = false,
                        const std::string stop = "beta") {
 
@@ -369,10 +375,10 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
     }
     arma::vec score_beta = Z.t() * Yp;
     arma::mat info_beta(Z.n_cols, Z.n_cols);
-    if (parallel==1) { // parallel
+    if (threads > 1) { // parallel
       info_beta = info_beta_omp(Z, pq, threads); // omp
       // info_beta = info_beta_tbb(Z, pq); // tbb
-    } else if (parallel==0) { // serial
+    } else if (threads == 1) { // serial
       info_beta = Z.t() * (Z.each_col()%pq);
     }
     arma::mat mat_tmp1 = trans(info_betagamma.each_row()%info_gamma_inv.t());
@@ -448,6 +454,9 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
         cout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
       }
     }
+    else{
+      Rcpp::stop("Argument 'stop' NOT as required!");
+    }
 
   }
   if (message == true) {
@@ -502,6 +511,9 @@ arma::vec Modified_score(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::ve
 
   arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));  // p under full model
   arma::vec pq = p % (1-p);  // pq under full model
+  if (any(pq == 0)) {
+    pq.replace(0, 1e-20);
+  }
 
   arma::vec p_null = 1 / (1 + exp(-gamma_null-Z_beta)); // p under null model
   arma::vec pq_null = p_null % (1-p_null);  // pq under null model
@@ -620,5 +632,41 @@ List compute_profilkd_linear(arma::vec& Y, arma::mat& Z, arma::vec& ID, arma::ve
   }
 
   List ret = List::create(_["gamma"]=gamma, _["beta"]=beta);
+  return ret;
+}
+
+
+// [[Rcpp::export]]
+List logis_fe_var(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec &gamma, arma::vec &beta) {
+  arma::vec gamma_obs = rep(gamma, n_prov);
+  int m = n_prov.n_elem;
+  arma::vec p = 1 / (1 + exp(-gamma_obs-Z*beta));
+  p = clamp(p, 1e-10, 1-1e-10);
+  int ind = 0;
+  arma::vec info_gamma_inv(m);
+  arma::mat info_betagamma(Z.n_cols,m);
+  for (int i = 0; i < m; i++) {
+    info_gamma_inv(i) = 1 / dot(p.subvec(ind,ind+n_prov(i)-1),1-p.subvec(ind,ind+n_prov(i)-1));
+    info_betagamma.col(i) =
+      sum(Z.rows(ind,ind+n_prov(i)-1).each_col()%(p.subvec(ind,ind+n_prov(i)-1)%(1-p.subvec(ind,ind+n_prov(i)-1)))).t();
+    ind += n_prov(i);
+  }
+  arma::mat info_beta = Z.t()*(Z.each_col()%(p%(1-p)));
+  arma::mat info_beta_inv = inv_sympd(info_beta-(info_betagamma.each_row()%info_gamma_inv.t())*info_betagamma.t());
+  arma::vec se_beta = sqrt(info_beta_inv.diag());
+
+  arma::vec se_gamma(m);
+  arma::vec var_gamma(m);
+  for (int i = 0; i < m; i++) {
+    arma::vec mat_tmp = info_gamma_inv(i) * info_betagamma.col(i); // J_1^T
+    var_gamma(i) = info_gamma_inv(i) + as_scalar(mat_tmp.t() * info_beta_inv * mat_tmp);
+    se_gamma(i) = sqrt(info_gamma_inv(i) + as_scalar(mat_tmp.t() * info_beta_inv * mat_tmp)); // sqrt(I_11^-1 + J_1^T * S^-1 * J_1)
+  }
+
+  List ret;
+  ret["var.beta"] = info_beta_inv;
+  ret["se.beta"] = 1*se_beta;
+  ret["var.gamma"] = var_gamma;
+  ret["se.gamma"] = se_gamma;
   return ret;
 }

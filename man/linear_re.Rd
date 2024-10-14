@@ -55,6 +55,9 @@ all categories except the reference level.}
 \item{char_list}{a list of the character vectors representing the column names for
 the response variable, covariates, and group identifier.
 For categorical variables, the names reflect the dummy variables created for each category.}
+\item{Loglkd}{the log-likelihood.}
+\item{AIC}{Akaike info criterion.}
+\item{BIC}{Bayesian info criterion.}
 }
 \description{
 Fit a random effect linear model via \code{\link{lmer}} from the \code{lme4} package.
@@ -62,7 +65,7 @@ Fit a random effect linear model via \code{\link{lmer}} from the \code{lme4} pac
 \details{
 This function is used to fit a random effect linear model of the form:
 \deqn{Y_{ij} = \mu + \alpha_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-where \eqn{Y_{ij}} is the outcome for individual \eqn{j} in group \eqn{i},
+where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in group \eqn{i},
 \eqn{\mu} is the overall intercept, \eqn{\alpha_i} is the random effect for group \eqn{i},
 \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 
@@ -74,7 +77,7 @@ or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \
 
 In addition to these input formats, all arguments from the \code{\link{lmer}} function can be modified via \verb{\\dots},
 allowing for customization of model fitting options such as controlling the optimization method or adjusting convergence criteria.
-By default, the model is fitted using REML (restricted maximum likelihood), but this can be changed by modifying the corresponding argument in \code{lmer}.
+By default, the model is fitted using REML (restricted maximum likelihood).
 }
 \examples{
 data(ExampleDataLinear)

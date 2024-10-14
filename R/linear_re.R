@@ -31,11 +31,14 @@
 #' \item{char_list}{a list of the character vectors representing the column names for
 #' the response variable, covariates, and group identifier.
 #' For categorical variables, the names reflect the dummy variables created for each category.}
+#' \item{Loglkd}{the log-likelihood.}
+#' \item{AIC}{Akaike info criterion.}
+#' \item{BIC}{Bayesian info criterion.}
 #'
 #' @details
 #' This function is used to fit a random effect linear model of the form:
 #' \deqn{Y_{ij} = \mu + \alpha_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-#' where \eqn{Y_{ij}} is the outcome for individual \eqn{j} in group \eqn{i},
+#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in group \eqn{i},
 #' \eqn{\mu} is the overall intercept, \eqn{\alpha_i} is the random effect for group \eqn{i},
 #' \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 #'
@@ -47,7 +50,7 @@
 #'
 #' In addition to these input formats, all arguments from the \code{\link{lmer}} function can be modified via `\dots`,
 #' allowing for customization of model fitting options such as controlling the optimization method or adjusting convergence criteria.
-#' By default, the model is fitted using REML (restricted maximum likelihood), but this can be changed by modifying the corresponding argument in \code{lmer}.
+#' By default, the model is fitted using REML (restricted maximum likelihood).
 #'
 #' @importFrom lme4 lmer fixef ranef
 #'
@@ -92,6 +95,9 @@ linear_re <- function(formula = NULL, data = NULL,
     Y.char <- response
     ID.char <- id_var
     Z.char <- predictors[!grepl("\\|", predictors)]
+    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+      stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
+
     data <- data[order(factor(data[, id_var])),]
     # Y <- data[, Y.char, drop = F]
     # Z <- as.matrix(data[, Z.char, drop = F])
@@ -184,6 +190,11 @@ linear_re <- function(formula = NULL, data = NULL,
   colnames(res) <- "Residuals"
   rownames(res) <- seq_len(nrow(res))
 
+  # AIC and BIC
+  log_likelihood <- logLik(fit_re)
+  AIC <- AIC(fit_re)
+  BIC <- BIC(fit_re)
+
   char_list <- list(Y.char = Y.char,
                     ID.char = ID.char,
                     Z.char = Z.char)
@@ -194,8 +205,11 @@ linear_re <- function(formula = NULL, data = NULL,
                            fitted = pred,
                            observation = Y,
                            residuals = res,
-                           linear_pred = linear_pred),
-                      class = "linear_re")  #define a list for prediction
+                           linear_pred = linear_pred,
+                           Loglkd = log_likelihood,
+                           AIC = AIC,
+                           BIC = BIC),
+                      class = "linear_re")  # define a list for prediction
 
   result$data_include <- data
   result$char_list <- char_list

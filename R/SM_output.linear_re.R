@@ -4,19 +4,19 @@
 #'
 #' @param fit a model fitted from \code{linear_re}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
-#' See `parm` argument in \code{\link{SM_output.linear_fe}}.
+#' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param stdz a character string or a vector specifying the standardization method(s).
-#' The default value is \code{"indirect"}. The possible values are:
+#' The possible values are:
 #' \itemize{
-#'   \item{\code{"indirect"}} indirect standardization method.
+#'   \item{\code{"indirect"}} (default) indirect standardization method.
 #'   \item{\code{"direct"}} direct standardization method.
 #'   \item{\code{c("indirect", "direct")}} outputs both direct and indirect standardized measures.
 #' }
 #'
 #' @return A list containing the standardized differences based on the method(s) specified in `stdz`,
 #' as well as the observed and expected outcomes used to calculate the standardized measures:
-#' \item{indirect.difference}{a data frame of indirect standardized differences, if `stdz` includes \code{"indirect"}.}
-#' \item{direct.difference}{a data frame of direct standardized differences, if `stdz` includes \code{"direct"}.}
+#' \item{indirect.difference}{indirect standardized differences, if `stdz` includes \code{"indirect"}.}
+#' \item{direct.difference}{direct standardized differences, if `stdz` includes \code{"direct"}.}
 #' \item{OE}{a list of data frames containing the observed and expected outcomes used for calculating standardized measures.}
 #'
 #' @details

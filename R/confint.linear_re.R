@@ -4,14 +4,13 @@
 #'
 #' @param fit a model fitted from \code{linear_re}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
-#' See `parm` argument in \code{\link{SM_output.linear_fe}}.
+#' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level. The default value is 0.95.
-#' @param option 	a character string or a vector specifying whether the
-#' confidence intervals should be provided for provider effects, standardized measures, or both:
+#' @param option 	a character string specifying whether the confidence intervals
+#' should be provided for provider effects, standardized measures:
 #'   \itemize{
 #'   \item {\code{"alpha"}} provider effect
 #'   \item {\code{"SM"}} standardized measures
-#'   \item {\code{c("alpha", "SM")}} both provider effects and standardized measures
 #'   }
 #' @param stdz a character string or a vector specifying the standardization method
 #' if `option` includes \code{"SM"}. See `stdz` argument in \code{\link{SM_output.linear_re}}.
@@ -36,7 +35,7 @@
 #'
 #' @exportS3Method confint linear_re
 
-confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SM"),
+confint.linear_re <- function(fit, parm, level = 0.95, option = "SM",
                               stdz = "indirect", alternative = "two.sided") {
   return_ls <- list()
 
@@ -102,7 +101,17 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = c("alpha", "SM")
     }
   }
 
-  if ("alpha" %in% option) {return_ls$CI.alpha <- CI_alpha[ind, ]}
+  if ("alpha" %in% option) {
+    if (alternative == "greater") {
+      CI_alpha$alpha.Upper <- NULL
+    }
+    else if (alternative == "less") {
+      CI_alpha$alpha.Lower <- NULL
+    }
+    return (CI_alpha[ind, ])
+    # return_ls$CI.alpha <- CI_alpha[ind, ]
+  }
+
 
   # CI of SR
   if ("SM" %in% option) {

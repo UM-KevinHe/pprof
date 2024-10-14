@@ -8,7 +8,7 @@
   fit,
   parm,
   level = 0.95,
-  option = c("alpha", "SM"),
+  option = "SM",
   stdz = "indirect",
   alternative = "two.sided"
 )
@@ -17,16 +17,15 @@
 \item{fit}{a model fitted from \code{linear_re}.}
 
 \item{parm}{specifies a subset of providers for which confidence intervals are to be given.
-See \code{parm} argument in \code{\link{SM_output.linear_fe}}.}
+By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}
 
 \item{level}{the confidence level. The default value is 0.95.}
 
-\item{option}{a character string or a vector specifying whether the
-confidence intervals should be provided for provider effects, standardized measures, or both:
+\item{option}{a character string specifying whether the confidence intervals
+should be provided for provider effects, standardized measures:
 \itemize{
 \item {\code{"alpha"}} provider effect
 \item {\code{"SM"}} standardized measures
-\item {\code{c("alpha", "SM")}} both provider effects and standardized measures
 }}
 
 \item{stdz}{a character string or a vector specifying the standardization method

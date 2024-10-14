@@ -37,8 +37,10 @@ or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
 \item{ID.char}{a character string specifying the column name of the grouping identifier in the \code{data}.}
 
 \item{method}{a character string specifying the method to fit the model.
-\code{"pl"} (default) uses profile likelihood to fit the model,
-while \code{"dummy"} calls \code{\link{lm}} to fit the model using dummy variables for the grouping identifier.}
+\itemize{
+\item{\code{"pl"}} (default) uses profile likelihood to fit the model,.
+\item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the grouping identifier
+}}
 }
 \value{
 A list of objects with S3 class \code{"linear_fe"}:
@@ -58,6 +60,9 @@ all categories except the reference level.}
 the response variable, covariates, and group identifier.
 For categorical variables, the names reflect the dummy variables created for each category.}
 \item{method}{the method used for model fitting, either \code{"Profile Likelihood"} or \code{"Dummy"}.}
+\item{neg2Loglkd}{log likelihood}
+\item{AIC}{Akaike info criterion}
+\item{BIC}{Bayesian info criterion}
 }
 \description{
 Fit a fixed effect linear model via profile likelihood or dummy encoding.
@@ -65,7 +70,7 @@ Fit a fixed effect linear model via profile likelihood or dummy encoding.
 \details{
 This function is used to fit a fixed effect linear model of the form:
 \deqn{Y_{ij} = \gamma_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-where \eqn{Y_{ij}} is the outcome for individual \eqn{j} in group \eqn{i}, \eqn{\gamma_i} is the group-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
+where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in group \eqn{i}, \eqn{\gamma_i} is the group-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 The default method for fitting the model is profile likelihood, but dummy encoding can also be used by specifying the appropriate method.
 When the number of groups is very large, we recommend using the profile likelihood method, as it is significantly faster than dummy encoding.
 

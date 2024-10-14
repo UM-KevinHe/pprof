@@ -14,8 +14,10 @@
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
 #' @param ID a numeric vector representing the grouping identifier.
 #' @param method a character string specifying the method to fit the model.
-#' `"pl"` (default) uses profile likelihood to fit the model,
-#' while `"dummy"` calls \code{\link{lm}} to fit the model using dummy variables for the grouping identifier.
+#' \itemize{
+#'   \item{\code{"pl"}} (default) uses profile likelihood to fit the model,.
+#'   \item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the grouping identifier
+#' }
 #'
 #' @return A list of objects with S3 class \code{"linear_fe"}:
 #' \item{coefficient}{a list containing the estimated coefficients:
@@ -34,11 +36,14 @@
 #' the response variable, covariates, and group identifier.
 #' For categorical variables, the names reflect the dummy variables created for each category.}
 #' \item{method}{the method used for model fitting, either \code{"Profile Likelihood"} or \code{"Dummy"}.}
+#' \item{neg2Loglkd}{log likelihood}
+#' \item{AIC}{Akaike info criterion}
+#' \item{BIC}{Bayesian info criterion}
 #'
 #' @details
 #' This function is used to fit a fixed effect linear model of the form:
 #' \deqn{Y_{ij} = \gamma_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-#' where \eqn{Y_{ij}} is the outcome for individual \eqn{j} in group \eqn{i}, \eqn{\gamma_i} is the group-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
+#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in group \eqn{i}, \eqn{\gamma_i} is the group-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 #' The default method for fitting the model is profile likelihood, but dummy encoding can also be used by specifying the appropriate method.
 #' When the number of groups is very large, we recommend using the profile likelihood method, as it is significantly faster than dummy encoding.
 #'
@@ -82,7 +87,7 @@ linear_fe <- function(formula = NULL, data = NULL,
       message("Input format: formula and data.")
 
       formula_terms <- terms(formula)
-      response <- as.character(attr(formula_terms, "variables"))[2]
+      Y.char <- as.character(attr(formula_terms, "variables"))[2]
       predictors <- attr(formula_terms, "term.labels")
       # id_var <- NULL
       # for (term in predictors) {
@@ -106,11 +111,11 @@ linear_fe <- function(formula = NULL, data = NULL,
       Z.char <- predictors[!grepl("id\\(", predictors)]
 
       if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
-        stop("The formula contains variables that are not in the data.", call.=F)
+        stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
 
       #mf <- model.frame(formula, data)
       #Y <- model.response(mf)
-      Y <- data[,response, drop = F]
+      Y <- data[,Y.char, drop = F]
       Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = F]
       # Z <- model.matrix(~ data[[predictors]] - 1)
       ID <- data[,ID.char, drop = F]
@@ -183,6 +188,7 @@ linear_fe <- function(formula = NULL, data = NULL,
     residuals <- matrix(Y - pred, ncol = 1)
     colnames(residuals) <- "Residuals"
     rownames(residuals) <- seq_len(nrow(residuals))
+    SSR <- sum(residuals^2)
     sigma_hat_sq <- sum(residuals^2)/(n - m - p)
 
     # Variance
@@ -197,6 +203,11 @@ linear_fe <- function(formula = NULL, data = NULL,
     variance <- list()
     variance$beta <- varcov_beta
     variance$gamma <- var_gamma
+
+    # AIC and BIC
+    log_likelihood <- - (n/2) * log(2*pi) - (n/2) * log(sigma_hat_sq) - (SSR/(2*sigma_hat_sq))
+    AIC <- -2*log_likelihood + 2*(m+p+1)
+    BIC <- -2*log_likelihood + 2*(m+p) * log(n)
 
     char_list <- list(Y.char = Y.char,
                       ID.char = ID.char,
@@ -217,7 +228,7 @@ linear_fe <- function(formula = NULL, data = NULL,
       data[,ID.char] <- as.factor(data[,ID.char])
 
       if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
-        stop("The formula contains variables that are not in the data.", call.=F)
+        stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
 
       # ID.char is always in the first position
       new_formula <- as.formula(paste(Y.char, "~", ID.char, "+",
@@ -312,6 +323,11 @@ linear_fe <- function(formula = NULL, data = NULL,
     colnames(linear_pred) <- "Linear Predictor"
     rownames(linear_pred) <- seq_len(nrow(linear_pred))
 
+    # AIC and BIC
+    log_likelihood <- logLik(fit_lm)
+    AIC <- AIC(fit_lm)
+    BIC <- BIC(fit_lm)
+
     char_list <- list(Y.char = Y.char,
                       ID.char = ID.char,
                       Z.char = Z.char)
@@ -327,7 +343,10 @@ linear_fe <- function(formula = NULL, data = NULL,
                            fitted = pred,
                            observation = Y,
                            residuals = residuals,
-                           linear_pred = linear_pred
+                           linear_pred = linear_pred,
+                           Loglkd = log_likelihood,
+                           AIC = AIC,
+                           BIC = BIC
                            ),
                       class = "linear_fe")  #define a list for prediction
 

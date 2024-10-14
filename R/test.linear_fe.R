@@ -4,7 +4,7 @@
 #'
 #' @param fit a model fitted from \code{linear_fe}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
-#' See `parm` argument in \code{\link{SM_output.linear_fe}}.
+#' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
 #' The default value is 0.95.
 #' @param null a character string or a number defining the null hypothesis for the provider effects.
@@ -65,8 +65,8 @@ test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative
   stat <- (gamma - gamma.null)/se.gamma
 
   prob <- switch(fit$method,
-              "Profile Likelihood" = pnorm(stat, lower=F),
-              "Dummy" = pt(stat, df = n - m - p, lower = F))
+                 "Profile Likelihood" = pnorm(stat, lower=F),
+                 "Dummy" = pt(stat, df = n - m - p, lower = F))
 
   if (alternative == "two.sided") {
     flag <- ifelse(prob < alpha/2, 1, ifelse(prob <= 1-alpha/2, 0, -1))

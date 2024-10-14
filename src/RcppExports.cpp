@@ -46,8 +46,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // logis_BIN_fe_prov
-List logis_BIN_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int parallel, int threads, double tol, int max_iter, double bound, bool message, bool backtrack, const std::string stop);
-RcppExport SEXP _pprof_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP parallelSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP, SEXP stopSEXP) {
+List logis_BIN_fe_prov(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int threads, double tol, int max_iter, double bound, bool message, bool backtrack, const std::string stop);
+RcppExport SEXP _pprof_logis_BIN_fe_prov(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP, SEXP stopSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -56,7 +56,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec& >::type n_prov(n_provSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< int >::type parallel(parallelSEXP);
     Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
@@ -64,7 +63,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type message(messageSEXP);
     Rcpp::traits::input_parameter< bool >::type backtrack(backtrackSEXP);
     Rcpp::traits::input_parameter< const std::string >::type stop(stopSEXP);
-    rcpp_result_gen = Rcpp::wrap(logis_BIN_fe_prov(Y, Z, n_prov, gamma, beta, parallel, threads, tol, max_iter, bound, message, backtrack, stop));
+    rcpp_result_gen = Rcpp::wrap(logis_BIN_fe_prov(Y, Z, n_prov, gamma, beta, threads, tol, max_iter, bound, message, backtrack, stop));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -119,14 +118,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// logis_fe_var
+List logis_fe_var(arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec& gamma, arma::vec& beta);
+RcppExport SEXP _pprof_logis_fe_var(SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(logis_fe_var(Y, Z, n_prov, gamma, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pprof_computeDirectExp", (DL_FUNC) &_pprof_computeDirectExp, 3},
     {"_pprof_logis_fe_prov", (DL_FUNC) &_pprof_logis_fe_prov, 11},
-    {"_pprof_logis_BIN_fe_prov", (DL_FUNC) &_pprof_logis_BIN_fe_prov, 13},
+    {"_pprof_logis_BIN_fe_prov", (DL_FUNC) &_pprof_logis_BIN_fe_prov, 12},
     {"_pprof_wald_covar", (DL_FUNC) &_pprof_wald_covar, 8},
     {"_pprof_Modified_score", (DL_FUNC) &_pprof_Modified_score, 9},
     {"_pprof_compute_profilkd_linear", (DL_FUNC) &_pprof_compute_profilkd_linear, 4},
+    {"_pprof_logis_fe_var", (DL_FUNC) &_pprof_logis_fe_var, 5},
     {NULL, NULL, 0}
 };
 

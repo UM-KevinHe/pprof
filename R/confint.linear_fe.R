@@ -4,14 +4,13 @@
 #'
 #' @param fit a model fitted from \code{linear_fe}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
-#' See `parm` argument in \code{\link{SM_output.linear_fe}}.
+#' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level. The default value is 0.95.
-#' @param option 	a character string or a vector specifying whether the
-#' confidence intervals should be provided for provider effects, standardized measures, or both:
+#' @param option 	a character string specifying whether the confidence intervals
+#' should be provided for provider effects, standardized measures:
 #'   \itemize{
 #'   \item {\code{"gamma"}} provider effect
 #'   \item {\code{"SM"}} standardized measures
-#'   \item {\code{c("gamma", "SM")}} both provider effects and standardized measures
 #'   }
 #' @param stdz a character string or a vector specifying the standardization method
 #' if `option` includes \code{"SM"}. See `stdz` argument in \code{\link{SM_output.linear_fe}}.
@@ -38,8 +37,8 @@
 #'
 #' @exportS3Method confint linear_fe
 
-confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SM"),
-                              stdz = "indirect", null = "median", alternative = "two.sided") {
+confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "indirect",
+                              null = "median", alternative = "two.sided") {
   return_ls <- list()
 
   alpha <- 1 - level
@@ -99,7 +98,16 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = c("gamma", "SM")
     }
   }
 
-  if ("gamma" %in% option) {return_ls$CI.gamma <- CI_gamma[ind, ]}
+  if ("gamma" %in% option) {
+    if (alternative == "greater") {
+      CI_gamma$gamma.Upper <- NULL
+    }
+    else if (alternative == "less") {
+      CI_gamma$gamma.Lower <- NULL
+    }
+    return (CI_gamma[ind, ])
+    # return_ls$CI.gamma <- CI_gamma[ind, ]
+  }
 
   # CI of SM
   if ("SM" %in% option) {
