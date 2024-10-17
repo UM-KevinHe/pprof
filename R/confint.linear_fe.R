@@ -9,8 +9,8 @@
 #' @param option 	a character string specifying whether the confidence intervals
 #' should be provided for provider effects, standardized measures:
 #'   \itemize{
-#'   \item {\code{"gamma"}} provider effect
-#'   \item {\code{"SM"}} standardized measures
+#'   \item {\code{"gamma"}} provider effect (only supports \code{"two.sided"} confidence interval).
+#'   \item {\code{"SM"}} standardized measures.
 #'   }
 #' @param stdz a character string or a vector specifying the standardization method
 #' if `option` includes \code{"SM"}. See `stdz` argument in \code{\link{SM_output.linear_fe}}.
@@ -18,6 +18,7 @@
 #' if `option` includes \code{"SM"}. See `null` argument in \code{\link{SM_output.linear_fe}}.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#' Note that \code{"gamma"} for argument `option` only supports \code{"two.sided"}.
 #'
 #' @return A list of data frames containing the confidence intervals based on the values of `option` and `stdz`.
 #' \item{CI.gamma}{Confidence intervals for provider effects if `option` includes \code{"gamma"}.}
@@ -47,6 +48,8 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
   if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!",call.=F)
   if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
+  if ("gamma" %in% option && alternative != "two.sided")
+    stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
 
   data <- fit$data_include
   prov <- data[ ,fit$char_list$ID.char]
@@ -98,19 +101,10 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
     }
   }
 
-  if ("gamma" %in% option) {
-    if (alternative == "greater") {
-      CI_gamma$gamma.Upper <- NULL
-    }
-    else if (alternative == "less") {
-      CI_gamma$gamma.Lower <- NULL
-    }
-    return (CI_gamma[ind, ])
-    # return_ls$CI.gamma <- CI_gamma[ind, ]
-  }
+  if (option == "gamma") return (CI_gamma[ind, ])
 
   # CI of SM
-  if ("SM" %in% option) {
+  if (option == "SM") {
     if ("indirect" %in% stdz) {
       SM <- SM_output(fit, stdz = "indirect", null = null)
 
@@ -143,7 +137,6 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
 
       CI_indirect <- data.frame(SM = SM$indirect.difference, indirect.Lower = L_indirect, indirect.Upper = U_indirect)
       colnames(CI_indirect) <- c("Indirect.Difference", "indirect.Lower", "indirect.Upper")
-
       return_ls$CI.indirect <- CI_indirect[ind, ]
     }
 
@@ -157,20 +150,17 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
       if (alternative == "two.sided") {
         L.prov <- sapply(L_gamma, Exp.direct)
         L_direct <- (L.prov - SM$OE$OE_direct$Obs)/n
-
         U.prov <- sapply(U_gamma, Exp.direct)
         U_direct <- (U.prov - SM$OE$OE_direct$Obs)/n
       }
       else if (alternative == "greater") {
         L.prov <- sapply(L_gamma, Exp.direct)
         L_direct <- (L.prov - SM$OE$OE_direct$Obs)/n
-
         U_direct <- Inf
       }
       else if (alternative == "less") {
         U.prov <- sapply(U_gamma, Exp.direct)
         U_direct <- (U.prov - SM$OE$OE_direct$Obs)/n
-
         L_direct <- -Inf
       }
       else {
@@ -179,7 +169,6 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
 
       CI_direct <- data.frame(SM = SM$direct.difference, direct.Lower = L_direct, direct.Upper = U_direct)
       colnames(CI_direct) <- c("Direct.Difference", "direct.Lower", "direct.Upper")
-
       return_ls$CI.direct <- CI_direct[ind, ]
     }
   }

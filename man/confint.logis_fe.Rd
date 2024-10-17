@@ -11,6 +11,7 @@
   test = "exact",
   option = "SM",
   stdz = "indirect",
+  null = "median",
   measure = c("rate", "ratio"),
   alternative = "two.sided"
 )
@@ -25,27 +26,29 @@ By default, all providers are included. The class of \code{parm} should match th
 
 \item{test}{a character string specifying the type of testing method. The default is "exact".
 \itemize{
-\item {\code{"exact"}} exact test
-\item {\code{"wald"}} wald test
-\item {\code{"score"}} score test
+\item {\code{"exact"}} exact test.
+\item {\code{"wald"}} wald test.
+\item {\code{"score"}} score test.
 }}
 
 \item{option}{a character string specifying whether the confidence intervals
 should be provided for provider effects, standardized measures:
 \itemize{
-\item {\code{"gamma"}} provider effect
-\item {\code{"SM"}} standardized measures
+\item {\code{"gamma"}} provider effect.
+\item {\code{"SM"}} standardized measures.
 }}
 
 \item{stdz}{a character string or a vector specifying the standardization method
 if \code{option = "SM"}. See \code{stdz} argument in \code{\link{SM_output.logis_fe}}.}
 
+\item{null}{a character string or a number defining the population norm if \code{option = "SM"}.}
+
 \item{measure}{a character string or a vector indicating whether the output measure is "ratio" or "rate" if \code{option = "SM"}.
 Both "rate" and "ratio" will be provided by default.
 \itemize{
 \item {\code{"rate"}} output the standardized rate. The "rate" has been restricted to 0\% - 100\%.
-\item {\code{"ratio"}}  output the standardized ratio
-\item {\code{c("ratio", "rate")}} output both the standardized rate and ratio
+\item {\code{"ratio"}}  output the standardized ratio.
+\item {\code{c("ratio", "rate")}} output both the standardized rate and ratio.
 }}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of

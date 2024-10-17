@@ -25,8 +25,8 @@ By default, all providers are included. The class of \code{parm} should match th
 \item{option}{a character string specifying whether the confidence intervals
 should be provided for provider effects, standardized measures:
 \itemize{
-\item {\code{"gamma"}} provider effect
-\item {\code{"SM"}} standardized measures
+\item {\code{"gamma"}} provider effect (only supports \code{"two.sided"} confidence interval).
+\item {\code{"SM"}} standardized measures.
 }}
 
 \item{stdz}{a character string or a vector specifying the standardization method
@@ -36,7 +36,8 @@ if \code{option} includes \code{"SM"}. See \code{stdz} argument in \code{\link{S
 if \code{option} includes \code{"SM"}. See \code{null} argument in \code{\link{SM_output.linear_fe}}.}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
-\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+Note that \code{"gamma"} for argument \code{option} only supports \code{"two.sided"}.}
 }
 \value{
 A list of data frames containing the confidence intervals based on the values of \code{option} and \code{stdz}.

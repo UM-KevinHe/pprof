@@ -8,24 +8,25 @@
 #' @param level the confidence level. The default value is 0.95.
 #' @param test a character string specifying the type of testing method. The default is "exact".
 #'   \itemize{
-#'   \item {\code{"exact"}} exact test
-#'   \item {\code{"wald"}} wald test
-#'   \item {\code{"score"}} score test
+#'   \item {\code{"exact"}} exact test.
+#'   \item {\code{"wald"}} wald test.
+#'   \item {\code{"score"}} score test.
 #'   }
 #' @param option 	a character string specifying whether the confidence intervals
 #' should be provided for provider effects, standardized measures:
 #'   \itemize{
-#'   \item {\code{"gamma"}} provider effect
-#'   \item {\code{"SM"}} standardized measures
+#'   \item {\code{"gamma"}} provider effect.
+#'   \item {\code{"SM"}} standardized measures.
 #'   }
 #' @param stdz a character string or a vector specifying the standardization method
 #' if \code{option = "SM"}. See `stdz` argument in \code{\link{SM_output.logis_fe}}.
+#' @param null a character string or a number defining the population norm if \code{option = "SM"}.
 #' @param measure a character string or a vector indicating whether the output measure is "ratio" or "rate" if \code{option = "SM"}.
 #' Both "rate" and "ratio" will be provided by default.
 #'   \itemize{
 #'   \item {\code{"rate"}} output the standardized rate. The "rate" has been restricted to 0% - 100%.
-#'   \item {\code{"ratio"}}  output the standardized ratio
-#'   \item {\code{c("ratio", "rate")}} output both the standardized rate and ratio
+#'   \item {\code{"ratio"}}  output the standardized ratio.
+#'   \item {\code{c("ratio", "rate")}} output both the standardized rate and ratio.
 #'   }
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
@@ -47,12 +48,13 @@
 #' @exportS3Method confint logis_fe
 
 confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
-                             option = "SM", stdz = "indirect",
+                             option = "SM", stdz = "indirect", null = "median",
                              measure = c("rate", "ratio"), alternative = "two.sided") {
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
   if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
   if (!(test %in% c("exact", "score", "wald"))) stop("Argument 'test' NOT as required!", call.=F)
+  if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
 
   alpha <- 1 - level
 
@@ -357,17 +359,17 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
     population_rate <- sum(data.ori[,Y.char])/nrow(data.ori) * 100  #sum(O_i)/N *100%
     return_ls <- list()
     if ("indirect" %in% stdz) {
-      SR.indirect <- SM_output(fit, stdz = c("indirect"), measure = c("ratio", "rate"))
+      SR.indirect <- SM_output(fit, stdz = c("indirect"), measure = c("ratio", "rate"), null = null)
       if (missing(parm)) {
         OE_df.indirect <- SR.indirect$OE$OE_indirect
         indirect.ratio_df <- SR.indirect$indirect.ratio
         indirect.rate_df <- SR.indirect$indirect.rate
         data <- data.ori
       } else if (class(parm) == class(data.ori[,ID.char])) {
-        OE_df.indirect <- SR.indirect$OE$OE_indirect[rownames(SR.indirect$OE$OE_indirect) %in% parm,]
+        OE_df.indirect <- SR.indirect$OE$OE_indirect[rownames(SR.indirect$OE$OE_indirect) %in% parm, , drop = FALSE]
         data <- data.ori[data.ori[,ID.char] %in% parm,]
-        indirect.ratio_df <- SR.indirect$indirect.ratio[rownames(SR.indirect$indirect.ratio) %in% parm,]
-        indirect.rate_df <- SR.indirect$indirect.rate[rownames(SR.indirect$indirect.rate) %in% parm,]
+        indirect.ratio_df <- SR.indirect$indirect.ratio[rownames(SR.indirect$indirect.ratio) %in% parm, , drop = FALSE]
+        indirect.rate_df <- SR.indirect$indirect.rate[rownames(SR.indirect$indirect.rate) %in% parm, , drop = FALSE]
       } else {
         stop("Argument 'parm' includes invalid elements!")
       }
@@ -428,19 +430,18 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,ID.char],identity),
                                    FUN=function(df) SR_indirect.all.events(df))
       prov_all.events <- unique(data[data$all.events==1,ID.char])
+      CI.combined <- cbind(confint.finite, confint.no.events, confint.all.events)
+      if (ncol(CI.combined) > 1) {
+        CI.combined <- CI.combined[, order(as.numeric(colnames(CI.combined)))]
+      }
 
-
-      CI.indirect_ratio <- as.numeric(rbind(t(indirect.ratio_df),
-                                            cbind(confint.finite,
-                                                  confint.no.events,
-                                                  confint.all.events)))
+      CI.indirect_ratio <- as.numeric(rbind(t(indirect.ratio_df), CI.combined))
       CI.indirect_ratio <- as.data.frame(matrix(CI.indirect_ratio, ncol = 3, byrow = T))
       colnames(CI.indirect_ratio) <- c("indirect_ratio", "CI_ratio.lower", "CI_ratio.upper")
-      #rownames(CI.indirect_ratio) <- names(indirect.rate_df)
-      rownames(CI.indirect_ratio) <- c(prov_finite, prov_no.events, prov_all.events)
+      rownames(CI.indirect_ratio) <- rownames(indirect.ratio_df)
 
       if ("ratio" %in% measure){
-        return_ls$CI.indirect_ratio <- CI.indirect_ratio[order(as.numeric(rownames(CI.indirect_ratio))),]
+        return_ls$CI.indirect_ratio <- CI.indirect_ratio
       }
 
       if ("rate" %in% measure){
@@ -454,7 +455,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
 
 
     if ("direct" %in% stdz) {
-      SR.direct <- SM_output(fit, stdz = c("direct"), measure = c("ratio", "rate"))
+      SR.direct <- SM_output(fit, stdz = c("direct"), measure = c("ratio", "rate"), null = null)
       if (missing(parm)) {
         OE_df.direct <- SR.direct$OE$OE_direct[1,1]
         direct.ratio_df <- SR.direct$direct.ratio
@@ -462,8 +463,8 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         data <- data.ori
       } else if (class(parm) == class(data[,ID.char])) {
         OE_df.direct <- SR.direct$OE$OE_direct[1,1]
-        direct.ratio_df <- SR.direct$direct.ratio[rownames(SR.direct$direct.ratio) %in% parm,]
-        direct.rate_df <- SR.direct$direct.rate[rownames(SR.direct$direct.rate) %in% parm,]
+        direct.ratio_df <- SR.direct$direct.ratio[rownames(SR.direct$direct.ratio) %in% parm, , drop = FALSE]
+        direct.rate_df <- SR.direct$direct.rate[rownames(SR.direct$direct.rate) %in% parm, , drop = FALSE]
         data <- data.ori[data.ori[,ID.char] %in% parm,]
       } else {
         stop("Argument 'parm' includes invalid elements!")
@@ -516,18 +517,19 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       confint.all.events <- sapply(unique(data[(data$no.events==0) & (data$all.events==1),]$ID),
                                    FUN = function(ID) SR_direct.all.events(ID))
       prov_all.events <- unique(data[data$all.events==1,ID.char])
-      CI.direct_ratio <- as.numeric(rbind(t(direct.ratio_df),
-                                          cbind(confint.finite,
-                                                confint.no.events,
-                                                confint.all.events)))
+      CI.combined <- cbind(confint.finite, confint.no.events, confint.all.events)
+      colnames(CI.combined) <- c(prov_finite, prov_no.events, prov_all.events)
+      if (ncol(CI.combined) > 1) {
+        CI.combined <- CI.combined[, order(as.numeric(colnames(CI.combined)))]
+      }
 
+      CI.direct_ratio <- as.numeric(rbind(t(direct.ratio_df), CI.combined))
       CI.direct_ratio <- as.data.frame(matrix(CI.direct_ratio, ncol = 3, byrow = T))
       colnames(CI.direct_ratio) <- c("direct_ratio", "CI_ratio.lower", "CI_ratio.upper")
-      #rownames(CI.direct_ratio) <- names(direct.rate_df)
-      rownames(CI.direct_ratio) <- c(prov_finite, prov_no.events, prov_all.events)
+      rownames(CI.direct_ratio) <- rownames(direct.ratio_df)
 
       if ("ratio" %in% measure){
-        return_ls$CI.direct_ratio <- CI.direct_ratio[order(as.numeric(rownames(CI.direct_ratio))),]
+        return_ls$CI.direct_ratio <- CI.direct_ratio
       }
 
       if ("rate" %in% measure){

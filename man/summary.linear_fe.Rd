@@ -44,4 +44,12 @@ ID <- ExampleDataLinear$ID
 fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
 summary(fit_fe)
 
+data(ExampleDataLinear)
+Y <- ExampleDataLinear$Y
+Z <- ExampleDataLinear$Z
+ID <- ExampleDataLinear$ID
+
+fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+summary(fit_re)
+
 }
