@@ -39,7 +39,7 @@
 #'
 #' @examples
 #' data(data_FE)
-#' fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
+#' fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 #' confint(fit_fe, option = "gamma")
 #' confint(fit_fe, option = "SR")
 #'
@@ -345,16 +345,13 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       return(return_mat[indices,])
     }
   }
-  if ("gamma" %in% option){
+  if (option == "gamma"){
+    if (alternative != "two.sided")
+      stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
     return_mat <- confint_fe_gamma(fit, test, parm, alpha, alternative)
-    if (alternative == "greater") {
-      return_mat$gamma.upper <- NULL
-    }
-    else if(alternative == "less") {
-      return_mat$gamma.lower <- NULL
-    }
     return(return_mat)
-  } else if ("SM" %in% option){
+  }
+  else if (option == "SM"){
     data.ori <- fit$data_include
     population_rate <- sum(data.ori[,Y.char])/nrow(data.ori) * 100  #sum(O_i)/N *100%
     return_ls <- list()
@@ -441,6 +438,12 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       rownames(CI.indirect_ratio) <- rownames(indirect.ratio_df)
 
       if ("ratio" %in% measure){
+        attr(CI.indirect_ratio, "confidence_level") <- paste(level * 100, "%")
+        attr(CI.indirect_ratio, "type") <- ifelse(alternative == "greater", "upper one-sided",
+                                            ifelse(alternative == "less", "lower one-sided",
+                                                   "two-sided"))
+        attr(CI.indirect_ratio, "description") <- "Indirect Standardized Ratio"
+        attr(CI.indirect_ratio, "model") <- "FE logis"
         return_ls$CI.indirect_ratio <- CI.indirect_ratio
       }
 
@@ -449,6 +452,14 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         rate.upper <- pmax(pmin(CI.indirect_ratio$CI_ratio.upper * population_rate, 100), 0)
         CI.indirect_rate <- as.data.frame(cbind(indirect.rate_df, rate.lower, rate.upper))
         colnames(CI.indirect_rate) <- c("indirect_rate", "CI_rate.lower", "CI_rate.upper")
+
+        attr(CI.indirect_rate, "confidence_level") <- paste(level * 100, "%")
+        attr(CI.indirect_rate, "type") <- ifelse(alternative == "greater", "upper one-sided",
+                                                  ifelse(alternative == "less", "lower one-sided",
+                                                         "two-sided"))
+        attr(CI.indirect_rate, "description") <- "Indirect Standardized Rate"
+        attr(CI.indirect_rate, "model") <- "FE logis"
+        attr(CI.indirect_rate, "population_rate") <- population_rate
         return_ls$CI.indirect_rate <- CI.indirect_rate
       }
     }
@@ -529,6 +540,13 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       rownames(CI.direct_ratio) <- rownames(direct.ratio_df)
 
       if ("ratio" %in% measure){
+        attr(CI.direct_ratio, "confidence_level") <- paste(level * 100, "%")
+        attr(CI.direct_ratio, "type") <- ifelse(alternative == "greater", "upper one-sided",
+                                                  ifelse(alternative == "less", "lower one-sided",
+                                                         "two-sided"))
+        attr(CI.direct_ratio, "description") <- "Direct Standardized Ratio"
+        attr(CI.direct_ratio, "model") <- "FE logis"
+        attr(CI.direct_ratio, "population_rate") <- population_rate
         return_ls$CI.direct_ratio <- CI.direct_ratio
       }
 
@@ -537,6 +555,14 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         rate.upper <- pmax(pmin(CI.direct_ratio$CI_ratio.upper * population_rate, 100), 0)
         CI.direct_rate <- as.data.frame(cbind(direct.rate_df, rate.lower, rate.upper))
         colnames(CI.direct_rate) <- c("direct_rate", "CI_rate.lower", "CI_rate.upper")
+
+        attr(CI.direct_rate, "confidence_level") <- paste(level * 100, "%")
+        attr(CI.direct_rate, "type") <- ifelse(alternative == "greater", "upper one-sided",
+                                                 ifelse(alternative == "less", "lower one-sided",
+                                                        "two-sided"))
+        attr(CI.direct_rate, "description") <- "Direct Standardized Rate"
+        attr(CI.direct_rate, "model") <- "FE logis"
+        attr(CI.direct_rate, "population_rate") <- population_rate
         return_ls$CI.direct_rate <- CI.direct_rate
       }
     }

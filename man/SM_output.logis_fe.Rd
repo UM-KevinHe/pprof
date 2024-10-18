@@ -52,7 +52,7 @@ Provide direct/indirect standardized ratio/rate for a fixed effect logistic mode
 }
 \examples{
 data(data_FE)
-fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
+fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 SR <- SM_output(fit_fe, stdz = "direct", measure = "rate")
 SR$direct.rate
 

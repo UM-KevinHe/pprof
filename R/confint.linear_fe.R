@@ -137,6 +137,12 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
 
       CI_indirect <- data.frame(SM = SM$indirect.difference, indirect.Lower = L_indirect, indirect.Upper = U_indirect)
       colnames(CI_indirect) <- c("Indirect.Difference", "indirect.Lower", "indirect.Upper")
+      attr(CI_indirect, "confidence_level") <- paste(level * 100, "%")
+      attr(CI_indirect, "type") <- ifelse(alternative == "greater", "upper one-sided",
+                                        ifelse(alternative == "less", "lower one-sided",
+                                               "two-sided"))
+      attr(CI_indirect, "description") <- "Indirect Standardized Difference"
+      attr(CI_indirect, "model") <- "FE linear"
       return_ls$CI.indirect <- CI_indirect[ind, ]
     }
 
@@ -169,6 +175,12 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
 
       CI_direct <- data.frame(SM = SM$direct.difference, direct.Lower = L_direct, direct.Upper = U_direct)
       colnames(CI_direct) <- c("Direct.Difference", "direct.Lower", "direct.Upper")
+      attr(CI_direct, "confidence_level") <- paste(level * 100, "%")
+      attr(CI_direct, "type") <- ifelse(alternative == "greater", "upper one-sided",
+                                         ifelse(alternative == "less", "lower one-sided",
+                                                "two-sided"))
+      attr(CI_direct, "description") <- "Direct Standardized Difference"
+      attr(CI_direct, "model") <- "FE linear"
       return_ls$CI.direct <- CI_direct[ind, ]
     }
   }

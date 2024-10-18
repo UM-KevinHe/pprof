@@ -27,7 +27,7 @@
 #'
 #' @examples
 #' data(data_FE)
-#' fit_fe <- logis_fe(data_FE$Y, data_FE$Z, data_FE$ID, message = FALSE)
+#' fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 #' summary.wald <- summary(fit_fe, level = 0.95, test = "wald")
 #' summary.wald
 #'

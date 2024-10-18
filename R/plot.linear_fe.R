@@ -6,7 +6,7 @@
 #' @param theme theme for the plot. The default is \code{theme_bw()}.
 #' @param point_size size of the points in the caterpillar plot. The default value is 2.
 #' @param point_color color of the points in the plot. The default value is "#475569".
-#' @param medianline_value valuie of the horizontal median line. The default value is 0.
+#' @param medianline_value value of the horizontal median line. The default value is 0.
 #' @param medianline_color color of the median line. The default value is "#64748b".
 #' @param medianline_size size of the median line. The default value is 1.
 #' @param medianline_type line type for the median line. The default value is "dashed".
