@@ -68,6 +68,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
   Z.char <- fit$char_list$Z.char
   ID.char <- fit$char_list$ID.char
   data <- fit$data_include[, c(Y.char, Z.char, ID.char)] #already sorted by provider ID
+  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
 
   # gamma <- fit$df.prov$gamma_est #not use the potential Inf of gamma here
   gamma <- fit$coefficient$gamma
@@ -83,6 +84,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
       parm <- as.numeric(parm)
     }
     if (class(parm) == class(data[, ID.char]) & !(test == "wald" | (test == "score" & !score_modified))) {
+      n.prov <- n.prov[names(n.prov) %in% parm]
       data <- data[data[, ID.char] %in% parm, ]
     } else if (class(parm) == class(data[, ID.char]) & (test == "wald" | (test == "score" & !score_modified))) {
       indices <- which(unique(data[, ID.char]) %in% parm)
@@ -132,6 +134,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
                             stat = results[3,],
                             row.names = unique(data[, ID.char]))
     colnames(return_df) <- c("flag", "p value", "stat")
+    attr(return_df, "provider size") <- n.prov
 
     return(return_df)
 
@@ -166,6 +169,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
                               stat=z.score,
                               row.names = unique(data[, ID.char])[indices])
       colnames(return_df) <- c("flag", "p value", "stat")
+      attr(return_df, "provider size") <- n.prov[indices]
 
       return(return_df)
 
@@ -196,6 +200,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
                               stat=z.score,
                               row.names = unique(data[, ID.char]))
       colnames(return_df) <- c("flag", "p value", "stat")
+      attr(return_df, "provider size") <- n.prov
 
       return(return_df)
     }
@@ -239,6 +244,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
                             stat = results[3,],
                             row.names = unique(data[, ID.char]))
     colnames(return_df) <- c("flag", "p value", "stat")
+    attr(return_df, "provider size") <- n.prov
 
     return(return_df)
   } else if (test=="wald") { # invalid in presence of outlying providers
@@ -288,9 +294,11 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
     colnames(result) <- c("flag", "p value", "stat", "Std.Error")
 
     if (missing(parm)) {
+      attr(result, "provider size") <- n.prov
       return(result)
     }
     else {
+      attr(result, "provider size") <- n.prov[indices]
       return(result[indices, ])
     }
   }

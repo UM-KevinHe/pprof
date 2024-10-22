@@ -51,15 +51,15 @@ test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative
   ID.char <- fit$char_list$ID.char
   gamma <- fit$coefficient$gamma
   se.gamma <- sqrt(fit$variance$gamma)
+  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, ID.char]), length)
+  m <- length(fit$coefficient$gamma)
+  p <- length(fit$coefficient$beta)
+  n <- nrow(fit$data_include)
   gamma.null <- ifelse(null=="median", median(gamma),
                        ifelse(null=="mean", sum(n.prov*gamma)/n,
                               ifelse(class(null)=="numeric", null[1],
                                      stop("Argument 'null' NOT as required!",call.=F))))
 
-  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, ID.char]), length)
-  m <- length(fit$coefficient$gamma)
-  p <- length(fit$coefficient$beta)
-  n <- nrow(fit$data_include)
 
   # test statistics
   stat <- (gamma - gamma.null)/se.gamma
@@ -87,13 +87,17 @@ test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative
   result <- data.frame(flag = factor(flag), p = p_value, stat = stat, Std.Error = se.gamma)
   colnames(result) <- c("flag", "p value", "stat", "Std.Error")
 
-  if (missing(parm)) {return(result)}
+  if (missing(parm)) {
+    attr(result, "provider size") <- n.prov
+    return(result)
+  }
   else {
     if (is.integer(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
     if (class(parm) == class(data[, ID.char])) {
-      result = result[row.names(result) %in% parm, ]
+      attr(result, "provider size") <- n.prov[names(n.prov) %in% parm]
+      result <- result[row.names(result) %in% parm, ]
       return(result)
     } else {
       stop("Argument 'parm' includes invalid elements!")

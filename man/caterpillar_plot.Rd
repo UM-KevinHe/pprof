@@ -22,7 +22,7 @@ caterpillar_plot(
 )
 }
 \arguments{
-\item{CI}{a dataframe containing the standardized measure values, along with their confidence interval lower and upper bounds.}
+\item{CI}{a dataframe from \code{confint} containing the standardized measure values, along with their confidence interval lower and upper bounds.}
 
 \item{theme}{theme for the plot. The default is \code{theme_bw()}.}
 

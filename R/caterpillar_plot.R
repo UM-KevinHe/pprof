@@ -2,7 +2,7 @@
 #'
 #' Generates a caterpillar plot for standardized measures from different models using a provided CI dataframe.
 #'
-#' @param CI a dataframe containing the standardized measure values, along with their confidence interval lower and upper bounds.
+#' @param CI a dataframe from `confint` containing the standardized measure values, along with their confidence interval lower and upper bounds.
 #' @param theme theme for the plot. The default is \code{theme_bw()}.
 #' @param point_size size of the points in the caterpillar plot. The default value is 2.
 #' @param point_color color of the points in the plot. The default value is "#475569".
@@ -112,14 +112,14 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
       panel.grid.minor = element_blank(),
       axis.text.x = element_blank(),
       axis.ticks.x = element_blank(),
-      axis.title = element_text(size = 18),
-      axis.text = element_text(size = 15),
-      plot.title = element_text(size = 20),
+      axis.title = element_text(size = 18, face = "bold"),
+      axis.text = element_text(size = 15, face = "bold"),
+      plot.title = element_text(size = 20, face = "bold"),
       legend.position = c(0.95, 0.05),
       legend.justification = c("right", "bottom"),
       legend.box.background = element_rect(color = "black", linewidth = 0.5),
       legend.box.margin = margin(5, 5, 5, 5),
-      legend.text = element_text(size = 15)
+      legend.text = element_text(size = 15, face = "bold")
     )
 
   return(caterpillar_p)

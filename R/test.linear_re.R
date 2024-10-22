@@ -82,13 +82,17 @@ test.linear_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two
   result <- data.frame(flag = factor(flag), p = p_value, stat = Z_score, Std.Error = denom)
   colnames(result) <- c("flag", "p value", "stat", "Std.Error")
 
-  if (missing(parm)) {return(result)}
+  if (missing(parm)) {
+    attr(result, "provider size") <- n.prov
+    return(result)
+  }
   else {
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
     if (class(parm) == class(data[, ID.char])) {
-      result = result[row.names(result) %in% parm, ]
+      attr(result, "provider size") <- n.prov[names(n.prov) %in% parm]
+      result <- result[row.names(result) %in% parm, ]
       return(result)
     } else {
       stop("Argument 'parm' includes invalid elements!")
