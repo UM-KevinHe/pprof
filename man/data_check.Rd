@@ -2,38 +2,31 @@
 % Please edit documentation in R/data_check.R
 \name{data_check}
 \alias{data_check}
-\title{Data Quality Check including}
+\title{Data Quality Check}
 \usage{
 data_check(Y, Z, ID)
 }
 \arguments{
-\item{Y}{a numerical vector, with values of 0 or 1, indicating the outcome variable.}
+\item{Y}{a numeric vector indicating the outcome variable.}
 
-\item{Z}{a matrix or data frame containing covariates.}
+\item{Z}{a matrix or data frame representing the covariates.}
 
-\item{ID}{a vector representing the provider id. Its elements can be either numeric values or characters.}
-
-\item{...}{}
+\item{ID}{a numeric vector representing the grouping identifier.}
 }
 \value{
 No return value, called for side effects.
 }
 \description{
-Data Quality Check including
+Conduct data quality check including checking missingness, variation, correlation and VIF of variables.
 }
 \details{
 The function performs the following checks:
 \itemize{
-\item \strong{Missingness}: Checks for any missing values in the dataset and provides a summary of missing data.
-\item \strong{Variation}: Identifies covariates with zero or near-zero variance which might affect model stability.
-\item \strong{Correlation}: Analyzes pairwise correlation among covariates and highlights highly correlated pairs.
-\item \strong{VIF}: Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.
+\item {Missingness}{Checks for any missing values in the dataset and provides a summary of missing data.}
+\item {Variation}{Identifies covariates with zero or near-zero variance which might affect model stability.}
+\item {Correlation}{Analyzes pairwise correlation among covariates and highlights highly correlated pairs.}
+\item {VIF}{Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.}
 }
-
-Users can either set \code{check=TRUE} in the \code{logis_fe} function to invoke this function,
-or directly call this function for data quality checking purposes.
+If issues arise when using the model functions \code{logis_fe}, \code{linear_fe} and \code{linear_re},
+this function can be called for data quality checking purposes.
 }
-\keyword{check}
-\keyword{data}
-\keyword{internal,}
-\keyword{quality,}

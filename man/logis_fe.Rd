@@ -119,8 +119,11 @@ followed by fixing the provider effect to update the covariate coefficient.
 We suggest using the default \code{"SerBIN"} option as it typically converges much faster for most datasets.
 However, in rare cases where the SerBIN algorithm encounters second-order derivative irreversibility leading to an error,
 users can consider using the \code{"BAN"} option as an alternative.
-
 For a deeper understanding, please consult the original article for detailed insights.
+
+If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
+which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
+For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
 }
 \examples{
 data(data_FE)
@@ -135,6 +138,9 @@ Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and infe
 He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis providers; adjusting for hospital effects.
 \emph{Lifetime Data Analysis}, \strong{19}: 490-512.
 \cr
+}
+\seealso{
+\code{\link{data_check}}
 }
 \keyword{(CENR)}
 \keyword{Algorithm,}

@@ -52,6 +52,12 @@
 #' allowing for customization of model fitting options such as controlling the optimization method or adjusting convergence criteria.
 #' By default, the model is fitted using REML (restricted maximum likelihood).
 #'
+#' If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
+#' which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
+#' For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
+#'
+#' @seealso \code{\link{data_check}}
+#'
 #' @importFrom lme4 lmer fixef ranef
 #'
 #' @export
@@ -84,7 +90,7 @@ linear_re <- function(formula = NULL, data = NULL,
                       Y.char = NULL, Z.char = NULL, ID.char = NULL, ...) {
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
-
+    data <- data[complete.cases(data), ] # Remove rows with missing values
     terms <- terms(formula)
     response <- as.character(attr(terms, "variables"))[2]
     predictors <- attr(terms, "term.labels")
@@ -109,6 +115,8 @@ linear_re <- function(formula = NULL, data = NULL,
 
     if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
+
+    data <- data[complete.cases(data), ] # Remove rows with missing values
     data <- data[order(factor(data[, ID.char])),]
     # Y <- data[, Y.char, drop = F]
     # Z <- as.matrix(data[, Z.char, drop = F])
@@ -124,6 +132,7 @@ linear_re <- function(formula = NULL, data = NULL,
       stop("Dimensions of the input data do not match!!", call.=F)}
 
     data <- as.data.frame(cbind(Y, ID, Z))
+    data <- data[complete.cases(data), ] # Remove rows with missing values
     Y.char <- colnames(data)[1]
     ID.char <- colnames(data)[2]
     Z.char <- colnames(Z)

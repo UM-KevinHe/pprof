@@ -78,6 +78,10 @@ or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \
 In addition to these input formats, all arguments from the \code{\link{lmer}} function can be modified via \verb{\\dots},
 allowing for customization of model fitting options such as controlling the optimization method or adjusting convergence criteria.
 By default, the model is fitted using REML (restricted maximum likelihood).
+
+If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
+which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
+For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
 }
 \examples{
 data(ExampleDataLinear)
@@ -100,4 +104,7 @@ fit_re3 <- linear_re(formula, data)
 Bates D, Maechler M, Bolker B, Walker S (2015). \emph{Fitting Linear Mixed-Effects Models Using lme4}.
 Journal of Statistical Software, 67(1), 1-48.
 \cr
+}
+\seealso{
+\code{\link{data_check}}
 }

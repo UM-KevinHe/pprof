@@ -54,9 +54,13 @@
 #' We suggest using the default `"SerBIN"` option as it typically converges much faster for most datasets.
 #' However, in rare cases where the SerBIN algorithm encounters second-order derivative irreversibility leading to an error,
 #' users can consider using the `"BAN"` option as an alternative.
-#'
 #' For a deeper understanding, please consult the original article for detailed insights.
 #'
+#' If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
+#' which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
+#' For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
+#'
+#' @seealso \code{\link{data_check}}
 #'
 #' @return A list of objects with S3 class \code{"logis_fe"}:
 #' \item{coefficient}{a list containing the estimated coefficients:
@@ -111,6 +115,7 @@ logis_fe <- function(formula = NULL, data = NULL,
   if (!is.null(formula) && !is.null(data)) {
     if (message == TRUE) message("Input format: formula and data.")
 
+    data <- data[complete.cases(data), ] # Remove rows with missing values
     formula_terms <- terms(formula)
     Y.char <- as.character(attr(formula_terms, "variables"))[2]
     predictors <- attr(formula_terms, "term.labels")
@@ -132,6 +137,7 @@ logis_fe <- function(formula = NULL, data = NULL,
     if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
 
+    data <- data[complete.cases(data), ] # Remove rows with missing values
     Y <- data[, Y.char]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
     ID <- data[, ID.char, drop = F]
@@ -143,8 +149,14 @@ logis_fe <- function(formula = NULL, data = NULL,
       stop("Dimensions of the input data do not match!!", call.=F)
     }
 
+    data <- data.frame(Y, ID, Z)
+    data <- data[complete.cases(data), ] # Remove rows with missing values
+    Y.char <- colnames(data)[1]
+    ID.char <- colnames(data)[2]
     Z.char <- colnames(Z)
-    Z <- model.matrix(reformulate(Z.char), Z)[, -1, drop = FALSE]
+    Y <- data[, Y.char]
+    ID <- data[, ID.char]
+    Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
   }
   else {
     stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ID.char, or (3) Y, Z, and ID.", call.=FALSE)

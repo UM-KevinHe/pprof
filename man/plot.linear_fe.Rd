@@ -7,7 +7,7 @@
 \method{plot}{linear_fe}(
   fit,
   null = "median",
-  target = 1,
+  target = 0,
   alpha = c(0.05, 0.01),
   labels = c("lower", "expected", "higher"),
   point_colors = c("#E69F00", "#56B4E9", "#009E73"),

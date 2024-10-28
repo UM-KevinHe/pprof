@@ -52,6 +52,11 @@
 #' a dataset along with the column names of the response, covariates, and group identifier;
 #' or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the group identifier vector \eqn{\boldsymbol{\gamma}}.
 #'
+#' If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
+#' which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
+#' For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
+#'
+#' @seealso \code{\link{data_check}}
 #'
 #' @importFrom Matrix bdiag
 #'
@@ -86,26 +91,10 @@ linear_fe <- function(formula = NULL, data = NULL,
     if (!is.null(formula) && !is.null(data)) {
       message("Input format: formula and data.")
 
+      data <- data[complete.cases(data), ] # Remove rows with missing values
       formula_terms <- terms(formula)
       Y.char <- as.character(attr(formula_terms, "variables"))[2]
       predictors <- attr(formula_terms, "term.labels")
-      # id_var <- NULL
-      # for (term in predictors) {
-      #   if (grepl("as.factor", term)) {
-      #     id_var <- gsub("as.factor\\((.*)\\)", "\\1", term)
-      #     predictors <- predictors[predictors != term]
-      #     break
-      #   }
-      # }
-      # if (is.null(id_var)) {
-      #   for (term in predictors) {
-      #     if (is.factor(data[[term]])) {
-      #       id_var <- term
-      #       predictors <- predictors[predictors != id_var]
-      #       break
-      #     }
-      #   }
-      # }
 
       ID.char <- gsub(".*id\\(([^)]+)\\).*", "\\1", predictors[grepl("id\\(", predictors)])
       Z.char <- predictors[!grepl("id\\(", predictors)]
@@ -126,6 +115,7 @@ linear_fe <- function(formula = NULL, data = NULL,
       if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
         stop("Some of the specified columns are not in the data!", call.=FALSE)
 
+      data <- data[complete.cases(data), ] # Remove rows with missing values
       Y <- data[, Y.char]
       Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
       ID <- data[, ID.char, drop = F]
@@ -137,14 +127,21 @@ linear_fe <- function(formula = NULL, data = NULL,
         stop("Dimensions of the input data do not match!!", call.=F)
       }
 
+      data <- data.frame(Y, ID, Z)
+      data <- data[complete.cases(data), ] # Remove rows with missing values
+      Y.char <- colnames(data)[1]
+      ID.char <- colnames(data)[2]
       Z.char <- colnames(Z)
-      Z <- model.matrix(reformulate(Z.char), Z)[, -1, drop = FALSE]
+      Y <- data[, Y.char]
+      ID <- data[, ID.char]
+      Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
     }
     else {
       stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ID.char, or (3) Y, Z, and ID.", call.=FALSE)
     }
 
     data <- data.frame(Y, ID, Z)
+    data <- data[complete.cases(data), ] # Remove rows with missing values
     Y.char <- colnames(data)[1]
     ID.char <- colnames(data)[2]
     Z.char <- colnames(Z)
@@ -205,9 +202,9 @@ linear_fe <- function(formula = NULL, data = NULL,
     variance$gamma <- var_gamma
 
     # AIC and BIC
-    log_likelihood <- - (n/2) * log(2*pi) - (n/2) * log(sigma_hat_sq) - (SSR/(2*sigma_hat_sq))
+    log_likelihood <- - (n/2) * log(2*pi) - (n/2) * log(sum(residuals^2)/n) - (SSR/(2*sum(residuals^2)/n))
     AIC <- -2*log_likelihood + 2*(m+p+1)
-    BIC <- -2*log_likelihood + 2*(m+p) * log(n)
+    BIC <- -2*log_likelihood + (m+p+1) * log(n)
 
     char_list <- list(Y.char = Y.char,
                       ID.char = ID.char,
@@ -219,6 +216,7 @@ linear_fe <- function(formula = NULL, data = NULL,
     if (!is.null(formula) && !is.null(data)){
       message("Input format: formula and data.")
 
+      data <- data[complete.cases(data), ] # Remove rows with missing values
       formula_terms <- terms(formula)
       Y.char <- as.character(attr(formula_terms, "variables"))[2]
       predictors <- attr(formula_terms, "term.labels")
@@ -244,6 +242,7 @@ linear_fe <- function(formula = NULL, data = NULL,
       if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
         stop("Some of the specified columns are not in the data!", call.=FALSE)
 
+      data <- data[complete.cases(data), ] # Remove rows with missing values
       original_ID <- data[, ID.char, drop = F]
       data[,ID.char] <- as.factor(data[,ID.char])
       data <- data[order(factor(data[,ID.char])),]
@@ -257,6 +256,7 @@ linear_fe <- function(formula = NULL, data = NULL,
         stop("Dimensions of the input data do not match!!", call.=F)
       }
       data <- as.data.frame(cbind(Y, ID, Z))
+      data <- data[complete.cases(data), ] # Remove rows with missing values
       Y.char <- colnames(data)[1]
       ID.char <- colnames(data)[2]
       Z.char <- colnames(Z)

@@ -78,6 +78,10 @@ The function accepts three different input formats:
 a formula and dataset, where the formula is of the form \code{response ~ covariates + id(group)}, with \code{group} representing the group identifier;
 a dataset along with the column names of the response, covariates, and group identifier;
 or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the group identifier vector \eqn{\boldsymbol{\gamma}}.
+
+If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
+which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
+For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
 }
 \examples{
 data(ExampleDataLinear)
@@ -100,4 +104,7 @@ fit_fe3 <- linear_fe(formula, data)
 R Core Team (2023). \emph{The R Stats Package: lm}.
 Available at: \url{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html}
 \cr
+}
+\seealso{
+\code{\link{data_check}}
 }
