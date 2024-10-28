@@ -81,7 +81,8 @@ SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate",
     Exp <- as.numeric(plogis(gamma.null + Z_beta)) # expected prob of events under null
 
     df.prov <- data.frame(Obs_provider = sapply(split(data[,Y.char],data[, ID.char]),sum),
-                          Exp.indirect_provider = sapply(split(Exp, prov), sum))
+                          Exp.indirect_provider = sapply(split(Exp, prov), sum),
+                          Var.indirect_provider = sapply(split(Exp*(1-Exp), prov), sum))
     rownames(df.prov) <- rownames(gamma)
     OE_list$OE_indirect <- df.prov[ind, ]
     df.prov$IS_Ratio <- df.prov$Obs_provider / df.prov$Exp.indirect_provider #indirect standardized ratio: O_i/E_i

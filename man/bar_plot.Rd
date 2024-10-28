@@ -33,11 +33,12 @@ bar_plot(
 A ggplot object representing the bar chart of flagging results.
 }
 \description{
-Generates a bar plot for flagging percentage based on grouped sample sizes
+Generates a bar plot for flagging percentage based on grouped sample sizes.
 }
 \details{
 This function generates a bar chart to visualize the percentage of flagging results based on provider size.
-The providers are grouped into a specified number of groups based on their sample sizes,
+The input data frame \code{test_df} must be the output from package \code{pprof}'s \code{test} function.
+The providers are grouped into a specified number of groups (\code{group_num}) based on their sample sizes,
 and an additional "overall" group is included to show the flagging results across all providers.
 }
 \examples{

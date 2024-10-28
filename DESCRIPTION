@@ -13,7 +13,7 @@ Description: If a fixed effect model is applied to data involving large-scale pr
    the Fisher information matrix becomes significantly high. This software package serves 
    as an implementation of the SerBIN method proposed by Wu et al. (2022), addressing and 
    mitigating the computational challenges associated with such large-scale provider data.
-License: GPL (>= 3)
+License: MIT
 LazyData: true
 Imports:
     Rcpp, 
@@ -34,7 +34,7 @@ Imports:
     lme4
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends:
-    R (>= 3.5.0)
+    R (>= 4.0.0)
 Suggests: 
     knitr,
     rmarkdown,

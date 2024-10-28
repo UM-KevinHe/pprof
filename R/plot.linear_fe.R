@@ -1,177 +1,217 @@
-#' Get Caterpillar Plot for Standardized Measures
+#' Get Funnel Plot for institutional comparisons
 #'
-#' Provide caterpillar plot for standardized measures from a fixed/random effect linear model.
+#' Creates a funnel plot from a linear fixed-effect model to compare provider performance.
 #'
-#' @param fit a model fitted from \code{linear_fe} or \code{linear_re}.
-#' @param theme theme for the plot. The default is \code{theme_bw()}.
-#' @param point_size size of the points in the caterpillar plot. The default value is 2.
-#' @param point_color color of the points in the plot. The default value is "#475569".
-#' @param medianline_value value of the horizontal median line. The default value is 0.
-#' @param medianline_color color of the median line. The default value is "#64748b".
-#' @param medianline_size size of the median line. The default value is 1.
-#' @param medianline_type line type for the median line. The default value is "dashed".
-#' @param errorbar_width the width of the error bars (horizontal ends of the CI bars). The default value is 0.
-#' @param errorbar_size the thickness of the error bars. The default value is 0.5.
-#' @param errorbar_alpha transparency level for the error bars. A value between 0 and 1, where 0 is completely transparent and 1 is fully opaque. The default value is 0.5.
-#' @param errorbar_color color of the error bars. The default value is "#94a3b8".
-#' @param use_flag logical; if \code{TRUE}, the error bars are colored to show providers' flags based on their performance. The default is \code{FALSE}.
-#' @param flag_color vector of colors used for flagging providers when \code{use_flag = TRUE}. The default value is \code{c("#E69F00", "#56B4E9", "#009E73")}.
-#' @param \dots Additional arguments to pass to the internal \code{confint.linear_fe} function for a \code{linear_fe} object or
-#' the internal \code{confint.linear_re} function for a \code{linear_re} object. These control the type of standardized measure and
-#' confidence intervals to be displayed. The \code{option} argument is fixed to \code{"SM"}, meaning that only standardized measures are supported.
+#' @param fit a model fitted from \code{linear_fe}.
+#' @param null a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.
+#' @param target a numeric value representing the target outcome. The default value is 0.
+#' @param alphas a vector of significance levels. The default is alpha = c(0.05, 0.01).
+#' @param labels a vector of labels for the plot.
+#' @param point_colors a vector of colors representing different provider flags. The default is \code{c("#E69F00", "#56B4E9", "#009E73")}.
+#' @param point_shapes a vector of shapes representing different provider flags. The default is \code{c(15, 17, 19)}.
+#' @param point_size size of the points. The default is 2.
+#' @param point_alpha alpha of the points. The default is 0.8.
+#' @param line_size size of all lines, including control limits and the target line. The default is 0.8.
+#' @param target_line_type line type for the target line. The default is "longdash".
 #'
 #' @details
-#' This function creates caterpillar plots to visualize the standardized measures (indirect or direct) from a fitted fixed effect linear model.
-#' Each provider's standardized measure value is represented as a point, and a reference line is shown at the value specified by `medianline_value` (default is 0).
-#' The confidence intervals (CI) are displayed as error bars: for \code{alternative = "two.sided"}, the full CI is shown;
-#' for \code{alternative = "greater"}, the error bar extends from the lower bound to the standardized measure value;
-#' and for \code{alternative = "less"}, it extends from the standardized measure value to the upper bound.
+#' This function generates a funnel plot from a linear fixed-effect model. Currently, it only supports the indirect standardized difference.
+#' The parameter `alpha` is a vector used to calculate control limits at different significance levels.
+#' The first value in the vector is used as the significance level for flagging each provider, utilizing the \code{\link{test.linear_fe}} function.
 #'
-#' When \code{use_flag = TRUE}, the plot will use colors specified by `flag_color` to show the flags of providers.
-#' Each error bar will be colored to reflect the flag, making it easy to identify providers with different performance levels.
-#' When \code{use_flag = FALSE}, all error bars will have the same color, specified by `errorbar_color`.
-#' This provides a simpler visualization without flagging individual providers.
+#' @seealso \code{\link{linear_fe}}, \code{\link{linear_fe}}, \code{\link{linear_fe}}
 #'
-#' @return A list of ggplot objects containing caterpillar plots for indirect and/or direct standardized measures.
-#' \item{indirect}{a ggplot object for the indirect standardized measure, if `stdz` includes \code{"indirect"}.}
-#' \item{direct}{a ggplot object for the direct standardized measure, if `stdz` includes \code{"direct"}.}
+#' @return A ggplot object representing the funnel plot.
 #'
 #' @examples
 #' data(ExampleDataLinear)
 #' Y <- ExampleDataLinear$Y
-#' ID <- ExampleDataLinear$ID
 #' Z <- ExampleDataLinear$Z
-#'
+#' ID <- ExampleDataLinear$ID
 #' fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
 #' plot(fit_fe)
 #'
-#' @seealso \code{\link{linear_fe}}, \code{\link{confint.linear_fe}}
-#'
-#' @importFrom ggplot2 ggplot aes theme element_blank labs ggtitle geom_hline geom_point scale_x_continuous scale_y_continuous scale_linetype_manual scale_fill_manual position_jitter geom_errorbar coord_flip theme_minimal theme_bw
-#' @importFrom ggpubr annotate_figure ggarrange text_grob
+#' @import dplyr rlang
+#' @import poibin
 #'
 #' @exportS3Method plot linear_fe
 
-plot.linear_fe <- function(fit, theme = theme_bw(), point_size = 2, point_color = "#475569",
-                           medianline_value = 0, medianline_color = "#64748b", medianline_size = 1, medianline_type = "dashed",
-                           errorbar_width = 0, errorbar_size = 0.5, errorbar_alpha = 0.5, errorbar_color = "#94a3b8",
-                           use_flag = FALSE, flag_color = c("#E69F00", "#56B4E9", "#009E73"),
-                           ...) {
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!",call.=F)
+plot.linear_fe <- function(fit, null = "median", target = 0, alpha = c(0.05, 0.01),
+                           labels = c("lower", "expected", "higher"),
+                           point_colors = c("#E69F00", "#56B4E9", "#009E73"),
+                           point_shapes = c(15, 17, 19),
+                           point_size = 2, point_alpha = 0.8,
+                           line_size = 0.8,
+                           target_line_type = "longdash"
+) {
+  if (missing(fit)) stop ("Argument 'fit' is required!", call.=F)
+  if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!", call.=F)
 
-  args <- list(...)
-  stdz <- if ("stdz" %in% names(args)) args$stdz else "indirect"
-  alternative <- if("alternative" %in% names(args)) args$alternative else "two.sided"
-  if ("option" %in% names(args)) {
-    if (args$option == "gamma") {
-      stop("Caterpillar plot only supports standardized measure and the 'option' argument must be 'SM'.", call. = FALSE)
-    }
-  }
-  CI <- do.call(confint, c(list(fit), args))
+  data <- fit$data_include
+  SM <- SM_output(fit, null = null, stdz = "indirect")
+  processed_data <- cbind(SM$indirect.difference, SM$OE$OE_indirect)
+  colnames(processed_data) <- c("indicator", "Obs", "Exp")
+  processed_data$precision <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
 
-  return_ls <- list()
 
-  if ("indirect" %in% stdz) {
-    CI$CI.indirect$prov <- rownames(CI$CI.indirect)
-    if (alternative == "two.sided") {
-      CI$CI.indirect$flag <- ifelse(CI$CI.indirect$indirect.Upper < medianline_value, "Lower",
-                                    ifelse(CI$CI.indirect$indirect.Lower > medianline_value, "Higher", "Normal"))
-    } else if (alternative == "greater") {
-      CI$CI.indirect$flag <- ifelse(CI$CI.indirect$indirect.Lower > medianline_value, "Higher", "Normal")
-    } else if (alternative == "less") {
-      CI$CI.indirect$flag <- ifelse(CI$CI.indirect$indirect.Upper < medianline_value, "Lower", "Normal")
-    }
+  flagging <- test(fit, level = 1-alpha[1], null = null)
+  processed_data <- cbind(processed_data, flagging)
+  plot_data <- processed_data %>%
+    arrange(precision) %>%
+    cross_join(tibble(alpha = alpha)) %>%
+    mutate(
+      lower = target - qnorm(1 - alpha / 2) * sqrt(1 / precision) * fit$sigma,
+      upper = target + qnorm(1 - alpha / 2) * sqrt(1 / precision) * fit$sigma
+    ) %>%
+    select(precision, indicator, Exp, flag, alpha, lower, upper) %>%
+    mutate(
+      alpha = factor(alpha),
+    )
 
-    p_indirect <- ggplot(CI$CI.indirect, aes(x = reorder(prov, Indirect.Difference), y = Indirect.Difference))
-    if (use_flag == TRUE) {
-      p_indirect <- p_indirect +
-        geom_errorbar(aes(ymin = if (alternative == "less") Indirect.Difference else indirect.Lower,
-                          ymax = if (alternative == "greater") Indirect.Difference else indirect.Upper,
-                          color = flag),
-                      width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
-        scale_color_manual(values = flag_color, guide = guide_legend(title = NULL, box.linetype = "solid",
-                                                                     override.aes = list(linewidth = 1.5) ))
-    } else {
-      p_indirect <- p_indirect +
-        geom_errorbar(aes(ymin = if (alternative == "less") Indirect.Difference else indirect.Lower,
-                          ymax = if (alternative == "greater") Indirect.Difference else indirect.Upper),
-                      width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha, color = errorbar_color)
-    }
+  plot <- ppfunnel_linear(plot_data,
+                          target,
+                          alpha,
+                          labels,
+                          point_colors,
+                          point_shapes,
+                          point_size,
+                          point_alpha,
+                          line_size,
+                          target_line_type
+  )
 
-    p_indirect <- p_indirect +
-      geom_point(size = point_size, color = point_color) +
-      geom_hline(aes(yintercept = medianline_value),
-                 color = medianline_color, linetype = medianline_type, linewidth = medianline_size) +
-      scale_x_discrete(expand = expansion(add = 5)) +
-      labs(x = "Provider", y = "Indirect Standardized Difference", title = "Indirect Standardized Difference Caterpillar Plot") +
-      theme +
-      theme(
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.title = element_text(size = 18),
-        axis.text = element_text(size = 15),
-        plot.title = element_text(size = 20),
-        legend.position = c(0.95, 0.05),
-        legend.justification = c("right", "bottom"),
-        legend.box.background = element_rect(color = "black", linewidth = 0.5),
-        legend.box.margin = margin(5, 5, 5, 5),
-        legend.text = element_text(size = 15)
-      )
-    return_ls$indirect <- p_indirect
-  }
-
-  if ("direct" %in% stdz) {
-    CI$CI.direct$prov <- rownames(CI$CI.direct)
-    if (alternative == "two.sided") {
-      CI$CI.direct$flag <- ifelse(CI$CI.direct$direct.Upper < medianline_value, "Lower",
-                                    ifelse(CI$CI.direct$direct.Lower > medianline_value, "Higher", "Normal"))
-    } else if (alternative == "greater") {
-      CI$CI.direct$flag <- ifelse(CI$CI.direct$direct.Lower > medianline_value, "Higher", "Normal")
-    } else if (alternative == "less") {
-      CI$CI.direct$flag <- ifelse(CI$CI.direct$direct.Upper < medianline_value, "Lower", "Normal")
-    }
-
-    p_direct <- ggplot(CI$CI.direct, aes(x = reorder(prov, Direct.Difference), y = Direct.Difference))
-    if (use_flag == TRUE) {
-      p_direct <- p_direct +
-        geom_errorbar(aes(ymin = if (alternative == "less") Direct.Difference else direct.Lower,
-                          ymax = if (alternative == "greater") Direct.Difference else direct.Upper,
-                          color = flag),
-                      width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
-        scale_color_manual(values = flag_color, guide = guide_legend(title = NULL, box.linetype = "solid",
-                                                                     override.aes = list(linewidth = 1.5) ))
-    } else {
-      p_direct <- p_direct +
-        geom_errorbar(aes(ymin = if (alternative == "less") Direct.Difference else direct.Lower,
-                          ymax = if (alternative == "greater") Direct.Difference else direct.Upper),
-                      width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha, color = errorbar_color)
-    }
-
-    p_direct <- p_direct +
-      geom_point(size = point_size, color = point_color) +
-      geom_hline(aes(yintercept = medianline_value),
-                 color = medianline_color, linetype = medianline_type, linewidth = medianline_size) +
-      labs(x = "Provider", y = "Direct Standardized Difference", title = "Direct Standardized Measure Caterpillar Plot") +
-      theme +
-      theme(
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.title = element_text(size = 18),
-        axis.text = element_text(size = 15),
-        plot.title = element_text(size = 20),
-        legend.position = c(0.95, 0.05),
-        legend.justification = c("right", "bottom"),
-        legend.box.background = element_rect(color = "black", linewidth = 0.5),
-        legend.box.margin = margin(5, 5, 5, 5),
-        legend.text = element_text(size = 15)
-      )
-    return_ls$direct <- p_direct
-  }
-
-  return(return_ls)
+  return(plot)
 }
+
+
+#' @import ggplot2 RColorBrewer
+ppfunnel_linear <- function(plot_data,
+                            target,
+                            alpha,
+                            labels,
+                            point_colors,
+                            point_shapes,
+                            point_size,
+                            point_alpha,
+                            line_size,
+                            target_line_type,
+                            xlab = "Precision",
+                            ylab = "Outcome",
+                            legend_justification = "center",
+                            legend_position = "right",
+                            point_legend_title = "Flagging",
+                            linetype_legend_title = "Ctrl Limit",
+                            legend_title_size = 14,
+                            legend_size = 14,
+                            legend_box = "vertical",
+                            axis_title_size = 14,
+                            axis_text_size = 14,
+                            plot_title = "Funnel Plot",
+                            plot_title_size = 18
+) {
+
+  # Check if plot_data is a data frame
+  if (!is.data.frame(plot_data)) {
+    stop("plot_data must be a data frame")
+  }
+
+  data <- plot_data %>% filter(alpha == alpha[1])
+
+  # Ensure that data$flag is a factor
+  data$flag <- factor(data$flag, levels = c(-1, 0, 1))
+
+  # Create labels for the legend
+  labs_color <- paste0(labels, " (", table(data$flag), ")")
+
+  # Add dummy rows for missing levels with NA values
+  missing_levels <- setdiff(c(-1, 0, 1), unique(data$flag))
+  if (length(missing_levels) > 0) {
+    dummy_data <- data.frame(flag = factor(missing_levels, levels = c(-1, 0, 1)),
+                             precision = NA,
+                             indicator = NA)
+    data <- bind_rows(data, dummy_data)
+  }
+
+  num_levels <- length(levels(data$flag))
+
+  # # Check if the length of shapes and color_palette is the same as the number of levels
+  # if (length(color_palette) != num_levels) {
+  #   stop("The length of color_palette must be the same as the number of levels in data$flag")
+  # }
+  #
+  # # Check if the length of labels is the same as the number of levels
+  # if (length(labels) != num_levels) {
+  #   stop("The length of labels must be the same as the number of levels in data$flag")
+  # }
+
+
+  # Assign each level of data$flag to a color from the palette
+  color_mapping <- setNames(point_colors, levels(data$flag))
+  # Assign each level of data$flag to a shape
+  shapes_mapping <- setNames(point_shapes, levels(data$flag))
+
+  # Create a named vector of lables for the legend
+  labels <- setNames(labels, levels(data$flag))
+
+  xmax <- max(plot_data$precision)
+  xmin <- min(plot_data$precision)
+  ymax <- max(max(plot_data$upper), max(plot_data$indicator))
+  ymin <- min(min(plot_data$lower), min(plot_data$indicator))
+
+  labs_linetype <- paste0((1 - alpha) * 100, "%")
+
+  values_linetype <- c('solid', 'dashed', 'dotted', 'dotdash', 'longdash', 'twodash')[1:length(alpha)]
+
+  values_linetype <- values_linetype[order(alpha)]
+  labs_linetype <- labs_linetype[order(alpha)]
+
+  plot <-
+    ggplot() +
+    scale_x_continuous(limits = c(xmin, xmax),
+                       expand = c(1, 1)/50) +
+    scale_y_continuous(breaks = round(seq(0, ymax, by=1), 1),
+                       limits = c(ymin, ymax),
+                       expand = c(1, 1)/50) +
+    geom_point(data = data, aes(x = precision, y = indicator, shape = flag, color = flag), size = point_size, alpha = point_alpha) +
+    scale_shape_manual(
+      name = bquote(.(point_legend_title) ~ "(" * alpha == .(alpha[1]) * ")"),
+      labels = labs_color,
+      values = shapes_mapping
+    ) +
+    scale_color_manual(
+      name = bquote(.(point_legend_title) ~ "(" * alpha == .(alpha[1]) * ")"),
+      labels = labs_color,
+      values = color_mapping
+    ) +
+    geom_line(data = plot_data, aes(x = precision, y = lower, group = alpha, linetype = alpha), linewidth = line_size) +
+    geom_line(data = plot_data, aes(x = precision, y = upper, group = alpha, linetype = alpha), linewidth = line_size) +
+    scale_linetype_manual(
+      name =  linetype_legend_title,
+      values = values_linetype,
+      labels = labs_linetype
+    ) +
+    guides(shape = guide_legend(order = 1), color = guide_legend(order = 1), linetype = guide_legend(reverse = TRUE, order = 2)) +
+    geom_hline(yintercept = target, linewidth = line_size, linetype = target_line_type) +
+    theme_classic() +
+    theme(
+      legend.justification = legend_justification,
+      legend.position = legend_position,
+      legend.box = legend_box,
+      legend.title = element_text(size = legend_title_size),
+      legend.text = element_text(size = legend_size),
+      axis.title = element_text(size = axis_title_size, margin = margin(t = 0, r = 0, b = 0, l = 0)),
+      axis.text = element_text(size = axis_text_size),
+      plot.title = element_text(hjust = 0.5, size = plot_title_size),
+      text = element_text(size = 13),
+      legend.background = element_rect(fill = "transparent", colour = NULL, linewidth = 0, linetype = "solid"),
+    ) +
+    labs(
+      x = xlab,
+      y = ylab,
+      title = plot_title
+    )
+
+
+  return(plot)
+}
+

@@ -2,78 +2,58 @@
 % Please edit documentation in R/plot.logis_fe.R
 \name{plot.logis_fe}
 \alias{plot.logis_fe}
-\title{Get Caterpillar Plot for Standardized Measures}
+\title{Get Funnel Plot for institutional comparisons}
 \usage{
 \method{plot}{logis_fe}(
   fit,
-  theme = theme_bw(),
+  null = "median",
+  test = "score",
+  target = 1,
+  alpha = c(0.05, 0.01),
+  labels = c("lower", "expected", "higher"),
+  point_colors = c("#E69F00", "#56B4E9", "#009E73"),
+  point_shapes = c(15, 17, 19),
   point_size = 2,
-  point_color = "#475569",
-  medianline_value = NULL,
-  medianline_color = "#64748b",
-  medianline_size = 1,
-  medianline_type = "dashed",
-  errorbar_width = 0,
-  errorbar_size = 0.5,
-  errorbar_alpha = 0.5,
-  errorbar_color = "#94a3b8",
-  use_flag = FALSE,
-  flag_color = c("#E69F00", "#56B4E9", "#009E73"),
-  ...
+  point_alpha = 0.8,
+  line_size = 0.8,
+  target_line_type = "longdash"
 )
 }
 \arguments{
 \item{fit}{a model fitted from \code{logis_fe}.}
 
-\item{theme}{theme for the plot. The default is \code{theme_bw()}.}
+\item{null}{a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.}
 
-\item{point_size}{size of the points in the caterpillar plot. The default value is 2.}
+\item{test}{a character string specifying the type of testing method to be conducted. The default is "score".}
 
-\item{point_color}{color of the points in the plot. The default value is "#475569".}
+\item{target}{a numeric value representing the target outcome. The default value is 1.}
 
-\item{medianline_value}{value of the horizontal median line. The default value is NULL.}
+\item{labels}{a vector of labels for the plot.}
 
-\item{medianline_color}{color of the median line. The default value is "#64748b".}
+\item{point_colors}{a vector of colors representing different provider flags. The default is \code{c("#E69F00", "#56B4E9", "#009E73")}.}
 
-\item{medianline_size}{size of the median line. The default value is 1.}
+\item{point_shapes}{a vector of shapes representing different provider flags. The default is \code{c(15, 17, 19)}.}
 
-\item{medianline_type}{line type for the median line. The default value is "dashed".}
+\item{point_size}{size of the points. The default is 2.}
 
-\item{errorbar_width}{the width of the error bars (horizontal ends of the CI bars). The default value is 0.}
+\item{point_alpha}{alpha of the points. The default is 0.8.}
 
-\item{errorbar_size}{the thickness of the error bars. The default value is 0.5.}
+\item{line_size}{size of all lines, including control limits and the target line. The default is 0.8.}
 
-\item{errorbar_alpha}{transparency level for the error bars. A value between 0 and 1, where 0 is completely transparent and 1 is fully opaque. The default value is 0.5.}
+\item{target_line_type}{line type for the target line. The default is "longdash".}
 
-\item{errorbar_color}{color of the error bars. The default value is "#94a3b8".}
-
-\item{use_flag}{logical; if \code{TRUE}, the error bars are colored to show providers' flags based on their performance. The default is \code{FALSE}.}
-
-\item{flag_color}{vector of colors used for flagging providers when \code{use_flag = TRUE}. The default value is \code{c("#E69F00", "#56B4E9", "#009E73")}.}
-
-\item{\dots}{Additional arguments to pass to the internal \code{confint.linear_fe} function for a \code{linear_fe} object or
-the internal \code{confint.linear_re} function for a \code{linear_re} object. These control the type of standardized measure and
-confidence intervals to be displayed. The \code{option} argument is fixed to \code{"SM"}, meaning that only standardized measures are supported.}
+\item{alphas}{a vector of significance levels. The default is alpha = c(0.05, 0.01).}
 }
 \value{
-A list of ggplot objects containing caterpillar plots for indirect and/or direct standardized ratio/rate based on the value of \code{stdz} and \code{measure}.
+A ggplot object representing the funnel plot.
 }
 \description{
-Provide caterpillar plot for standardized measures from a fixed effect logistic model.
+Creates a funnel plot from a logistic fixed-effect model to compare provider performance.
 }
 \details{
-This function creates caterpillar plots to visualize the standardized ratio/rate (indirect or direct) from a fitted fixed effect logistic model.
-Each provider's standardized measure value is represented as a point, and a reference line is shown at the value specified by \code{medianline_value} (default is NULL).
-If \code{medianline_value} is not specified, for standardized ratios, the reference line will be set at 1;
-for standardized rates, the reference line will be set at the population rate, which represents the average outcome across all data points.
-The confidence intervals (CI) are displayed as error bars: for \code{alternative = "two.sided"}, the full CI is shown;
-for \code{alternative = "greater"}, the error bar extends from the lower bound to the standardized measure value;
-and for \code{alternative = "less"}, it extends from the standardized measure value to the upper bound.
-
-When \code{use_flag = TRUE}, the plot will use colors specified by \code{flag_color} to show the flags of providers.
-Each error bar will be colored to reflect the flag, making it easy to identify providers with different performance levels.
-When \code{use_flag = FALSE}, all error bars will have the same color, specified by \code{errorbar_color}.
-This provides a simpler visualization without flagging individual providers.
+This function generates a funnel plot from a logistic fixed-effect model. Currently, it only supports the indirect standardized ratio.
+The parameter \code{alpha} is a vector used to calculate control limits at different significance levels.
+The first value in the vector is used as the significance level for flagging each provider, utilizing the \code{\link{test.logis_fe}} function.
 }
 \examples{
 data(data_FE)
@@ -82,5 +62,5 @@ plot(fit_fe)
 
 }
 \seealso{
-\code{\link{logis_fe}}, \code{\link{confint.logis_fe}}
+\code{\link{logis_fe}}, \code{\link{SM_output.linear_re}}, \code{\link{test.logis_fe}}
 }

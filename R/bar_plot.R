@@ -32,7 +32,7 @@
 #' @seealso \code{\link{test.linear_fe}}, \code{\link{test.linear_re}}, \code{\link{test.logis_fe}}
 #'
 #' @importFrom ggplot2 ggplot geom_bar geom_text labs aes theme element_blank ggtitle scale_x_continuous scale_y_continuous scale_linetype_manual scale_fill_manual theme_minimal theme_bw
-#' @importFrom tidyverse group_by summerise mutate
+#' @importFrom dplyr group_by summarise mutate
 #'
 #' @export
 
