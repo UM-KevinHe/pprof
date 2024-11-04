@@ -4,36 +4,36 @@
 #'
 #' @param formula a two-sided formula object describing the model to be fitted,
 #' with the response variable on the left of a ~ operator and covariates on the right,
-#' separated by + operators. The fixed effect of the grouping identifier is specified using \code{id()}.
+#' separated by + operators. The fixed effect of the provider identifier is specified using \code{id()}.
 #' @param data a data frame containing the variables named in the `formula`,
 #' or the columns specified by `Y.char`, `Z.char`, and `ID.char`.
 #' @param Y.char a character string specifying the column name of the response variable in the `data`.
 #' @param Z.char a character vector specifying the column names of the covariates in the `data`.
-#' @param ID.char a character string specifying the column name of the grouping identifier in the `data`.
+#' @param ID.char a character string specifying the column name of the provider identifier in the `data`.
 #' @param Y a numeric vector representing the response variable.
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
-#' @param ID a numeric vector representing the grouping identifier.
+#' @param ID a numeric vector representing the provider identifier.
 #' @param method a character string specifying the method to fit the model.
 #' \itemize{
 #'   \item{\code{"pl"}} (default) uses profile likelihood to fit the model,.
-#'   \item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the grouping identifier
+#'   \item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the provider identifier
 #' }
 #'
 #' @return A list of objects with S3 class \code{"linear_fe"}:
 #' \item{coefficient}{a list containing the estimated coefficients:
-#'   \code{beta}, the fixed effects for each predictor, and \code{gamma}, the effect for each group.}
+#'   \code{beta}, the fixed effects for each predictor, and \code{gamma}, the effect for each provider.}
 #' \item{variance}{a list containing the variance estimates:
-#'   \code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the group effects.}
+#'   \code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the provider effects.}
 #' \item{sigma}{the residual standard error.}
 #' \item{fitted}{the fitted values of each individual.}
 #' \item{observation}{the original response of each individual.}
 #' \item{residuals}{the residuals of each individual, that is response minus fitted values}
 #' \item{linear_pred}{the linear predictor of each individual.}
-#' \item{data_include}{the data used to fit the model, sorted by the group identifier.
+#' \item{data_include}{the data used to fit the model, sorted by the provider identifier.
 #' For categorical covariates, this includes the dummy variables created for
 #' all categories except the reference level.}
 #' \item{char_list}{a list of the character vectors representing the column names for
-#' the response variable, covariates, and group identifier.
+#' the response variable, covariates, and provider identifier.
 #' For categorical variables, the names reflect the dummy variables created for each category.}
 #' \item{method}{the method used for model fitting, either \code{"Profile Likelihood"} or \code{"Dummy"}.}
 #' \item{neg2Loglkd}{log likelihood}
@@ -43,14 +43,14 @@
 #' @details
 #' This function is used to fit a fixed effect linear model of the form:
 #' \deqn{Y_{ij} = \gamma_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in group \eqn{i}, \eqn{\gamma_i} is the group-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
+#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider \eqn{i}, \eqn{\gamma_i} is the provider-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 #' The default method for fitting the model is profile likelihood, but dummy encoding can also be used by specifying the appropriate method.
-#' When the number of groups is very large, we recommend using the profile likelihood method, as it is significantly faster than dummy encoding.
+#' When the number of providers is very large, we recommend using the profile likelihood method, as it is significantly faster than dummy encoding.
 #'
 #' The function accepts three different input formats:
-#' a formula and dataset, where the formula is of the form \code{response ~ covariates + id(group)}, with \code{group} representing the group identifier;
-#' a dataset along with the column names of the response, covariates, and group identifier;
-#' or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the group identifier vector \eqn{\boldsymbol{\gamma}}.
+#' a formula and dataset, where the formula is of the form \code{response ~ covariates + id(provider)}, with \code{provider} representing the provider identifier;
+#' a dataset along with the column names of the response, covariates, and provider identifier;
+#' or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector \eqn{\boldsymbol{\gamma}}.
 #'
 #' If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
 #' which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
@@ -223,7 +223,8 @@ linear_fe <- function(formula = NULL, data = NULL,
       ID.char <- gsub(".*id\\(([^)]+)\\).*", "\\1", predictors[grepl("id\\(", predictors)])
       Z.char <- predictors[!grepl("id\\(", predictors)]
       original_ID <- data[, ID.char, drop = F]
-      data[,ID.char] <- as.factor(data[,ID.char])
+      #data[,ID.char] <- as.factor(data[,ID.char])
+      data[[ID.char]] <- as.factor(data[[ID.char]])
 
       if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
         stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
@@ -232,7 +233,7 @@ linear_fe <- function(formula = NULL, data = NULL,
       new_formula <- as.formula(paste(Y.char, "~", ID.char, "+",
                                       paste(Z.char, collapse = " + ")))
 
-      data <- data[order(factor(data[,ID.char])),]
+      data <- data[order(factor(data[[ID.char]])),]
       formula <- update(new_formula, . ~ . - 1)
       fit_lm <- lm(formula, data = data)
     }
@@ -297,7 +298,8 @@ linear_fe <- function(formula = NULL, data = NULL,
 
     # Variance
     sigma_hat_sq <- sum$sigma^2
-    varcov <- sigma_hat_sq * solve(t(X.model)%*%X.model)
+    #varcov <- sigma_hat_sq * solve(t(X.model)%*%X.model)
+    varcov <- vcov(fit_lm)
     varcov_beta <- matrix(varcov[(m+1):(m+p), (m+1):(m+p)], ncol = p, nrow = p)
     rownames(varcov_beta) <- Z.char
     colnames(varcov_beta) <- Z.char

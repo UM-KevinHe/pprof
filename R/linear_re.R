@@ -104,7 +104,7 @@ linear_re <- function(formula = NULL, data = NULL,
     if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
       stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
 
-    data <- data[order(factor(data[, id_var])),]
+    data <- data[order(factor(data[[id_var]])),]
     # Y <- data[, Y.char, drop = F]
     # Z <- as.matrix(data[, Z.char, drop = F])
     # ID <- data[, ID.char, drop = F]

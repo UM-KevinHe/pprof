@@ -1,18 +1,19 @@
 Package: pprof
 Type: Package
-Title: GLM Model with Provider as Fixed Effects
+Title: Linear and Generalized Linear Models for Provider Profiling with Fixed and Random Effects
 Version: 1.3
-Date: 2024-03-15
+Date: 2024-11-04
 Authors@R: c(
    person("Yubo", "Shao", email = "ybshao@umich.edu", role = c("aut", "cre")),
    person("Wenbo", "Wu", email = "Wenbo.Wu@nyulangone.org", role = "aut"),
    person("Kevin", "He", email = "kevinhe@umich.edu", role = "aut"),
    person("Tao", "Xu", email = "taoxu@med.umich.edu", role = c("ctb")))
-Description: If a fixed effect model is applied to data involving large-scale providers, 
-   the default glm function will be unsuitable since the computational burden of inverting 
-   the Fisher information matrix becomes significantly high. This software package serves 
-   as an implementation of the SerBIN method proposed by Wu et al. (2022), addressing and 
-   mitigating the computational challenges associated with such large-scale provider data.
+Description: Implements linear and generalized linear models for provider profiling,
+    incorporating both fixed and random effects. For large-scale providers, the linear 
+    profiled-based method and the SerBIN method (Wu et al., 2022) for binary data 
+    reduce the computational burden. Provides post-modeling features including 
+    indirect and direct standardization measures, hypothesis testing, 
+    confidence intervals, and post-estimation visualization.
 License: MIT
 LazyData: true
 Imports:
