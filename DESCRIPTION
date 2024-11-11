@@ -1,6 +1,6 @@
 Package: pprof
 Type: Package
-Title: Linear and Generalized Linear Models for Provider Profiling with Fixed and Random Effects
+Title: Risk-adjusted Models, Standardized Measure Calculation, Hypothesis Testing and Visualization for Provider Profiling
 Version: 1.3
 Date: 2024-11-04
 Authors@R: c(

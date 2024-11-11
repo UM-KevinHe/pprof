@@ -45,7 +45,7 @@ and an additional "overall" group is included to show the flagging results acros
 data(ExampleDataLinear)
 fit_linear <- linear_fe(Y = ExampleDataLinear$Y, Z = ExampleDataLinear$Z, ID = ExampleDataLinear$ID)
 test_linear <- test(fit_linear)
-bar_plot(CI_linear$CI.indirect, use_flag =T)
+bar_plot(CI_linear$CI.indirect)
 
 data(data_FE)
 fit_logis <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)

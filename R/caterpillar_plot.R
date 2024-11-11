@@ -50,6 +50,7 @@
 #'
 #' @importFrom ggplot2 ggplot aes theme element_blank labs ggtitle geom_hline geom_point scale_x_continuous scale_y_continuous scale_linetype_manual scale_fill_manual position_jitter geom_errorbar coord_flip theme_minimal theme_bw
 #' @importFrom ggpubr annotate_figure ggarrange text_grob
+#' @importFrom dplyr arrange
 #'
 #' @export
 
@@ -78,12 +79,14 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
   if (attr(CI, "type") == "two-sided") {
     CI$flag <- ifelse(CI$Upper < medianline_value, "Lower",
                       ifelse(CI$Lower > medianline_value, "Higher", "Normal"))
+    # CI$flag <- factor(CI$flag, levels = c("Normal", "Lower", "Higher"), ordered = T)
   } else if (attr(CI, "type") == "upper one-sided") {
     CI$flag <- ifelse(CI$Lower > medianline_value, "Higher", "Normal")
   } else if (attr(CI, "type") == "lower one-sided") {
     CI$flag <- ifelse(CI$Upper < medianline_value, "Lower", "Normal")
   }
 
+  # CI$flag <- factor(CI$flag, levels = c("Normal", "Lower", "Higher"), ordered = T)
   caterpillar_p <- ggplot(CI, aes(x = reorder(prov, SM), y = SM))
   if (use_flag == TRUE) {
     caterpillar_p <- caterpillar_p +
@@ -93,6 +96,7 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
                     width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
       scale_color_manual(values = flag_color, guide = guide_legend(title = NULL, box.linetype = "solid",
                                                                    override.aes = list(linewidth = 1.5) ))
+
   } else {
     caterpillar_p <- caterpillar_p +
       geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") SM else Lower,
