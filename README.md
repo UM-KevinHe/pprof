@@ -1,6 +1,6 @@
-# srrFE
+# pprof
 
-The `srrFE` software package is designed to implement the SerBIN method proposed by [Wu et al. (2022)](doi:10.1002/sim.9387), specifically tailored to address the computational challenges inherent in large-scale provider data. Additionally, the package is equipped with functions designed to estimate standardized ratios and rates and conduct hypothesis testing.
+The `pprof` software package provides a variety of risk-adjusted models for provider profiling, capable of addressing the computational challenges inherent in large-scale provider data. It also includes standardized measure calculations, hypothesis testing to evaluate provider performance, and visualization tools for comprehensive analysis.
 
 ## Introduction
 
@@ -10,16 +10,21 @@ Beyond the computational challenge, the current literature lacks a suitable infe
 
 ## Installation
 
-* To install the latest development version from GitHub:
-```
-require("devtools")
-require("remotes")
-remotes::install_github("UM-KevinHe/srrFE", ref = "main")
-```
+**Note:** *The package is still in the early stages of development, so please don't hesitate to report any problems you may experience.* 
+
+You can install 'pprof' via CRAN or github:
+
+    install.packages("pprof")
+
+    #or
+    require("devtools")
+    require("remotes")
+    remotes::install_github("UM-KevinHe/pprof", ref = "main")
+
 
 ## Getting started
-
-See ["Getting Started with srrFE"](https://um-kevinhe.github.io/srrFE/articles/srrFE.html)
+We recommend to start with <a href="https://um-kevinhe.github.io/surtvep/articles/surtvep.html#quick-start" target="_blank">tutorial</a>, which provides an overview of the package's usage, including preprocessing, model training
+See ["Getting Started with pprof"](https://um-kevinhe.github.io/srrFE/articles/srrFE.html)
 
 ## Details of the algorithms
 

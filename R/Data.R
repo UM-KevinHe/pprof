@@ -1,6 +1,6 @@
 #' Example data with binary outcomes
 #'
-#' A simulated data set containing 784 observations, 5 continuous covariates and 10 providers.
+#' A simulated data set containing 8160 observations, 5 continuous covariates and 100 providers.
 #' @name ExampleDataBinary
 #' @docType ExampleDataBinary
 #' @usage data(ExampleDataBinary)
@@ -29,7 +29,7 @@
 
 #' Example data with continuous outcomes
 #'
-#' A simulated data set containing 784 observations, 5 continuous covariates and 10 providers.
+#' A simulated data set containing 7901 observations, 5 continuous covariates and 100 providers.
 #' @name ExampleDataLinear
 #' @docType data
 #' @usage data(ExampleDataLinear)

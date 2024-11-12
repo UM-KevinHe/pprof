@@ -1,9 +1,9 @@
-#' Data Quality Check
+#' Data quality check
 #'
 #' Conduct data quality check including checking missingness, variation, correlation and VIF of variables.
 #'
 #' @param Y a numeric vector indicating the outcome variable.
-#' @param Z a matrix or data frame representing the covariates.
+#' @param Z a matrix or data frame representing covariates.
 #' @param ID a numeric vector representing the grouping identifier.
 #'
 #' @details The function performs the following checks:

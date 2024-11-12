@@ -9,7 +9,7 @@ template:
 
 
 vignettes:
-  - vignettes/srrFE.Rmd
+  - vignettes/pprof.Rmd
 
 authors:
   Yubo Shao:

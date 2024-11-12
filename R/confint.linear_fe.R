@@ -1,13 +1,13 @@
-#' Get Confidence Intervals for Provider Effects or Standardized Measures
+#' Get confidence intervals for provider effects or standardized measures
 #'
-#' Provide confidence interval for provider effects \eqn{\hat{\gamma}} or standardized measures from a fixed effect linear model.
+#' Provide confidence intervals for provider effects or standardized measures from a fixed effect linear model.
 #'
 #' @param fit a model fitted from \code{linear_fe}.
-#' @param parm specifies a subset of providers for which confidence intervals are to be given.
+#' @param parm specify a subset of providers for which confidence intervals are given.
 #' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level. The default value is 0.95.
 #' @param option 	a character string specifying whether the confidence intervals
-#' should be provided for provider effects, standardized measures:
+#' should be provided for provider effects or standardized measures:
 #'   \itemize{
 #'   \item {\code{"gamma"}} provider effect (only supports \code{"two.sided"} confidence interval).
 #'   \item {\code{"SM"}} standardized measures.
@@ -22,17 +22,16 @@
 #'
 #' @return A list of data frames containing the confidence intervals based on the values of `option` and `stdz`.
 #' \item{CI.gamma}{Confidence intervals for provider effects if `option` includes \code{"gamma"}.}
-#' \item{CI.indirect}{Confidence intervals for indirect standardized difference if `option` includes \code{"SM"} and `stdz` includes \code{"indirect"}.}
-#' \item{CI.direct}{Confidence intervals for direct standardized difference if `option` includes \code{"SM"} and `stdz` includes \code{"direct"}.}
+#' \item{CI.indirect}{Confidence intervals for indirect standardized differences if `option` includes \code{"SM"} and `stdz` includes \code{"indirect"}.}
+#' \item{CI.direct}{Confidence intervals for direct standardized differences if `option` includes \code{"SM"} and `stdz` includes \code{"direct"}.}
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
+#' outcome <- ExampleDataLinear$Y
+#' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
-#' Z <- ExampleDataLinear$Z
-#'
-#' fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
-#' confint(fit_fe)
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' confint(fit_linear)
 #'
 #' @importFrom stats pnorm qnorm pt qt
 #'
