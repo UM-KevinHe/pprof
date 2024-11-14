@@ -79,9 +79,13 @@
 #' fit_fe3 <- linear_fe(formula, data)
 #'
 #' @references
+#' Hsiao, C. (2022). Analysis of panel data (No. 64). Cambridge university press.
+#' \cr
+#'
 #' R Core Team (2023). \emph{The R Stats Package: lm}.
 #' Available at: \url{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html}
 #' \cr
+#'
 
 linear_fe <- function(formula = NULL, data = NULL,
                       Y = NULL, Z = NULL, ID = NULL,

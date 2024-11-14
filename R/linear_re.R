@@ -82,8 +82,6 @@
 #' Bates D, Maechler M, Bolker B, Walker S (2015). \emph{Fitting Linear Mixed-Effects Models Using lme4}.
 #' Journal of Statistical Software, 67(1), 1-48.
 #' \cr
-#'
-
 
 linear_re <- function(formula = NULL, data = NULL,
                       Y = NULL, Z = NULL, ID = NULL,
