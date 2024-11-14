@@ -91,25 +91,24 @@ body {
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>The <code>pprof</code> software package is designed to implement the
-SerBIN method proposed by <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387" class="external-link">Wu et
-al. (2022)</a>, specifically tailored to address the computational
-challenges inherent in large-scale provider data. Additionally, the
-package is equipped with functions designed to estimate standardized
-ratios and rates and conduct hypothesis testing.</p>
-<p>In this vignette, we will explore the fundamental usage of the
-functions integrated into the current R package.</p>
-<ul>
-<li><p>For more details, please see the <a href="https://um-kevinhe.github.io/pprof/reference/index.html">Reference</a>
-section.</p></li>
-<li><p>To learn the algorithms employed by <code>pprof</code>, refer to
-the <a href="https://um-kevinhe.github.io/pprof/articles/Models.html">Models</a>
-section or see the <a href="https://um-kevinhe.github.io/pprof/articles/Articles.html">original
-articles</a>.</p></li>
-<li><p>If you need a more concise guide to quickly use the package,
-please refer to the <a href="https://um-kevinhe.github.io/pprof/articles/Quick-start.html">Quick
-Start</a>.</p></li>
-</ul>
+<p>The <code>pprof</code> software package is designed to provide
+different risk-adjusted models for data with various types of outcomes,
+specifically focusing on the field of provider profiling. In addition to
+model fitting, the package equips a suite of functions for calculating
+standardized ratios and rates, conducting statistical inference, and
+generating various plots to aid in the interpretation of results.
+Currently, the package supports logistic fixed effect models for binary
+outcomes, as well as linear fixed effect and linear random effect models
+for continuous outcomes. It is under ongoing development, with plans to
+incorporate additional models and more robust testing methods.</p>
+<p>This tutorial provides a brief overview of the package’s structure
+and a detailed guide of how to utilize the various functions. Simulated
+example data (<code>ExampleDataBinary</code>) with binary outcomes will
+be used as an illustration, alongside a real data set with continuous
+outcomes (<code>ecls_data</code>) to demonstrate its application with
+continuous outcomes. Throughout the tutorial, we will cover the key
+features and capabilities of <code>pprof</code>, presenting examples and
+use cases to illustrate its functionality comprehensively.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -121,20 +120,81 @@ Start</a>.</p></li>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+<h2 id="structure">Structure<a class="anchor" aria-label="anchor" href="#structure"></a>
 </h2>
-<p>We will employ a simulated dataset contained in the current package
-to illustrate how to utilize this package for data analysis. The data
-named <code>data_FE</code> includes the information of:</p>
-<ul>
-<li><p>Y: the binary outcome variable</p></li>
-<li><p>ID: provider identifiers</p></li>
-<li><p>Z: 4 continuous covariates</p></li>
-</ul>
+<p>This section presents the structure and workflow of the
+<code>pprof</code> package. Generally, for datasets with continuous
+outcomes, either a fixed effect model or a random effect model can be
+fitted, while for binary outcomes, the current version only supports the
+fixed effect model. For the calculation of standardized measures, both
+indirect and direct standardization methods are provided for all models.
+Regarding hypothesis testing of provider effects, <code>pprof</code>
+includes the flagging based on each provider’s performance, categorizing
+them as 1 (statistically higher), 0 (as expected), or -1 (statistically
+lower). Confidence intervals are provided for both provider effects and
+standardized measures. Additionally, various visualizations are equipped
+to facilitate interpretation of the results. These include caterpillar
+plots for the confidence intervals of standardized measures, bar plots
+showing flagging percentages overall and stratified by provider sizes,
+and funnel plots for indirect standardized measures in fixed effect
+models. These visualizations offer multiple perspectives for
+understanding the results effectively.</p>
+<p><img src="Charts/pprof%20flowchart.png"></p>
+</div>
+<div class="section level2">
+<h2 id="model-fitting">Model Fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
+</h2>
+<p><code>pprof</code> package introduces three different fitting
+functions: <code>logis_fe</code> for logistic fixed effect model,
+<code>linear_fe</code> for linear fixed effect model, and
+<code>linear_re</code> for linear random effect mode. Throughout the
+guide, the simulated dataset, the simulated dataset
+<code>ExampleDataBinary</code> will included in this package is used as
+an example.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/UM-KevinHe/pprof" class="external-link">pprof</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">data_FE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in data(data_FE): data set 'data_FE' not found</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">)</span></span>
+<span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Y</span></span>
+<span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Z</span></span>
+<span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ID</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">outcome</span>, <span class="va">covar</span>, <span class="va">ID</span><span class="op">)</span></span></code></pre></div>
+<p>Each model function supports three different ways to input data.
+Users have the flexibility to choose the one that best suits their data
+availability and convenience. Firstly, users can provide a formula and
+the whole dataset.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">formula_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="st">"outcome ~ id(ID) + z1 + z2 + z3 + z4 + z5"</span><span class="op">)</span></span>
+<span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logis_fe.html">logis_fe</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">formula_fe</span>, data <span class="op">=</span> <span class="va">data</span>, message <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>Additionally, users also input the whole dataset, along with the
+column names of the outcome vector, the covariate matrix/data frame, and
+the provider identifier vector.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="co"># [1] "outcome" "z1"      "z2"      "z3"      "z4"      "z5"      "ID"     </span></span>
+<span><span class="co">#&gt; [1] "outcome" "z1"      "z2"      "z3"      "z4"      "z5"      "ID"</span></span>
+<span><span class="va">Y.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="va">Z.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
+<span><span class="va">ID.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">7</span><span class="op">]</span></span>
+<span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logis_fe.html">logis_fe</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, Y.char <span class="op">=</span> <span class="va">Y.char</span>, Z.char <span class="op">=</span> <span class="va">Z.char</span>, ID.char <span class="op">=</span> <span class="va">ID.char</span>, message <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>Finally, the function also accepts the outcome vector, the covariate
+matrix/data frame, and the provider identifier vector.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logis_fe.html">logis_fe</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span>, message <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<p>By default, each model fitting function automatically removes all
+observations containing missing values. If users encounter data-related
+issues, they can utilize our built-in function <code>data_check</code>
+to perform data quality checks. This function can assist in examining
+missingness, variation, correlation, and the variance inflation factor
+(VIF) of variables to ensure data quality before fitting a model.</p>
+<p>The logistic fixed effect model provides two algorithmic approaches:
+the Serial Blockwise Inversion Newton (SerBIN) algorithm (See <a href="https://um-kevinhe.github.io/ppsrr/articles/Logis-FE.html" class="external-link">Logis
+FE</a>for more details) and the Block Ascent Newton algorithm. The
+preferred method can be specified by setting the <code>method</code>
+argument, allowing users to choose the algorithm that best fits their
+computational needs and model requirements.</p>
+</div>
+<div class="section level2">
+<h2 id="standardized-measures">Standardized Measures<a class="anchor" aria-label="anchor" href="#standardized-measures"></a>
+</h2>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
