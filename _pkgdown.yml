@@ -26,31 +26,48 @@ navbar:
    articles:
     text: Appendix
     menu:
-    - text: Quick Start
-      href: articles/Quick-start.html
-    - text: Models
-      href: articles/Models.html
-    - text: -------
-    - text: Articles
-      href: articles/Articles.html
+    - text: Logis FE
+      href: articles/Logis-FE.html
 
 reference:
-- title: Data Preparation
-  contents:
-  - fe_data_prep
-- title: Estimation
+- title: Model Fitting Functions
   contents:
   - logis_fe
-  - logis_firth
-  - SR_output
-- title: Coefficient and Confidence Interval
+  - linear_fe
+  - linear_re
+- title: Standardized Measure Calculation
   contents:
-  - coef.logis_fe
+  - SM_output
+  - SM_output.logis_fe
+  - SM_output.linear_fe
+  - SM_output.linear_re
+- title: Hypothesis Testing for Provider Effects
+  contents:
+  - test
+  - test.logis_fe
+  - test.linear_fe
+  - test.linear_re
+- title: Confidence Interval for Provider Effects
+  contents:
   - confint.logis_fe
-- title: Hypothesis Testing
+  - confint.linear_fe
+  - confint.linear_re
+- title: Summary Statistics for Covariate Estimates
   contents:
-  - test_fe
-  - summary_fe_covar
-- title: Example Data Set
+  - summary.logis_fe
+  - summary.linear_fe
+  - summary.linear_re
+- title: Plotting Functions
   contents:
-  - data_FE
+  - bar_plot
+  - caterpillar_plot
+  - plot.logis_fe
+  - plot.linear_fe
+- title: Helper Function
+  contents:
+  - data_check
+- title: Example Data Sets
+  contents:
+  - ExampleDataBinary
+  - ecls_data
+  - ExampleDataLinear

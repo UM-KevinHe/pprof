@@ -5,25 +5,27 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="If a fixed effect model is applied to data involving large-scale providers, 
-   the default glm function will be unsuitable since the computational burden of inverting 
-   the Fisher information matrix becomes significantly high. This software package serves 
-   as an implementation of the SerBIN method proposed by Wu et al. (2022), addressing and 
-   mitigating the computational challenges associated with such large-scale provider data.">
-<title>GLM Model with Provider as Fixed Effects • srrFE</title>
+<meta name="description" content="Implements linear and generalized linear models for provider profiling,
+    incorporating both fixed and random effects. For large-scale providers, the linear 
+    profiled-based method and the SerBIN method (Wu et al., 2022) for binary data 
+    reduce the computational burden. Provides post-modeling features including 
+    indirect and direct standardization measures, hypothesis testing, 
+    confidence intervals, and post-estimation visualization.">
+<title>Risk-adjusted Models, Standardized Measure Calculation, Hypothesis Testing and Visualization for Provider Profiling • pprof</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/Roboto-0.4.2/font.css" rel="stylesheet">
-<link href="deps/JetBrains_Mono-0.4.2/font.css" rel="stylesheet">
-<link href="deps/Roboto_Slab-0.4.2/font.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/Roboto-0.4.9/font.css" rel="stylesheet">
+<link href="deps/JetBrains_Mono-0.4.9/font.css" rel="stylesheet">
+<link href="deps/Roboto_Slab-0.4.9/font.css" rel="stylesheet">
 <!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="GLM Model with Provider as Fixed Effects">
-<meta property="og:description" content="If a fixed effect model is applied to data involving large-scale providers, 
-   the default glm function will be unsuitable since the computational burden of inverting 
-   the Fisher information matrix becomes significantly high. This software package serves 
-   as an implementation of the SerBIN method proposed by Wu et al. (2022), addressing and 
-   mitigating the computational challenges associated with such large-scale provider data.">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Risk-adjusted Models, Standardized Measure Calculation, Hypothesis Testing and Visualization for Provider Profiling">
+<meta property="og:description" content="Implements linear and generalized linear models for provider profiling,
+    incorporating both fixed and random effects. For large-scale providers, the linear 
+    profiled-based method and the SerBIN method (Wu et al., 2022) for binary data 
+    reduce the computational burden. Provides post-modeling features including 
+    indirect and direct standardization measures, hypothesis testing, 
+    confidence intervals, and post-estimation visualization.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -35,7 +37,7 @@
 
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
-    <a class="navbar-brand me-2" href="index.html">srrFE</a>
+    <a class="navbar-brand me-2" href="index.html">pprof</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3</small>
 
@@ -47,7 +49,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item">
-  <a class="nav-link" href="articles/srrFE.html">Get started</a>
+  <a class="nav-link" href="articles/pprof.html">Get started</a>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
@@ -55,10 +57,7 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-appendix">Appendix</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-appendix">
-    <a class="dropdown-item" href="articles/Quick-start.html">Quick Start</a>
-    <a class="dropdown-item" href="articles/Models.html">Models</a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="articles/Articles.html">Articles</a>
+    <a class="dropdown-item" href="articles/Logis-FE.html">Logis FE</a>
   </div>
 </li>
       </ul>
@@ -68,7 +67,7 @@
 
       <ul class="navbar-nav">
 <li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/UM-KevinHe/srrFE/" aria-label="github">
+  <a class="external-link nav-link" href="https://github.com/UM-KevinHe/pprof/" aria-label="github">
     <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
@@ -81,60 +80,51 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="srrfe">srrFE<a class="anchor" aria-label="anchor" href="#srrfe"></a>
+<div class="page-header"><h1 id="pprof">pprof<a class="anchor" aria-label="anchor" href="#pprof"></a>
 </h1></div>
-<p>The <code>srrFE</code> software package is designed to implement the SerBIN method proposed by <a href="doi:10.1002/sim.9387">Wu et al. (2022)</a>, specifically tailored to address the computational challenges inherent in large-scale provider data. Additionally, the package is equipped with functions designed to estimate standardized ratios and rates and conduct hypothesis testing.</p>
+<p>The <code>pprof</code> software package provides a variety of risk-adjusted models for provider profiling, capable of addressing the computational challenges inherent in large-scale provider data. It also includes standardized measure calculations, hypothesis testing to evaluate provider performance, and visualization tools for comprehensive analysis.</p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Provider profiling is acknowledged for its utility in monitoring healthcare quality, facilitating inter-provider care coordination, and enhancing medical cost-effectiveness. Existing methods often use generalized linear models with fixed provider effects, especially when profiling dialysis facilities. However, as the number of providers increases, the computational burden becomes challenging. To address this issue, we introduce a serial blockwise inversion Newton (SerBIN) algorithm that capitalizes on the block structure of the information matrix. Additionally, we propose a shared-memory divide-and-conquer algorithm to further enhance computational efficiency.</p>
-<p>Beyond the computational challenge, the current literature lacks a suitable inferential approach for identifying providers with outlier performance, especially in cases involving small providers with extreme outcomes. Traditional score and Wald tests, relying on large-sample distributions of test statistics, inaccurately approximate small-sample properties in this context. To address this inferential gap, we present an exact test of provider effects using exact finite-sample distributions, with the Poisson-binomial distribution serving as a special case when the outcome is binary. This methodological advancement aims to provide a more accurate and reliable assessment of provider performance, considering both computational and inferential challenges.</p>
+<p>Provider profiling involves assessing and comparing the performance of healthcare providers by evaluating specific metrics that reflect quality of care, efficiency, and patient outcomes. To achieve this, it is essential to fit statistical models and design appropriate measures. We developed the <code>pprof</code> package that facilitates fitting a variety of risk-adjusted models, each of which includes tools for calculating standardized measures, conducting statistical inference, and visualizing results, thereby offering a comprehensive solution for provider profiling.</p>
+<p>Our package addresses key limitations found in existing R functions, which often struggle with computational inefficiency when applied to large-scale provider data. For the logistic fixed effect model, we introduced the serial blockwise inversion Newton (SerBIN) algorithm, which leverages the block structure of the information matrix. For linear fixed effect models, we employed a profile-based method, both of which improve computational speed significantly. These improvements, along with parallel computing capabilities, ensure that our package reduces the computational burden associated with large datasets. Moreover, our package is highly versatile, accommodating different types of outcomes and integrating both indirect and direct standardization measures for each model. By offering functionalities that encompass model fitting through post-modeling analysis, our package provides a complete and user-friendly solution for the diverse needs of provider profiling.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<ul>
-<li>To install the latest development version from GitHub:</li>
-</ul>
-<pre><code><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://devtools.r-lib.org/" class="external-link">"devtools"</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://remotes.r-lib.org" class="external-link">"remotes"</a></span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"UM-KevinHe/srrFE"</span>, ref <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre>
+<p><strong>Note:</strong> <em>The package is still in the early stages of development, so please don’t hesitate to report any problems you may experience.</em></p>
+<p>You can install ‘pprof’ via CRAN or github:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">require</span>(<span class="st">"devtools"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">require</span>(<span class="st">"remotes"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"UM-KevinHe/pprof"</span>, <span class="at">ref =</span> <span class="st">"main"</span>)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
-<p>See <a href="https://um-kevinhe.github.io/srrFE/articles/srrFE.html">“Getting Started with srrFE”</a></p>
-</div>
-<div class="section level2">
-<h2 id="details-of-the-algorithms">Details of the algorithms<a class="anchor" aria-label="anchor" href="#details-of-the-algorithms"></a>
-</h2>
-<p>See <a href="https://um-kevinhe.github.io/srrFE/articles/Models.html">“Models”</a> or <a href="https://um-kevinhe.github.io/srrFE/articles/Articles.html">original articles</a></p>
+<p>For a detailed overview of the usage of the package, please see <a href="https://um-kevinhe.github.io/pprof/articles/pprof.html">“tutorial”</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting Help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
 </h2>
-<p>If you encounter any problems or bugs, please contact us at: <a href="mailto:ybshao@umich.edu" class="email">ybshao@umich.edu</a>, <a href="mailto:kevinhe@umich.edu" class="email">kevinhe@umich.edu</a>, <a href="mailto:Wenbo.Wu@nyulangone.org" class="email">Wenbo.Wu@nyulangone.org</a>, <a href="mailto:taoxu@med.umich.edu" class="email">taoxu@med.umich.edu</a></p>
+<p>If you encounter any problems or bugs, please contact us at: <a href="mailto:xhliuu@umich.edu" class="email">xhliuu@umich.edu</a>, <a href="mailto:lfluo@umich.edu" class="email">lfluo@umich.edu</a>, <a href="mailto:kevinhe@umich.edu" class="email">kevinhe@umich.edu</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<ul>
-<li><a href="https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387" class="external-link">Wu, W., Yang, Y., Kang, J., &amp; He, K. (2022). Improving large‐scale estimation and inference for profiling health care providers. Statistics in Medicine, 41(15), 2840-2853.</a></li>
-<li><a href="https://link.springer.com/article/10.1007/s10985-013-9264-6" class="external-link">He, K., Kalbfleisch, J. D., Li, Y., &amp; Li, Y. (2013). Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects. Lifetime Data Analysis, 19, 490-512.</a></li>
-</ul>
+<p>[1] Bates, D., Mächler, M., Bolker, B., &amp; Walker, S. (2015). Fitting linear mixed-effects models using lme4. Journal of Statistical Software, 67(1), 1-48. <a href="https://doi.org/10.18637/jss.v067.i01" class="external-link uri">https://doi.org/10.18637/jss.v067.i01</a> [2] He, K., Kalbfleisch, J. D., Li, Y., &amp; Li, Y. (2013). Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects. Lifetime Data Analysis, 19, 490-512. <a href="https://link.springer.com/article/10.1007/s10985-013-9264-6" class="external-link uri">https://link.springer.com/article/10.1007/s10985-013-9264-6</a> [3] He, K. (2019). Indirect and direct standardization for evaluating transplant centers. Journal of Hospital Administration, 8(1), 9-14. <a href="https://www.sciedupress.com/journal/index.php/jha/article/view/14304" class="external-link uri">https://www.sciedupress.com/journal/index.php/jha/article/view/14304</a> [4] Hsiao, C. (2022). Analysis of panel data (No. 64). Cambridge University Press. [5] Wu, W., Yang, Y., Kang, J., &amp; He, K. (2022). Improving large‐scale estimation and inference for profiling health care providers. Statistics in Medicine, 41(15), 2840-2853. <a href="https://onlinelibrary.wiley.com/doi/full/10.1002/sim.938" class="external-link uri">https://onlinelibrary.wiley.com/doi/full/10.1002/sim.938</a>) [6] Wu, W., Kuriakose, J. P., Weng, W., Burney, R. E., &amp; He, K. (2023). Test-specific funnel plots for healthcare provider profiling leveraging individual- and summary-level information. Health Services and Outcomes Research Methodology, 23, 45-58. <a href="https://pubmed.ncbi.nlm.nih.gov/37621728/" class="external-link uri">https://pubmed.ncbi.nlm.nih.gov/37621728/</a></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/UM-KevinHe/srrFE/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/UM-KevinHe/pprof/" class="external-link">Browse source code</a></li>
 </ul>
 </div>
 
 <div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li>GPL (&gt;= 3)</li>
+<li><a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a></li>
 </ul>
 </div>
 
@@ -142,7 +132,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing srrFE</a></li>
+<li><a href="authors.html#citation">Citing pprof</a></li>
 </ul>
 </div>
 
@@ -172,7 +162,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer>

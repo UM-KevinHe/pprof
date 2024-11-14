@@ -2,7 +2,7 @@
 % Please edit documentation in R/confint.linear_re.R
 \name{confint.linear_re}
 \alias{confint.linear_re}
-\title{Get Confidence Intervals for Provider Effects or Standardized Measures}
+\title{Get confidence intervals for provider effects or standardized measures}
 \usage{
 \method{confint}{linear_re}(
   fit,
@@ -16,13 +16,13 @@
 \arguments{
 \item{fit}{a model fitted from \code{linear_re}.}
 
-\item{parm}{specifies a subset of providers for which confidence intervals are to be given.
+\item{parm}{specify a subset of providers for which confidence intervals are given.
 By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}
 
 \item{level}{the confidence level. The default value is 0.95.}
 
 \item{option}{a character string specifying whether the confidence intervals
-should be provided for provider effects, standardized measures:
+should be provided for provider effects or standardized measures:
 \itemize{
 \item {\code{"alpha"}} provider effect
 \item {\code{"SM"}} standardized measures
@@ -37,19 +37,19 @@ if \code{option} includes \code{"SM"}. See \code{stdz} argument in \code{\link{S
 \value{
 A list of data frames containing the confidence intervals based on the values of \code{option} and \code{stdz}.
 \item{CI.alpha}{Confidence intervals for provider effects if \code{option} includes \code{"alpha"}.}
-\item{CI.indirect}{Confidence intervals for indirect standardized difference if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"indirect"}.}
-\item{CI.direct}{Confidence intervals for direct standardized difference if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"direct"}.}
+\item{CI.indirect}{Confidence intervals for indirect standardized differences if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"indirect"}.}
+\item{CI.direct}{Confidence intervals for direct standardized differences if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"direct"}.}
 }
 \description{
-Provide confidence interval for provider effects \eqn{\hat{\alpha}} or standardized measures from a random effect linear model.
+Provide confidence intervals for provider effects or standardized measures from a random effect linear model.
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
+outcome <- ExampleDataLinear$Y
 ID <- ExampleDataLinear$ID
-Z <- ExampleDataLinear$Z
+covar <- ExampleDataLinear$Z
 
-fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
 confint(fit_re)
 
 }

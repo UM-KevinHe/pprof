@@ -2,14 +2,14 @@
 % Please edit documentation in R/data_check.R
 \name{data_check}
 \alias{data_check}
-\title{Data Quality Check}
+\title{Data quality check}
 \usage{
 data_check(Y, Z, ID)
 }
 \arguments{
 \item{Y}{a numeric vector indicating the outcome variable.}
 
-\item{Z}{a matrix or data frame representing the covariates.}
+\item{Z}{a matrix or data frame representing covariates.}
 
 \item{ID}{a numeric vector representing the grouping identifier.}
 }

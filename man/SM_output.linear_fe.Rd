@@ -57,7 +57,3 @@ SM_output(fit_fe)
 SM_output(fit_fe, stdz = "direct", null = "mean")
 
 }
-\references{
-He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects.
-\emph{Lifetime Data Analysis}, \strong{19}: 490-512.
-}

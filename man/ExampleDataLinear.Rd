@@ -22,13 +22,12 @@ and the correlation between covariates and provider effects is 0.1.}
 data(ExampleDataLinear)
 }
 \description{
-A simulated data set containing 784 observations, 5 continuous covariates and 10 providers.
+A simulated data set containing 7901 observations, 5 continuous covariates and 100 providers.
 }
 \examples{
 data(ExampleDataLinear)
 head(ExampleDataLinear$Y)
 head(ExampleDataLinear$ID)
 head(ExampleDataLinear$Z)
-
 }
 \keyword{datasets}

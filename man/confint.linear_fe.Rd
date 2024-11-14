@@ -2,7 +2,7 @@
 % Please edit documentation in R/confint.linear_fe.R
 \name{confint.linear_fe}
 \alias{confint.linear_fe}
-\title{Get Confidence Intervals for Provider Effects or Standardized Measures}
+\title{Get confidence intervals for provider effects or standardized measures}
 \usage{
 \method{confint}{linear_fe}(
   fit,
@@ -17,13 +17,13 @@
 \arguments{
 \item{fit}{a model fitted from \code{linear_fe}.}
 
-\item{parm}{specifies a subset of providers for which confidence intervals are to be given.
+\item{parm}{specify a subset of providers for which confidence intervals are given.
 By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}
 
 \item{level}{the confidence level. The default value is 0.95.}
 
 \item{option}{a character string specifying whether the confidence intervals
-should be provided for provider effects, standardized measures:
+should be provided for provider effects or standardized measures:
 \itemize{
 \item {\code{"gamma"}} provider effect (only supports \code{"two.sided"} confidence interval).
 \item {\code{"SM"}} standardized measures.
@@ -42,19 +42,18 @@ Note that \code{"gamma"} for argument \code{option} only supports \code{"two.sid
 \value{
 A list of data frames containing the confidence intervals based on the values of \code{option} and \code{stdz}.
 \item{CI.gamma}{Confidence intervals for provider effects if \code{option} includes \code{"gamma"}.}
-\item{CI.indirect}{Confidence intervals for indirect standardized difference if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"indirect"}.}
-\item{CI.direct}{Confidence intervals for direct standardized difference if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"direct"}.}
+\item{CI.indirect}{Confidence intervals for indirect standardized differences if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"indirect"}.}
+\item{CI.direct}{Confidence intervals for direct standardized differences if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"direct"}.}
 }
 \description{
-Provide confidence interval for provider effects \eqn{\hat{\gamma}} or standardized measures from a fixed effect linear model.
+Provide confidence intervals for provider effects or standardized measures from a fixed effect linear model.
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-Z <- ExampleDataLinear$Z
-
-fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
-confint(fit_fe)
+fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+confint(fit_linear)
 
 }

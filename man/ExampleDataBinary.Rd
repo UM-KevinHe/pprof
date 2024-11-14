@@ -23,13 +23,12 @@ and the correlation between covariates and provider effects is 0.1.}
 data(ExampleDataBinary)
 }
 \description{
-A simulated data set containing 784 observations, 5 continuous covariates and 10 providers.
+A simulated data set containing 8160 observations, 5 continuous covariates and 100 providers.
 }
 \examples{
 data(ExampleDataBinary)
 head(ExampleDataBinary$Y)
 head(ExampleDataBinary$ID)
 head(ExampleDataBinary$Z)
-
 }
 \keyword{datasets}

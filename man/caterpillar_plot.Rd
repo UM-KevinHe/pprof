@@ -2,17 +2,17 @@
 % Please edit documentation in R/caterpillar_plot.R
 \name{caterpillar_plot}
 \alias{caterpillar_plot}
-\title{Get Caterpillar Plot for Standardized Measures}
+\title{Get a caterpillar plot for standardized measures}
 \usage{
 caterpillar_plot(
   CI,
   theme = theme_bw(),
   point_size = 2,
   point_color = "#475569",
-  medianline_value = NULL,
-  medianline_color = "#64748b",
-  medianline_size = 1,
-  medianline_type = "dashed",
+  refline_value = NULL,
+  refline_color = "#64748b",
+  refline_size = 1,
+  refline_type = "dashed",
   errorbar_width = 0,
   errorbar_size = 0.5,
   errorbar_alpha = 0.5,
@@ -22,7 +22,7 @@ caterpillar_plot(
 )
 }
 \arguments{
-\item{CI}{a dataframe from \code{confint} containing the standardized measure values, along with their confidence interval lower and upper bounds.}
+\item{CI}{a dataframe from \code{confint} function containing the standardized measure values, along with their confidence intervals lower and upper bounds.}
 
 \item{theme}{theme for the plot. The default is \code{theme_bw()}.}
 
@@ -30,13 +30,13 @@ caterpillar_plot(
 
 \item{point_color}{color of the points in the plot. The default value is "#475569".}
 
-\item{medianline_value}{value of the horizontal median line. The default value is NULL.}
+\item{refline_value}{value of the horizontal reference line, for which the standardized measures are compared. The default value is NULL.}
 
-\item{medianline_color}{color of the median line. The default value is "#64748b".}
+\item{refline_color}{color of the reference line. The default value is "#64748b".}
 
-\item{medianline_size}{size of the median line. The default value is 1.}
+\item{refline_size}{size of the reference line. The default value is 1.}
 
-\item{medianline_type}{line type for the median line. The default value is "dashed".}
+\item{refline_type}{line type for the reference line. The default value is "dashed".}
 
 \item{errorbar_width}{the width of the error bars (horizontal ends of the CI bars). The default value is 0.}
 
@@ -57,15 +57,15 @@ A ggplot object which is a caterpillar plot for the standardized measures.
 Generates a caterpillar plot for standardized measures from different models using a provided CI dataframe.
 }
 \details{
-This function creates caterpillar plots to visualize the standardized measures (indirect or direct).
+This function creates a caterpillar plot to visualize the standardized measures (indirect or direct).
 The input \code{CI} must be a dataframe output from package \code{pprof}'s \code{confint} function.
-Each provider's standardized measure value is represented as a point, and a reference line is shown at the value specified by \code{medianline_value} (default is NULL).
-If \code{medianline_value} is not specified, for linear FE or RE models with indirect or direct standardized measures, it will be set to 0;
+Each provider's standardized measure value is represented as a point, and a reference line is shown at the value specified by \code{refline_value} (default is NULL).
+If \code{refline_value} is not specified, for linear FE or RE models with indirect or direct standardized differences, it will be set to 0;
 for logistic FE models with indirect or direct ratios, it will be set to 1;
-and for logistic FE with indirect or direct rates, it will be set to the population rate, which represents the average outcome across all data points.
-The confidence intervals (CI) are displayed as error bars: for \code{alternative = "two.sided"}, the full CI is shown;
-for \code{alternative = "greater"}, the error bar extends from the lower bound to the standardized measure value;
-and for \code{alternative = "less"}, it extends from the standardized measure value to the upper bound.
+and for logistic FE with indirect or direct rates, it will be set to the population rate, which represents the average rate across all observations.
+Confidence intervals (CI) are displayed as error bars: for \code{alternative = "two.sided"}, two-sided confidence intervals are shown;
+for \code{alternative = "greater"}, the error bar extends from the lower bound to the standardized measure values;
+and for \code{alternative = "less"}, it extends from the standardized measure values to the upper bound.
 
 When \code{use_flag = TRUE}, the plot will use colors specified by \code{flag_color} to show the flags of providers.
 Each error bar will be colored to reflect the flag, making it easy to identify providers with different performance levels.
@@ -74,14 +74,17 @@ This provides a simpler visualization without flagging individual providers.
 }
 \examples{
 data(ExampleDataLinear)
-fit_linear <- linear_fe(Y = ExampleDataLinear$Y, Z = ExampleDataLinear$Z, ID = ExampleDataLinear$ID)
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
+ID <- ExampleDataLinear$ID
+fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 CI_linear <- confint(fit_linear)
-caterpillar_plot(CI_linear$CI.indirect, use_flag =T)
+caterpillar_plot(CI_linear$CI.indirect, use_flag =T, errorbar_width = 0.5, errorbar_size = 1)
 
-data(data_FE)
-fit_logis <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-CI_logis <- confint(fit_linear)
-caterpillar_plot(CI$CI.indirect_rate)
+data(ExampleDataBinary)
+fit_logis <- logis_fe(Y = ExampleDataBinary$Y, Z = ExampleDataBinary$Z, ID = ExampleDataBinary$ID, message = FALSE)
+CI_logis <- confint(fit_logis)
+caterpillar_plot(CI_logis$CI.indirect_ratio, use_flag =T, errorbar_width = 0.5, errorbar_size = 1)
 
 }
 \seealso{

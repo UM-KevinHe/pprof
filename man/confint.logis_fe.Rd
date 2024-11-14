@@ -2,7 +2,7 @@
 % Please edit documentation in R/confint.logis_fe.R
 \name{confint.logis_fe}
 \alias{confint.logis_fe}
-\title{Get Confidence Intervals for Provider Effects or Standardized Measures}
+\title{Get confidence intervals for provider effects or standardized Mmeasures}
 \usage{
 \method{confint}{logis_fe}(
   fit,
@@ -19,7 +19,7 @@
 \arguments{
 \item{fit}{a model fitted from \code{logis_fe}.}
 
-\item{parm}{specifies a subset of providers for which confidence intervals are to be given.
+\item{parm}{specify a subset of providers for which confidence intervals are given.
 By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}
 
 \item{level}{the confidence level. The default value is 0.95.}
@@ -32,7 +32,7 @@ By default, all providers are included. The class of \code{parm} should match th
 }}
 
 \item{option}{a character string specifying whether the confidence intervals
-should be provided for provider effects, standardized measures:
+should be provided for provider effects or standardized measures:
 \itemize{
 \item {\code{"gamma"}} provider effect.
 \item {\code{"SM"}} standardized measures.
@@ -58,15 +58,19 @@ Both "rate" and "ratio" will be provided by default.
 A dataframe (\code{option = "gamma"}) or a list of data frames (\code{option = "SM"}) containing the point estimate, and lower and upper bounds of the estimate.
 }
 \description{
-Provide confidence interval for provider effects \eqn{\hat{\gamma}} or standardized measures from a fixed effect logistic model.
+Provide confidence intervals for provider effects or standardized measures from a fixed effect logistic model.
 }
 \details{
 The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
-We suggest using score or exact test to generate the confidence interval.
+We suggest using score or exact test to generate confidence intervals.
 }
 \examples{
-data(data_FE)
-fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+data(ExampleDataBinary)
+outcome = ExampleDataBinary$Y
+covar = ExampleDataBinary$Z
+ID = ExampleDataBinary$ID
+
+fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 confint(fit_fe, option = "gamma")
 confint(fit_fe, option = "SR")
 

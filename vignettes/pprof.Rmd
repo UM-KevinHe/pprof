@@ -1,0 +1,90 @@
+---
+title: "Getting Started with pprof"
+output: 
+  rmarkdown::html_vignette:
+    self_contained: yes
+    mode: selfcontained
+vignette: >
+  %\VignetteIndexEntry{Getting Started with pprof}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = T,
+  comment = "#>"
+)
+```
+
+<style>
+body {
+  text-align: justify
+}
+</style>
+
+## Introduction
+
+The `pprof` software package is designed to provide different risk-adjusted models for data with various types of outcomes, specifically focusing on the field of provider profiling. In addition to model fitting, the package equips a suite of functions for calculating standardized ratios and rates, conducting statistical inference, and generating various plots to aid in the interpretation of results. Currently, the package supports logistic fixed effect models for binary outcomes, as well as linear fixed effect and linear random effect models for continuous outcomes. It is under ongoing development, with plans to incorporate additional models and more robust testing methods.
+
+This tutorial provides a brief overview of the package’s structure and a detailed guide of how to utilize the various functions. Simulated example data (`ExampleDataBinary`) with binary outcomes will be used as an illustration, alongside a real data set with continuous outcomes (`ecls_data`) to demonstrate its application with continuous outcomes. Throughout the tutorial, we will cover the key features and capabilities of `pprof`, presenting examples and use cases to illustrate its functionality comprehensively.
+
+## Installation
+
+```{r ,include=TRUE,eval=FALSE}
+require("devtools")
+require("remotes")
+remotes::install_github("UM-KevinHe/pprof", ref = "main")
+```
+
+------------------------------------------------------------------------
+
+## Structure
+
+This section presents the structure and workflow of the `pprof` package. Generally, for datasets with continuous outcomes, either a fixed effect model or a random effect model can be fitted, while for binary outcomes, the current version only supports the fixed effect model. For the calculation of standardized measures, both indirect and direct standardization methods are provided for all models. Regarding hypothesis testing of provider effects, `pprof` includes the flagging based on each provider's performance, categorizing them as 1 (statistically higher), 0 (as expected), or -1 (statistically lower). Confidence intervals are provided for both provider effects and standardized measures. Additionally, various visualizations are equipped to facilitate interpretation of the results. These include caterpillar plots for the confidence intervals of standardized measures, bar plots showing flagging percentages overall and stratified by provider sizes, and funnel plots for indirect standardized measures in fixed effect models. These visualizations offer multiple perspectives for understanding the results effectively.
+
+![](Charts/pprof%20flowchart.png)
+
+## Model Fitting
+
+`pprof` package introduces three different fitting functions: `logis_fe` for logistic fixed effect model, `linear_fe` for linear fixed effect model, and `linear_re` for linear random effect mode. Throughout the guide, the simulated dataset, the simulated dataset `ExampleDataBinary` will included in this package is used as an example.
+
+```{r}
+library(pprof)
+data(ExampleDataBinary)
+outcome <- ExampleDataBinary$Y
+covar <- ExampleDataBinary$Z
+ID <- ExampleDataBinary$ID
+data <- data.frame(outcome, covar, ID)
+```
+
+Each model function supports three different ways to input data. Users have the flexibility to choose the one that best suits their data availability and convenience. Firstly, users can provide a formula and the whole dataset.
+
+```{r, eval=F, echo=T}
+formula_fe <- as.formula("outcome ~ id(ID) + z1 + z2 + z3 + z4 + z5")
+fit_fe <- logis_fe(formula = formula_fe, data = data, message = F)
+```
+
+Additionally, users also input the whole dataset, along with the column names of the outcome vector, the covariate matrix/data frame, and the provider identifier vector.
+
+```{r}
+colnames(data) # [1] "outcome" "z1"      "z2"      "z3"      "z4"      "z5"      "ID"     
+Y.char <- colnames(data)[1]
+Z.char <- colnames(data)[2:6]
+ID.char <- colnames(data)[7]
+fit_fe <- logis_fe(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char, message = F)
+```
+
+Finally, the function also accepts the outcome vector, the covariate matrix/data frame, and the provider identifier vector.
+
+```{r, eval=F, echo=T}
+fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = F)
+```
+
+By default, each model fitting function automatically removes all observations containing missing values. If users encounter data-related issues, they can utilize our built-in function `data_check` to perform data quality checks. This function can assist in examining missingness, variation, correlation, and the variance inflation factor (VIF) of variables to ensure data quality before fitting a model.
+
+The logistic fixed effect model provides two algorithmic approaches: the Serial Blockwise Inversion Newton (SerBIN) algorithm (See [Logis FE](https://um-kevinhe.github.io/ppsrr/articles/Logis-FE.html)for more details) and the Block Ascent Newton algorithm. The preferred method can be specified by setting the `method` argument, allowing users to choose the algorithm that best fits their computational needs and model requirements.
+
+
+## Standardized Measures
+

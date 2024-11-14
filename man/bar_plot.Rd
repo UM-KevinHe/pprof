@@ -2,7 +2,7 @@
 % Please edit documentation in R/bar_plot.R
 \name{bar_plot}
 \alias{bar_plot}
-\title{Get Bar Plot for flags of each provider}
+\title{Get a bar plot for flags of each provider}
 \usage{
 bar_plot(
   flag_df,
@@ -17,13 +17,13 @@ bar_plot(
 \arguments{
 \item{flag_df}{a data frame from \code{test} function containing the flag of each provider.}
 
-\item{group_num}{number of groups to divide providers into based on their sample size. The default is 4.}
+\item{group_num}{number of groups into which providers are divided based on their sample sizes. The default is 4.}
 
 \item{bar_colors}{a vector of colors used to fill the bars representing the categories. The default is c("#66c2a5", "#fc8d62", "#8da0cb").}
 
-\item{bar_width}{Width of the bars in the bar chart. The default is 0.7.}
+\item{bar_width}{width of the bars in the bar chart. The default is 0.7.}
 
-\item{theme}{theme for the plot. The default is theme_minimal().}
+\item{theme}{theme for the plot. The default is \code{theme_minimal()}.}
 
 \item{label_color}{color of the text labels inside the bars. The default is "black".}
 
@@ -33,24 +33,28 @@ bar_plot(
 A ggplot object representing the bar chart of flagging results.
 }
 \description{
-Generates a bar plot for flagging percentage based on grouped sample sizes.
+Generate a bar plot for flagging percentage overall and stratified by provider sizes.
 }
 \details{
-This function generates a bar chart to visualize the percentage of flagging results based on provider size.
+This function generates a bar chart to visualize the percentage of flagging results based on provider sizes.
 The input data frame \code{test_df} must be the output from package \code{pprof}'s \code{test} function.
-The providers are grouped into a specified number of groups (\code{group_num}) based on their sample sizes,
-and an additional "overall" group is included to show the flagging results across all providers.
+Providers are grouped into a specified number of groups (\code{group_num}) based on their sample sizes, where
+the number of providers are approximately equal across groups. An additional "overall" group is
+included to show the flagging results across all providers.
 }
 \examples{
 data(ExampleDataLinear)
-fit_linear <- linear_fe(Y = ExampleDataLinear$Y, Z = ExampleDataLinear$Z, ID = ExampleDataLinear$ID)
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
+ID <- ExampleDataLinear$ID
+fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 test_linear <- test(fit_linear)
-bar_plot(CI_linear$CI.indirect)
+bar_plot(test_linear)
 
-data(data_FE)
-fit_logis <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-test_logis <- test(fit_linear)
-bar_plot(CI$CI.indirect_rate)
+data(ExampleDataBinary)
+fit_logis <- logis_fe(Y = ExampleDataBinary$Y, Z = ExampleDataBinary$Z, ID = ExampleDataBinary$ID, message = FALSE)
+test_logis <- test(fit_logis)
+bar_plot(test_logis)
 
 }
 \seealso{
