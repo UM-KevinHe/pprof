@@ -10,6 +10,8 @@
 #'
 #' @return the return varies depending on the method implemented for the
 #' class of the input object.
+#'
+#' @export
 
 SM_output <- function(fit, ...) {
   UseMethod("SM_output")

@@ -29,8 +29,9 @@
 #' fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
 #' plot(fit_fe)
 #'
-#' @import dplyr rlang
-#' @import poibin
+#' @importFrom dplyr arrange cross_join mutate select filter
+#' @importFrom poibin ppoibin dpoibin
+#' @importFrom stats plogis
 #'
 #' @exportS3Method plot logis_fe
 
@@ -162,7 +163,8 @@ plot.logis_fe <- function(fit, null = "median", test = "score", target = 1, alph
 
 
 
-#' @import ggplot2 RColorBrewer
+#' @importFrom dplyr filter
+#' @importFrom ggplot2 scale_x_continuous scale_y_continuous geom_point scale_shape_manual scale_color_manual scale_linetype_manual geom_line geom_hline guides theme labs theme_classic
 ppfunnel_logis <- function(plot_data,
                            target,
                            alpha,

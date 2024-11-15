@@ -11,6 +11,8 @@
 #' @return the return depends on the method implemented for the
 #' class of the input object, typically including statistical outputs for
 #' provider effect coefficients and identification of outlier providers.
+#'
+#' @export
 
 test <- function(fit, ...) {
   UseMethod("test")
