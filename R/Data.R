@@ -2,7 +2,7 @@
 #'
 #' A simulated data set containing 7994 observations, 5 continuous covariates and 100 providers.
 #' @name ExampleDataBinary
-#' @docType ExampleDataBinary
+#' @docType data
 #' @usage data(ExampleDataBinary)
 #'
 #' @format A list containing the following elements:

@@ -32,7 +32,8 @@ Imports:
     rlang, 
     tidyr,
     Matrix,
-    lme4
+    lme4,
+    magrittr
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends:
     R (>= 4.1.0)

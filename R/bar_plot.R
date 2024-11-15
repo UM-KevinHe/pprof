@@ -35,8 +35,10 @@
 #'
 #' @seealso \code{\link{test.linear_fe}}, \code{\link{test.linear_re}}, \code{\link{test.logis_fe}}
 #'
-#' @importFrom ggplot2 ggplot geom_bar geom_text labs aes theme element_blank ggtitle scale_x_continuous scale_y_continuous scale_linetype_manual scale_fill_manual theme_minimal theme_bw
-#' @importFrom dplyr group_by summarise mutate
+#' @importFrom ggplot2 ggplot geom_bar geom_text labs aes theme scale_y_continuous scale_fill_manual element_text element_line element_blank theme_minimal position_stack
+#' @importFrom dplyr group_by summarise mutate n
+#' @importFrom scales percent percent_format
+#' @importFrom magrittr %>%
 #'
 #' @export
 
@@ -72,14 +74,14 @@ bar_plot <- function(flag_df, group_num = 4,
   # Plot the bar chart
   p <- ggplot(df_long, aes(x = size, y = value, fill = category)) +
     geom_bar(stat = "identity", color = "black", width = 0.7) +
-    geom_text(aes(label = scales::percent(value, accuracy = 0.1)),
+    geom_text(aes(label = percent(value, accuracy = 0.1)),
               position = position_stack(vjust = 0.5),
               color = label_color, size = label_size) +
     labs(x = "Provider Size",
          y = "Flagging Percentage",
          title = "Flagging Results Based on Provider Size",
          fill = "Category") +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1), limits = c(0, 1)) +
+    scale_y_continuous(labels = percent_format(accuracy = 1), limits = c(0, 1)) +
     theme +
     scale_fill_manual(values = bar_colors) +
     theme(

@@ -126,16 +126,14 @@ included to show the flagging results across all providers.</p>
 <span class="r-in"><span><span class="va">fit_linear</span> <span class="op">&lt;-</span> <span class="fu"><a href="linear_fe.html">linear_fe</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ID.</span>
 <span class="r-in"><span><span class="va">test_linear</span> <span class="op">&lt;-</span> <span class="fu"><a href="test.html">test</a></span><span class="op">(</span><span class="va">fit_linear</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in test(fit_linear):</span> could not find function "test"</span>
 <span class="r-in"><span><span class="fu">bar_plot</span><span class="op">(</span><span class="va">test_linear</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'test_linear' not found</span>
+<span class="r-plt img"><img src="bar_plot-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fit_logis</span> <span class="op">&lt;-</span> <span class="fu"><a href="logis_fe.html">logis_fe</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Y</span>, Z <span class="op">=</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Z</span>, ID <span class="op">=</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ID</span>, message <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">test_logis</span> <span class="op">&lt;-</span> <span class="fu"><a href="test.html">test</a></span><span class="op">(</span><span class="va">fit_logis</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in test(fit_logis):</span> could not find function "test"</span>
 <span class="r-in"><span><span class="fu">bar_plot</span><span class="op">(</span><span class="va">test_logis</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'test_logis' not found</span>
+<span class="r-plt img"><img src="bar_plot-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

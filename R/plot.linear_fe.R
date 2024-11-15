@@ -32,6 +32,8 @@
 #' plot(fit_fe)
 #'
 #' @importFrom dplyr arrange cross_join mutate select filter
+#' @importFrom tibble tibble
+#' @importFrom magrittr %>%
 #'
 #' @exportS3Method plot linear_fe
 
@@ -84,7 +86,10 @@ plot.linear_fe <- function(fit, null = "median", target = 0, alpha = c(0.05, 0.0
 
 
 #' @importFrom dplyr filter
-#' @importFrom ggplot2 scale_x_continuous scale_y_continuous geom_point scale_shape_manual scale_color_manual scale_linetype_manual geom_line geom_hline guides theme labs theme_classic
+#' @importFrom stats setNames
+#' @importFrom magrittr %>%
+#' @importFrom tibble tibble
+#' @importFrom ggplot2 scale_x_continuous scale_y_continuous geom_point scale_shape_manual scale_color_manual scale_linetype_manual geom_line geom_hline guides theme labs theme_classic guide_legend
 ppfunnel_linear <- function(plot_data,
                             target,
                             alpha,

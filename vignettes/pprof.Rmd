@@ -91,6 +91,9 @@ Based on the results obtained from the fitted model, users can easily calculate 
 
 ```{r}
 SR <- SM_output(fit_fe, stdz = "indirect")
+head(SR$indirect.ratio)
+head(SR$indirect.rate)
+head(SR$OE$OE_indirect)
 ```
 
 ## Hypothesis Testing for Provider Effects
@@ -155,11 +158,9 @@ schools_with_5_or_more <- as.numeric(names(obs_counts[obs_counts >= 5]))
 # Caterpillar Plot
 CI_ecls <- confint(fit_ecls, parm = schools_with_5_or_more)
 caterpillar_plot(CI_ecls$CI.indirect, use_flag = T)
-
 # Bar Plot
 test_ecls <- test(fit_ecls, parm = schools_with_5_or_more)
 bar_plot(test_ecls)
-
 # Funnel Plot
 plot(fit_ecls, alpha = 0.05)
 ```

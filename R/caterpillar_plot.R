@@ -51,9 +51,7 @@
 #'
 #' @seealso \code{\link{confint.linear_fe}}, \code{\link{confint.linear_re}}, \code{\link{confint.logis_fe}}
 #'
-#' @importFrom ggplot2 ggplot aes theme element_blank labs ggtitle geom_hline geom_point scale_x_continuous scale_y_continuous scale_linetype_manual scale_fill_manual position_jitter geom_errorbar coord_flip theme_minimal theme_bw
-#' @importFrom ggpubr annotate_figure ggarrange text_grob
-#' @importFrom dplyr arrange
+#' @importFrom ggplot2 ggplot geom_errorbar aes scale_color_manual guide_legend geom_point geom_hline scale_x_discrete expansion theme theme_bw labs element_blank element_text element_rect margin
 #'
 #' @export
 
@@ -98,7 +96,7 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
                         color = flag),
                     width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
       scale_color_manual(values = flag_color, guide = guide_legend(title = NULL, box.linetype = "solid",
-                                                                   override.aes = list(linewidth = 1.5) ))
+                                                                   override.aes = list(linewidth = 1.5)))
 
   } else {
     caterpillar_p <- caterpillar_p +

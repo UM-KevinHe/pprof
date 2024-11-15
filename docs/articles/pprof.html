@@ -139,7 +139,7 @@ showing flagging percentages overall and stratified by provider sizes,
 and funnel plots for indirect standardized measures in fixed effect
 models. These visualizations offer multiple perspectives for
 understanding the results effectively.</p>
-<p><img src="Charts/pprof%20flowchart.png"></p>
+<p><img src="Charts/pprof%20flowchart.png" width="3000"></p>
 </div>
 <div class="section level2">
 <h2 id="model-fitting">Model Fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
@@ -169,7 +169,7 @@ the whole dataset.</p>
 column names of the outcome vector, the covariate matrix/data frame, and
 the provider identifier vector.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="co"># [1] "outcome" "z1"      "z2"      "z3"      "z4"      "z5"      "ID"     </span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "outcome" "z1"      "z2"      "z3"      "z4"      "z5"      "ID"</span></span>
 <span><span class="va">Y.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">Z.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
@@ -187,7 +187,7 @@ missingness, variation, correlation, and the variance inflation factor
 (VIF) of variables to ensure data quality before fitting a model.</p>
 <p>The logistic fixed effect model provides two algorithmic approaches:
 the Serial Blockwise Inversion Newton (SerBIN) algorithm (See <a href="https://um-kevinhe.github.io/ppsrr/articles/Logis-FE.html" class="external-link">Logis
-FE</a>for more details) and the Block Ascent Newton algorithm. The
+FE</a> for more details) and the Block Ascent Newton algorithm. The
 preferred method can be specified by setting the <code>method</code>
 argument, allowing users to choose the algorithm that best fits their
 computational needs and model requirements.</p>
@@ -195,6 +195,183 @@ computational needs and model requirements.</p>
 <div class="section level2">
 <h2 id="standardized-measures">Standardized Measures<a class="anchor" aria-label="anchor" href="#standardized-measures"></a>
 </h2>
+<p>Based on the results obtained from the fitted model, users can easily
+calculate direct or indirect standardized measures as per their specific
+requirements. The <code>SM_output</code> function simply necessitates
+the users to input the object returned from the model functions and
+specify the desired type of measure. Additionally, the observed outcomes
+and “expected” outcomes are included in case users wish to calculate
+standardized measures under different definitions.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">SR</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SM_output.html">SM_output</a></span><span class="op">(</span><span class="va">fit_fe</span>, stdz <span class="op">=</span> <span class="st">"indirect"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="hypothesis-testing-for-provider-effects">Hypothesis Testing for Provider Effects<a class="anchor" aria-label="anchor" href="#hypothesis-testing-for-provider-effects"></a>
+</h2>
+<p>The <code>test</code> function is designed to conduct hypothesis
+testing for provider effects and identify outlier providers. It returns
+a four-column dataframe, where the “flag” column indicates whether a
+provider is flagged as an outlier. The other three columns provide the
+p-values, corresponding test statistics, and the standard errors of
+provider effects. Users have the flexibility to choose between two-sided
+and one-sided tests by specifying the <code>alternative</code> argument.
+In cases when the number of providers is very large, outputting all
+results at once may become cumbersome. To address this, users can opt to
+display results only for the providers of particular interest by setting
+the <code>parm</code> argument to the corresponding provider ID. This
+selective output feature makes it easier for users to focus on specific
+providers without being overwhelmed by extensive data.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11</span><span class="op">:</span><span class="fl">20</span>, <span class="fl">60</span><span class="op">:</span><span class="fl">65</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    flag      p value        stat</span></span>
+<span><span class="co">#&gt; 11    0 0.1031407301  1.62981440</span></span>
+<span><span class="co">#&gt; 12    0 0.8210148768  0.22623985</span></span>
+<span><span class="co">#&gt; 13    0 0.2744008465  1.09298395</span></span>
+<span><span class="co">#&gt; 14    0 0.1370648282 -1.48681065</span></span>
+<span><span class="co">#&gt; 15    0 0.8340344124  0.20953014</span></span>
+<span><span class="co">#&gt; 16   -1 0.0299553164 -2.17068071</span></span>
+<span><span class="co">#&gt; 17    0 0.0745112915  1.78346100</span></span>
+<span><span class="co">#&gt; 18   -1 0.0361175315 -2.09560178</span></span>
+<span><span class="co">#&gt; 19    0 0.5606615895  0.58185910</span></span>
+<span><span class="co">#&gt; 20    0 0.9903105282  0.01214425</span></span>
+<span><span class="co">#&gt; 60    0 0.4600111503 -0.73882849</span></span>
+<span><span class="co">#&gt; 61    1 0.0004267554  3.52296022</span></span>
+<span><span class="co">#&gt; 62    0 0.0677680598  1.82654599</span></span>
+<span><span class="co">#&gt; 63    0 0.3526406608  0.92947947</span></span>
+<span><span class="co">#&gt; 64    0 0.3894835561  0.86055432</span></span>
+<span><span class="co">#&gt; 65    0 0.1026006595 -1.63237430</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="hypothesis-testing-for-covariate-coefficients">Hypothesis Testing for Covariate Coefficients<a class="anchor" aria-label="anchor" href="#hypothesis-testing-for-covariate-coefficients"></a>
+</h2>
+<p>Additionally, we offer the <code>summary</code> function to provides
+the test statistics for the covariate coefficients. The output dataframe
+may include the estimates, standard errors, p-values, and confindence
+intervals.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_fe</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     Estimate  Std.Error     Stat p value  CI.Lower CI.Upper</span></span>
+<span><span class="co">#&gt; z1 1.0512744 0.04179173 25.15508       0 0.9693641 1.133185</span></span>
+<span><span class="co">#&gt; z2 1.0229572 0.04093213 24.99154       0 0.9427316 1.103183</span></span>
+<span><span class="co">#&gt; z3 0.9918962 0.04035333 24.58028       0 0.9128051 1.070987</span></span>
+<span><span class="co">#&gt; z4 1.0413031 0.04115101 25.30443       0 0.9606486 1.121958</span></span>
+<span><span class="co">#&gt; z5 1.0930890 0.04173967 26.18825       0 1.0112808 1.174897</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="confidence-interval">Confidence Interval<a class="anchor" aria-label="anchor" href="#confidence-interval"></a>
+</h2>
+<p>Both the confidence intervals for provider effects and standardized
+measures can be obtained from the function <code>confint</code> by
+specifying the value of argument <code>option</code>. The function will
+return a three-column data frame that provides the estimates, along with
+the corresponding upper and lower bounds of the confidence
+intervals.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">55</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span>, option <span class="op">=</span> <span class="st">"gamma"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         gamma gamma.lower  gamma.upper</span></span>
+<span><span class="co">#&gt; 55 -1.4176768   -2.057409 -0.792812684</span></span>
+<span><span class="co">#&gt; 56 -0.6624298   -1.239835 -0.091294432</span></span>
+<span><span class="co">#&gt; 57 -0.6411525   -1.295789 -0.006435919</span></span>
+<span><span class="co">#&gt; 58 -1.3264628   -1.966684 -0.699596625</span></span>
+<span><span class="co">#&gt; 59 -0.8219975   -1.473821 -0.178134425</span></span>
+<span><span class="co">#&gt; 60 -1.1748531   -1.834632 -0.526685839</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80</span><span class="op">:</span><span class="fl">85</span><span class="op">)</span>, option <span class="op">=</span> <span class="st">"SM"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; $CI.indirect_ratio</span></span>
+<span><span class="co">#&gt;    indirect_ratio CI_ratio.lower CI_ratio.upper</span></span>
+<span><span class="co">#&gt; 80      0.6651076      0.4614515      0.8967515</span></span>
+<span><span class="co">#&gt; 81      0.0000000      0.0000000      1.1422604</span></span>
+<span><span class="co">#&gt; 82      1.0857752      0.8814482      1.3007155</span></span>
+<span><span class="co">#&gt; 83      1.0965577      0.9548462      1.2299472</span></span>
+<span><span class="co">#&gt; 84      1.1255589      0.9578273      1.2922141</span></span>
+<span><span class="co">#&gt; 85      1.1540167      0.9741097      1.3352526</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $CI.indirect_rate</span></span>
+<span><span class="co">#&gt;    indirect_rate CI_rate.lower CI_rate.upper</span></span>
+<span><span class="co">#&gt; 80      25.78715      17.89112      34.76831</span></span>
+<span><span class="co">#&gt; 81       0.00000       0.00000      44.28703</span></span>
+<span><span class="co">#&gt; 82      42.09702      34.17498      50.43056</span></span>
+<span><span class="co">#&gt; 83      42.51508      37.02073      47.68678</span></span>
+<span><span class="co">#&gt; 84      43.63949      37.13631      50.10095</span></span>
+<span><span class="co">#&gt; 85      44.74284      37.76760      51.76961</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="plotting">Plotting<a class="anchor" aria-label="anchor" href="#plotting"></a>
+</h2>
+<p>The caterpillar plot is a type of visualization used to display
+confidence intervals for estimated parameters, often employed to
+identify outliers or assess the variability across groups or providers.
+In <code>pprof</code>, the <code>caterpillar_plot</code> function is
+used to generate such plots, providing a clear representation of
+standardized measures and their associated confidence intervals. To use
+this function, users need to input a dataframe returned by our built-in
+<code>confint</code> function, with the <code>option</code> argument set
+to “SM” to ensure standardized measures are visualized.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">CI_SM</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_fe</span>, option <span class="op">=</span> <span class="st">"SM"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/caterpillar_plot.html">caterpillar_plot</a></span><span class="op">(</span><span class="va">CI_SM</span><span class="op">$</span><span class="va">CI.indirect_ratio</span>, use_flag <span class="op">=</span> <span class="cn">T</span>, errorbar_width <span class="op">=</span> <span class="fl">0.5</span>, errorbar_size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p><img src="pprof_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<p>Additionally, a bar plot is also provided to visualize the overall
+flagging percentage, as well as the percentages stratified by provider
+sizes. The providers are divided into a specified number of groups, set
+by the <code>group_num</code> argument, where the number of providers is
+approximately equal across all groups. The flagging percentage for each
+group is then displayed, giving insights into variations in provider
+performance. For this plot, users need to input the dataframe returned
+from the <code>test</code> function. This visualization offers an
+effective way to interpret the performance distribution across different
+provider groups.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">test_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit_fe</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bar_plot.html">bar_plot</a></span><span class="op">(</span><span class="va">test_df</span>, group_num <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<p><img src="pprof_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
+<p>The current version of <code>pprof</code> also supports the funnel
+plot through the <code>plot</code> function, an effective graphical tool
+for identifying healthcare providers with unusual performance. This
+function can visualize the indirect standardized differences for the
+linear fixed effect model and the indirect standardized ratios for the
+logistic fixed effect model, offering valuable insights into variations
+in provider performance.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_fe</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<p><img src="pprof_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="real-data-example-ecls_data">Real Data Example <code>ecls_data</code><a class="anchor" aria-label="anchor" href="#real-data-example-ecls_data"></a>
+</h2>
+<p>In this section, we further show the usage of the package by
+analyzing the Early Childhood Longitudinal Study (ECLS) dataset. We use
+fifth-grade cross-sectional data, focusing on students’ mathematical
+assessment scores as the continuous outcome, with the continuous
+predictor household income and the categorical predictor gender. Due to
+the small number of observations for some schools, we fit the model
+using all available observations but exclude schools with fewer than
+five records when generating caterpillat plot and bar plot. This ensures
+a more reliable and interpretable graphical representation of the
+results.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ecls_data</span><span class="op">)</span></span>
+<span><span class="va">formula_ecls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="st">"Math_Score ~ Income + id(School_ID) + Child_Sex"</span><span class="op">)</span></span>
+<span><span class="va">fit_ecls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/linear_fe.html">linear_fe</a></span><span class="op">(</span>formula <span class="op">=</span> <span class="va">formula_ecls</span>, data <span class="op">=</span> <span class="va">ecls_data</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Input format: formula and data.</span></span>
+<span></span>
+<span><span class="va">obs_counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">ecls_data</span><span class="op">$</span><span class="va">School_ID</span><span class="op">)</span></span>
+<span><span class="va">schools_with_5_or_more</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">obs_counts</span><span class="op">[</span><span class="va">obs_counts</span> <span class="op">&gt;=</span> <span class="fl">5</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Caterpillar Plot</span></span>
+<span><span class="va">CI_ecls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_ecls</span>, parm <span class="op">=</span> <span class="va">schools_with_5_or_more</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/caterpillar_plot.html">caterpillar_plot</a></span><span class="op">(</span><span class="va">CI_ecls</span><span class="op">$</span><span class="va">CI.indirect</span>, use_flag <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
+<p><img src="pprof_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Bar Plot</span></span>
+<span><span class="va">test_ecls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit_ecls</span>, parm <span class="op">=</span> <span class="va">schools_with_5_or_more</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/bar_plot.html">bar_plot</a></span><span class="op">(</span><span class="va">test_ecls</span><span class="op">)</span></span></code></pre></div>
+<p><img src="pprof_files/figure-html/unnamed-chunk-14-2.png" width="700"></p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Funnel Plot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_ecls</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
+<p><img src="pprof_files/figure-html/unnamed-chunk-14-3.png" width="700"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
