@@ -33,7 +33,9 @@ Imports:
     tidyr,
     Matrix,
     lme4,
-    magrittr
+    magrittr,
+    scales,
+    tibble
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends:
     R (>= 4.1.0)
