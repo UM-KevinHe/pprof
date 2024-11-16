@@ -4,7 +4,7 @@
 \alias{test.linear_fe}
 \title{Conduct hypothesis testing for provider effects from a fitted \code{linear_fe} object}
 \usage{
-\method{test}{linear_fe}(fit, parm, level = 0.95, null = "median", alternative = "two.sided")
+\method{test}{linear_fe}(fit, parm, level = 0.95, null = "median", alternative = "two.sided", ...)
 }
 \arguments{
 \item{fit}{a model fitted from \code{linear_fe}.}
@@ -25,6 +25,8 @@ The default value is \code{"median"}. The possible values are:
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
 \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+
+\item{\dots}{additional arguments that can be passed to specific methods.}
 }
 \value{
 A data frame containing the results of the hypothesis test, with the following columns:
@@ -50,6 +52,6 @@ outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
 fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
-test(fit_fe)
+test(fit_linear)
 
 }

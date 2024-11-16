@@ -72,6 +72,6 @@ covar = ExampleDataBinary$Z
 ID = ExampleDataBinary$ID
 fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 confint(fit_fe, option = "gamma")
-confint(fit_fe, option = "SR")
+confint(fit_fe, option = "SM")
 
 }

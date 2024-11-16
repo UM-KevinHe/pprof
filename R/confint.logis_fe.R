@@ -45,7 +45,7 @@
 #' ID = ExampleDataBinary$ID
 #' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 #' confint(fit_fe, option = "gamma")
-#' confint(fit_fe, option = "SR")
+#' confint(fit_fe, option = "SM")
 #'
 #' @importFrom stats plogis
 #'
@@ -267,7 +267,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
           gamma.upper <- Inf
           for (i in 1:max_attempts){
             result_upper <- try(uniroot(function(x) prod(plogis(-x-Z.beta))/2-alpha,
-                                        (10+max.Z.beta)*c(-i,i)), silent = T)
+                                        (10+max.Z.beta)*c(-i,i)), silent = TRUE)
             if (class(result_upper)[1] == "try-error") {
 
             } else {

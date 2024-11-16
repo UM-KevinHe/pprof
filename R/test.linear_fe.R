@@ -16,6 +16,7 @@
 #' }
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#' @param \dots additional arguments that can be passed to specific methods.
 #'
 #' @return A data frame containing the results of the hypothesis test, with the following columns:
 #' \item{flag}{a flagging indicator where \code{1} means statistically higher than expected
@@ -37,13 +38,13 @@
 #' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
 #' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
-#' test(fit_fe)
+#' test(fit_linear)
 #'
 #' @importFrom stats pnorm qnorm pt qt
 #'
 #' @exportS3Method test linear_fe
 
-test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative = "two.sided") {
+test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative = "two.sided", ...) {
   alpha <- 1 - level
 
   data <- fit$data_include

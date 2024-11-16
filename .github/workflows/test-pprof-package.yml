@@ -2,9 +2,9 @@ name: Test PProf Package with testthat
 
 on:
   push:
-    branches: [ Xiaohan ]
+    branches: [ main ]
   pull_request:
-    branches: [ Xiaohan ]
+    branches: [ main ]
 
 jobs:
   check:
