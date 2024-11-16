@@ -2,7 +2,7 @@
 #'
 #' Provide the summary statistics for the covariate estimates for a fixed/random effect linear model.
 #'
-#' @param fit a model fitted from \code{linear_fe} or \code{linear_re}.
+#' @param object a model fitted from \code{linear_fe} or \code{linear_re}.
 #' @param parm Specifies a subset of covariates for which the result summaries should be output.
 #' By default, all covariates are included.
 #' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
@@ -32,7 +32,7 @@
 #'
 #' @exportS3Method summary linear_fe
 
-summary.linear_fe <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
+summary.linear_fe <- function(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
   alpha <- 1 - level
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)

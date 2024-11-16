@@ -2,7 +2,7 @@
 #'
 #' Provide the summary statistics for the covariate estimates for a fixed effect logistic model.
 #'
-#' @param fit a model fitted from \code{logis_fe}.
+#' @param object a model fitted from \code{logis_fe}.
 #' @param parm Specifies a subset of covariates for which the result summaries should be output.
 #' By default, all covariates are included.
 #' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
@@ -41,7 +41,7 @@
 #'
 #' @exportS3Method summary logis_fe
 
-summary.logis_fe <- function(fit, parm, level = 0.95, test = "wald", null = 0, alternative = "two.sided", ...) {
+summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0, alternative = "two.sided", ...) {
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
   if (!(test %in% c("wald", "lr", "score"))) stop("Argument 'test' NOT as required!",call.=F)

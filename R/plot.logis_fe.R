@@ -2,7 +2,7 @@
 #'
 #' Creates a funnel plot from a logistic fixed effect model to compare provider performance.
 #'
-#' @param fit a model fitted from \code{logis_fe}.
+#' @param x a model fitted from \code{logis_fe}.
 #' @param null a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.
 #' @param test a character string specifying the type of testing methods to be conducted. The default is "score".
 #' @param target a numeric value representing the target outcome. The default value is 1.
@@ -41,7 +41,7 @@
 #'
 #' @exportS3Method plot logis_fe
 
-plot.logis_fe <- function(fit, null = "median", test = "score", target = 1, alpha = 0.05,
+plot.logis_fe <- function(x, null = "median", test = "score", target = 1, alpha = 0.05,
                           labels = c("lower", "expected", "higher"),
                           point_colors = c("#E69F00", "#56B4E9", "#009E73"),
                           point_shapes = c(15, 17, 19),

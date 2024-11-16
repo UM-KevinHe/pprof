@@ -5,7 +5,7 @@
 \title{Result Summaries of Covariate Estimates from a fitted \code{logis_fe} object}
 \usage{
 \method{summary}{logis_fe}(
-  fit,
+  object,
   parm,
   level = 0.95,
   test = "wald",
@@ -15,7 +15,7 @@
 )
 }
 \arguments{
-\item{fit}{a model fitted from \code{logis_fe}.}
+\item{object}{a model fitted from \code{logis_fe}.}
 
 \item{parm}{Specifies a subset of covariates for which the result summaries should be output.
 By default, all covariates are included.}

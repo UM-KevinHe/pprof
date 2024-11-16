@@ -12,7 +12,7 @@
 #'
 #' @exportS3Method summary linear_re
 
-summary.linear_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
+summary.linear_re <- function(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
   alpha <- 1 - level
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)

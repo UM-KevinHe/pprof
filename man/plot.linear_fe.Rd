@@ -5,7 +5,7 @@
 \title{Get funnel plot from a fitted \code{linear_fe} object for institutional comparisons}
 \usage{
 \method{plot}{linear_fe}(
-  fit,
+  x,
   null = "median",
   target = 0,
   alpha = 0.05,
@@ -20,7 +20,7 @@
 )
 }
 \arguments{
-\item{fit}{a model fitted from \code{linear_fe}.}
+\item{x}{a model fitted from \code{linear_fe}.}
 
 \item{null}{a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.}
 

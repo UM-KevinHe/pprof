@@ -5,7 +5,7 @@
 \title{Get funnel plot from a fitted \code{logis_fe} object for institutional comparisons}
 \usage{
 \method{plot}{logis_fe}(
-  fit,
+  x,
   null = "median",
   test = "score",
   target = 1,
@@ -21,7 +21,7 @@
 )
 }
 \arguments{
-\item{fit}{a model fitted from \code{logis_fe}.}
+\item{x}{a model fitted from \code{logis_fe}.}
 
 \item{null}{a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.}
 

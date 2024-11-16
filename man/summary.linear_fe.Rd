@@ -5,12 +5,12 @@
 \alias{summary.linear_re}
 \title{Result Summaries of Covariate Estimates from a fitted \code{linear_fe} or \code{linear_re} object}
 \usage{
-\method{summary}{linear_fe}(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...)
+\method{summary}{linear_fe}(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...)
 
-\method{summary}{linear_re}(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...)
+\method{summary}{linear_re}(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...)
 }
 \arguments{
-\item{fit}{a model fitted from \code{linear_fe} or \code{linear_re}.}
+\item{object}{a model fitted from \code{linear_fe} or \code{linear_re}.}
 
 \item{parm}{Specifies a subset of covariates for which the result summaries should be output.
 By default, all covariates are included.}
