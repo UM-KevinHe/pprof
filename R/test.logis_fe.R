@@ -1,4 +1,4 @@
-#' Hypothesis Testing Function for Provider Effects
+#' Conduct hypothesis testing for provider effects from a fitted `logis_fe` object
 #'
 #' Conduct hypothesis tests on provider effects and identify outlying providers for a fixed effect logistic model.
 #'
@@ -41,8 +41,11 @@
 #'
 #'
 #' @examples
-#' data(data_FE)
-#' fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+#' data(ExampleDataBinary)
+#' outcome = ExampleDataBinary$Y
+#' covar = ExampleDataBinary$Z
+#' ID = ExampleDataBinary$ID
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 #' test(fit_fe, test = "score")
 #'
 #' @importFrom stats plogis qnorm pnorm rbinom

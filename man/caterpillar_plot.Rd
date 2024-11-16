@@ -2,7 +2,7 @@
 % Please edit documentation in R/caterpillar_plot.R
 \name{caterpillar_plot}
 \alias{caterpillar_plot}
-\title{Get a caterpillar plot for standardized measures}
+\title{Get a caterpillar plot to display confidence intervals for standardized measures}
 \usage{
 caterpillar_plot(
   CI,
@@ -54,7 +54,7 @@ caterpillar_plot(
 A ggplot object which is a caterpillar plot for the standardized measures.
 }
 \description{
-Generates a caterpillar plot for standardized measures from different models using a provided CI dataframe.
+Generate a caterpillar plot for standardized measures from different models using a provided CI dataframe.
 }
 \details{
 This function creates a caterpillar plot to visualize the standardized measures (indirect or direct).
@@ -63,9 +63,12 @@ Each provider's standardized measure value is represented as a point, and a refe
 If \code{refline_value} is not specified, for linear FE or RE models with indirect or direct standardized differences, it will be set to 0;
 for logistic FE models with indirect or direct ratios, it will be set to 1;
 and for logistic FE with indirect or direct rates, it will be set to the population rate, which represents the average rate across all observations.
+
 Confidence intervals (CI) are displayed as error bars: for \code{alternative = "two.sided"}, two-sided confidence intervals are shown;
-for \code{alternative = "greater"}, the error bar extends from the lower bound to the standardized measure values;
-and for \code{alternative = "less"}, it extends from the standardized measure values to the upper bound.
+for \code{alternative = "greater"}, error bars extend from the lower bound to the standardized measure values;
+and for \code{alternative = "less"}, they extend from the standardized measure values to the upper bound.
+For cases where one side of the confidence interval is infinite, that side only extends to the standardized measure.
+For example, in a logistic fixed effect model, if a provider has all 0s or all 1s, one side of the confidence interval will be infinite.
 
 When \code{use_flag = TRUE}, the plot will use colors specified by \code{flag_color} to show the flags of providers.
 Each error bar will be colored to reflect the flag, making it easy to identify providers with different performance levels.

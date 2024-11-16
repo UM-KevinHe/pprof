@@ -2,11 +2,10 @@
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
-#' Z <- ExampleDataLinear$Z
+#' outcome <- ExampleDataLinear$Y
+#' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
-#'
-#' fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+#' fit_re <- linear_fe(Y = outcome, Z = covar, ID = ID)
 #' summary(fit_re)
 #'
 #' @importFrom stats pnorm qnorm

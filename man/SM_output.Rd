@@ -2,15 +2,15 @@
 % Please edit documentation in R/SM_output.R
 \name{SM_output}
 \alias{SM_output}
-\title{Generic Function for Calculating Standardized Measures}
+\title{Generic function for calculating standardized measures}
 \usage{
 SM_output(fit, ...)
 }
 \arguments{
 \item{fit}{the input object, typically a fitted model, for which standardized measures
-are to be calculated. The method applied depends on the class of this object.}
+are calculated. The method applied depends on the class of this object.}
 
-\item{...}{Additional arguments that can be passed to specific methods.}
+\item{...}{additional arguments that can be passed to specific methods.}
 }
 \value{
 the return varies depending on the method implemented for the

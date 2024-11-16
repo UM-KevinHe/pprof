@@ -2,7 +2,7 @@
 % Please edit documentation in R/test.linear_re.R
 \name{test.linear_re}
 \alias{test.linear_re}
-\title{Hypothesis Testing Function for Provider Effects}
+\title{Conduct hypothesis testing for provider effects from a fitted \code{linear_re} object}
 \usage{
 \method{test}{linear_re}(fit, parm, level = 0.95, null = 0, alternative = "two.sided")
 }
@@ -41,11 +41,10 @@ Outlying providers are determined by the test statistic falling beyond the thres
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
 ID <- ExampleDataLinear$ID
-
-fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+covar <- ExampleDataLinear$Z
+fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
 test(fit_re)
 
 }

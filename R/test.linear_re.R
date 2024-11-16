@@ -1,4 +1,4 @@
-#' Hypothesis Testing Function for Provider Effects
+#' Conduct hypothesis testing for provider effects from a fitted `linear_re` object
 #'
 #' Conduct hypothesis tests on provider effects and identify outlying providers for a random effect linear model.
 #'
@@ -28,11 +28,10 @@
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
-#' Z <- ExampleDataLinear$Z
+#' outcome <- ExampleDataLinear$Y
 #' ID <- ExampleDataLinear$ID
-#'
-#' fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+#' covar <- ExampleDataLinear$Z
+#' fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
 #' test(fit_re)
 #'
 #' @importFrom stats pnorm qnorm pt qt

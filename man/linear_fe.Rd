@@ -2,7 +2,7 @@
 % Please edit documentation in R/linear_fe.R
 \name{linear_fe}
 \alias{linear_fe}
-\title{Main Function for Fitting the Fixed Effect Linear Model}
+\title{Main function for fitting the fixed effect linear model}
 \usage{
 linear_fe(
   formula = NULL,
@@ -38,8 +38,8 @@ or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
 
 \item{method}{a character string specifying the method to fit the model.
 \itemize{
-\item{\code{"pl"}} (default) uses profile likelihood to fit the model,.
-\item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the provider identifier
+\item{\code{"pl"}} (default) uses profile likelihood to fit the model.
+\item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the provider identifier.
 }}
 }
 \value{
@@ -51,7 +51,7 @@ A list of objects with S3 class \code{"linear_fe"}:
 \item{sigma}{the residual standard error.}
 \item{fitted}{the fitted values of each individual.}
 \item{observation}{the original response of each individual.}
-\item{residuals}{the residuals of each individual, that is response minus fitted values}
+\item{residuals}{the residuals of each individual, that is response minus fitted values.}
 \item{linear_pred}{the linear predictor of each individual.}
 \item{data_include}{the data used to fit the model, sorted by the provider identifier.
 For categorical covariates, this includes the dummy variables created for
@@ -60,9 +60,9 @@ all categories except the reference level.}
 the response variable, covariates, and provider identifier.
 For categorical variables, the names reflect the dummy variables created for each category.}
 \item{method}{the method used for model fitting, either \code{"Profile Likelihood"} or \code{"Dummy"}.}
-\item{neg2Loglkd}{log likelihood}
-\item{AIC}{Akaike info criterion}
-\item{BIC}{Bayesian info criterion}
+\item{Loglkd}{log likelihood.}
+\item{AIC}{Akaike information criterion.}
+\item{BIC}{Bayesian information criterion.}
 }
 \description{
 Fit a fixed effect linear model via profile likelihood or dummy encoding.
@@ -72,12 +72,13 @@ This function is used to fit a fixed effect linear model of the form:
 \deqn{Y_{ij} = \gamma_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
 where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider \eqn{i}, \eqn{\gamma_i} is the provider-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 The default method for fitting the model is profile likelihood, but dummy encoding can also be used by specifying the appropriate method.
-When the number of providers is very large, we recommend using the profile likelihood method, as it is significantly faster than dummy encoding.
+When the number of providers is very large, we recommend using the profile likelihood method, as it is computationally efficient and requires
+less memory usage.
 
 The function accepts three different input formats:
 a formula and dataset, where the formula is of the form \code{response ~ covariates + id(provider)}, with \code{provider} representing the provider identifier;
 a dataset along with the column names of the response, covariates, and provider identifier;
-or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector \eqn{\boldsymbol{\gamma}}.
+or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector.
 
 If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
 which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
@@ -85,18 +86,18 @@ For datasets with missing values, this function automatically removes observatio
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-data <- data.frame(Y, ID, Z)
-Z.char <- colnames(Z)
-Y.char <- "Y"
-ID.char <- "ID"
-formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ id(ID)"))
+data <- data.frame(outcome, ID, covar)
+covar.char <- colnames(covar)
+outcome.char <- colnames(data)[1]
+ID.char <- colnames(data)[2]
+formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ID)"))
 
 # Fit fixed linear effect model using three input formats
-fit_fe1 <- linear_fe(Y = Y, Z = Z, ID = ID)
-fit_fe2 <- linear_fe(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char)
+fit_fe1 <- linear_fe(Y = outcome, Z = covar, ID = ID)
+fit_fe2 <- linear_fe(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
 fit_fe3 <- linear_fe(formula, data)
 
 }

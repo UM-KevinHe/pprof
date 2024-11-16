@@ -2,7 +2,7 @@
 % Please edit documentation in R/SM_output.linear_re.R
 \name{SM_output.linear_re}
 \alias{SM_output.linear_re}
-\title{Standardized Measures Output Function}
+\title{Calculate direct/indirect standardized differences from a fitted \code{linear_re} object}
 \usage{
 \method{SM_output}{linear_re}(fit, parm, stdz = "indirect")
 }
@@ -28,7 +28,7 @@ as well as the observed and expected outcomes used to calculate the standardized
 \item{OE}{a list of data frames containing the observed and expected outcomes used for calculating standardized measures.}
 }
 \description{
-Provide direct/indirect standardized difference for a random effect linear model.
+Provide direct/indirect standardized differences for a random effect linear model.
 }
 \details{
 This function computes standardized differences for a random effect linear model
@@ -38,16 +38,10 @@ used for their calculation.
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-
-# Fit a fixed linear effect model
-fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+fit_linear <- linear_re(Y = outcome, Z = covar, ID = ID)
 SM_output(fit_re)
 
-}
-\references{
-He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects.
-\emph{Lifetime Data Analysis}, \strong{19}: 490-512.
 }

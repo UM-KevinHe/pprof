@@ -1,6 +1,6 @@
-#' Standardized Measures Output Function
+#' Calculate direct/indirect standardized differences from a fitted `linear_re` object
 #'
-#' Provide direct/indirect standardized difference for a random effect linear model.
+#' Provide direct/indirect standardized differences for a random effect linear model.
 #'
 #' @param fit a model fitted from \code{linear_re}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
@@ -27,17 +27,11 @@
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
-#' Z <- ExampleDataLinear$Z
+#' outcome <- ExampleDataLinear$Y
+#' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
-#'
-#' # Fit a fixed linear effect model
-#' fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+#' fit_linear <- linear_re(Y = outcome, Z = covar, ID = ID)
 #' SM_output(fit_re)
-#'
-#' @references
-#' He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects.
-#' \emph{Lifetime Data Analysis}, \strong{19}: 490-512.
 #'
 #' @exportS3Method SM_output linear_re
 

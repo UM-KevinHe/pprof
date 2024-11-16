@@ -2,7 +2,7 @@
 % Please edit documentation in R/logis_fe.R
 \name{logis_fe}
 \alias{logis_fe}
-\title{Main Function for Fitting the Fixed Effect Logistic Model}
+\title{Main function for fitting the fixed effect logistic model}
 \usage{
 logis_fe(
   formula = NULL,
@@ -27,7 +27,7 @@ logis_fe(
 \arguments{
 \item{formula}{a two-sided formula object describing the model to be fitted,
 with the response variable on the left of a ~ operator and covariates on the right,
-separated by + operators. The fixed effect of the grouping identifier is specified using \code{id()}.}
+separated by + operators. The fixed effect of the provider identifier is specified using \code{id()}.}
 
 \item{data}{a data frame containing the variables named in the \code{formula},
 or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
@@ -36,13 +36,13 @@ or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
 
 \item{Z.char}{a character vector specifying the column names of the covariates in the \code{data}.}
 
-\item{ID.char}{a character string specifying the column name of the grouping identifier in the \code{data}.}
+\item{ID.char}{a character string specifying the column name of the provider identifier in the \code{data}.}
 
 \item{Y}{a numeric vector representing the response variable.}
 
 \item{Z}{a matrix or data frame representing the covariates, which can include both numeric and categorical variables.}
 
-\item{ID}{a numeric vector representing the grouping identifier.}
+\item{ID}{a numeric vector representing the provider identifier.}
 
 \item{method}{a string specifying the algorithm to be used. The default value is "SerBIN".
 \itemize{
@@ -54,7 +54,7 @@ or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
 
 \item{tol}{tolerance used for stopping the algorithm. See details in \code{stop} below. The default value is 1e-5.}
 
-\item{bound}{a positive number to avoid inflation of provider effect. The default value is 10.}
+\item{bound}{a positive number to avoid inflation of provider effects. The default value is 10.}
 
 \item{cutoff}{An integer specifying the minimum number of observations required for providers.
 Providers with fewer observations than the cutoff will be labeled as \code{"include = 0"} and excluded from model fitting. The default is 10.}
@@ -64,8 +64,11 @@ Providers with fewer observations than the cutoff will be labeled as \code{"incl
 \item{stop}{a character string specifying the stopping rule to determine convergence.
 \itemize{
 \item{\code{"beta"}} stop the algorithm when the infinity norm of the difference between current and previous beta coefficients is less than the \code{tol}.
-\item{\code{"relch"}} stop the algorithm when the \eqn{(loglik(m)-loglik(m-1))/(loglik(m))} is less than the \code{tol}.
-\item{\code{"ratch"}} stop the algorithm when \eqn{(loglik(m)-loglik(m-1))/(loglik(m)-loglik(0))} is less than the \code{tol}.
+\item{\code{"relch"}} stop the algorithm when the \eqn{(loglik(m)-loglik(m-1))/(loglik(m))} (the difference between the log-likelihood of
+the current iteration and the previous iteration divided by the log-likelihood of the current iteration) is less than the \code{tol}.
+\item{\code{"ratch"}} stop the algorithm when \eqn{(loglik(m)-loglik(m-1))/(loglik(m)-loglik(0))} (the difference between the log-likelihood of
+the current iteration and the previous iteration divided by the difference of the log-likelihood of the current iteration and the initial iteration)
+is less than the \code{tol}.
 \item{\code{"all"}} stop the algorithm when all the stopping rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) are met.
 \item{\code{"or"}} stop the algorithm if any one of the rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) is met.
 }
@@ -78,20 +81,20 @@ The default value is \code{or}. If \code{iter.max} is achieved, it overrides any
 \value{
 A list of objects with S3 class \code{"logis_fe"}:
 \item{coefficient}{a list containing the estimated coefficients:
-\code{beta}, the fixed effects for each predictor, and \code{gamma}, the effect for each group.}
+\code{beta}, the fixed effects for each predictor, and \code{gamma}, the effect for each provider.}
 \item{variance}{a list containing the variance estimates:
-\code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the group effects.}
+\code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the provider effects.}
 \item{linear_pred}{the linear predictor of each individual.}
 \item{prediction}{predicted probability of each individual}
 \item{observation}{the original response of each individual.}
-\item{Loglkd}{the log-likelihood}
-\item{AIC}{Akaike info criterion}
-\item{BIC}{Bayesian info criterion}
-\item{AUC}{area under the ROC curve}
+\item{Loglkd}{the log-likelihood.}
+\item{AIC}{Akaike info criterion.}
+\item{BIC}{Bayesian info criterion.}
+\item{AUC}{area under the ROC curve.}
 \item{char_list}{a list of the character vectors representing the column names for
-the response variable, covariates, and group identifier.
+the response variable, covariates, and provider identifier.
 For categorical variables, the names reflect the dummy variables created for each category.}
-\item{data_include}{the data used to fit the model, sorted by the group identifier.
+\item{data_include}{the data used to fit the model, sorted by the provider identifier.
 For categorical covariates, this includes the dummy variables created for
 all categories except the reference level. Additionally, it contains three extra columns:
 \code{included}, indicating whether the provider is included based on the \code{cutoff} argument;
@@ -103,20 +106,20 @@ Fit a fixed effect logistic model via Serial blockwise inversion Newton (SerBIN)
 }
 \details{
 The function accepts three different input formats:
-a formula and dataset, where the formula is of the form \code{response ~ covariates + id(group)}, with \code{group} representing the group identifier;
-a dataset along with the column names of the response, covariates, and group identifier;
-or the binary outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the group identifier vector \eqn{\boldsymbol{\gamma}}.
+a formula and dataset, where the formula is of the form \code{response ~ covariates + id(provider)}, with \code{provider} representing the provider identifier;
+a dataset along with the column names of the response, covariates, and provider identifier;
+or the binary outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector.
 
 The default algorithm is based on Serial blockwise inversion Newton (SerBIN) proposed by
 \href{https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387}{Wu et al. (2022)},
 but users can also choose to use the block ascent Newton (BAN) algorithm proposed by
 \href{https://link.springer.com/article/10.1007/s10985-013-9264-6}{He et al. (2013)} to fit the model.
 Both methodologies build upon the Newton-Raphson method, yet SerBIN simultaneously updates both the provider effect and covariate coefficient.
-This concurrent update necessitates the inversion of the complete information matrix at each iteration.
+This concurrent update necessitates the inversion of the whole information matrix at each iteration.
 In contrast, BAN adopts a two-layer updating approach, where the covariate coefficient is sequentially fixed to update the provider effect,
 followed by fixing the provider effect to update the covariate coefficient.
 
-We suggest using the default \code{"SerBIN"} option as it typically converges much faster for most datasets.
+We suggest using the default \code{"SerBIN"} option as it typically converges subsequently much faster for most datasets.
 However, in rare cases where the SerBIN algorithm encounters second-order derivative irreversibility leading to an error,
 users can consider using the \code{"BAN"} option as an alternative.
 For a deeper understanding, please consult the original article for detailed insights.
@@ -126,17 +129,29 @@ which can help identify missing values, low variation in covariates, high-pairwi
 For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
 }
 \examples{
-data(data_FE)
-fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+data(ExampleDataBinary)
+outcome <- ExampleDataBinary$Y
+covar <- ExampleDataBinary$Z
+ID <- ExampleDataBinary$ID
+data <- data.frame(outcome, ID, covar)
+covar.char <- colnames(covar)
+outcome.char <- colnames(data)[1]
+ID.char <- colnames(data)[2]
+formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ID)"))
+
+# Fit logistic linear effect model using three input formats
+fit_fe1 <- logis_fe(Y = outcome, Z = covar, ID = ID)
+fit_fe2 <- logis_fe(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
+fit_fe3 <- logis_fe(formula, data)
 
 }
 \references{
-Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and inference for profiling health care providers.
-\emph{Statistics in Medicine}, \strong{41(15)}: 2840-2853.
-\cr
-
 He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis providers; adjusting for hospital effects.
 \emph{Lifetime Data Analysis}, \strong{19}: 490-512.
+\cr
+
+Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and inference for profiling health care providers.
+\emph{Statistics in Medicine}, \strong{41(15)}: 2840-2853.
 \cr
 }
 \seealso{

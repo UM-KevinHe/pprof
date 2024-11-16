@@ -2,7 +2,7 @@
 % Please edit documentation in R/SM_output.logis_fe.R
 \name{SM_output.logis_fe}
 \alias{SM_output.logis_fe}
-\title{Standardized Measures Output Function}
+\title{Calculate direct/indirect standardized ratios/rates from a fitted \code{logis_fe} object}
 \usage{
 \method{SM_output}{logis_fe}(
   fit,
@@ -48,16 +48,19 @@ depending on the user's choice of standardization method (\code{stdz}) and measu
 \item{OE}{a list of data frames containing the observed and expected outcomes used for calculating standardized measures.}
 }
 \description{
-Provide direct/indirect standardized ratio/rate for a fixed effect logistic model.
+Provide direct/indirect standardized ratios/rates for a fixed effect logistic model.
 }
 \examples{
-data(data_FE)
-fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+data(ExampleDataBinary)
+outcome = ExampleDataBinary$Y
+covar = ExampleDataBinary$Z
+ID = ExampleDataBinary$ID
+fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 SR <- SM_output(fit_fe, stdz = "direct", measure = "rate")
 SR$direct.rate
 
 }
 \references{
-He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects.
-\emph{Lifetime Data Analysis}, \strong{19}: 490-512.
+He, K. (2019). Indirect and direct standardization for evaluating transplant centers. Journal of Hospital Administration, \strong{8(1)}, 9-14.
+\cr
 }

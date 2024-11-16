@@ -1,17 +1,17 @@
-#' Get Funnel Plot for institutional comparisons
+#' Get funnel plot from a fitted `logis_fe` object for institutional comparisons
 #'
-#' Creates a funnel plot from a logistic fixed-effect model to compare provider performance.
+#' Creates a funnel plot from a logistic fixed effect model to compare provider performance.
 #'
 #' @param fit a model fitted from \code{logis_fe}.
 #' @param null a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.
-#' @param test a character string specifying the type of testing method to be conducted. The default is "score".
+#' @param test a character string specifying the type of testing methods to be conducted. The default is "score".
 #' @param target a numeric value representing the target outcome. The default value is 1.
-#' @param alphas a number or a vector of significance levels. The default is alpha = 0.05.
+#' @param alpha a number or a vector of significance levels. The default is 0.05.
 #' @param labels a vector of labels for the plot.
 #' @param point_colors a vector of colors representing different provider flags. The default is \code{c("#E69F00", "#56B4E9", "#009E73")}.
 #' @param point_shapes a vector of shapes representing different provider flags. The default is \code{c(15, 17, 19)}.
 #' @param point_size size of the points. The default is 2.
-#' @param point_alpha alpha of the points. The default is 0.8.
+#' @param point_alpha transparency level of the points. The default is 0.8.
 #' @param line_size size of all lines, including control limits and the target line. The default is 0.8.
 #' @param target_line_type line type for the target line. The default is "longdash".
 #'
@@ -25,8 +25,11 @@
 #' @return A ggplot object representing the funnel plot.
 #'
 #' @examples
-#' data(data_FE)
-#' fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+#' data(ExampleDataBinary)
+#' outcome <- ExampleDataBinary$Y
+#' covar <- ExampleDataBinary$Z
+#' ID <- ExampleDataBinary$ID
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID)
 #' plot(fit_fe)
 #'
 #' @importFrom dplyr filter arrange cross_join mutate select

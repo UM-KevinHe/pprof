@@ -1,17 +1,17 @@
-#' Data quality check
+#' Data quality check function
 #'
 #' Conduct data quality check including checking missingness, variation, correlation and VIF of variables.
 #'
 #' @param Y a numeric vector indicating the outcome variable.
 #' @param Z a matrix or data frame representing covariates.
-#' @param ID a numeric vector representing the grouping identifier.
+#' @param ID a numeric vector representing the provider identifier.
 #'
 #' @details The function performs the following checks:
 #'   \itemize{
-#'     \item {Missingness}{Checks for any missing values in the dataset and provides a summary of missing data.}
-#'     \item {Variation}{Identifies covariates with zero or near-zero variance which might affect model stability.}
-#'     \item {Correlation}{Analyzes pairwise correlation among covariates and highlights highly correlated pairs.}
-#'     \item {VIF}{Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.}
+#'     \item{Missingness:} {Checks for any missing values in the dataset and provides a summary of missing data.}
+#'     \item{Variation:} {Identifies covariates with zero or near-zero variance which might affect model stability.}
+#'     \item{Correlation:} {Analyzes pairwise correlation among covariates and highlights highly correlated pairs.}
+#'     \item{VIF:} {Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.}
 #'   }
 #' If issues arise when using the model functions \code{logis_fe}, \code{linear_fe} and \code{linear_re},
 #' this function can be called for data quality checking purposes.
@@ -20,6 +20,13 @@
 #'
 #' @importFrom caret nearZeroVar
 #' @importFrom olsrr ols_vif_tol
+#'
+#' @examples
+#' data(ExampleDataBinary)
+#' outcome = ExampleDataBinary$Y
+#' covar = ExampleDataBinary$Z
+#' ID = ExampleDataBinary$ID
+#' data_check(outcome, covar, ID)
 #'
 #' @export
 

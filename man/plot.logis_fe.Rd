@@ -2,14 +2,14 @@
 % Please edit documentation in R/plot.logis_fe.R
 \name{plot.logis_fe}
 \alias{plot.logis_fe}
-\title{Get Funnel Plot for institutional comparisons}
+\title{Get funnel plot from a fitted \code{logis_fe} object for institutional comparisons}
 \usage{
 \method{plot}{logis_fe}(
   fit,
   null = "median",
   test = "score",
   target = 1,
-  alpha = c(0.05, 0.01),
+  alpha = 0.05,
   labels = c("lower", "expected", "higher"),
   point_colors = c("#E69F00", "#56B4E9", "#009E73"),
   point_shapes = c(15, 17, 19),
@@ -24,9 +24,11 @@
 
 \item{null}{a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.}
 
-\item{test}{a character string specifying the type of testing method to be conducted. The default is "score".}
+\item{test}{a character string specifying the type of testing methods to be conducted. The default is "score".}
 
 \item{target}{a numeric value representing the target outcome. The default value is 1.}
+
+\item{alpha}{a number or a vector of significance levels. The default is 0.05.}
 
 \item{labels}{a vector of labels for the plot.}
 
@@ -36,19 +38,17 @@
 
 \item{point_size}{size of the points. The default is 2.}
 
-\item{point_alpha}{alpha of the points. The default is 0.8.}
+\item{point_alpha}{transparency level of the points. The default is 0.8.}
 
 \item{line_size}{size of all lines, including control limits and the target line. The default is 0.8.}
 
 \item{target_line_type}{line type for the target line. The default is "longdash".}
-
-\item{alphas}{a vector of significance levels. The default is alpha = c(0.05, 0.01).}
 }
 \value{
 A ggplot object representing the funnel plot.
 }
 \description{
-Creates a funnel plot from a logistic fixed-effect model to compare provider performance.
+Creates a funnel plot from a logistic fixed effect model to compare provider performance.
 }
 \details{
 This function generates a funnel plot from a logistic fixed-effect model. Currently, it only supports the indirect standardized ratio.
@@ -56,8 +56,11 @@ The parameter \code{alpha} is a vector used to calculate control limits at diffe
 The first value in the vector is used as the significance level for flagging each provider, utilizing the \code{\link{test.logis_fe}} function.
 }
 \examples{
-data(data_FE)
-fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+data(ExampleDataBinary)
+outcome <- ExampleDataBinary$Y
+covar <- ExampleDataBinary$Z
+ID <- ExampleDataBinary$ID
+fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID)
 plot(fit_fe)
 
 }

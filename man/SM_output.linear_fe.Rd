@@ -2,7 +2,7 @@
 % Please edit documentation in R/SM_output.linear_fe.R
 \name{SM_output.linear_fe}
 \alias{SM_output.linear_fe}
-\title{Standardized Measures Output Function}
+\title{Calculate direct/indirect standardized differences from a fitted \code{linear_fe} object}
 \usage{
 \method{SM_output}{linear_fe}(fit, parm, stdz = "indirect", null = "median")
 }
@@ -36,7 +36,7 @@ as well as the observed and expected outcomes used to calculate the standardized
 \item{OE}{a list of data frames containing the observed and expected outcomes used for calculating standardized measures.}
 }
 \description{
-Provide direct/indirect standardized difference for a fixed effect linear model.
+Provide direct/indirect standardized differences for a fixed effect linear model.
 }
 \details{
 This function computes standardized differences for a fixed effect linear model
@@ -47,12 +47,10 @@ The population norm can be the median of the estimates, their weighted mean
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-
-# Fit a fixed linear effect model
-fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 SM_output(fit_fe)
 SM_output(fit_fe, stdz = "direct", null = "mean")
 

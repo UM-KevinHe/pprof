@@ -1,4 +1,4 @@
-#' Get confidence intervals for provider effects or standardized measures
+#' Get confidence intervals for provider effects or standardized measures from a fitted `linear_re` object
 #'
 #' Provide confidence intervals for provider effects or standardized measures from a random effect linear model.
 #'
@@ -9,13 +9,14 @@
 #' @param option 	a character string specifying whether the confidence intervals
 #' should be provided for provider effects or standardized measures:
 #'   \itemize{
-#'   \item {\code{"alpha"}} provider effect
-#'   \item {\code{"SM"}} standardized measures
+#'   \item {\code{"alpha"}} provider effect.
+#'   \item {\code{"SM"}} standardized measures.
 #'   }
 #' @param stdz a character string or a vector specifying the standardization method
 #' if `option` includes \code{"SM"}. See `stdz` argument in \code{\link{SM_output.linear_re}}.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#' Note that \code{"alpha"} for argument `option` only supports \code{"two.sided"}.
 #'
 #' @return A list of data frames containing the confidence intervals based on the values of `option` and `stdz`.
 #' \item{CI.alpha}{Confidence intervals for provider effects if `option` includes \code{"alpha"}.}
@@ -27,7 +28,6 @@
 #' outcome <- ExampleDataLinear$Y
 #' ID <- ExampleDataLinear$ID
 #' covar <- ExampleDataLinear$Z
-#'
 #' fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
 #' confint(fit_re)
 #'
@@ -45,6 +45,8 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = "SM",
   if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_re'!",call.=F)
   if (! "alpha" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
+  if ("alpha" %in% option && alternative != "two.sided")
+    stop("Provider effect (option = 'alpha') only supports two-sided confidence intervals.", call. = FALSE)
 
   data <- fit$data_include
   prov <- data[ ,fit$char_list$ID.char]
@@ -108,6 +110,7 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = "SM",
     else if (alternative == "less") {
       CI_alpha$alpha.Lower <- NULL
     }
+    attr(CI_alpha, "description") <- "Provider Effects"
     return (CI_alpha[ind, ])
     # return_ls$CI.alpha <- CI_alpha[ind, ]
   }

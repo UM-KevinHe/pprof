@@ -1,4 +1,4 @@
-#' Hypothesis Testing Function for Provider Effects
+#' Conduct hypothesis testing for provider effects from a fitted `linear_fe` object
 #'
 #' Conduct hypothesis tests on provider effects and identify outlying providers for a fixed effect linear model.
 #'
@@ -33,11 +33,10 @@
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
-#' Z <- ExampleDataLinear$Z
+#' outcome <- ExampleDataLinear$Y
+#' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
-#'
-#' fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 #' test(fit_fe)
 #'
 #' @importFrom stats pnorm qnorm pt qt

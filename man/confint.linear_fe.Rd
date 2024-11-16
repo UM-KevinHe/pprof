@@ -2,7 +2,7 @@
 % Please edit documentation in R/confint.linear_fe.R
 \name{confint.linear_fe}
 \alias{confint.linear_fe}
-\title{Get confidence intervals for provider effects or standardized measures}
+\title{Get confidence intervals for provider effects or standardized measures from a fitted \code{linear_fe} object}
 \usage{
 \method{confint}{linear_fe}(
   fit,
@@ -46,7 +46,7 @@ A list of data frames containing the confidence intervals based on the values of
 \item{CI.direct}{Confidence intervals for direct standardized differences if \code{option} includes \code{"SM"} and \code{stdz} includes \code{"direct"}.}
 }
 \description{
-Provide confidence intervals for provider effects or standardized measures from a fixed effect linear model.
+Provide confidence intervals for provider effects or standardized measures from from a fixed effect linear model.
 }
 \examples{
 data(ExampleDataLinear)

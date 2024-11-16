@@ -2,7 +2,7 @@
 % Please edit documentation in R/bar_plot.R
 \name{bar_plot}
 \alias{bar_plot}
-\title{Get a bar plot for flags of each provider}
+\title{Get a bar plot for flagging percentage overall and stratified by provider sizes}
 \usage{
 bar_plot(
   flag_df,
@@ -33,7 +33,7 @@ bar_plot(
 A ggplot object representing the bar chart of flagging results.
 }
 \description{
-Generate a bar plot for flagging percentage overall and stratified by provider sizes.
+Generate a bar plot for flagging percentage.
 }
 \details{
 This function generates a bar chart to visualize the percentage of flagging results based on provider sizes.

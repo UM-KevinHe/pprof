@@ -2,7 +2,7 @@
 % Please edit documentation in R/confint.logis_fe.R
 \name{confint.logis_fe}
 \alias{confint.logis_fe}
-\title{Get confidence intervals for provider effects or standardized Mmeasures}
+\title{Get confidence intervals for provider effects or standardized measures from a fitted \code{logis_fe} object}
 \usage{
 \method{confint}{logis_fe}(
   fit,
@@ -52,7 +52,8 @@ Both "rate" and "ratio" will be provided by default.
 }}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
-\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+Note that \code{"gamma"} for argument \code{option} only supports \code{"two.sided"}.}
 }
 \value{
 A dataframe (\code{option = "gamma"}) or a list of data frames (\code{option = "SM"}) containing the point estimate, and lower and upper bounds of the estimate.
@@ -69,7 +70,6 @@ data(ExampleDataBinary)
 outcome = ExampleDataBinary$Y
 covar = ExampleDataBinary$Z
 ID = ExampleDataBinary$ID
-
 fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 confint(fit_fe, option = "gamma")
 confint(fit_fe, option = "SR")

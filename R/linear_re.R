@@ -1,23 +1,23 @@
-#' Main Function for Fitting the Random Effect Linear Model
+#' Main Function for fitting the random effect linear model
 #'
 #' Fit a random effect linear model via \code{\link{lmer}} from the \code{lme4} package.
 #'
 #' @param formula a two-sided formula object describing the model to be fitted,
 #' with the response variable on the left of a ~ operator and covariates on the right,
-#' separated by + operators. The random effect of the grouping identifier is specified using \code{(1 | )}.
+#' separated by + operators. The random effect of the provider identifier is specified using \code{(1 | )}.
 #' @param data a data frame containing the variables named in the `formula`,
 #' or the columns specified by `Y.char`, `Z.char`, and `ID.char`.
 #' @param Y.char a character string specifying the column name of the response variable in the `data`.
 #' @param Z.char a character vector specifying the column names of the covariates in the `data`.
-#' @param ID.char a character string specifying the column name of the grouping identifier in the `data`.
+#' @param ID.char a character string specifying the column name of the provider identifier in the `data`.
 #' @param Y a numeric vector representing the response variable.
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
-#' @param ID a numeric vector representing the grouping identifier.
+#' @param ID a numeric vector representing the provider identifier.
 #' @param \dots additional arguments passed to \code{\link{lmer}} for further customization.
 #'
 #' @return A list of objects with S3 class \code{"random_re"}:
 #' \item{coefficient}{a list containing the estimated coefficients:
-#'   \code{FE}, the fixed effects for each predictor and the intercept, and \code{RE}, the random effects for each group.}
+#'   \code{FE}, the fixed effects for each predictor and the intercept, and \code{RE}, the random effects for each provider.}
 #' \item{variance}{a list containing the variance estimates:
 #'   \code{FE}, the variance-covariance matrix of the fixed effect coefficients, and \code{RE}, the variance of the random effects.}
 #' \item{sigma}{the residual standard error.}
@@ -25,30 +25,30 @@
 #' \item{observation}{the original response of each individual.}
 #' \item{residuals}{the residuals of each individual, that is response minus fitted values.}
 #' \item{linear_pred}{the linear predictor of each individual.}
-#' \item{data_include}{the data used to fit the model, sorted by the group identifier.
+#' \item{data_include}{the data used to fit the model, sorted by the provider identifier.
 #' For categorical covariates, this includes the dummy variables created for
 #' all categories except the reference level.}
 #' \item{char_list}{a list of the character vectors representing the column names for
-#' the response variable, covariates, and group identifier.
+#' the response variable, covariates, and provider identifier.
 #' For categorical variables, the names reflect the dummy variables created for each category.}
 #' \item{Loglkd}{the log-likelihood.}
-#' \item{AIC}{Akaike info criterion.}
-#' \item{BIC}{Bayesian info criterion.}
+#' \item{AIC}{Akaike information criterion.}
+#' \item{BIC}{Bayesian information criterion.}
 #'
 #' @details
 #' This function is used to fit a random effect linear model of the form:
 #' \deqn{Y_{ij} = \mu + \alpha_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in group \eqn{i},
-#' \eqn{\mu} is the overall intercept, \eqn{\alpha_i} is the random effect for group \eqn{i},
+#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider \eqn{i},
+#' \eqn{\mu} is the overall intercept, \eqn{\alpha_i} is the random effect for provider \eqn{i},
 #' \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 #'
 #' The model is fitted by overloading the \code{\link{lmer}} function from the \code{lme4} package.
 #' Three different input formats are accepted:
-#' a formula and dataset, where the formula is of the form \code{response ~ covariates + (1 | group)}, with \code{group} representing the group identifier;
-#' a dataset along with the column names of the response, covariates, and group identifier;
-#' or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the group identifier vector \eqn{\boldsymbol{\alpha}}.
+#' a formula and dataset, where the formula is of the form \code{response ~ covariates + (1 | provider)}, with \code{provider} representing the provider identifier;
+#' a dataset along with the column names of the response, covariates, and provider identifier;
+#' or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector.
 #'
-#' In addition to these input formats, all arguments from the \code{\link{lmer}} function can be modified via `\dots`,
+#' In addition to these input formats, all arguments from the \code{\link{lmer}} function can be modified via \code{\dots},
 #' allowing for customization of model fitting options such as controlling the optimization method or adjusting convergence criteria.
 #' By default, the model is fitted using REML (restricted maximum likelihood).
 #'
@@ -64,18 +64,18 @@
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
-#' Z <- ExampleDataLinear$Z
+#' outcome <- ExampleDataLinear$Y
+#' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
-#' data <- data.frame(Y, ID, Z)
-#' Z.char <- colnames(Z)
-#' Y.char <- "Y"
-#' ID.char <- "ID"
-#' formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ (1 | ID)"))
+#' data <- data.frame(outcome, ID, covar)
+#' covar.char <- colnames(covar)
+#' outcome.char <- colnames(data)[1]
+#' ID.char <- colnames(data)[2]
+#' formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ (1|ID)"))
 #'
 #' # Fit random effect linear model using three input formats
-#' fit_re1 <- linear_re(Y = Y, Z = Z, ID = ID)
-#' fit_re2 <- linear_re(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char)
+#' fit_re1 <- linear_re(Y = outcome, Z = covar, ID = ID)
+#' fit_re2 <- linear_re(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
 #' fit_re3 <- linear_re(formula, data)
 #'
 #' @references

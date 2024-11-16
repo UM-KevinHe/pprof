@@ -1,4 +1,4 @@
-#' Result Summaries of Covariate Estimates
+#' Result Summaries of Covariate Estimates from a fitted `logis_fe` object
 #'
 #' Provide the summary statistics for the covariate estimates for a fixed effect logistic model.
 #'
@@ -26,8 +26,12 @@
 #' \item{CI.lower}{the upper bound of the confidence interval, included only when \code{test = "wald"}.}
 #'
 #' @examples
-#' data(data_FE)
-#' fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+#' data(ExampleDataBinary)
+#' outcome = ExampleDataBinary$Y
+#' covar = ExampleDataBinary$Z
+#' ID = ExampleDataBinary$ID
+#'
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 #' summary.wald <- summary(fit_fe, level = 0.95, test = "wald")
 #' summary.wald
 #'

@@ -2,13 +2,13 @@
 % Please edit documentation in R/plot.linear_fe.R
 \name{plot.linear_fe}
 \alias{plot.linear_fe}
-\title{Get Funnel Plot for institutional comparisons}
+\title{Get funnel plot from a fitted \code{linear_fe} object for institutional comparisons}
 \usage{
 \method{plot}{linear_fe}(
   fit,
   null = "median",
   target = 0,
-  alpha = c(0.05, 0.01),
+  alpha = 0.05,
   labels = c("lower", "expected", "higher"),
   point_colors = c("#E69F00", "#56B4E9", "#009E73"),
   point_shapes = c(15, 17, 19),
@@ -25,6 +25,8 @@
 
 \item{target}{a numeric value representing the target outcome. The default value is 0.}
 
+\item{alpha}{a number or a vector of significance levels. The default is 0.05.}
+
 \item{labels}{a vector of labels for the plot.}
 
 \item{point_colors}{a vector of colors representing different provider flags. The default is \code{c("#E69F00", "#56B4E9", "#009E73")}.}
@@ -33,31 +35,29 @@
 
 \item{point_size}{size of the points. The default is 2.}
 
-\item{point_alpha}{alpha of the points. The default is 0.8.}
+\item{point_alpha}{transparency level of the points. The default is 0.8.}
 
 \item{line_size}{size of all lines, including control limits and the target line. The default is 0.8.}
 
 \item{target_line_type}{line type for the target line. The default is "longdash".}
-
-\item{alphas}{a vector of significance levels. The default is alpha = c(0.05, 0.01).}
 }
 \value{
 A ggplot object representing the funnel plot.
 }
 \description{
-Creates a funnel plot from a linear fixed-effect model to compare provider performance.
+Creates a funnel plot from a linear fixed effect model to compare provider performance.
 }
 \details{
-This function generates a funnel plot from a linear fixed-effect model. Currently, it only supports the indirect standardized difference.
+This function generates a funnel plot from a linear fixed effect model. Currently, it only supports the indirect standardized difference.
 The parameter \code{alpha} is a vector used to calculate control limits at different significance levels.
 The first value in the vector is used as the significance level for flagging each provider, utilizing the \code{\link{test.linear_fe}} function.
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
 plot(fit_fe)
 
 }

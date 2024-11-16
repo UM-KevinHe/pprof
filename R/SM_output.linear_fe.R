@@ -1,6 +1,6 @@
-#' Standardized Measures Output Function
+#' Calculate direct/indirect standardized differences from a fitted `linear_fe` object
 #'
-#' Provide direct/indirect standardized difference for a fixed effect linear model.
+#' Provide direct/indirect standardized differences for a fixed effect linear model.
 #'
 #' @param fit a model fitted from \code{linear_fe}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
@@ -35,12 +35,10 @@
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
-#' Z <- ExampleDataLinear$Z
+#' outcome <- ExampleDataLinear$Y
+#' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
-#'
-#' # Fit a fixed linear effect model
-#' fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 #' SM_output(fit_fe)
 #' SM_output(fit_fe, stdz = "direct", null = "mean")
 #'

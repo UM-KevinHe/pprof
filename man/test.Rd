@@ -2,15 +2,15 @@
 % Please edit documentation in R/test.R
 \name{test}
 \alias{test}
-\title{Generic Function for Hypothesis Testing of Provider Effects}
+\title{Generic function for hypothesis testing of provider effects}
 \usage{
 test(fit, ...)
 }
 \arguments{
 \item{fit}{the input object, typically a fitted model, for which provider
-effects are to be tested. The method applied depends on the class of this object.}
+effects are tested. The method applied depends on the class of this object.}
 
-\item{...}{Additional arguments that can be passed to specific methods.}
+\item{...}{additional arguments that can be passed to specific methods.}
 }
 \value{
 the return depends on the method implemented for the

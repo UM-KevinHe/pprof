@@ -1,6 +1,6 @@
-#' Get a caterpillar plot for standardized measures
+#' Get a caterpillar plot to display confidence intervals for standardized measures
 #'
-#' Generates a caterpillar plot for standardized measures from different models using a provided CI dataframe.
+#' Generate a caterpillar plot for standardized measures from different models using a provided CI dataframe.
 #'
 #' @param CI a dataframe from `confint` function containing the standardized measure values, along with their confidence intervals lower and upper bounds.
 #' @param theme theme for the plot. The default is \code{theme_bw()}.
@@ -24,9 +24,12 @@
 #' If `refline_value` is not specified, for linear FE or RE models with indirect or direct standardized differences, it will be set to 0;
 #' for logistic FE models with indirect or direct ratios, it will be set to 1;
 #' and for logistic FE with indirect or direct rates, it will be set to the population rate, which represents the average rate across all observations.
+#'
 #' Confidence intervals (CI) are displayed as error bars: for \code{alternative = "two.sided"}, two-sided confidence intervals are shown;
-#' for \code{alternative = "greater"}, the error bar extends from the lower bound to the standardized measure values;
-#' and for \code{alternative = "less"}, it extends from the standardized measure values to the upper bound.
+#' for \code{alternative = "greater"}, error bars extend from the lower bound to the standardized measure values;
+#' and for \code{alternative = "less"}, they extend from the standardized measure values to the upper bound.
+#' For cases where one side of the confidence interval is infinite, that side only extends to the standardized measure.
+#' For example, in a logistic fixed effect model, if a provider has all 0s or all 1s, one side of the confidence interval will be infinite.
 #'
 #' When \code{use_flag = TRUE}, the plot will use colors specified by `flag_color` to show the flags of providers.
 #' Each error bar will be colored to reflect the flag, making it easy to identify providers with different performance levels.
@@ -61,7 +64,7 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
                              use_flag = FALSE, flag_color = c("#E69F00", "#56B4E9", "#009E73")) {
   if (missing(CI)) stop ("Argument 'CI' is required!",call.=F)
   if (!class(CI) %in% c("data.frame")) stop("Object CI should be a data frame!",call.=F)
-  if (attr(CI, "description") == "gamma") stop("Caterpillar plot only supports standardized measure")
+  if (attr(CI, "description") == "Provider Effects") stop("Caterpillar plot only supports standardized measure")
 
   colnames(CI) <- c("SM", "Lower", "Upper")
   CI$prov <- rownames(CI)

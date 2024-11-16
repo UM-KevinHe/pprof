@@ -1,6 +1,6 @@
-#' Get a bar plot for flags of each provider
+#' Get a bar plot for flagging percentage overall and stratified by provider sizes
 #'
-#' Generate a bar plot for flagging percentage overall and stratified by provider sizes.
+#' Generate a bar plot for flagging percentage.
 #'
 #' @param flag_df a data frame from `test` function containing the flag of each provider.
 #' @param group_num number of groups into which providers are divided based on their sample sizes. The default is 4.

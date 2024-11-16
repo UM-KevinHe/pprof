@@ -1,4 +1,4 @@
-#' Get confidence intervals for provider effects or standardized measures
+#' Get confidence intervals for provider effects or standardized measures from a fitted `logis_fe` object
 #'
 #' Provide confidence intervals for provider effects or standardized measures from a fixed effect logistic model.
 #'
@@ -30,6 +30,7 @@
 #'   }
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#' Note that \code{"gamma"} for argument `option` only supports \code{"two.sided"}.
 #'
 #' @details
 #' The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
@@ -42,7 +43,6 @@
 #' outcome = ExampleDataBinary$Y
 #' covar = ExampleDataBinary$Z
 #' ID = ExampleDataBinary$ID
-#'
 #' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 #' confint(fit_fe, option = "gamma")
 #' confint(fit_fe, option = "SR")
@@ -353,7 +353,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
     if (alternative != "two.sided")
       stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
     return_mat <- confint_fe_gamma(fit, test, parm, alpha, alternative)
-    attr(return_mat, "description") <- "gamma"
+    attr(return_mat, "description") <- "Provider Effects"
     return(return_mat)
   }
   else if (option == "SM"){

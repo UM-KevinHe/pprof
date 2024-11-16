@@ -2,7 +2,7 @@
 % Please edit documentation in R/confint.linear_re.R
 \name{confint.linear_re}
 \alias{confint.linear_re}
-\title{Get confidence intervals for provider effects or standardized measures}
+\title{Get confidence intervals for provider effects or standardized measures from a fitted \code{linear_re} object}
 \usage{
 \method{confint}{linear_re}(
   fit,
@@ -24,15 +24,16 @@ By default, all providers are included. The class of \code{parm} should match th
 \item{option}{a character string specifying whether the confidence intervals
 should be provided for provider effects or standardized measures:
 \itemize{
-\item {\code{"alpha"}} provider effect
-\item {\code{"SM"}} standardized measures
+\item {\code{"alpha"}} provider effect.
+\item {\code{"SM"}} standardized measures.
 }}
 
 \item{stdz}{a character string or a vector specifying the standardization method
 if \code{option} includes \code{"SM"}. See \code{stdz} argument in \code{\link{SM_output.linear_re}}.}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
-\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+Note that \code{"alpha"} for argument \code{option} only supports \code{"two.sided"}.}
 }
 \value{
 A list of data frames containing the confidence intervals based on the values of \code{option} and \code{stdz}.
@@ -48,7 +49,6 @@ data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 ID <- ExampleDataLinear$ID
 covar <- ExampleDataLinear$Z
-
 fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
 confint(fit_re)
 

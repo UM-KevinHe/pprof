@@ -1,4 +1,4 @@
-#' Result Summaries of Covariate Estimates
+#' Result Summaries of Covariate Estimates from a fitted `linear_fe` or `linear_re` object
 #'
 #' Provide the summary statistics for the covariate estimates for a fixed/random effect linear model.
 #'
@@ -21,11 +21,10 @@
 #'
 #' @examples
 #' data(ExampleDataLinear)
-#' Y <- ExampleDataLinear$Y
-#' Z <- ExampleDataLinear$Z
+#' outcome <- ExampleDataLinear$Y
+#' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
-#'
-#' fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+#' fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
 #' summary(fit_fe)
 #'
 #' @importFrom stats pnorm qnorm pt qt

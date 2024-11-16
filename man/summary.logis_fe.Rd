@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary.logis_fe.R
 \name{summary.logis_fe}
 \alias{summary.logis_fe}
-\title{Result Summaries of Covariate Estimates}
+\title{Result Summaries of Covariate Estimates from a fitted \code{logis_fe} object}
 \usage{
 \method{summary}{logis_fe}(
   fit,
@@ -47,8 +47,12 @@ A data frame containing summary statistics for covariate estimates, with the fol
 Provide the summary statistics for the covariate estimates for a fixed effect logistic model.
 }
 \examples{
-data(data_FE)
-fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+data(ExampleDataBinary)
+outcome = ExampleDataBinary$Y
+covar = ExampleDataBinary$Z
+ID = ExampleDataBinary$ID
+
+fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 summary.wald <- summary(fit_fe, level = 0.95, test = "wald")
 summary.wald
 

@@ -3,7 +3,7 @@
 \name{summary.linear_fe}
 \alias{summary.linear_fe}
 \alias{summary.linear_re}
-\title{Result Summaries of Covariate Estimates}
+\title{Result Summaries of Covariate Estimates from a fitted \code{linear_fe} or \code{linear_re} object}
 \usage{
 \method{summary}{linear_fe}(fit, parm, level = 0.95, null = 0, alternative = "two.sided")
 
@@ -37,19 +37,17 @@ Provide the summary statistics for the covariate estimates for a fixed/random ef
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-
-fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
 summary(fit_fe)
 
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-
-fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+fit_re <- linear_fe(Y = outcome, Z = covar, ID = ID)
 summary(fit_re)
 
 }

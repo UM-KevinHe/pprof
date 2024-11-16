@@ -2,7 +2,7 @@
 % Please edit documentation in R/test.logis_fe.R
 \name{test.logis_fe}
 \alias{test.logis_fe}
-\title{Hypothesis Testing Function for Provider Effects}
+\title{Conduct hypothesis testing for provider effects from a fitted \code{logis_fe} object}
 \usage{
 \method{test}{logis_fe}(
   fit,
@@ -65,8 +65,11 @@ Therefore, we use unrestricted MLEs to replace the restricted MLEs during the te
 However, the user can specify \code{score_modified = FALSE} to perform a standard score test.
 }
 \examples{
-data(data_FE)
-fit_fe <- logis_fe(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
+data(ExampleDataBinary)
+outcome = ExampleDataBinary$Y
+covar = ExampleDataBinary$Z
+ID = ExampleDataBinary$ID
+fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
 test(fit_fe, test = "score")
 
 }

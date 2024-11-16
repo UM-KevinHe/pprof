@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_check.R
 \name{data_check}
 \alias{data_check}
-\title{Data quality check}
+\title{Data quality check function}
 \usage{
 data_check(Y, Z, ID)
 }
@@ -11,7 +11,7 @@ data_check(Y, Z, ID)
 
 \item{Z}{a matrix or data frame representing covariates.}
 
-\item{ID}{a numeric vector representing the grouping identifier.}
+\item{ID}{a numeric vector representing the provider identifier.}
 }
 \value{
 No return value, called for side effects.
@@ -22,11 +22,19 @@ Conduct data quality check including checking missingness, variation, correlatio
 \details{
 The function performs the following checks:
 \itemize{
-\item {Missingness}{Checks for any missing values in the dataset and provides a summary of missing data.}
-\item {Variation}{Identifies covariates with zero or near-zero variance which might affect model stability.}
-\item {Correlation}{Analyzes pairwise correlation among covariates and highlights highly correlated pairs.}
-\item {VIF}{Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.}
+\item{Missingness:} {Checks for any missing values in the dataset and provides a summary of missing data.}
+\item{Variation:} {Identifies covariates with zero or near-zero variance which might affect model stability.}
+\item{Correlation:} {Analyzes pairwise correlation among covariates and highlights highly correlated pairs.}
+\item{VIF:} {Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.}
 }
 If issues arise when using the model functions \code{logis_fe}, \code{linear_fe} and \code{linear_re},
 this function can be called for data quality checking purposes.
+}
+\examples{
+data(ExampleDataBinary)
+outcome = ExampleDataBinary$Y
+covar = ExampleDataBinary$Z
+ID = ExampleDataBinary$ID
+data_check(outcome, covar, ID)
+
 }

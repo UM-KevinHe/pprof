@@ -2,7 +2,7 @@
 % Please edit documentation in R/test.linear_fe.R
 \name{test.linear_fe}
 \alias{test.linear_fe}
-\title{Hypothesis Testing Function for Provider Effects}
+\title{Conduct hypothesis testing for provider effects from a fitted \code{linear_fe} object}
 \usage{
 \method{test}{linear_fe}(fit, parm, level = 0.95, null = "median", alternative = "two.sided")
 }
@@ -46,11 +46,10 @@ Outlying providers are determined by the test statistic falling beyond the thres
 }
 \examples{
 data(ExampleDataLinear)
-Y <- ExampleDataLinear$Y
-Z <- ExampleDataLinear$Z
+outcome <- ExampleDataLinear$Y
+covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
-
-fit_fe <- linear_fe(Y = Y, Z = Z, ID = ID)
+fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 test(fit_fe)
 
 }
