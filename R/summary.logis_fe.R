@@ -16,6 +16,7 @@
 #' @param null a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.
 #' @param alternative a character string specifying the alternative hypothesis when \code{test = "wald"}, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A data frame containing summary statistics for covariate estimates, with the following columns:
 #' \item{Estimate}{the estimates of covariate coefficients.}
@@ -40,7 +41,7 @@
 #'
 #' @exportS3Method summary logis_fe
 
-summary.logis_fe <- function(fit, parm, level = 0.95, test = "wald", null = 0, alternative = "two.sided") {
+summary.logis_fe <- function(fit, parm, level = 0.95, test = "wald", null = 0, alternative = "two.sided", ...) {
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
   if (!(test %in% c("wald", "lr", "score"))) stop("Argument 'test' NOT as required!",call.=F)

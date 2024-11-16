@@ -4,7 +4,7 @@
 \alias{SM_output.linear_re}
 \title{Calculate direct/indirect standardized differences from a fitted \code{linear_re} object}
 \usage{
-\method{SM_output}{linear_re}(fit, parm, stdz = "indirect")
+\method{SM_output}{linear_re}(fit, parm, stdz = "indirect", ...)
 }
 \arguments{
 \item{fit}{a model fitted from \code{linear_re}.}
@@ -19,6 +19,8 @@ The possible values are:
 \item{\code{"direct"}} direct standardization method.
 \item{\code{c("indirect", "direct")}} outputs both direct and indirect standardized measures.
 }}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A list containing the standardized differences based on the method(s) specified in \code{stdz},

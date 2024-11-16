@@ -16,7 +16,8 @@
   point_size = 2,
   point_alpha = 0.8,
   line_size = 0.8,
-  target_line_type = "longdash"
+  target_line_type = "longdash",
+  ...
 )
 }
 \arguments{
@@ -43,6 +44,8 @@
 \item{line_size}{size of all lines, including control limits and the target line. The default is 0.8.}
 
 \item{target_line_type}{line type for the target line. The default is "longdash".}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A ggplot object representing the funnel plot.

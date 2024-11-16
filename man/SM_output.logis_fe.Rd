@@ -10,7 +10,8 @@
   stdz = "indirect",
   measure = c("rate", "ratio"),
   null = "median",
-  threads = 2
+  threads = 2,
+  ...
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ The possible values are:
 \item{null}{if \code{"stdz = indirect"}, a character string or a number defining the population norm. The default is "median".}
 
 \item{threads}{an integer specifying the number of threads to use. The default value is 2.}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A list contains standardized measures, as well as the observed and expected outcomes used for calculation,

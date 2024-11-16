@@ -20,6 +20,7 @@
 #' }
 #' @param null if \code{"stdz = indirect"}, a character string or a number defining the population norm. The default is "median".
 #' @param threads an integer specifying the number of threads to use. The default value is 2.
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #'
 #' @return A list contains standardized measures, as well as the observed and expected outcomes used for calculation,
@@ -46,7 +47,7 @@
 #' @exportS3Method SM_output logis_fe
 
 SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate", "ratio"),
-                               null = "median", threads = 2){
+                               null = "median", threads = 2, ...){
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)

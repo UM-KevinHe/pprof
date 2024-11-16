@@ -13,7 +13,8 @@
   null = "median",
   n = 10000,
   threads = 1,
-  alternative = "two.sided"
+  alternative = "two.sided",
+  ...
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ ignoring the randomness of covariate coefficient for score teat (\code{"test = s
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
 \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A data frame containing the results of the hypothesis test, with the following columns:

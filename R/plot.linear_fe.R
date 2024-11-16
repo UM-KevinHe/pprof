@@ -13,6 +13,7 @@
 #' @param point_alpha transparency level of the points. The default is 0.8.
 #' @param line_size size of all lines, including control limits and the target line. The default is 0.8.
 #' @param target_line_type line type for the target line. The default is "longdash".
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @details
 #' This function generates a funnel plot from a linear fixed effect model. Currently, it only supports the indirect standardized difference.
@@ -43,7 +44,7 @@ plot.linear_fe <- function(fit, null = "median", target = 0, alpha = 0.05,
                            point_shapes = c(15, 17, 19),
                            point_size = 2, point_alpha = 0.8,
                            line_size = 0.8,
-                           target_line_type = "longdash"
+                           target_line_type = "longdash", ...
 ) {
   if (missing(fit)) stop ("Argument 'fit' is required!", call.=F)
   if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!", call.=F)

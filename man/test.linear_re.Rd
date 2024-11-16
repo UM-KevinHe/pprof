@@ -4,7 +4,7 @@
 \alias{test.linear_re}
 \title{Conduct hypothesis testing for provider effects from a fitted \code{linear_re} object}
 \usage{
-\method{test}{linear_re}(fit, parm, level = 0.95, null = 0, alternative = "two.sided")
+\method{test}{linear_re}(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...)
 }
 \arguments{
 \item{fit}{a model fitted from \code{linear_re}.}
@@ -20,6 +20,8 @@ The default value is 0.}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
 \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A data frame containing the results of the hypothesis test, with the following columns:

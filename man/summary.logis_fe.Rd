@@ -10,7 +10,8 @@
   level = 0.95,
   test = "wald",
   null = 0,
-  alternative = "two.sided"
+  alternative = "two.sided",
+  ...
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ The default value is 0.95.}
 
 \item{alternative}{a character string specifying the alternative hypothesis when \code{test = "wald"}, must be one of
 \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A data frame containing summary statistics for covariate estimates, with the following columns:

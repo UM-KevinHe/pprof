@@ -10,7 +10,8 @@
   level = 0.95,
   option = "SM",
   stdz = "indirect",
-  alternative = "two.sided"
+  alternative = "two.sided",
+  ...
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ if \code{option} includes \code{"SM"}. See \code{stdz} argument in \code{\link{S
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
 \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 Note that \code{"alpha"} for argument \code{option} only supports \code{"two.sided"}.}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A list of data frames containing the confidence intervals based on the values of \code{option} and \code{stdz}.

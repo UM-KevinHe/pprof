@@ -31,6 +31,7 @@
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 #' Note that \code{"gamma"} for argument `option` only supports \code{"two.sided"}.
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @details
 #' The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
@@ -53,7 +54,7 @@
 
 confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
                              option = "SM", stdz = "indirect", null = "median",
-                             measure = c("rate", "ratio"), alternative = "two.sided") {
+                             measure = c("rate", "ratio"), alternative = "two.sided", ...) {
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
   if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)

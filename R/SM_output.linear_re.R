@@ -12,6 +12,7 @@
 #'   \item{\code{"direct"}} direct standardization method.
 #'   \item{\code{c("indirect", "direct")}} outputs both direct and indirect standardized measures.
 #' }
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A list containing the standardized differences based on the method(s) specified in `stdz`,
 #' as well as the observed and expected outcomes used to calculate the standardized measures:
@@ -35,7 +36,7 @@
 #'
 #' @exportS3Method SM_output linear_re
 
-SM_output.linear_re <- function(fit, parm, stdz = "indirect") {
+SM_output.linear_re <- function(fit, parm, stdz = "indirect", ...) {
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_re'!",call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)

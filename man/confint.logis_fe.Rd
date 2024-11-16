@@ -13,7 +13,8 @@
   stdz = "indirect",
   null = "median",
   measure = c("rate", "ratio"),
-  alternative = "two.sided"
+  alternative = "two.sided",
+  ...
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ Both "rate" and "ratio" will be provided by default.
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of
 \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 Note that \code{"gamma"} for argument \code{option} only supports \code{"two.sided"}.}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A dataframe (\code{option = "gamma"}) or a list of data frames (\code{option = "SM"}) containing the point estimate, and lower and upper bounds of the estimate.

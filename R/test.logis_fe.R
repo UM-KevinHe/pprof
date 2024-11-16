@@ -21,6 +21,7 @@
 #' @param threads an integer specifying the number of threads to use. The default value is 1.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #'
 #' @details
@@ -59,7 +60,7 @@
 #' @exportS3Method test logis_fe
 
 test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_modified = TRUE,
-                          null = "median", n = 10000, threads = 1, alternative = "two.sided") {
+                          null = "median", n = 10000, threads = 1, alternative = "two.sided", ...) {
   if (missing(fit)) stop ("Argument 'fit is required!", call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
   if (!(test %in% c("exact.poisbinom", "exact.bootstrap", "score", "wald")))

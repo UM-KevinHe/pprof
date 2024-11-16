@@ -17,6 +17,7 @@
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 #' Note that \code{"alpha"} for argument `option` only supports \code{"two.sided"}.
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A list of data frames containing the confidence intervals based on the values of `option` and `stdz`.
 #' \item{CI.alpha}{Confidence intervals for provider effects if `option` includes \code{"alpha"}.}
@@ -36,7 +37,7 @@
 #' @exportS3Method confint linear_re
 
 confint.linear_re <- function(fit, parm, level = 0.95, option = "SM",
-                              stdz = "indirect", alternative = "two.sided") {
+                              stdz = "indirect", alternative = "two.sided", ...) {
   return_ls <- list()
 
   alpha <- 1 - level

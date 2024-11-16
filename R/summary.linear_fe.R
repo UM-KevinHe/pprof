@@ -10,6 +10,7 @@
 #' @param null a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A data frame containing summary statistics for covariate estimates, with the following columns:
 #' \item{Estimate}{the estimates of covariate coefficients.}
@@ -31,7 +32,7 @@
 #'
 #' @exportS3Method summary linear_fe
 
-summary.linear_fe <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided") {
+summary.linear_fe <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
   alpha <- 1 - level
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)

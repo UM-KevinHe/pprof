@@ -19,6 +19,7 @@
 #'   \item{\code{"mean"}} the weighted average of the provider effect estimates (\eqn{\hat{\gamma}_i}), where the weights correspond to the sample size of each provider.
 #'   \item{numeric} a user-defined numeric value representing the population norm.
 #' }
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A list containing the standardized differences based on the method(s) specified in `stdz`,
 #' as well as the observed and expected outcomes used to calculate the standardized measures:
@@ -44,7 +45,7 @@
 #'
 #' @exportS3Method SM_output linear_fe
 
-SM_output.linear_fe <- function(fit, parm, stdz = "indirect", null = "median") {
+SM_output.linear_fe <- function(fit, parm, stdz = "indirect", null = "median", ...) {
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
   if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!",call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)

@@ -16,7 +16,7 @@
 #' }
 #' @param alternative a character string specifying the alternative hypothesis, must be one of
 #' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
-#' @param \dots additional arguments that can be passed to specific methods.
+#' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A data frame containing the results of the hypothesis test, with the following columns:
 #' \item{flag}{a flagging indicator where \code{1} means statistically higher than expected

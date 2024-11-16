@@ -4,7 +4,7 @@
 \alias{SM_output.linear_fe}
 \title{Calculate direct/indirect standardized differences from a fitted \code{linear_fe} object}
 \usage{
-\method{SM_output}{linear_fe}(fit, parm, stdz = "indirect", null = "median")
+\method{SM_output}{linear_fe}(fit, parm, stdz = "indirect", null = "median", ...)
 }
 \arguments{
 \item{fit}{a model fitted from \code{linear_fe}.}
@@ -27,6 +27,8 @@ The default value is \code{"median"}. The possible values are:
 \item{\code{"mean"}} the weighted average of the provider effect estimates (\eqn{\hat{\gamma}_i}), where the weights correspond to the sample size of each provider.
 \item{numeric} a user-defined numeric value representing the population norm.
 }}
+
+\item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
 A list containing the standardized differences based on the method(s) specified in \code{stdz},
