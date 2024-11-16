@@ -153,15 +153,15 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
                                 gamma.null, m, indices - 1, threads)  #In cpp, indices starts from 0
 
       if (alternative == "two.sided") {
-        p <- pnorm(z.score, lower=F)
+        p <- pnorm(z.score, lower.tail=F)
         flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
         p.val <- 2 * pmin(p, 1-p)
       } else if (alternative == "greater") {
-        p <- pnorm(z.score, lower=F)
+        p <- pnorm(z.score, lower.tail=F)
         p.val <- p
         flag <- ifelse(p < alpha, 1, 0)
       } else if (alternative == "less") {
-        p <- pnorm(z.score, lower = T)
+        p <- pnorm(z.score, lower.tail = T)
         p.val <- p
         flag <- ifelse(p < alpha, -1, 0)
       } else {
@@ -184,15 +184,15 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
         sqrt(sapply(split(probs*(1-probs),data[,ID.char]),sum))
 
       if (alternative == "two.sided") {
-        p <- pnorm(z.score, lower=F)
+        p <- pnorm(z.score, lower.tail=F)
         flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
         p.val <- 2 * pmin(p, 1-p)
       } else if (alternative == "greater") {
-        p <- pnorm(z.score, lower=F)
+        p <- pnorm(z.score, lower.tail=F)
         p.val <- p
         flag <- ifelse(p < alpha, 1, 0)
       } else if (alternative == "less") {
-        p <- pnorm(z.score, lower = T)
+        p <- pnorm(z.score, lower.tail = T)
         p.val <- p
         flag <- ifelse(p < alpha, -1, 0)
       } else {
@@ -220,7 +220,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
 
       if (alternative == "two.sided") {
         p <- 1 - poibin::ppoibin(obs, probs) + 0.5*poibin::dpoibin(obs, probs)  #"ppoibin": probability of "#event <= obs"
-        z.score <- qnorm(p, lower=F)
+        z.score <- qnorm(p, lower.tail=F)
         flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
         p.val <- 2 * min(p, 1-p)
       } else if (alternative == "greater") {
@@ -276,7 +276,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
     # p.val <- 2 * pmin(p, 1-p)
 
     stat <- (gamma - gamma.null)/se.gamma
-    prob <- pnorm(stat, lower = F)
+    prob <- pnorm(stat, lower.tail = F)
 
     if (alternative == "two.sided") {
       flag <- ifelse(prob < alpha/2, 1, ifelse(prob <= 1-alpha/2, 0, -1))

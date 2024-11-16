@@ -12,14 +12,11 @@ vignettes:
   - vignettes/pprof.Rmd
 
 authors:
-  Yubo Shao:
-    href: "https://mcommunity.umich.edu/person/ybshao"
+  Xiaohan Liu
+  Lingfeng Luo
+    href: "https://mcommunity.umich.edu/person/lfluo"
   Kevin He:
     href: "https://www.um-kevinhe-group.org/"
-  Wenbo Wu:
-    href: "https://www.wenbowu.me/"
-  Tao Xu:
-    href: "https://mcommunity.umich.edu/person/taoxu/"
 
 navbar:
  components:

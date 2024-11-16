@@ -20,6 +20,7 @@
 #'
 #' @importFrom caret nearZeroVar
 #' @importFrom olsrr ols_vif_tol
+#' @importFrom stats complete.cases lm as.formula
 #'
 #' @examples
 #' data(ExampleDataBinary)

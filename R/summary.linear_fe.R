@@ -35,16 +35,16 @@
 summary.linear_fe <- function(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
   alpha <- 1 - level
 
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!",call.=F)
+  if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+  if (!class(object) %in% c("linear_fe")) stop("Object `object` is not of the classes 'linear_fe'!",call.=F)
 
-  Z.char <- fit$char_list$Z.char
-  beta <- fit$coefficient$beta
-  se.beta <- sqrt(diag(fit$variance$beta))
-  m <- length(fit$coefficient$gamma)
-  p <- length(fit$coefficient$beta)
-  n <- nrow(fit$data_include)
-  model.method <- fit$method
+  Z.char <- object$char_list$Z.char
+  beta <- object$coefficient$beta
+  se.beta <- sqrt(diag(object$variance$beta))
+  m <- length(object$coefficient$gamma)
+  p <- length(object$coefficient$beta)
+  n <- nrow(object$data_include)
+  model.method <- object$method
 
   # Test Statistics
   stat <- (beta - null) / se.beta
@@ -62,7 +62,7 @@ summary.linear_fe <- function(object, parm, level = 0.95, null = 0, alternative 
     p_value <- switch(model.method,
                       "Profile Likelihood" = 1 - pnorm(stat),
                       "Dummy" = 1 - pt(stat, df = n - p - m))
-    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(level),
+    crit_value <- ifelse(object$method == "Profile Likelihood", qnorm(level),
                            qt(level, df = n - p - m))
 
     lower_bound <- beta - crit_value * se.beta
@@ -72,7 +72,7 @@ summary.linear_fe <- function(object, parm, level = 0.95, null = 0, alternative 
     p_value <- switch(model.method,
                       "Profile Likelihood" = pnorm(stat),
                       "Dummy" = pt(stat, df = n - p - m))
-    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(level),
+    crit_value <- ifelse(object$method == "Profile Likelihood", qnorm(level),
                          qt(level, df = n - p - m))
 
     lower_bound <- -Inf

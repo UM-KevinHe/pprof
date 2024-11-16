@@ -35,6 +35,7 @@
 #' @importFrom dplyr arrange cross_join mutate select filter
 #' @importFrom tibble tibble
 #' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #'
 #' @exportS3Method plot linear_fe
 
@@ -46,26 +47,26 @@ plot.linear_fe <- function(x, null = "median", target = 0, alpha = 0.05,
                            line_size = 0.8,
                            target_line_type = "longdash", ...
 ) {
-  if (missing(fit)) stop ("Argument 'fit' is required!", call.=F)
-  if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!", call.=F)
+  if (missing(x)) stop ("Argument 'x' is required!", call.=F)
+  if (!class(x) %in% c("linear_fe")) stop("Object 'x' is not of the classes 'linear_fe'!", call.=F)
 
-  data <- fit$data_include
-  SM <- SM_output(fit, null = null, stdz = "indirect")
+  data <- x$data_include
+  SM <- SM_output(x, null = null, stdz = "indirect")
   processed_data <- cbind(SM$indirect.difference, SM$OE$OE_indirect)
   colnames(processed_data) <- c("indicator", "Obs", "Exp")
-  processed_data$precision <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
+  processed_data$precision <- sapply(split(data[, x$char_list$Y.char], data[, x$char_list$ID.char]), length)
 
 
-  flagging <- test(fit, level = 1-alpha[1], null = null)
+  flagging <- test(x, level = 1-alpha[1], null = null)
   processed_data <- cbind(processed_data, flagging)
   plot_data <- processed_data %>%
-    arrange(precision) %>%
+    arrange(.data$precision) %>%
     cross_join(tibble(alpha = alpha)) %>%
     mutate(
-      lower = target - qnorm(1 - alpha / 2) * sqrt(1 / precision) * fit$sigma,
-      upper = target + qnorm(1 - alpha / 2) * sqrt(1 / precision) * fit$sigma
+      lower = target - qnorm(1 - alpha / 2) * sqrt(1 / .data$precision) * x$sigma,
+      upper = target + qnorm(1 - alpha / 2) * sqrt(1 / .data$precision) * x$sigma
     ) %>%
-    select(precision, indicator, Exp, flag, alpha, lower, upper) %>%
+    select(.data$precision, .data$indicator, .data$Exp, .data$flag, alpha, .data$lower, .data$upper) %>%
     mutate(
       alpha = factor(alpha),
     )
@@ -90,6 +91,7 @@ plot.linear_fe <- function(x, null = "median", target = 0, alpha = 0.05,
 #' @importFrom stats setNames
 #' @importFrom magrittr %>%
 #' @importFrom tibble tibble
+#' @importFrom rlang .data
 #' @importFrom ggplot2 scale_x_continuous scale_y_continuous geom_point scale_shape_manual scale_color_manual scale_linetype_manual geom_line geom_hline guides theme labs theme_classic guide_legend
 ppfunnel_linear <- function(plot_data,
                             target,
@@ -178,7 +180,7 @@ ppfunnel_linear <- function(plot_data,
     scale_y_continuous(breaks = round(seq(0, ymax, by=1), 1),
                        limits = c(ymin, ymax),
                        expand = c(1, 1)/50) +
-    geom_point(data = data, aes(x = precision, y = indicator, shape = flag, color = flag), size = point_size, alpha = point_alpha) +
+    geom_point(data = data, aes(x = .data$precision, y = .data$indicator, shape = .data$flag, color = .data$flag), size = point_size, alpha = point_alpha) +
     scale_shape_manual(
       name = bquote(.(point_legend_title) ~ "(" * alpha == .(alpha[1]) * ")"),
       labels = labs_color,
@@ -189,8 +191,8 @@ ppfunnel_linear <- function(plot_data,
       labels = labs_color,
       values = color_mapping
     ) +
-    geom_line(data = plot_data, aes(x = precision, y = lower, group = alpha, linetype = alpha), linewidth = line_size) +
-    geom_line(data = plot_data, aes(x = precision, y = upper, group = alpha, linetype = alpha), linewidth = line_size) +
+    geom_line(data = plot_data, aes(x = .data$precision, y = .data$lower, group = alpha, linetype = alpha), linewidth = line_size) +
+    geom_line(data = plot_data, aes(x = .data$precision, y = .data$upper, group = alpha, linetype = alpha), linewidth = line_size) +
     scale_linetype_manual(
       name =  linetype_legend_title,
       values = values_linetype,

@@ -43,7 +43,7 @@ remotes::install_github("UM-KevinHe/pprof", ref = "main")
 
 This section presents the structure and workflow of the `pprof` package. Generally, for datasets with continuous outcomes, either a fixed effect model or a random effect model can be fitted, while for binary outcomes, the current version only supports the fixed effect model. For the calculation of standardized measures, both indirect and direct standardization methods are provided for all models. Regarding hypothesis testing of provider effects, `pprof` includes the flagging based on each provider's performance, categorizing them as 1 (statistically higher), 0 (as expected), or -1 (statistically lower). Confidence intervals are provided for both provider effects and standardized measures. Additionally, various visualizations are equipped to facilitate interpretation of the results. These include caterpillar plots for the confidence intervals of standardized measures, bar plots showing flagging percentages overall and stratified by provider sizes, and funnel plots for indirect standardized measures in fixed effect models. These visualizations offer multiple perspectives for understanding the results effectively.
 
-![](Charts/pprof%20flowchart.png){width="3000"}
+![](Charts/pprof_flowchart.png){width="3000"}
 
 
 ## Model Fitting

@@ -59,6 +59,7 @@
 #' @seealso \code{\link{data_check}}
 #'
 #' @importFrom lme4 lmer fixef ranef
+#' @importFrom stats complete.cases as.formula model.matrix fitted residuals logLik
 #'
 #' @export
 #'

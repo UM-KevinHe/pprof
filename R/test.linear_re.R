@@ -61,7 +61,7 @@ test.linear_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two
 
   denom <- sqrt(R_i * sigma_sq / n.prov)
   Z_score <- (fit$coefficient$RE - null)/denom
-  p <- pnorm(Z_score, lower=F)
+  p <- pnorm(Z_score, lower.tail=F)
 
   if (alternative == "two.sided") {
     p_value <- 2 * pmin(p, 1-p)

@@ -106,6 +106,7 @@
 #' @importFrom Rcpp evalCpp
 #' @importFrom pROC auc
 #' @importFrom RcppParallel RcppParallelLibs
+#' @importFrom stats complete.cases terms model.matrix reformulate median
 #'
 #' @references
 #' He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis providers; adjusting for hospital effects.

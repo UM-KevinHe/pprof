@@ -37,20 +37,20 @@
 #' summary.wald
 #'
 #' @importFrom Rcpp evalCpp
-#' @importFrom stats plogis pnorm qnorm pchisq
+#' @importFrom stats plogis pnorm qnorm pchisq median
 #'
 #' @exportS3Method summary logis_fe
 
 summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0, alternative = "two.sided", ...) {
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
+  if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+  if (!class(object) %in% c("logis_fe")) stop("Object `object` is not of the classes 'logis_fe'!",call.=F)
   if (!(test %in% c("wald", "lr", "score"))) stop("Argument 'test' NOT as required!",call.=F)
 
-  Y.char <- fit$char_list$Y.char
-  Z.char <- fit$char_list$Z.char
-  ID.char <- fit$char_list$ID.char
-  beta <- fit$coefficient$beta
-  gamma <- fit$coefficient$gamma
+  Y.char <- object$char_list$Y.char
+  Z.char <- object$char_list$Z.char
+  ID.char <- object$char_list$ID.char
+  beta <- object$coefficient$beta
+  gamma <- object$coefficient$gamma
   alpha <- 1 - level
 
   if (missing(parm)) {
@@ -64,7 +64,7 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
   }
 
   if (test=="wald") { # Wald test and test-based CIs
-    se.beta <- sqrt(diag(fit$variance$beta))
+    se.beta <- sqrt(diag(object$variance$beta))
     stat <- (beta - null) / se.beta
 
     if (alternative == "two.sided") {
@@ -95,30 +95,30 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
 
     return(result[ind, ])
 
-    # data <- fit$data_include[, c(Y.char,Z.char,ID.char)]
-    # gamma.obs <- rep(fit$df.prov$gamma_est, sapply(split(data[,Y.char],data[,ID.char]),length))
-    # probs <- as.numeric(plogis(gamma.obs+as.matrix(data[,Z.char]) %*% fit$coefficient$beta))
+    # data <- object$data_include[, c(Y.char,Z.char,ID.char)]
+    # gamma.obs <- rep(object$df.prov$gamma_est, sapply(split(data[,Y.char],data[,ID.char]),length))
+    # probs <- as.numeric(plogis(gamma.obs+as.matrix(data[,Z.char]) %*% object$coefficient$beta))
     # probs <- pmin(pmax(probs,1e-10),1-1e-10)
     # info.gamma.inv <- 1/sapply(split(probs*(1-probs), data[,ID.char]),sum)
     # info.betagamma <- sapply(by(probs*(1-probs)*as.matrix(data[,Z.char]),data[,ID.char],identity),colSums)
     # info.beta <- t(as.matrix(data[,Z.char]))%*%(probs*(1-probs)*as.matrix(data[,Z.char]))
     # se.beta <- sqrt(diag(solve(info.beta-info.betagamma%*%(info.gamma.inv*t(info.betagamma)))))[ind] #S^-1
-    # p <- pnorm((fit$beta[ind]-null)/se.beta, lower=F)
-    # df <- data.frame(beta = fit$beta[ind],
+    # p <- pnorm((object$beta[ind]-null)/se.beta, lower=F)
+    # df <- data.frame(beta = object$beta[ind],
     #                  se.beta = se.beta,
     #                  p=2*pmin(p,1-p),
-    #                  CI.lower=fit$beta[ind]-qnorm(1-alpha/2)*se.beta,
-    #                  CI.upper=fit$beta[ind]+qnorm(1-alpha/2)*se.beta)
+    #                  CI.lower=object$beta[ind]-qnorm(1-alpha/2)*se.beta,
+    #                  CI.upper=object$beta[ind]+qnorm(1-alpha/2)*se.beta)
     # row.names(df) <- Z.char[ind]
     #return(df)
   }
   # else if (test=="wald.cpp") {  #use cpp function to calculate Cov(\beta)
-  #   data <- fit$data_include[, c(Y.char,Z.char,ID.char)]
+  #   data <- object$data_include[, c(Y.char,Z.char,ID.char)]
   #   n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
-  #   ls <- wald_covar(data[,Y.char], as.matrix(data[,Z.char]), n.prov, fit$df.prov$gamma_est, as.numeric(fit$beta), ind, null, alpha)
+  #   ls <- wald_covar(data[,Y.char], as.matrix(data[,Z.char]), n.prov, object$df.prov$gamma_est, as.numeric(object$beta), ind, null, alpha)
   #   #ls$p <- c(ls$p); ls$stat <- c(ls$stat); ls$se.beta <- c(ls$se.beta)
   #   #ls$beta.lower <- c(ls$beta.lower); ls$beta.upper <- c(ls$beta.upper)
-  #   df <- data.frame(beta = fit$beta[ind],
+  #   df <- data.frame(beta = object$beta[ind],
   #                    se.beta=c(ls$se.beta),
   #                    p=c(ls$p),
   #                    #stat=ls$stat,
@@ -129,12 +129,12 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
   # }
   else if (test=="lr") { # Note: only null=0 allowed for now and no CIs
     if (null!=0) stop("Argument 'null' is invalid!")
-    data <- fit$data_include
+    data <- object$data_include
     gamma.obs <- rep(pmax(pmin(gamma,median(gamma)+10),median(gamma)-10), sapply(split(data[,Y.char],data[,ID.char]),length))
     neg2Loglkd <- -2*sum((gamma.obs+as.matrix(data[,Z.char])%*%beta)*data[,Y.char]-log(1+exp(gamma.obs+as.matrix(data[,Z.char])%*%beta)))
     lr <- function(index) {
       data.null <- as.data.frame(cbind(data[,Y.char], data[,ID.char], data[,Z.char[-index]], data[, (ncol(data) - 2):ncol(data)]))
-      char_list.null <- fit$char_list
+      char_list.null <- object$char_list
       char_list.null$Z.char <- char_list.null$Z.char[-index]
       colnames(data.null)[1:2] <- c(char_list.null$Y.char, char_list.null$ID.char)
       data.prep.null <- list(data = data.null,
@@ -143,17 +143,17 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
       Z.null <- as.matrix(data[,Z.char[-index]])
       gamma.obs.null <- rep(pmax(pmin(fe.null$coefficient$gamma,median(fe.null$coefficient$gamma)+10),median(fe.null$coefficient$gamma)-10), sapply(split(data[,Y.char],data[,ID.char]),length))
       neg2Loglkd.null <- -2*sum((gamma.obs.null+Z.null%*%fe.null$coefficient$beta)*data[,Y.char]-log(1+exp(gamma.obs.null+Z.null%*%fe.null$coefficient$beta)))
-      #p <- pchisq(neg2Loglkd.null-neg2Loglkd, 1, lower=F)
+      #p <- pchisq(neg2Loglkd.null-neg2Loglkd, 1, lower.tail=F)
       test_stat <- neg2Loglkd.null - neg2Loglkd
-      p <- pchisq(test_stat, 1, lower = FALSE)
+      p <- pchisq(test_stat, 1, lower.tail = FALSE)
       return(list(test_stat = test_stat, p = p))
     }
     # df <- data.frame(
-    #   beta = fit$beta[ind],
+    #   beta = object$beta[ind],
     #   p = sapply(ind, function(i) lr(i)$p)
     # )
     df <- data.frame(
-      beta = fit$coefficient$beta[ind],
+      beta = object$coefficient$beta[ind],
       test_stat = sapply(ind, function(i) lr(i)$test_stat),
       p = sapply(ind, function(i) lr(i)$p)
     )
@@ -162,10 +162,10 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
     return(df)
   } else if (test=="score") { # Note: only null=0 allowed for now and no CIs
     if (null!=0) stop("Argument 'null' is invalid!")
-    data <- fit$data_include
+    data <- object$data_include
     score <- function(index) {
       data.null <- as.data.frame(cbind(data[,Y.char], data[,ID.char], data[,Z.char[-index]], data[, (ncol(data) - 2):ncol(data)]))
-      char_list.null <- fit$char_list
+      char_list.null <- object$char_list
       char_list.null$Z.char <- char_list.null$Z.char[-index]
       colnames(data.null)[1:2] <- c(char_list.null$Y.char, char_list.null$ID.char)
       data.prep.null <- list(data = data.null,
@@ -191,10 +191,10 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
         info.beta.add.beta%*%schur.inv.null%*%t(info.beta.add.beta)
       score.beta.add <- t(as.matrix(data[,Z.char[index]]))%*%(data[,Y.char]-probs.null)
       score.stat <- score.beta.add^2/info.beta.add
-      p <- pchisq(score.stat, 1, lower=F)
+      p <- pchisq(score.stat, 1, lower.tail=F)
       return(list(test_stat = score.stat, p = p))
     }
-    df <- data.frame(beta = fit$coefficient$beta[ind],
+    df <- data.frame(beta = object$coefficient$beta[ind],
                      test_stat = sapply(ind, function(i) score(i)$test_stat),
                      p = sapply(ind, function(i) score(i)$p))
     rownames(df) <- Z.char[ind]

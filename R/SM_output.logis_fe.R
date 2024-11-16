@@ -44,6 +44,8 @@
 #' He, K. (2019). Indirect and direct standardization for evaluating transplant centers. Journal of Hospital Administration, \strong{8(1)}, 9-14.
 #' \cr
 #'
+#' @importFrom stats median
+#'
 #' @exportS3Method SM_output logis_fe
 
 SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate", "ratio"),

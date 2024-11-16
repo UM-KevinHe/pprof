@@ -60,6 +60,7 @@
 #' @seealso \code{\link{data_check}}
 #'
 #' @importFrom Matrix bdiag
+#' @importFrom stats complete.cases terms model.matrix reformulate as.formula update lm vcov logLik
 #'
 #' @export
 #'

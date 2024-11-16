@@ -15,17 +15,17 @@
 summary.linear_re <- function(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
   alpha <- 1 - level
 
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_re'!",call.=F)
+  if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+  if (!class(object) %in% c("linear_re")) stop("Object `object` is not of the classes 'linear_re'!",call.=F)
 
-  covar_char <- c("(intercept)", fit$char_list$Z.char)
+  covar_char <- c("(intercept)", object$char_list$Z.char)
 
-  FE_est <- fit$coefficient$FE
-  se.FE <- sqrt(diag(fit$variance$FE))
+  FE_est <- object$coefficient$FE
+  se.FE <- sqrt(diag(object$variance$FE))
   stat <- (FE_est - null) / se.FE
 
-  n <- nrow(fit$data_includ)
-  df <- n - length(fit$coefficient$FE) - length(fit$coefficient$RE) + 1
+  n <- nrow(object$data_includ)
+  df <- n - length(object$coefficient$FE) - length(object$coefficient$RE) + 1
 
   if (alternative == "two.sided") {
     p_value <- 2 * (1 - pt(abs(stat), df = df))
@@ -72,20 +72,20 @@ summary.linear_re <- function(object, parm, level = 0.95, null = 0, alternative 
 }
 
 
-# summary_linearRE_covar <- function(fit, parm, level = 0.95, null = 0, ref.dis = "normal") {
+# summary_linearRE_covar <- function(object, parm, level = 0.95, null = 0, ref.dis = "normal") {
 #   alpha <- 1 - level
 #
-#   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-#   if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_RE'!",call.=F)
+#   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+#   if (!class(object) %in% c("linear_re")) stop("Object object is not of the classes 'linear_RE'!",call.=F)
 #
-#   covar_char <- c("(intercept)", fit$char_list$Z.char)
+#   covar_char <- c("(intercept)", object$char_list$Z.char)
 #
 #   if (ref.dis == "normal") {
-#     covar <- rbind(fit$coefficient$mu, fit$coefficient$beta)
+#     covar <- rbind(object$coefficient$mu, object$coefficient$beta)
 #     colnames(covar) <- "Estimate"
 #     rownames(covar) <- covar_char
 #
-#     se.covar <- rbind(sqrt(fit$variance$mu), sqrt(fit$variance$beta))
+#     se.covar <- rbind(sqrt(object$variance$mu), sqrt(object$variance$beta))
 #     colnames(covar) <- "Std.Error"
 #     rownames(covar) <- covar_char
 #
@@ -105,13 +105,13 @@ summary.linear_re <- function(object, parm, level = 0.95, null = 0, alternative 
 #
 #   }
 #   else if (ref.dis == "t") {
-#     fit_converted <- as_lmerModLmerTest(fit$model)
-#     sum <- summary(fit_converted)
+#     object_converted <- as_lmerModLmerTest(object$model)
+#     sum <- summary(object_converted)
 #     beta_sum <- sum$coefficients
 #
 #     stat <- (beta_sum[,1] - null) / beta_sum[,2]
 #     p_value <- 2 * (1 - pt(abs(stat), df = beta_sum[,3]))
-#     CI <- confint(fit_converted, level = level)
+#     CI <- confint(object_converted, level = level)
 #
 #     result <- data.frame(Estimate = beta_sum[,1], Std.Error = beta_sum[,2],
 #                          df = beta_sum[,3], stat = stat, p_value = p_value,

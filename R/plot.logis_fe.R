@@ -38,6 +38,7 @@
 #' @importFrom poibin ppoibin dpoibin
 #' @importFrom stats plogis
 #' @importFrom tibble tibble
+#' @importFrom rlang .data
 #'
 #' @exportS3Method plot logis_fe
 
@@ -49,35 +50,35 @@ plot.logis_fe <- function(x, null = "median", test = "score", target = 1, alpha 
                           line_size = 0.8,
                           target_line_type = "longdash", ...
 ) {
-  if (missing(fit)) stop ("Argument 'fit' is required!", call.=F)
-  if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
+  if (missing(x)) stop ("Argument 'x' is required!", call.=F)
+  if (!class(x) %in% c("logis_fe")) stop("Object 'x' is not of the classes 'logis_fe'!", call.=F)
   if (!(test %in% c("exact", "score"))) stop("Argument 'test' NOT as required!", call.=F)
 
   # Indicator
-  SM <- SM_output(fit, null = null, stdz = "indirect", measure = "ratio")
+  SM <- SM_output(x, null = null, stdz = "indirect", measure = "ratio")
   processed_data <- cbind(SM$indirect.ratio, SM$OE$OE_indirect)
   colnames(processed_data) <- c("indicator", "Obs", "Exp", "Var")
   processed_data$precision <- processed_data$Exp^2/processed_data$Var
 
-  data <- fit$data_include
-  Z_beta <- fit$linear_pred
-  prov <- data[ ,fit$char_list$ID.char]
-  gamma <- fit$coefficient$gamma
+  data <- x$data_include
+  Z_beta <- x$linear_pred
+  prov <- data[ ,x$char_list$ID.char]
+  gamma <- x$coefficient$gamma
   gamma.null <- ifelse(null=="median", median(gamma),
                        ifelse(class(null)=="numeric", null[1],
                               stop("Argument 'null' NOT as required!", call.=F)))
   probs_all <- as.numeric(plogis(gamma.null + Z_beta)) # expected prob of events under null
   probs_list <- split(probs_all, prov)
-  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
+  n.prov <- sapply(split(data[, x$char_list$Y.char], data[, x$char_list$ID.char]), length)
 
   if (test == "exact") {
-    flagging <- test(fit, level = 1-alpha[1], test = "exact.poisbinom", null = null)
+    flagging <- test(x, level = 1-alpha[1], test = "exact.poisbinom", null = null)
     processed_data <- cbind(processed_data, flagging)
 
     cl_lower <- function(probs_list, alpha) {
       # lower CL for obs
       # o_lower <- qpoibin(alpha / 2, E/n)
-      o_lower <- sapply(probs_list, qpoibin, qq = alpha/2)
+      o_lower <- sapply(probs_list, .data$qpoibin, qq = alpha/2)
       # o_lower <- ifelse(ppoibin(o_lower - 1, E/n) + 0.5 * dpoibin(o_lower, E/n) >= alpha / 2, o_lower, o_lower + 1)
       o_lower <- sapply(1:length(probs_list), function(i){
         ifelse(ppoibin(o_lower[i] - 1, probs_list[[i]]) + 0.5 * dpoibin(o_lower[i], probs_list[[i]]) >= alpha / 2,
@@ -93,7 +94,7 @@ plot.logis_fe <- function(x, null = "median", test = "score", target = 1, alpha 
 
     cl_upper <- function(probs_list, alpha) {
       # upper CL for obs
-      o_upper <- sapply(probs_list, qpoibin, qq = 1-alpha/2) # qpoibin(1 - alpha / 2, E)
+      o_upper <- sapply(probs_list, .data$qpoibin, qq = 1-alpha/2) # qpoibin(1 - alpha / 2, E)
       o_upper <- sapply(1:length(probs_list), function(i){
         ifelse(ppoibin(o_upper[i] - 1, probs_list[[i]]) + 0.5 * dpoibin(o_upper[i], probs_list[[i]]) >= 1-alpha / 2,
                o_upper[i], o_upper[i] + 1)})
@@ -127,27 +128,27 @@ plot.logis_fe <- function(x, null = "median", test = "score", target = 1, alpha 
       #   lower = cl_lower(probs_list, alpha) / Exp,
       #   upper = cl_upper(probs_list, alpha) / Exp
       # ) %>%
-      select(precision, indicator, Exp, flag, alpha, lower, upper) %>%
+      select(.data$precision, .data$indicator, .data$Exp, .data$flag, alpha, .data$lower, .data$upper) %>%
       mutate(
         alpha = factor(alpha),
-        lower = pmax(lower/Exp, 0),
-        upper = upper/Exp
-      ) %>% arrange(precision)
+        lower = pmax(.data$lower/.data$Exp, 0),
+        upper = .data$upper/.data$Exp
+      ) %>% arrange(.data$precision)
   }
   else if (test == "score") {
-    flagging <- test(fit, level = 1-alpha[1], test = "score", null = null)
+    flagging <- test(x, level = 1-alpha[1], test = "score", null = null)
     processed_data <- cbind(processed_data, flagging)
     plot_data <- processed_data %>%
-      arrange(precision) %>%
+      arrange(.data$precision) %>%
       cross_join(tibble(alpha = alpha)) %>%
       mutate(
-        lower = target - qnorm(1 - alpha / 2) * sqrt(1 / precision),
-        upper = target + qnorm(1 - alpha / 2) * sqrt(1 / precision)
+        lower = target - qnorm(1 - alpha / 2) * sqrt(1 / .data$precision),
+        upper = target + qnorm(1 - alpha / 2) * sqrt(1 / .data$precision)
       ) %>%
-      select(precision, indicator, Exp, flag, alpha, lower, upper) %>%
+      select(.data$precision, .data$indicator, .data$Exp, .data$flag, alpha, .data$lower, .data$upper) %>%
       mutate(
         alpha = factor(alpha),
-        lower = pmax(lower, 0)
+        lower = pmax(.data$lower, 0)
       )
   }
 
@@ -173,6 +174,7 @@ plot.logis_fe <- function(x, null = "median", test = "score", target = 1, alpha 
 #' @importFrom dplyr filter bind_rows
 #' @importFrom magrittr %>%
 #' @importFrom tibble tibble
+#' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot scale_x_continuous scale_y_continuous geom_point aes scale_shape_manual scale_color_manual scale_linetype_manual geom_line geom_hline guides guide_legend theme labs theme_classic element_text element_rect
 ppfunnel_logis <- function(plot_data,
                            target,
@@ -260,7 +262,7 @@ ppfunnel_logis <- function(plot_data,
     scale_y_continuous(breaks = round(seq(0, ymax, by=1), 1),
                        limits = c(0, ymax),
                        expand = c(1, 1)/50) +
-    geom_point(data = data, aes(x = precision, y = indicator, shape = flag, color = flag), size = point_size, alpha = point_alpha) +
+    geom_point(data = data, aes(x = .data$precision, y = .data$indicator, shape = .data$flag, color = .data$flag), size = point_size, alpha = point_alpha) +
     scale_shape_manual(
       name = bquote(.(point_legend_title) ~ "(" * alpha == .(alpha[1]) * ")"),
       labels = labs_color,
@@ -271,8 +273,8 @@ ppfunnel_logis <- function(plot_data,
       labels = labs_color,
       values = color_mapping
     ) +
-    geom_line(data = plot_data, aes(x = precision, y = lower, group = alpha, linetype = alpha), linewidth = line_size) +
-    geom_line(data = plot_data, aes(x = precision, y = upper, group = alpha, linetype = alpha), linewidth = line_size) +
+    geom_line(data = plot_data, aes(x = .data$precision, y = .data$lower, group = alpha, linetype = alpha), linewidth = line_size) +
+    geom_line(data = plot_data, aes(x = .data$precision, y = .data$upper, group = alpha, linetype = alpha), linewidth = line_size) +
     scale_linetype_manual(
       name =  linetype_legend_title,
       values = values_linetype,

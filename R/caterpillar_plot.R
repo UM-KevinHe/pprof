@@ -45,17 +45,22 @@
 #' ID <- ExampleDataLinear$ID
 #' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 #' CI_linear <- confint(fit_linear)
-#' caterpillar_plot(CI_linear$CI.indirect, use_flag = TRUE, errorbar_width = 0.5, errorbar_size = 1)
+#' caterpillar_plot(CI_linear$CI.indirect, use_flag = TRUE,
+#'                  errorbar_width = 0.5, errorbar_size = 1)
 #'
 #' data(ExampleDataBinary)
-#' fit_logis <- logis_fe(Y = ExampleDataBinary$Y, Z = ExampleDataBinary$Z, ID = ExampleDataBinary$ID, message = FALSE)
+#' fit_logis <- logis_fe(Y = ExampleDataBinary$Y,
+#'                       Z = ExampleDataBinary$Z,
+#'                       ID = ExampleDataBinary$ID, message = FALSE)
 #' CI_logis <- confint(fit_logis)
-#' caterpillar_plot(CI_logis$CI.indirect_ratio, use_flag = TRUE, errorbar_width = 0.5, errorbar_size = 1)
+#' caterpillar_plot(CI_logis$CI.indirect_ratio, use_flag = TRUE,
+#'                  errorbar_width = 0.5, errorbar_size = 1)
 #'
 #' @seealso \code{\link{confint.linear_fe}}, \code{\link{confint.linear_re}}, \code{\link{confint.logis_fe}}
 #'
+#' @importFrom stats reorder
+#' @importFrom rlang .data
 #' @importFrom ggplot2 ggplot geom_errorbar aes scale_color_manual guide_legend geom_point geom_hline scale_x_discrete expansion theme theme_bw labs element_blank element_text element_rect margin
-#'
 #' @export
 
 caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color = "#475569",
@@ -92,20 +97,20 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
   }
 
   # CI$flag <- factor(CI$flag, levels = c("Normal", "Lower", "Higher"), ordered = T)
-  caterpillar_p <- ggplot(CI, aes(x = reorder(prov, SM), y = SM))
+  caterpillar_p <- ggplot(CI, aes(x = reorder(.data$prov, .data$SM), y = .data$SM))
   if (use_flag == TRUE) {
     caterpillar_p <- caterpillar_p +
-      geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") SM else Lower,
-                        ymax = if (attr(CI, "type") == "upper one-sided") SM else Upper,
-                        color = flag),
+      geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
+                        ymax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper,
+                        color = .data$flag),
                     width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
       scale_color_manual(values = flag_color, guide = guide_legend(title = NULL, box.linetype = "solid",
                                                                    override.aes = list(linewidth = 1.5)))
 
   } else {
     caterpillar_p <- caterpillar_p +
-      geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") SM else Lower,
-                        ymax = if (attr(CI, "type") == "upper one-sided") SM else Upper),
+      geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
+                        ymax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper),
                     width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha, color = errorbar_color)
   }
 

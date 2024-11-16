@@ -29,7 +29,9 @@
 #' bar_plot(test_linear)
 #'
 #' data(ExampleDataBinary)
-#' fit_logis <- logis_fe(Y = ExampleDataBinary$Y, Z = ExampleDataBinary$Z, ID = ExampleDataBinary$ID, message = FALSE)
+#' fit_logis <- logis_fe(Y = ExampleDataBinary$Y,
+#'                       Z = ExampleDataBinary$Z,
+#'                       ID = ExampleDataBinary$ID, message = FALSE)
 #' test_logis <- test(fit_logis)
 #' bar_plot(test_logis)
 #'
@@ -39,6 +41,8 @@
 #' @importFrom dplyr group_by summarise mutate n
 #' @importFrom scales percent percent_format
 #' @importFrom magrittr %>%
+#' @importFrom stats quantile
+#' @importFrom rlang .data
 #'
 #' @export
 
@@ -66,15 +70,15 @@ bar_plot <- function(flag_df, group_num = 4,
 
   # Calculate percentage of each flag in each group
   df_long <- flag_df %>%
-    group_by(size, category) %>%
+    group_by(.data$size, .data$category) %>%
     summarise(count = n(), .groups = "drop") %>%
-    group_by(size) %>%
-    mutate(value = count / sum(count))
+    group_by(.data$size) %>%
+    mutate(value = .data$count / sum(.data$count))
 
   # Plot the bar chart
-  p <- ggplot(df_long, aes(x = size, y = value, fill = category)) +
+  p <- ggplot(df_long, aes(x = .data$size, y = .data$value, fill = .data$category)) +
     geom_bar(stat = "identity", color = "black", width = 0.7) +
-    geom_text(aes(label = percent(value, accuracy = 0.1)),
+    geom_text(aes(label = percent(.data$value, accuracy = 0.1)),
               position = position_stack(vjust = 0.5),
               color = label_color, size = label_size) +
     labs(x = "Provider Size",

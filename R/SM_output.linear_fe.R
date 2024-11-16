@@ -43,6 +43,8 @@
 #' SM_output(fit_linear)
 #' SM_output(fit_linear, stdz = "direct", null = "mean")
 #'
+#' @importFrom stats median
+#'
 #' @exportS3Method SM_output linear_fe
 
 SM_output.linear_fe <- function(fit, parm, stdz = "indirect", null = "median", ...) {

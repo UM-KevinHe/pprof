@@ -52,7 +52,9 @@ test_linear <- test(fit_linear)
 bar_plot(test_linear)
 
 data(ExampleDataBinary)
-fit_logis <- logis_fe(Y = ExampleDataBinary$Y, Z = ExampleDataBinary$Z, ID = ExampleDataBinary$ID, message = FALSE)
+fit_logis <- logis_fe(Y = ExampleDataBinary$Y,
+                      Z = ExampleDataBinary$Z,
+                      ID = ExampleDataBinary$ID, message = FALSE)
 test_logis <- test(fit_logis)
 bar_plot(test_logis)
 

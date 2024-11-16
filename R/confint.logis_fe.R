@@ -48,7 +48,7 @@
 #' confint(fit_fe, option = "gamma")
 #' confint(fit_fe, option = "SM")
 #'
-#' @importFrom stats plogis
+#' @importFrom stats plogis uniroot
 #'
 #' @exportS3Method confint logis_fe
 
@@ -94,8 +94,8 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
 
     if (test %in% c("score", "exact")) {
       if (test=="score") {
-        qnorm.halfalpha <- qnorm(alpha/2, lower=F)
-        qnorm.alpha <- qnorm(alpha, lower=F)
+        qnorm.halfalpha <- qnorm(alpha/2, lower.tail=F)
+        qnorm.alpha <- qnorm(alpha, lower.tail=F)
         CL.finite <- function(df, alternative) {
           prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                          stop("Number of providers involved NOT equal to one!"))
@@ -377,8 +377,8 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         stop("Argument 'parm' includes invalid elements!")
       }
       #functions for calculate CI of SRs
-      qnorm.halfalpha <- qnorm(alpha/2, lower=F)
-      qnorm.alpha <- qnorm(alpha, lower=F)
+      qnorm.halfalpha <- qnorm(alpha/2, lower.tail=F)
+      qnorm.alpha <- qnorm(alpha, lower.tail=F)
       SR_indirect.finite <- function(df) {
         prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                        stop("Number of providers involved NOT equal to one!"))
@@ -487,8 +487,8 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         stop("Argument 'parm' includes invalid elements!")
       }
       #funcitons for calculate CI of SRs
-      qnorm.halfalpha <- qnorm(alpha/2, lower=F)
-      qnorm.alpha <- qnorm(alpha, lower=F)
+      qnorm.halfalpha <- qnorm(alpha/2, lower.tail=F)
+      qnorm.alpha <- qnorm(alpha, lower.tail=F)
 
       SR_direct.finite <- function(ID) {
         Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta

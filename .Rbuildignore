@@ -1,3 +1,19 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^src/.*\.tmp$
+^\.github$
+^\.github/
+^pprof/docs/deps/bootstrap-5\.3\.1/fonts/.+
+^LICENSE\.md$
+
+# Exclude pkgdown configuration
+^_pkgdown\.yml$
+
+# Exclude cleanup script
+^cleanup\.txt$
+
+# Exclude incorrect configure script
+^configure\.txt$
+
+# Exclude pkgdown-generated docs
+^docs/
