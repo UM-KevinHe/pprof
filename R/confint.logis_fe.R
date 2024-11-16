@@ -1,4 +1,4 @@
-#' Get confidence intervals for provider effects or standardized Mmeasures
+#' Get confidence intervals for provider effects or standardized measures
 #'
 #' Provide confidence intervals for provider effects or standardized measures from a fixed effect logistic model.
 #'
@@ -353,6 +353,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
     if (alternative != "two.sided")
       stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
     return_mat <- confint_fe_gamma(fit, test, parm, alpha, alternative)
+    attr(return_mat, "description") <- "gamma"
     return(return_mat)
   }
   else if (option == "SM"){
@@ -381,7 +382,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df$ID), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         gamma.upper <- confint_gamma$gamma.upper
         EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
@@ -393,7 +394,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df$ID), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
         gamma.upper <- confint_gamma$gamma.upper
         EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
         if (alternative == "greater") {
@@ -408,7 +409,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df$ID), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
         if (alternative == "less") {

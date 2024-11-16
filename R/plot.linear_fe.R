@@ -5,7 +5,7 @@
 #' @param fit a model fitted from \code{linear_fe}.
 #' @param null a character string or a number specifying null hypotheses of fixed provider effects. The default is \code{"median"}.
 #' @param target a numeric value representing the target outcome. The default value is 0.
-#' @param alphas a vector of significance levels. The default is alpha = c(0.05, 0.01).
+#' @param alphas anumber or a vector of significance levels. The default is alpha = 0.05.
 #' @param labels a vector of labels for the plot.
 #' @param point_colors a vector of colors representing different provider flags. The default is \code{c("#E69F00", "#56B4E9", "#009E73")}.
 #' @param point_shapes a vector of shapes representing different provider flags. The default is \code{c(15, 17, 19)}.
@@ -37,7 +37,7 @@
 #'
 #' @exportS3Method plot linear_fe
 
-plot.linear_fe <- function(fit, null = "median", target = 0, alpha = c(0.05, 0.01),
+plot.linear_fe <- function(fit, null = "median", target = 0, alpha = 0.05,
                            labels = c("lower", "expected", "higher"),
                            point_colors = c("#E69F00", "#56B4E9", "#009E73"),
                            point_shapes = c(15, 17, 19),

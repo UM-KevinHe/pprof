@@ -61,6 +61,7 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
                              use_flag = FALSE, flag_color = c("#E69F00", "#56B4E9", "#009E73")) {
   if (missing(CI)) stop ("Argument 'CI' is required!",call.=F)
   if (!class(CI) %in% c("data.frame")) stop("Object CI should be a data frame!",call.=F)
+  if (attr(CI, "description") == "gamma") stop("Caterpillar plot only supports standardized measure")
 
   colnames(CI) <- c("SM", "Lower", "Upper")
   CI$prov <- rownames(CI)
