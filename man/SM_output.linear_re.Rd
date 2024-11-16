@@ -42,6 +42,6 @@ outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
 ID <- ExampleDataLinear$ID
 fit_linear <- linear_re(Y = outcome, Z = covar, ID = ID)
-SM_output(fit_re)
+SM_output(fit_linear)
 
 }

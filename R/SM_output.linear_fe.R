@@ -39,8 +39,8 @@
 #' covar <- ExampleDataLinear$Z
 #' ID <- ExampleDataLinear$ID
 #' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
-#' SM_output(fit_fe)
-#' SM_output(fit_fe, stdz = "direct", null = "mean")
+#' SM_output(fit_linear)
+#' SM_output(fit_linear, stdz = "direct", null = "mean")
 #'
 #' @exportS3Method SM_output linear_fe
 

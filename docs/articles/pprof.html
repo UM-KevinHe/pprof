@@ -9,12 +9,12 @@
 <title>Getting Started with pprof • pprof</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Roboto-0.4.9/font.css" rel="stylesheet">
-<link href="../deps/JetBrains_Mono-0.4.9/font.css" rel="stylesheet">
-<link href="../deps/Roboto_Slab-0.4.9/font.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Roboto-0.4.8/font.css" rel="stylesheet">
+<link href="../deps/JetBrains_Mono-0.4.8/font.css" rel="stylesheet">
+<link href="../deps/Roboto_Slab-0.4.8/font.css" rel="stylesheet">
 <!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started with pprof">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started with pprof">
 <meta property="og:description" content="pprof">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -25,7 +25,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
@@ -120,7 +120,7 @@ use cases to illustrate its functionality comprehensively.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="structure">Structure<a class="anchor" aria-label="anchor" href="#structure"></a>
+<h2 id="package-workflow-overview">Package Workflow Overview<a class="anchor" aria-label="anchor" href="#package-workflow-overview"></a>
 </h2>
 <p>This section presents the structure and workflow of the
 <code>pprof</code> package. Generally, for datasets with continuous
@@ -147,10 +147,9 @@ understanding the results effectively.</p>
 <p><code>pprof</code> package introduces three different fitting
 functions: <code>logis_fe</code> for logistic fixed effect model,
 <code>linear_fe</code> for linear fixed effect model, and
-<code>linear_re</code> for linear random effect mode. Throughout the
-guide, the simulated dataset, the simulated dataset
-<code>ExampleDataBinary</code> will included in this package is used as
-an example.</p>
+<code>linear_re</code> for linear random effect mode.</p>
+<p>The simulated dataset <code>ExampleDataBinary</code> is used as an
+example in this section.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/UM-KevinHe/pprof" class="external-link">pprof</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">)</span></span>
@@ -203,7 +202,31 @@ specify the desired type of measure. Additionally, the observed outcomes
 and “expected” outcomes are included in case users wish to calculate
 standardized measures under different definitions.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">SR</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SM_output.html">SM_output</a></span><span class="op">(</span><span class="va">fit_fe</span>, stdz <span class="op">=</span> <span class="st">"indirect"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">SR</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SM_output.html">SM_output</a></span><span class="op">(</span><span class="va">fit_fe</span>, stdz <span class="op">=</span> <span class="st">"indirect"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SR</span><span class="op">$</span><span class="va">indirect.ratio</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Indirect_standardized.ratio</span></span>
+<span><span class="co">#&gt; 1                   0.9025369</span></span>
+<span><span class="co">#&gt; 2                   1.1081224</span></span>
+<span><span class="co">#&gt; 3                   0.8994107</span></span>
+<span><span class="co">#&gt; 4                   1.0742682</span></span>
+<span><span class="co">#&gt; 5                   0.9771412</span></span>
+<span><span class="co">#&gt; 6                   1.0311867</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SR</span><span class="op">$</span><span class="va">indirect.rate</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Indirect_standardized.rate</span></span>
+<span><span class="co">#&gt; 1                   34.99262</span></span>
+<span><span class="co">#&gt; 2                   42.96346</span></span>
+<span><span class="co">#&gt; 3                   34.87141</span></span>
+<span><span class="co">#&gt; 4                   41.65088</span></span>
+<span><span class="co">#&gt; 5                   37.88513</span></span>
+<span><span class="co">#&gt; 6                   39.98055</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SR</span><span class="op">$</span><span class="va">OE</span><span class="op">$</span><span class="va">OE_indirect</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   Obs_provider Exp.indirect_provider Var.indirect_provider</span></span>
+<span><span class="co">#&gt; 1           31              34.34763              8.009189</span></span>
+<span><span class="co">#&gt; 2           16              14.43884              6.107131</span></span>
+<span><span class="co">#&gt; 3           35              38.91437             11.132482</span></span>
+<span><span class="co">#&gt; 4           39              36.30378             10.725251</span></span>
+<span><span class="co">#&gt; 5           23              23.53805              8.296404</span></span>
+<span><span class="co">#&gt; 6           34              32.97172              9.162980</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="hypothesis-testing-for-provider-effects">Hypothesis Testing for Provider Effects<a class="anchor" aria-label="anchor" href="#hypothesis-testing-for-provider-effects"></a>
@@ -222,19 +245,13 @@ the <code>parm</code> argument to the corresponding provider ID. This
 selective output feature makes it easier for users to focus on specific
 providers without being overwhelmed by extensive data.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11</span><span class="op">:</span><span class="fl">20</span>, <span class="fl">60</span><span class="op">:</span><span class="fl">65</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16</span><span class="op">:</span><span class="fl">20</span>, <span class="fl">61</span><span class="op">:</span><span class="fl">65</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    flag      p value        stat</span></span>
-<span><span class="co">#&gt; 11    0 0.1031407301  1.62981440</span></span>
-<span><span class="co">#&gt; 12    0 0.8210148768  0.22623985</span></span>
-<span><span class="co">#&gt; 13    0 0.2744008465  1.09298395</span></span>
-<span><span class="co">#&gt; 14    0 0.1370648282 -1.48681065</span></span>
-<span><span class="co">#&gt; 15    0 0.8340344124  0.20953014</span></span>
 <span><span class="co">#&gt; 16   -1 0.0299553164 -2.17068071</span></span>
 <span><span class="co">#&gt; 17    0 0.0745112915  1.78346100</span></span>
 <span><span class="co">#&gt; 18   -1 0.0361175315 -2.09560178</span></span>
 <span><span class="co">#&gt; 19    0 0.5606615895  0.58185910</span></span>
 <span><span class="co">#&gt; 20    0 0.9903105282  0.01214425</span></span>
-<span><span class="co">#&gt; 60    0 0.4600111503 -0.73882849</span></span>
 <span><span class="co">#&gt; 61    1 0.0004267554  3.52296022</span></span>
 <span><span class="co">#&gt; 62    0 0.0677680598  1.82654599</span></span>
 <span><span class="co">#&gt; 63    0 0.3526406608  0.92947947</span></span>
@@ -336,8 +353,11 @@ in provider performance.</p>
 <p><img src="pprof_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="real-data-example-ecls_data">Real Data Example <code>ecls_data</code><a class="anchor" aria-label="anchor" href="#real-data-example-ecls_data"></a>
+<h2 id="real-data-example">Real Data Example<a class="anchor" aria-label="anchor" href="#real-data-example"></a>
 </h2>
+<div class="section level3">
+<h3 id="early-childhood-longitudinal-study-ecls-dataset">Early Childhood Longitudinal Study (ECLS) Dataset<a class="anchor" aria-label="anchor" href="#early-childhood-longitudinal-study-ecls-dataset"></a>
+</h3>
 <p>In this section, we further show the usage of the package by
 analyzing the Early Childhood Longitudinal Study (ECLS) dataset. We use
 fifth-grade cross-sectional data, focusing on students’ mathematical
@@ -362,16 +382,15 @@ results.</p>
 <span><span class="fu"><a href="../reference/caterpillar_plot.html">caterpillar_plot</a></span><span class="op">(</span><span class="va">CI_ecls</span><span class="op">$</span><span class="va">CI.indirect</span>, use_flag <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Bar Plot</span></span>
+<code class="sourceCode R"><span><span class="co"># Bar Plot</span></span>
 <span><span class="va">test_ecls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit_ecls</span>, parm <span class="op">=</span> <span class="va">schools_with_5_or_more</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/bar_plot.html">bar_plot</a></span><span class="op">(</span><span class="va">test_ecls</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/unnamed-chunk-14-2.png" width="700"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Funnel Plot</span></span>
+<code class="sourceCode R"><span><span class="co"># Funnel Plot</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_ecls</span>, alpha <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/unnamed-chunk-14-3.png" width="700"></p>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
@@ -380,13 +399,11 @@ results.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by <a href="https://mcommunity.umich.edu/person/ybshao" class="external-link">Yubo Shao</a>, <a href="https://www.wenbowu.me/" class="external-link">Wenbo Wu</a>, <a href="https://www.um-kevinhe-group.org/" class="external-link">Kevin He</a>.</p>
+  <p>Developed by <a href="https://mcommunity.umich.edu/person/ybshao" class="external-link">Yubo Shao</a>, <a href="https://www.wenbowu.me/" class="external-link">Wenbo Wu</a>, <a href="https://www.um-kevinhe-group.org/" class="external-link">Kevin He</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer>

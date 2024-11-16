@@ -82,13 +82,15 @@
 #'   \item{Child_Sex}{Binary variable indicating the gender of each student.}
 #'   }
 #'
-#' @source Available at the following website: \url{https://nces.ed.gov/ecls/}
+#' @source Available at the following website: \url{https://nces.ed.gov/ecls/}.
 #'
 #' @references
-#' Tourangeau, K., C. Nord, T. Lˆe, A. G. Sorongon, M. C. Hagedorn, P. Daly, and M. Najarian (2015).
-#' Early childhood longitudinal study, kindergarten class of 2010-11 (ecls-k: 2011):
-#' User’s manual for the ecls-k: 2011 kindergarten data file and electronic codebook,
-#' public version. nces 2015-074. National Center for Education Statistics.
+#'
+#' Tourangeau, K., Nord, C., Lê, T., Sorongon, A. G., Hagedorn, M. C., Daly, P.,
+#' & Najarian, M. (2015). Early Childhood Longitudinal Study, Kindergarten Class of
+#' 2010-11 (ECLS-K:2011): User’s manual for the ECLS-K:2011 kindergarten data file
+#' and electronic codebook, public version (NCES 2015-074). National Center for
+#' Education Statistics.
 #' \cr
 #'
 #' @examples
@@ -96,6 +98,6 @@
 #' formula_FE <- as.formula("Math_Score ~ Income + id(School_ID) + Child_Sex")
 #' fit_FE <- linear_fe(formula = formula_FE, data = ecls_data)
 #'
-#' formula_RE <- formula = as.formula("Math_Score ~ Income + (1|School_ID) + Child_Sex")
+#' formula_RE <- as.formula("Math_Score ~ Income + (1|School_ID) + Child_Sex")
 #' fit_RE <- linear_re(formula = formula_RE, data = ecls_data)
 "ecls_data"

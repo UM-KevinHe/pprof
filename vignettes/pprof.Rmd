@@ -39,15 +39,19 @@ remotes::install_github("UM-KevinHe/pprof", ref = "main")
 
 ------------------------------------------------------------------------
 
-## Structure
+## Package Workflow Overview
 
 This section presents the structure and workflow of the `pprof` package. Generally, for datasets with continuous outcomes, either a fixed effect model or a random effect model can be fitted, while for binary outcomes, the current version only supports the fixed effect model. For the calculation of standardized measures, both indirect and direct standardization methods are provided for all models. Regarding hypothesis testing of provider effects, `pprof` includes the flagging based on each provider's performance, categorizing them as 1 (statistically higher), 0 (as expected), or -1 (statistically lower). Confidence intervals are provided for both provider effects and standardized measures. Additionally, various visualizations are equipped to facilitate interpretation of the results. These include caterpillar plots for the confidence intervals of standardized measures, bar plots showing flagging percentages overall and stratified by provider sizes, and funnel plots for indirect standardized measures in fixed effect models. These visualizations offer multiple perspectives for understanding the results effectively.
 
 ![](Charts/pprof%20flowchart.png){width="3000"}
 
+
 ## Model Fitting
 
-`pprof` package introduces three different fitting functions: `logis_fe` for logistic fixed effect model, `linear_fe` for linear fixed effect model, and `linear_re` for linear random effect mode. Throughout the guide, the simulated dataset, the simulated dataset `ExampleDataBinary` will included in this package is used as an example.
+`pprof` package introduces three different fitting functions: `logis_fe` for logistic fixed effect model, `linear_fe` for linear fixed effect model, and `linear_re` for linear random effect mode. 
+
+
+The simulated dataset `ExampleDataBinary` is used as an example in this section.
 
 ```{r}
 library(pprof)
@@ -101,7 +105,7 @@ head(SR$OE$OE_indirect)
 The `test` function is designed to conduct hypothesis testing for provider effects and identify outlier providers. It returns a four-column dataframe, where the "flag" column indicates whether a provider is flagged as an outlier. The other three columns provide the p-values, corresponding test statistics, and the standard errors of provider effects. Users have the flexibility to choose between two-sided and one-sided tests by specifying the `alternative` argument. In cases when the number of providers is very large, outputting all results at once may become cumbersome. To address this, users can opt to display results only for the providers of particular interest by setting the `parm` argument to the corresponding provider ID. This selective output feature makes it easier for users to focus on specific providers without being overwhelmed by extensive data.
 
 ```{r}
-test(fit_fe, parm = c(11:20, 60:65))
+test(fit_fe, parm = c(16:20, 61:65))
 ```
 
 ## Hypothesis Testing for Covariate Coefficients
@@ -143,7 +147,8 @@ The current version of `pprof` also supports the funnel plot through the `plot` 
 plot(fit_fe, alpha = 0.05)
 ```
 
-## Real Data Example `ecls_data`
+## Real Data Example
+### Early Childhood Longitudinal Study (ECLS) Dataset
 
 In this section, we further show the usage of the package by analyzing the Early Childhood Longitudinal Study (ECLS) dataset. We use fifth-grade cross-sectional data, focusing on students' mathematical assessment scores as the continuous outcome, with the continuous predictor household income and the categorical predictor gender. Due to the small number of observations for some schools, we fit the model using all available observations but exclude schools with fewer than five records when generating caterpillat plot and bar plot. This ensures a more reliable and interpretable graphical representation of the results. 
 

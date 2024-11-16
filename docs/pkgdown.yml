@@ -1,11 +1,11 @@
 pandoc: '3.2'
-pkgdown: 2.0.7
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
   Logis-FE: Logis-FE.html
   pprof: pprof.html
   Quick-start: Quick-start.html
-last_built: 2024-11-15T18:18Z
+last_built: 2024-11-16T21:08Z
 urls:
   reference: https://um-kevinhe.github.io/pprof/reference
   article: https://um-kevinhe.github.io/pprof/articles
