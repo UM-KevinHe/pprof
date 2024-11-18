@@ -2,7 +2,7 @@ Package: pprof
 Type: Package
 Title: Risk-adjusted Models, Standardized Measure Calculation, Hypothesis Testing and Visualization for Provider Profiling
 Version: 1.3
-Date: 2024-11-12
+Date: 2024-11-18
 Authors@R: c(
    person("Xiaohan", "Liu", email = "xhliuu@umich.edu", role = c("aut", "cre")),
    person("Lingfeng", "Luo", email = "lfluo@umich.edu", role = "aut"),
@@ -13,7 +13,7 @@ Authors@R: c(
 Description: Implements linear and generalized linear models for provider profiling,
     incorporating both fixed and random effects. For large-scale providers, the linear 
     profiled-based method and the SerBIN method (Wu et al., 2022) for binary data 
-    reduce the computational burden. Provides post-modeling features including 
+    reduce the computational burden. Provides post-modeling features, such as 
     indirect and direct standardization measures, hypothesis testing, 
     confidence intervals, and post-estimation visualization.
 License: MIT + file LICENSE

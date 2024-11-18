@@ -1,18 +1,18 @@
 # pprof
 
-The `pprof` software package provides a variety of risk-adjusted models for provider profiling, efficiently handling large-scale provider data. It includes standardized measure calculations, hypothesis testing, and visualization tools for comprehensive analysis.
+The `pprof` software package provides a variety of risk-adjusted models for provider profiling, efficiently handling large-scale provider data. It includes standardized measure calculations, hypothesis testing, and visualization tools for evaluating the performance of healthcare providers and identifying significant deviations from expected standards.
 
 ## Introduction
                                                                                                                                                                                                                                                                                                                                                                 
 Provider profiling involves assessing and comparing the performance of healthcare providers by evaluating specific metrics that reflect quality of care, efficiency, and patient outcomes. To achieve this, it is essential to fit statistical models and design appropriate measures. 
-We developed the `pprof` package that facilitates fitting a variety of risk-adjusted models, each of which includes tools for calculating standardized measures, conducting statistical inference, and visualizing results, thereby offering a comprehensive solution for provider profiling.
+We developed the `pprof` package that facilitates fitting a variety of risk-adjusted models, each of which includes tools for calculating standardized measures, conducting statistical inference, and visualizing results, thereby offering a comprehensive tool for provider profiling.
 
-This package addresses key limitations in existing R functions, which often struggle with computational inefficiency when applied to large-scale provider data. 
+This package addresses key limitations in existing R functions for provider profiling, which often suffer from computational inefficiency when applied to large-scale provider data. 
 For the logistic fixed effect model, the serial blockwise inversion Newton (SerBIN) algorithm is implemented, which leverages the block structure of the information matrix. 
 For linear fixed effect models, a profile-based method is used. 
 These, along with parallel computing capabilities, improve computational speed significantly. 
-`pprof` handles diverse outcomes (binary, continuous) and offers both direct and indirect standardization.
-pprof provides a comprehensive and user-friendly solution for provider profiling, enabling users to fit risk-adjusted models, calculate standardized measures, perform hypothesis tests, and visualize results.
+`pprof` handles diverse outcomes (e.g. binary and continuous) and offers both direct and indirect standardization.
+pprof provides a comprehensive and user-friendly tool for provider profiling, enabling users to fit risk-adjusted models, calculate standardized measures, perform hypothesis tests, and visualize results.
 
 ## Installation
 
