@@ -40,6 +40,11 @@
 #' @importFrom tibble tibble
 #' @importFrom rlang .data
 #'
+#' @references
+#' Wu, W., Kuriakose, J. P., Weng, W., Burney, R. E., & He, K. (2023). Test-specific funnel plots for healthcare provider profiling leveraging
+#' individual- and summary-level information. \emph{Health Services and Outcomes Research Methodology}, \strong{23(1)}, 45-58.
+#' \cr
+#'
 #' @exportS3Method plot logis_fe
 
 plot.logis_fe <- function(x, null = "median", test = "score", target = 1, alpha = 0.05,

@@ -67,6 +67,11 @@ fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID)
 plot(fit_fe)
 
 }
+\references{
+Wu, W., Kuriakose, J. P., Weng, W., Burney, R. E., & He, K. (2023). Test-specific funnel plots for healthcare provider profiling leveraging
+individual- and summary-level information. \emph{Health Services and Outcomes Research Methodology}, \strong{23(1)}, 45-58.
+\cr
+}
 \seealso{
 \code{\link{logis_fe}}, \code{\link{SM_output.linear_re}}, \code{\link{test.logis_fe}}
 }

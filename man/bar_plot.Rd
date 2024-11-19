@@ -9,7 +9,6 @@ bar_plot(
   group_num = 4,
   bar_colors = c("#66c2a5", "#fc8d62", "#8da0cb"),
   bar_width = 0.7,
-  theme = theme_minimal(),
   label_color = "black",
   label_size = 4
 )
@@ -22,8 +21,6 @@ bar_plot(
 \item{bar_colors}{a vector of colors used to fill the bars representing the categories. The default is c("#66c2a5", "#fc8d62", "#8da0cb").}
 
 \item{bar_width}{width of the bars in the bar chart. The default is 0.7.}
-
-\item{theme}{theme for the plot. The default is \code{theme_minimal()}.}
 
 \item{label_color}{color of the text labels inside the bars. The default is "black".}
 

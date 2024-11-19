@@ -64,6 +64,6 @@ SR$direct.rate
 
 }
 \references{
-He, K. (2019). Indirect and direct standardization for evaluating transplant centers. Journal of Hospital Administration, \strong{8(1)}, 9-14.
+He, K. (2019). Indirect and direct standardization for evaluating transplant centers. \emph{Journal of Hospital Administration}, \strong{8(1)}, 9-14.
 \cr
 }

@@ -68,29 +68,25 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
                          crit_value <- qt(1 - alpha / 2, df = n - m - p))
     U_gamma <- gamma + crit_value * se.gamma
     L_gamma <- gamma - crit_value * se.gamma
-    CI_gamma <- data.frame(gamma = gamma, gamma.Lower = L_gamma, gamma.Upper = U_gamma)
-    colnames(CI_gamma) <- c("gamma", "gamma.Lower", "gamma.Upper")
   }
   else if (alternative == "greater") {
     crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha),
                          crit_value <- qt(1 - alpha, df = n - m - p))
     U_gamma <- Inf
     L_gamma <- gamma - crit_value * se.gamma
-    CI_gamma <- data.frame(gamma = gamma, gamma.Lower = L_gamma)
-    colnames(CI_gamma) <- c("gamma", "gamma.Lower")
   }
   else if (alternative == "less") {
     crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha),
                          crit_value <- qt(1 - alpha, df = n - m - p))
     U_gamma <- gamma + crit_value * se.gamma
     L_gamma <- -Inf
-    CI_gamma <- data.frame(gamma = gamma, gamma.Upper = U_gamma)
-    colnames(CI_gamma) <- c("gamma", "gamma.Upper")
   }
   else {
     stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
   }
 
+  CI_gamma <- data.frame(gamma = gamma, gamma.Lower = L_gamma, gamma.Upper = U_gamma)
+  colnames(CI_gamma) <- c("gamma", "gamma.Lower", "gamma.Upper")
   attr(CI_gamma, "description") <- "Provider Effects"
 
   if (missing(parm)) {

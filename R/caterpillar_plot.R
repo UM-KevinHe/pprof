@@ -3,7 +3,6 @@
 #' Generate a caterpillar plot for standardized measures from different models using a provided CI dataframe.
 #'
 #' @param CI a dataframe from `confint` function containing the standardized measure values, along with their confidence intervals lower and upper bounds.
-#' @param theme theme for the plot. The default is \code{theme_bw()}.
 #' @param point_size size of the points in the caterpillar plot. The default value is 2.
 #' @param point_color color of the points in the plot. The default value is "#475569".
 #' @param refline_value value of the horizontal reference line, for which the standardized measures are compared. The default value is NULL.
@@ -63,7 +62,7 @@
 #' @importFrom ggplot2 ggplot geom_errorbar aes scale_color_manual guide_legend geom_point geom_hline scale_x_discrete expansion theme theme_bw labs element_blank element_text element_rect margin
 #' @export
 
-caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color = "#475569",
+caterpillar_plot <- function(CI, point_size = 2, point_color = "#475569",
                              refline_value = NULL, refline_color = "#64748b", refline_size = 1, refline_type = "dashed",
                              errorbar_width = 0, errorbar_size = 0.5, errorbar_alpha = 0.5, errorbar_color = "#94a3b8",
                              use_flag = FALSE, flag_color = c("#E69F00", "#56B4E9", "#009E73")) {
@@ -120,7 +119,7 @@ caterpillar_plot <- function(CI, theme = theme_bw(), point_size = 2, point_color
                color = refline_color, linetype = refline_type, linewidth = refline_size) +
     scale_x_discrete(expand = expansion(add = 5)) +
     labs(x = "Provider", y = attr(CI, "description"), title = paste(attr(CI, "description"), "Caterpillar Plot")) +
-    theme +
+    theme_bw() +
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),

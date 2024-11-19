@@ -6,7 +6,6 @@
 #' @param group_num number of groups into which providers are divided based on their sample sizes. The default is 4.
 #' @param bar_colors a vector of colors used to fill the bars representing the categories. The default is c("#66c2a5", "#fc8d62", "#8da0cb").
 #' @param bar_width width of the bars in the bar chart. The default is 0.7.
-#' @param theme theme for the plot. The default is \code{theme_minimal()}.
 #' @param label_color color of the text labels inside the bars. The default is "black".
 #' @param label_size size of the text labels inside the bars. The default is 4.
 #'
@@ -48,7 +47,7 @@
 
 bar_plot <- function(flag_df, group_num = 4,
                      bar_colors = c("#66c2a5", "#fc8d62", "#8da0cb"), bar_width = 0.7,
-                     theme = theme_minimal(), label_color = "black", label_size = 4) {
+                     label_color = "black", label_size = 4) {
   if (missing(flag_df)) stop ("Argument 'flag_df' is required!",call.=F)
   if (!class(flag_df) %in% c("data.frame")) stop("Object flag_df should be a data frame!",call.=F)
   if (!"flag" %in% colnames(flag_df) || is.null(attr(flag_df, "provider size"))) {
@@ -86,7 +85,7 @@ bar_plot <- function(flag_df, group_num = 4,
          title = "Flagging Results Based on Provider Size",
          fill = "Category") +
     scale_y_continuous(labels = percent_format(accuracy = 1), limits = c(0, 1)) +
-    theme +
+    theme_minimal() +
     scale_fill_manual(values = bar_colors) +
     theme(
       plot.title = element_text(hjust = 0.5, face = "bold", size = 16),

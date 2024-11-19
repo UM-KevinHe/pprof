@@ -6,7 +6,6 @@
 \usage{
 caterpillar_plot(
   CI,
-  theme = theme_bw(),
   point_size = 2,
   point_color = "#475569",
   refline_value = NULL,
@@ -23,8 +22,6 @@ caterpillar_plot(
 }
 \arguments{
 \item{CI}{a dataframe from \code{confint} function containing the standardized measure values, along with their confidence intervals lower and upper bounds.}
-
-\item{theme}{theme for the plot. The default is \code{theme_bw()}.}
 
 \item{point_size}{size of the points in the caterpillar plot. The default value is 2.}
 
