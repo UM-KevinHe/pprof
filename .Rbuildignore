@@ -26,3 +26,6 @@
 ^.*\.o$
 ^.*\.so$
 ^.*\.dylib$
+
+# Exclude vignettes folder
+^vignettes/

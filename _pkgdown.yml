@@ -12,10 +12,10 @@ vignettes:
   - vignettes/pprof.Rmd
 
 authors:
-  Xiaohan Liu
-  Lingfeng Luo
+  - name: "Xiaohan Liu"
+  - name: "Lingfeng Luo"
     href: "https://mcommunity.umich.edu/person/lfluo"
-  Kevin He:
+  - name: "Kevin He"
     href: "https://www.um-kevinhe-group.org/"
 
 navbar:
