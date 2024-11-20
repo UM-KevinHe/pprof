@@ -7,6 +7,8 @@
 #include <cmath>
 #include <omp.h>
 #include <iostream>
+#include "header.h"
+#include "myomp.h"
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::plugins(openmp)]]
