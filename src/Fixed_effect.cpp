@@ -5,7 +5,7 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <cmath>
-#include <omp.h>
+//#include <omp.h>
 #include <iostream>
 #include "header.h"
 #include "myomp.h"
