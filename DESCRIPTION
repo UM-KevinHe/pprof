@@ -16,7 +16,7 @@ Description: Implements linear and generalized linear models for provider profil
     reduce the computational burden. Provides post-modeling features, such as 
     indirect and direct standardization measures, hypothesis testing, 
     confidence intervals, and post-estimation visualization. 
-    For more information, see Wu et al. (2022) <doi: 10.1002/sim.9387>.
+    For more information, see Wu et al. (2022) <doi:10.1002/sim.9387>.
 License: MIT + file LICENSE
 LazyData: true
 Imports:
