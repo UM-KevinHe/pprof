@@ -12,10 +12,11 @@ Authors@R: c(
    person("Kevin", "He", email = "kevinhe@umich.edu", role = "aut"))
 Description: Implements linear and generalized linear models for provider profiling,
     incorporating both fixed and random effects. For large-scale providers, the linear 
-    profiled-based method and the SerBIN method (Wu et al., 2022) for binary data 
+    profiled-based method and the SerBIN method for binary data 
     reduce the computational burden. Provides post-modeling features, such as 
     indirect and direct standardization measures, hypothesis testing, 
-    confidence intervals, and post-estimation visualization.
+    confidence intervals, and post-estimation visualization. 
+    For more information, see Wu et al. (2022) <doi: 10.1002/sim.9387>.
 License: MIT + file LICENSE
 LazyData: true
 Imports:
