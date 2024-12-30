@@ -5,7 +5,7 @@
 \title{Get confidence intervals for provider effects or standardized measures from a fitted \code{linear_fe} object}
 \usage{
 \method{confint}{linear_fe}(
-  fit,
+  object,
   parm,
   level = 0.95,
   option = "SM",
@@ -16,7 +16,7 @@
 )
 }
 \arguments{
-\item{fit}{a model fitted from \code{linear_fe}.}
+\item{object}{a model fitted from \code{linear_fe}.}
 
 \item{parm}{specify a subset of providers for which confidence intervals are given.
 By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}

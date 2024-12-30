@@ -157,10 +157,3 @@ Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and infe
 \seealso{
 \code{\link{data_check}}
 }
-\keyword{(CENR)}
-\keyword{Algorithm,}
-\keyword{Cost-Efficient}
-\keyword{Effects}
-\keyword{Fixed}
-\keyword{Newton-Raphson}
-\keyword{Provider}

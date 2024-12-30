@@ -2,7 +2,7 @@
 #'
 #' Provide confidence intervals for provider effects or standardized measures from a fixed effect logistic model.
 #'
-#' @param fit a model fitted from \code{logis_fe}.
+#' @param object a model fitted from \code{logis_fe}.
 #' @param parm specify a subset of providers for which confidence intervals are given.
 #' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level. The default value is 0.95.
@@ -52,23 +52,23 @@
 #'
 #' @exportS3Method confint logis_fe
 
-confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
+confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
                              option = "SM", stdz = "indirect", null = "median",
                              measure = c("rate", "ratio"), alternative = "two.sided", ...) {
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
+  if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+  if (!class(object) %in% c("logis_fe")) stop("Object 'object' is not of the classes 'logis_fe'!",call.=F)
   if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
   if (!(test %in% c("exact", "score", "wald"))) stop("Argument 'test' NOT as required!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
 
   alpha <- 1 - level
 
-  Y.char <- fit$char_list$Y.char
-  Z.char <- fit$char_list$Z.char
-  ID.char <- fit$char_list$ID.char
-  gamma <- fit$coefficient$gamma
-  beta <- fit$coefficient$beta
-  # df.prov <- fit$df.prov
+  Y.char <- object$char_list$Y.char
+  Z.char <- object$char_list$Z.char
+  ID.char <- object$char_list$ID.char
+  gamma <- object$coefficient$gamma
+  beta <- object$coefficient$beta
+  # df.prov <- object$df.prov
   # names(gamma) <- rownames(df.prov)
   prov.order <- rownames(gamma)
 
@@ -79,8 +79,8 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
   }
 
   #confidence of gamma
-  confint_fe_gamma <- function(fit, test, parm, alpha, alternative) {
-    data <- fit$data_include
+  confint_fe_gamma <- function(object, test, parm, alpha, alternative) {
+    data <- object$data_include
     Obs_provider <- sapply(split(data[,Y.char],data[,ID.char]),sum)
     if (missing(parm)) {
       # pass
@@ -324,7 +324,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         indices <- 1:length(prov.order)
       }
 
-      se.gamma <- sqrt(fit$variance$gamma)
+      se.gamma <- sqrt(object$variance$gamma)
       if (alternative == "two.sided") {
         crit_value <- qnorm(1 - alpha / 2)
         U_gamma <- gamma + crit_value * se.gamma
@@ -353,16 +353,16 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
   if (option == "gamma"){
     if (alternative != "two.sided")
       stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
-    return_mat <- confint_fe_gamma(fit, test, parm, alpha, alternative)
+    return_mat <- confint_fe_gamma(object, test, parm, alpha, alternative)
     attr(return_mat, "description") <- "Provider Effects"
     return(return_mat)
   }
   else if (option == "SM"){
-    data.ori <- fit$data_include
+    data.ori <- object$data_include
     population_rate <- sum(data.ori[,Y.char])/nrow(data.ori) * 100  #sum(O_i)/N *100%
     return_ls <- list()
     if ("indirect" %in% stdz) {
-      SR.indirect <- SM_output(fit, stdz = c("indirect"), measure = c("ratio", "rate"), null = null)
+      SR.indirect <- SM_output(object, stdz = c("indirect"), measure = c("ratio", "rate"), null = null)
       if (missing(parm)) {
         OE_df.indirect <- SR.indirect$OE$OE_indirect
         indirect.ratio_df <- SR.indirect$indirect.ratio
@@ -383,7 +383,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         gamma.upper <- confint_gamma$gamma.upper
         EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
@@ -395,7 +395,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
         gamma.upper <- confint_gamma$gamma.upper
         EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
         if (alternative == "greater") {
@@ -410,7 +410,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
         prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
         if (alternative == "less") {
@@ -472,7 +472,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
 
 
     if ("direct" %in% stdz) {
-      SR.direct <- SM_output(fit, stdz = c("direct"), measure = c("ratio", "rate"), null = null)
+      SR.direct <- SM_output(object, stdz = c("direct"), measure = c("ratio", "rate"), null = null)
       if (missing(parm)) {
         OE_df.direct <- SR.direct$OE$OE_direct[1,1]
         direct.ratio_df <- SR.direct$direct.ratio
@@ -492,7 +492,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
 
       SR_direct.finite <- function(ID) {
         Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = ID, alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = ID, alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         gamma.upper <- confint_gamma$gamma.upper
         SR.lower <- sum(plogis(gamma.lower+Z.beta.all)) / OE_df.direct
@@ -501,7 +501,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       }
       SR_direct.no.events <- function(ID) {
         Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = ID, alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = ID, alpha = alpha, alternative = alternative)
         gamma.upper <- confint_gamma$gamma.upper
         if (alternative == "greater") {
           SR.upper <- nrow(data.ori)/sum(data.ori[,Y.char])
@@ -513,7 +513,7 @@ confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
       }
       SR_direct.all.events <- function(ID) {
         Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = ID, alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = ID, alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         if (alternative == "less") {
           SR.lower <- 0

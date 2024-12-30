@@ -9,9 +9,9 @@
 #' The default value is 0.95.
 #' @param test a character string specifying the type of testing method. The default is "wald".
 #'   \itemize{
-#'     \item{\code{"wald"}}{wald test.}
-#'     \item{\code{"lr"}}{likelihood ratio test.}
-#'     \item{\code{"score"}}{score test.}
+#'     \item{\code{"wald"}:} wald test.
+#'     \item{\code{"lr"}:} likelihood ratio test.
+#'     \item{\code{"score"}:} score test.
 #'   }
 #' @param null a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.
 #' @param alternative a character string specifying the alternative hypothesis when \code{test = "wald"}, must be one of

@@ -2,7 +2,7 @@
 #'
 #' Provide confidence intervals for provider effects or standardized measures from from a fixed effect linear model.
 #'
-#' @param fit a model fitted from \code{linear_fe}.
+#' @param object a model fitted from \code{linear_fe}.
 #' @param parm specify a subset of providers for which confidence intervals are given.
 #' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level. The default value is 0.95.
@@ -38,45 +38,45 @@
 #'
 #' @exportS3Method confint linear_fe
 
-confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "indirect",
+confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = "indirect",
                               null = "median", alternative = "two.sided", ...) {
   return_ls <- list()
 
   alpha <- 1 - level
 
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("linear_fe")) stop("Object fit is not of the classes 'linear_fe'!",call.=F)
+  if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+  if (!class(object) %in% c("linear_fe")) stop("Object 'object' is not of the classes 'linear_fe'!",call.=F)
   if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
   if ("gamma" %in% option && alternative != "two.sided")
     stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
 
-  data <- fit$data_include
-  prov <- data[ ,fit$char_list$ID.char]
-  prov.name <- rownames(fit$coefficient$gamma)
-  m <- length(fit$coefficient$gamma)
-  p <- length(fit$coefficient$beta)
-  n <- nrow(fit$data_include)
-  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
+  data <- object$data_include
+  prov <- data[ ,object$char_list$ID.char]
+  prov.name <- rownames(object$coefficient$gamma)
+  m <- length(object$coefficient$gamma)
+  p <- length(object$coefficient$beta)
+  n <- nrow(object$data_include)
+  n.prov <- sapply(split(data[, object$char_list$Y.char], data[, object$char_list$ID.char]), length)
 
   # CI of Gamma
-  gamma <- fit$coefficient$gamma
-  se.gamma <- sqrt(fit$variance$gamma)
+  gamma <- object$coefficient$gamma
+  se.gamma <- sqrt(object$variance$gamma)
 
   if (alternative == "two.sided") {
-    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha / 2),
+    crit_value <- ifelse(object$method == "Profile Likelihood", qnorm(1 - alpha / 2),
                          crit_value <- qt(1 - alpha / 2, df = n - m - p))
     U_gamma <- gamma + crit_value * se.gamma
     L_gamma <- gamma - crit_value * se.gamma
   }
   else if (alternative == "greater") {
-    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha),
+    crit_value <- ifelse(object$method == "Profile Likelihood", qnorm(1 - alpha),
                          crit_value <- qt(1 - alpha, df = n - m - p))
     U_gamma <- Inf
     L_gamma <- gamma - crit_value * se.gamma
   }
   else if (alternative == "less") {
-    crit_value <- ifelse(fit$method == "Profile Likelihood", qnorm(1 - alpha),
+    crit_value <- ifelse(object$method == "Profile Likelihood", qnorm(1 - alpha),
                          crit_value <- qt(1 - alpha, df = n - m - p))
     U_gamma <- gamma + crit_value * se.gamma
     L_gamma <- -Inf
@@ -95,7 +95,7 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, fit$char_list$ID.char])) {
+    if (class(parm) == class(data[, object$char_list$ID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements.")
@@ -107,26 +107,26 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
   # CI of SM
   if (option == "SM") {
     if ("indirect" %in% stdz) {
-      SM <- SM_output(fit, stdz = "indirect", null = null)
+      SM <- SM_output(object, stdz = "indirect", null = null)
 
       if (alternative == "two.sided") {
-        L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
+        L.obs <- rep(L_gamma, n.prov) + object$linear_pred
         L.prov <- sapply(split(L.obs, prov), sum)
         L_indirect <- (L.prov - SM$OE$OE_indirect$Exp)/n.prov
 
-        U.obs <- rep(U_gamma, n.prov) + fit$linear_pred
+        U.obs <- rep(U_gamma, n.prov) + object$linear_pred
         U.prov <- sapply(split(U.obs, prov), sum)
         U_indirect <- (U.prov - SM$OE$OE_indirect$Exp)/n.prov
       }
       else if (alternative == "greater") {
-        L.obs <- rep(L_gamma, n.prov) + fit$linear_pred
+        L.obs <- rep(L_gamma, n.prov) + object$linear_pred
         L.prov <- sapply(split(L.obs, prov), sum)
         L_indirect <- (L.prov - SM$OE$OE_indirect$Exp)/n.prov
 
         U_indirect <- Inf
       }
       else if (alternative == "less") {
-        U.obs <- rep(U_gamma, n.prov) + fit$linear_pred
+        U.obs <- rep(U_gamma, n.prov) + object$linear_pred
         U.prov <- sapply(split(U.obs, prov), sum)
         U_indirect <- (U.prov - SM$OE$OE_indirect$Exp)/n.prov
 
@@ -148,10 +148,10 @@ confint.linear_fe <- function(fit, parm, level = 0.95, option = "SM", stdz = "in
     }
 
     if ("direct" %in% stdz) {
-      SM <- SM_output(fit, stdz = "direct", null = null)
+      SM <- SM_output(object, stdz = "direct", null = null)
 
       Exp.direct <- function(gamma){
-        sum(gamma + fit$linear_pred)
+        sum(gamma + object$linear_pred)
       }
 
       if (alternative == "two.sided") {

@@ -8,10 +8,10 @@
 #'
 #' @details The function performs the following checks:
 #'   \itemize{
-#'     \item{Missingness:} {Checks for any missing values in the dataset and provides a summary of missing data.}
-#'     \item{Variation:} {Identifies covariates with zero or near-zero variance which might affect model stability.}
-#'     \item{Correlation:} {Analyzes pairwise correlation among covariates and highlights highly correlated pairs.}
-#'     \item{VIF:} {Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.}
+#'     \item \strong{Missingness:} Checks for any missing values in the dataset and provides a summary of missing data.
+#'     \item \strong{Variation:} Identifies covariates with zero or near-zero variance which might affect model stability.
+#'     \item \strong{Correlation:} Analyzes pairwise correlation among covariates and highlights highly correlated pairs.
+#'     \item \strong{VIF:} Computes the Variable Inflation Factors to identify covariates with potential multicollinearity issues.
 #'   }
 #' If issues arise when using the model functions \code{logis_fe}, \code{linear_fe} and \code{linear_re},
 #' this function can be called for data quality checking purposes.

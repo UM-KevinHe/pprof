@@ -24,10 +24,6 @@ You can install 'pprof' via CRAN or github:
     require("remotes")
     remotes::install_github("UM-KevinHe/pprof", ref = "main")
 
-
-## Getting started
-For a detailed overview of the usage of the package, please see ["tutorial"](https://um-kevinhe.github.io/pprof/articles/pprof.html).
-
 ## Getting Help
 If you encounter any problems or bugs, please contact us at: [xhliuu\@umich.edu](mailto:xhliuu@umich.edu){.email}, [lfluo\@umich.edu](mailto:lfluo@umich.edu){.email}, [kevinhe\@umich.edu](mailto:kevinhe@umich.edu){.email}.
 

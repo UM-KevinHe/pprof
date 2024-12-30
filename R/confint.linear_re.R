@@ -2,7 +2,7 @@
 #'
 #' Provide confidence intervals for provider effects or standardized measures from a random effect linear model.
 #'
-#' @param fit a model fitted from \code{linear_re}.
+#' @param object a model fitted from \code{linear_re}.
 #' @param parm specify a subset of providers for which confidence intervals are given.
 #' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level. The default value is 0.95.
@@ -36,30 +36,30 @@
 #'
 #' @exportS3Method confint linear_re
 
-confint.linear_re <- function(fit, parm, level = 0.95, option = "SM",
+confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
                               stdz = "indirect", alternative = "two.sided", ...) {
   return_ls <- list()
 
   alpha <- 1 - level
 
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("linear_re")) stop("Object fit is not of the classes 'linear_re'!",call.=F)
+  if (missing(object)) stop ("Argument 'object' is required!",call.=F)
+  if (!class(object) %in% c("linear_re")) stop("Object 'object' is not of the classes 'linear_re'!",call.=F)
   if (! "alpha" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
   if ("alpha" %in% option && alternative != "two.sided")
     stop("Provider effect (option = 'alpha') only supports two-sided confidence intervals.", call. = FALSE)
 
-  data <- fit$data_include
-  prov <- data[ ,fit$char_list$ID.char]
+  data <- object$data_include
+  prov <- data[ ,object$char_list$ID.char]
   n <- nrow(data)
-  Y.char <- fit$char_list$Y.char
-  ID.char <- fit$char_list$ID.char
-  Z.char <- fit$char_list$Z.char
-  prov.name <- rownames(fit$coefficient$RE)
-  REcoef <- fit$coefficient$RE
+  Y.char <- object$char_list$Y.char
+  ID.char <- object$char_list$ID.char
+  Z.char <- object$char_list$Z.char
+  prov.name <- rownames(object$coefficient$RE)
+  REcoef <- object$coefficient$RE
 
-  var_alpha <- fit$variance$alpha
-  sigma_sq <- fit$sigma^2
+  var_alpha <- object$variance$alpha
+  sigma_sq <- object$sigma^2
   n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
   R_i <- as.vector(var_alpha) / (as.vector(var_alpha) + as.vector(sigma_sq) / n.prov)
 
@@ -120,26 +120,26 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = "SM",
   # CI of SR
   if ("SM" %in% option) {
     if ("indirect" %in% stdz) {
-      SR <- SM_output(fit, stdz = "indirect")
+      SR <- SM_output(object, stdz = "indirect")
 
       if (alternative == "two.sided") {
-        L.obs <- rep(L_alpha, n.prov) + fit$linear_pred
+        L.obs <- rep(L_alpha, n.prov) + object$linear_pred
         L.prov <- sapply(split(L.obs, prov), sum)
         L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
 
-        U.obs <- rep(U_alpha, n.prov) + fit$linear_pred
+        U.obs <- rep(U_alpha, n.prov) + object$linear_pred
         U.prov <- sapply(split(U.obs, prov), sum)
         U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
       }
       else if (alternative == "greater") {
-        L.obs <- rep(L_alpha, n.prov) + fit$linear_pred
+        L.obs <- rep(L_alpha, n.prov) + object$linear_pred
         L.prov <- sapply(split(L.obs, prov), sum)
         L_indirect <- (L.prov - SR$OE$OE_indirect$Exp)/n.prov
 
         U_indirect <- Inf
       }
       else if (alternative == "less") {
-        U.obs <- rep(U_alpha, n.prov) + fit$linear_pred
+        U.obs <- rep(U_alpha, n.prov) + object$linear_pred
         U.prov <- sapply(split(U.obs, prov), sum)
         U_indirect <- (U.prov - SR$OE$OE_indirect$Exp)/n.prov
 
@@ -161,10 +161,10 @@ confint.linear_re <- function(fit, parm, level = 0.95, option = "SM",
     }
 
     if ("direct" %in% stdz) {
-      SR <- SM_output(fit, stdz = "direct")
+      SR <- SM_output(object, stdz = "direct")
 
       Exp.direct <- function(alpha){
-        sum(alpha + fit$linear_pred)
+        sum(alpha + object$linear_pred)
       }
 
       if (alternative == "two.sided") {

@@ -5,7 +5,7 @@
 \title{Get confidence intervals for provider effects or standardized measures from a fitted \code{logis_fe} object}
 \usage{
 \method{confint}{logis_fe}(
-  fit,
+  object,
   parm,
   level = 0.95,
   test = "exact",
@@ -18,7 +18,7 @@
 )
 }
 \arguments{
-\item{fit}{a model fitted from \code{logis_fe}.}
+\item{object}{a model fitted from \code{logis_fe}.}
 
 \item{parm}{specify a subset of providers for which confidence intervals are given.
 By default, all providers are included. The class of \code{parm} should match the class of the provider IDs.}

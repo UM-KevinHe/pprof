@@ -117,8 +117,6 @@
 #' \emph{Statistics in Medicine}, \strong{41(15)}: 2840-2853.
 #' \cr
 #'
-#' @keywords Cost-Efficient Newton-Raphson (CENR) Algorithm, Fixed Provider Effects
-#'
 #' @export
 #'
 #' @useDynLib pprof, .registration = TRUE

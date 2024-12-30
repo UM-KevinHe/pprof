@@ -36,7 +36,7 @@ or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
 
 \item{ID.char}{a character string specifying the column name of the provider identifier in the \code{data}.}
 
-\item{\dots}{additional arguments passed to \code{\link{lmer}} for further customization.}
+\item{\dots}{additional arguments passed to \code{\link[lme4]{lmer}} for further customization.}
 }
 \value{
 A list of objects with S3 class \code{"random_re"}:
@@ -60,7 +60,7 @@ For categorical variables, the names reflect the dummy variables created for eac
 \item{BIC}{Bayesian information criterion.}
 }
 \description{
-Fit a random effect linear model via \code{\link{lmer}} from the \code{lme4} package.
+Fit a random effect linear model via \code{\link[lme4]{lmer}} from the \code{lme4} package.
 }
 \details{
 This function is used to fit a random effect linear model of the form:
@@ -69,13 +69,13 @@ where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider 
 \eqn{\mu} is the overall intercept, \eqn{\alpha_i} is the random effect for provider \eqn{i},
 \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 
-The model is fitted by overloading the \code{\link{lmer}} function from the \code{lme4} package.
+The model is fitted by overloading the \code{\link[lme4]{lmer}} function from the \code{lme4} package.
 Three different input formats are accepted:
 a formula and dataset, where the formula is of the form \code{response ~ covariates + (1 | provider)}, with \code{provider} representing the provider identifier;
 a dataset along with the column names of the response, covariates, and provider identifier;
 or the outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector.
 
-In addition to these input formats, all arguments from the \code{\link{lmer}} function can be modified via \code{\dots},
+In addition to these input formats, all arguments from the \code{\link[lme4]{lmer}} function can be modified via \code{\dots},
 allowing for customization of model fitting options such as controlling the optimization method or adjusting convergence criteria.
 By default, the model is fitted using REML (restricted maximum likelihood).
 

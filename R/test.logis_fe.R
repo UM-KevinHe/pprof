@@ -9,10 +9,10 @@
 #' The default value is 0.95.
 #' @param test a character string specifying the type of testing method to be conducted. The default is "exact.poisbinom".
 #'   \itemize{
-#'   \item{\code{"exact.poisbinom"}}{exact test based on Poisson-binomial distribution of \eqn{O_i|Z_i}.}
-#'   \item{\code{"exact.bootstrap"}}{exact test based on bootstrap procedure.}
-#'   \item{\code{"wald"}}{wald test.}
-#'   \item{\code{"score"}}{score test.}
+#'   \item{\code{"exact.poisbinom"}:} exact test based on Poisson-binomial distribution of \eqn{O_i|Z_i}.
+#'   \item{\code{"exact.bootstrap"}:} exact test based on bootstrap procedure.
+#'   \item{\code{"wald"}:} wald test.
+#'   \item{\code{"score"}:} score test.
 #'   }
 #' @param score_modified a logical indicating whether to use the modified score test
 #' ignoring the randomness of covariate coefficient for score teat (\code{"test = score"}). The default value is TRUE.

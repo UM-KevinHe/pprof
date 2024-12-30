@@ -25,9 +25,9 @@ The default value is 0.95.}
 
 \item{test}{a character string specifying the type of testing method. The default is "wald".
 \itemize{
-\item{\code{"wald"}}{wald test.}
-\item{\code{"lr"}}{likelihood ratio test.}
-\item{\code{"score"}}{score test.}
+\item{\code{"wald"}:} wald test.
+\item{\code{"lr"}:} likelihood ratio test.
+\item{\code{"score"}:} score test.
 }}
 
 \item{null}{a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.}
