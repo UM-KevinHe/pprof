@@ -13,7 +13,7 @@ linear_fe(
   Y.char = NULL,
   Z.char = NULL,
   ID.char = NULL,
-  option.gamma.se = "complete"
+  option.gamma.var = "complete"
 )
 }
 \arguments{
@@ -36,10 +36,11 @@ or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
 
 \item{ID.char}{a character string specifying the column name of the provider identifier in the \code{data}.}
 
-\item{method}{a character string specifying the method to fit the model.
+\item{option.gamma.var}{a character string specifying the method to calculate the variance of provider effects \code{gamma},
+must be \code{"complete"} or \code{"simplified"}. You can specify just the initial letter.
 \itemize{
-\item{\code{"pl"}} (default) uses profile likelihood to fit the model.
-\item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the provider identifier.
+\item{\code{"complete"}} (default) considering the correlation between provider effects and regression coefficients.
+\item{\code{"simplified"}} calculating the variance of provider effects assuming regression coefficients are known.
 }}
 }
 \value{
@@ -59,7 +60,6 @@ all categories except the reference level.}
 \item{char_list}{a list of the character vectors representing the column names for
 the response variable, covariates, and provider identifier.
 For categorical variables, the names reflect the dummy variables created for each category.}
-\item{method}{the method used for model fitting, either \code{"Profile Likelihood"} or \code{"Dummy"}.}
 \item{Loglkd}{log likelihood.}
 \item{AIC}{Akaike information criterion.}
 \item{BIC}{Bayesian information criterion.}
@@ -70,10 +70,8 @@ Fit a fixed effect linear model via profile likelihood.
 \details{
 This function is used to fit a fixed effect linear model of the form:
 \deqn{Y_{ij} = \gamma_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider \eqn{i}, \eqn{\gamma_i} is the provider-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
-The default method for fitting the model is profile likelihood, but dummy encoding can also be used by specifying the appropriate method.
-When the number of providers is very large, we recommend using the profile likelihood method, as it is computationally efficient and requires
-less memory usage.
+where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider \eqn{i}, \eqn{\gamma_i} is the provider-specific effect,
+\eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 
 The function accepts three different input formats:
 a formula and dataset, where the formula is of the form \code{response ~ covariates + id(provider)}, with \code{provider} representing the provider identifier;
@@ -103,10 +101,6 @@ fit_fe3 <- linear_fe(formula, data)
 }
 \references{
 Hsiao, C. (2022). Analysis of panel data (No. 64). Cambridge university press.
-\cr
-
-R Core Team (2023). \emph{The R Stats Package: lm}.
-Available at: \url{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html}
 \cr
 }
 \seealso{

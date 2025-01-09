@@ -13,10 +13,11 @@
 #' @param Y a numeric vector representing the response variable.
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
 #' @param ID a numeric vector representing the provider identifier.
-#' @param method a character string specifying the method to fit the model.
+#' @param option.gamma.var a character string specifying the method to calculate the variance of provider effects \code{gamma},
+#' must be \code{"complete"} or \code{"simplified"}. You can specify just the initial letter.
 #' \itemize{
-#'   \item{\code{"pl"}} (default) uses profile likelihood to fit the model.
-#'   \item{\code{"dummy"}} calls \code{\link{lm}} to fit the model using dummy variables for the provider identifier.
+#'   \item{\code{"complete"}} (default) considering the correlation between provider effects and regression coefficients.
+#'   \item{\code{"simplified"}} calculating the variance of provider effects assuming regression coefficients are known.
 #' }
 #'
 #' @return A list of objects with S3 class \code{"linear_fe"}:
@@ -35,7 +36,6 @@
 #' \item{char_list}{a list of the character vectors representing the column names for
 #' the response variable, covariates, and provider identifier.
 #' For categorical variables, the names reflect the dummy variables created for each category.}
-#' \item{method}{the method used for model fitting, either \code{"Profile Likelihood"} or \code{"Dummy"}.}
 #' \item{Loglkd}{log likelihood.}
 #' \item{AIC}{Akaike information criterion.}
 #' \item{BIC}{Bayesian information criterion.}
@@ -43,10 +43,8 @@
 #' @details
 #' This function is used to fit a fixed effect linear model of the form:
 #' \deqn{Y_{ij} = \gamma_i + \mathbf{Z}_{ij}^\top\boldsymbol\beta + \epsilon_{ij}}
-#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider \eqn{i}, \eqn{\gamma_i} is the provider-specific effect, \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
-#' The default method for fitting the model is profile likelihood, but dummy encoding can also be used by specifying the appropriate method.
-#' When the number of providers is very large, we recommend using the profile likelihood method, as it is computationally efficient and requires
-#' less memory usage.
+#' where \eqn{Y_{ij}} is the continuous outcome for individual \eqn{j} in provider \eqn{i}, \eqn{\gamma_i} is the provider-specific effect,
+#' \eqn{\mathbf{Z}_{ij}} are the covariates, and \eqn{\boldsymbol\beta} is the vector of coefficients for the covariates.
 #'
 #' The function accepts three different input formats:
 #' a formula and dataset, where the formula is of the form \code{response ~ covariates + id(provider)}, with \code{provider} representing the provider identifier;
@@ -60,7 +58,7 @@
 #' @seealso \code{\link{data_check}}
 #'
 #' @importFrom Matrix bdiag
-#' @importFrom stats complete.cases terms model.matrix reformulate as.formula update lm vcov logLik
+#' @importFrom stats complete.cases terms model.matrix reformulate as.formula
 #'
 #' @export
 #'
@@ -84,15 +82,11 @@
 #' Hsiao, C. (2022). Analysis of panel data (No. 64). Cambridge university press.
 #' \cr
 #'
-#' R Core Team (2023). \emph{The R Stats Package: lm}.
-#' Available at: \url{https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html}
-#' \cr
-#'
 
 linear_fe <- function(formula = NULL, data = NULL,
                       Y = NULL, Z = NULL, ID = NULL,
                       Y.char = NULL, Z.char = NULL, ID.char = NULL,
-                      option.gamma.se = "complete"){
+                      option.gamma.var = "complete"){
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
 
@@ -198,13 +192,13 @@ linear_fe <- function(formula = NULL, data = NULL,
   rownames(varcov_beta) <- Z.char
   colnames(varcov_beta) <- Z.char
 
-  if (option.gamma.se == "complete" | option.gamma.se == "c") {
+  if (option.gamma.var == "complete" | option.gamma.var == "c") {
     var_gamma <- matrix(sigma_hat_sq*(1/n.prov + diag(Z_bar%*%solve(t(Z)%*%bdiag(Q)%*%Z)%*%t(Z_bar))), ncol = 1)
   }
-  else if (option.gamma.se == "simplified" | option.gamma.se == "s") {
+  else if (option.gamma.var == "simplified" | option.gamma.var == "s") {
     var_gamma <- matrix(sigma_hat_sq/n.prov, ncol = 1)
   }
-  else stop("Argument 'option.gamma.se' should be 'simplified' or 'complete'.")
+  else stop("Argument 'option.gamma.var' should be 'simplified' or 'complete'.")
   rownames(var_gamma) <- names(n.prov)
   colnames(var_gamma) <- "Variance.Gamma"
 
