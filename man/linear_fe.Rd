@@ -13,7 +13,7 @@ linear_fe(
   Y.char = NULL,
   Z.char = NULL,
   ID.char = NULL,
-  method = "pl"
+  option.gamma.se = "complete"
 )
 }
 \arguments{
@@ -65,7 +65,7 @@ For categorical variables, the names reflect the dummy variables created for eac
 \item{BIC}{Bayesian information criterion.}
 }
 \description{
-Fit a fixed effect linear model via profile likelihood or dummy encoding.
+Fit a fixed effect linear model via profile likelihood.
 }
 \details{
 This function is used to fit a fixed effect linear model of the form:

@@ -40,7 +40,7 @@
 #' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
 #' test(fit_linear)
 #'
-#' @importFrom stats pnorm qnorm pt qt median
+#' @importFrom stats pt qt median
 #'
 #' @exportS3Method test linear_fe
 
@@ -64,9 +64,7 @@ test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative
   # test statistics
   stat <- (gamma - gamma.null)/se.gamma
 
-  prob <- switch(fit$method,
-                 "Profile Likelihood" = pnorm(stat, lower.tail=F),
-                 "Dummy" = pt(stat, df = n - m - p, lower.tail = F))
+  prob <- pt(stat, df = n - m - p, lower.tail = F)
 
   if (alternative == "two.sided") {
     flag <- ifelse(prob < alpha/2, 1, ifelse(prob <= 1-alpha/2, 0, -1))

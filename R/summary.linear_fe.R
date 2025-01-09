@@ -28,7 +28,7 @@
 #' fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
 #' summary(fit_fe)
 #'
-#' @importFrom stats pnorm qnorm pt qt
+#' @importFrom stats pt qt
 #'
 #' @exportS3Method summary linear_fe
 
@@ -44,36 +44,26 @@ summary.linear_fe <- function(object, parm, level = 0.95, null = 0, alternative 
   m <- length(object$coefficient$gamma)
   p <- length(object$coefficient$beta)
   n <- nrow(object$data_include)
-  model.method <- object$method
 
   # Test Statistics
   stat <- (beta - null) / se.beta
 
   if (alternative == "two.sided") {
-    p_value <- switch(model.method,
-                      "Profile Likelihood" = 2 * (1 - pnorm(abs(stat))),
-                      "Dummy" = 2 * (1 - pt(abs(stat), df = n - p - m)))
-    crit_value <- ifelse(model.method == "Profile Likelihood", qnorm(1 - alpha / 2),
-                         qt(1 - alpha / 2, df = n - p - m))
+    p_value <- 2 * (1 - pt(abs(stat), df = n - p - m))
+    crit_value <- qt(1 - alpha / 2, df = n - p - m)
     lower_bound <- beta - crit_value * se.beta
     upper_bound <- beta + crit_value * se.beta
   }
   else if (alternative == "greater") {
-    p_value <- switch(model.method,
-                      "Profile Likelihood" = 1 - pnorm(stat),
-                      "Dummy" = 1 - pt(stat, df = n - p - m))
-    crit_value <- ifelse(object$method == "Profile Likelihood", qnorm(level),
-                           qt(level, df = n - p - m))
+    p_value <- 1 - pt(stat, df = n - p - m)
+    crit_value <- qt(level, df = n - p - m)
 
     lower_bound <- beta - crit_value * se.beta
     upper_bound <- Inf
   }
   else if (alternative == "less") {
-    p_value <- switch(model.method,
-                      "Profile Likelihood" = pnorm(stat),
-                      "Dummy" = pt(stat, df = n - p - m))
-    crit_value <- ifelse(object$method == "Profile Likelihood", qnorm(level),
-                         qt(level, df = n - p - m))
+    p_value <- pt(stat, df = n - p - m)
+    crit_value <- qt(level, df = n - p - m)
 
     lower_bound <- -Inf
     upper_bound <- beta + crit_value * se.beta

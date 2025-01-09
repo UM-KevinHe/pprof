@@ -1,135 +1,47 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/404.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/articles/Articles.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/articles/Logis-FE.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/articles/Models.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/articles/pprof.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/articles/Quick-start.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/articles/srrFE.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/index.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/bar_plot.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/caterpillar_plot.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/coef.logis_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/confint.linear_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/confint.linear_re.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/confint.logis_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/data_check.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/data_FE.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/ecls_data.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/ExampleDataBinary.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/ExampleDataLinear.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/fe_data_prep.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/linear_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/linear_re.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/logis_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/logis_firth.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/plot.linear_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/plot.logis_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/SM_output.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/SM_output.linear_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/SM_output.linear_re.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/SM_output.logis_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/SR_output.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/summary.linear_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/summary.logis_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/summary_fe_covar.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/test.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/test.linear_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/test.linear_re.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/test.logis_fe.html</loc>
-  </url>
-  <url>
-    <loc>https://um-kevinhe.github.io/pprof/reference/test_fe.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://um-kevinhe.github.io/pprof/404.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/LICENSE-text.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/LICENSE.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/Articles.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/Logis-FE.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/Models.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/Quick-start.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/index.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/pprof.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/srrFE.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/authors.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/index.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/ExampleDataBinary.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/ExampleDataLinear.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.linear_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.linear_re.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/SR_output.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/bar_plot.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/caterpillar_plot.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/coef.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/confint.linear_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/confint.linear_re.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/confint.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/data_FE.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/data_check.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/ecls_data.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/fe_data_prep.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/index.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/linear_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/linear_re.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/logis_firth.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/plot.linear_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/plot.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/summary.linear_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/summary.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/summary_fe_covar.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/test.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/test.linear_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/test.linear_re.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/test.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/test_fe.html</loc></url>
 </urlset>
+
