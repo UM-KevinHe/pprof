@@ -14,10 +14,12 @@
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
 #' @param ID a numeric vector representing the provider identifier.
 #' @param option.gamma.var a character string specifying the method to calculate the variance of provider effects \code{gamma},
-#' must be \code{"complete"} or \code{"simplified"}. You can specify just the initial letter.
+#' must be \code{"full"} or \code{"simplified"}. You can specify just the initial letter.
 #' \itemize{
-#'   \item{\code{"complete"}} (default) considering the correlation between provider effects and regression coefficients.
-#'   \item{\code{"simplified"}} calculating the variance of provider effects assuming regression coefficients are known.
+#'   \item{\code{"full"}} (default) considering the correlation between provider effects and regression coefficients.
+#'   \item{\code{"simplified"}} calculating the simplified variance of provider effects assuming regression coefficients are known.
+#'   This approach is suitable for large datasets where the results of the full and simplified methods are similar,
+#'   or when the full method may become unstable due to complex settings.
 #' }
 #'
 #' @return A list of objects with S3 class \code{"linear_fe"}:
@@ -86,7 +88,7 @@
 linear_fe <- function(formula = NULL, data = NULL,
                       Y = NULL, Z = NULL, ID = NULL,
                       Y.char = NULL, Z.char = NULL, ID.char = NULL,
-                      option.gamma.var = "complete"){
+                      option.gamma.var = "full"){
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
 
@@ -192,13 +194,15 @@ linear_fe <- function(formula = NULL, data = NULL,
   rownames(varcov_beta) <- Z.char
   colnames(varcov_beta) <- Z.char
 
-  if (option.gamma.var == "complete" | option.gamma.var == "c") {
+  if (option.gamma.var == "full" | option.gamma.var == "f") {
     var_gamma <- matrix(sigma_hat_sq*(1/n.prov + diag(Z_bar%*%solve(t(Z)%*%bdiag(Q)%*%Z)%*%t(Z_bar))), ncol = 1)
+    attr(var_gamma, "description")<- "full"
   }
   else if (option.gamma.var == "simplified" | option.gamma.var == "s") {
     var_gamma <- matrix(sigma_hat_sq/n.prov, ncol = 1)
+    attr(var_gamma, "description")<- "simplified"
   }
-  else stop("Argument 'option.gamma.var' should be 'simplified' or 'complete'.")
+  else stop("Argument 'option.gamma.var' should be 'full' or 'simplified'.")
   rownames(var_gamma) <- names(n.prov)
   colnames(var_gamma) <- "Variance.Gamma"
 

@@ -64,7 +64,9 @@ test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative
   # test statistics
   stat <- (gamma - gamma.null)/se.gamma
 
-  prob <- pt(stat, df = n - m - p, lower.tail = F)
+  prob <- switch(attributes(fit$variance$gamma)$description,
+                 "simplified" = pnorm(stat, lower.tail=F),
+                 "full" = pt(stat, df = n - m - p, lower.tail = F))
 
   if (alternative == "two.sided") {
     flag <- ifelse(prob < alpha/2, 1, ifelse(prob <= 1-alpha/2, 0, -1))

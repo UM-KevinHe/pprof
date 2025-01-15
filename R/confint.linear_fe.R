@@ -64,17 +64,20 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
   se.gamma <- sqrt(object$variance$gamma)
 
   if (alternative == "two.sided") {
-    crit_value <- qt(1 - alpha / 2, df = n - m - p)
+    crit_value <- ifelse(attributes(object$variance$gamma)$description == "full", qnorm(1 - alpha / 2),
+                         crit_value <- qt(1 - alpha / 2, df = n - m - p))
     U_gamma <- gamma + crit_value * se.gamma
     L_gamma <- gamma - crit_value * se.gamma
   }
   else if (alternative == "greater") {
-    crit_value <- qt(1 - alpha, df = n - m - p)
+    crit_value <- ifelse(attributes(object$variance$gamma)$description == "full", qnorm(1 - alpha),
+                         crit_value <- qt(1 - alpha, df = n - m - p))
     U_gamma <- Inf
     L_gamma <- gamma - crit_value * se.gamma
   }
   else if (alternative == "less") {
-    crit_value <- qt(1 - alpha, df = n - m - p)
+    crit_value <- ifelse(attributes(object$variance$gamma)$description == "full", qnorm(1 - alpha),
+                         crit_value <- qt(1 - alpha, df = n - m - p))
     U_gamma <- gamma + crit_value * se.gamma
     L_gamma <- -Inf
   }
