@@ -16,10 +16,10 @@
 #' @param option.gamma.var a character string specifying the method to calculate the variance of provider effects \code{gamma},
 #' must be \code{"full"} or \code{"simplified"}. You can specify just the initial letter.
 #' \itemize{
-#'   \item{\code{"full"}} (default) considering the correlation between provider effects and regression coefficients.
-#'   \item{\code{"simplified"}} calculating the simplified variance of provider effects assuming regression coefficients are known.
-#'   This approach is suitable for large datasets where the results of the full and simplified methods are similar,
-#'   or when the full method may become unstable due to complex settings.
+#'    \item{\code{"simplified"}} (default) calculating the simplified variance of provider effects assuming regression coefficients are known.
+#'    This approach is suitable for large datasets where the results of the full and simplified methods are similar,
+#'    or when the full method may become unstable due to complex settings.
+#'    \item{\code{"full"}} considering the correlation between provider effects and regression coefficients.
 #' }
 #'
 #' @return A list of objects with S3 class \code{"linear_fe"}:
@@ -88,7 +88,7 @@
 linear_fe <- function(formula = NULL, data = NULL,
                       Y = NULL, Z = NULL, ID = NULL,
                       Y.char = NULL, Z.char = NULL, ID.char = NULL,
-                      option.gamma.var = "full"){
+                      option.gamma.var = "simplified"){
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
 
