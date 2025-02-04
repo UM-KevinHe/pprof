@@ -28,8 +28,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_fe <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' plot(fit_fe)
 #'
 #' @importFrom dplyr arrange cross_join mutate select filter
@@ -54,7 +54,7 @@ plot.linear_fe <- function(x, null = "median", target = 0, alpha = 0.05,
   SM <- SM_output(x, null = null, stdz = "indirect")
   processed_data <- cbind(SM$indirect.difference, SM$OE$OE_indirect)
   colnames(processed_data) <- c("indicator", "Obs", "Exp")
-  processed_data$precision <- sapply(split(data[, x$char_list$Y.char], data[, x$char_list$ID.char]), length)
+  processed_data$precision <- sapply(split(data[, x$char_list$Y.char], data[, x$char_list$ProvID.char]), length)
 
 
   flagging <- test(x, level = 1-alpha[1], null = null)

@@ -2,13 +2,13 @@ test_that("test.confint_fe function behaves correctly", {
   data(ExampleDataLinear)
   Y <- ExampleDataLinear$Y
   Z <- ExampleDataLinear$Z
-  ID <- ExampleDataLinear$ID
-  data <- data.frame(Y, ID, Z)
+  ProvID <- ExampleDataLinear$ProvID
+  data <- data.frame(Y, ProvID, Z)
   Z.char <- colnames(Z)
   Y.char <- "Y"
-  ID.char <- "ID"
+  ProvID.char <- "ProvID"
 
-  fit_fe <- linear_fe(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char)
+  fit_fe <- linear_fe(data = data, Y.char = Y.char, Z.char = Z.char, ProvID.char = ProvID.char)
 
   CI <- confint(fit_fe, stdz = c("indirect", "direct"))
   CI_parm <- confint(fit_fe, parm = c(2, 4, 5, 7), stdz = c("indirect", "direct"))

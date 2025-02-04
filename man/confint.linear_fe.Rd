@@ -55,8 +55,8 @@ Provide confidence intervals for provider effects or standardized measures from 
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
-ID <- ExampleDataLinear$ID
-fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+ProvID <- ExampleDataLinear$ProvID
+fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 confint(fit_linear)
 
 }

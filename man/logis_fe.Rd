@@ -9,10 +9,10 @@ logis_fe(
   data = NULL,
   Y.char = NULL,
   Z.char = NULL,
-  ID.char = NULL,
+  ProvID.char = NULL,
   Y = NULL,
   Z = NULL,
-  ID = NULL,
+  ProvID = NULL,
   method = "SerBIN",
   max.iter = 1000,
   tol = 1e-05,
@@ -30,19 +30,19 @@ with the response variable on the left of a ~ operator and covariates on the rig
 separated by + operators. The fixed effect of the provider identifier is specified using \code{id()}.}
 
 \item{data}{a data frame containing the variables named in the \code{formula},
-or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
+or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ProvID.char}.}
 
 \item{Y.char}{a character string specifying the column name of the response variable in the \code{data}.}
 
 \item{Z.char}{a character vector specifying the column names of the covariates in the \code{data}.}
 
-\item{ID.char}{a character string specifying the column name of the provider identifier in the \code{data}.}
+\item{ProvID.char}{a character string specifying the column name of the provider identifier in the \code{data}.}
 
 \item{Y}{a numeric vector representing the response variable.}
 
 \item{Z}{a matrix or data frame representing the covariates, which can include both numeric and categorical variables.}
 
-\item{ID}{a numeric vector representing the provider identifier.}
+\item{ProvID}{a numeric vector representing the provider identifier.}
 
 \item{method}{a string specifying the algorithm to be used. The default value is "SerBIN".
 \itemize{
@@ -132,16 +132,17 @@ For datasets with missing values, this function automatically removes observatio
 data(ExampleDataBinary)
 outcome <- ExampleDataBinary$Y
 covar <- ExampleDataBinary$Z
-ID <- ExampleDataBinary$ID
-data <- data.frame(outcome, ID, covar)
+ProvID <- ExampleDataBinary$ProvID
+data <- data.frame(outcome, ProvID, covar)
 covar.char <- colnames(covar)
 outcome.char <- colnames(data)[1]
-ID.char <- colnames(data)[2]
-formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ID)"))
+ProvID.char <- colnames(data)[2]
+formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ProvID)"))
 
 # Fit logistic linear effect model using three input formats
-fit_fe1 <- logis_fe(Y = outcome, Z = covar, ID = ID)
-fit_fe2 <- logis_fe(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
+fit_fe1 <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID)
+fit_fe2 <- logis_fe(data = data, Y.char = outcome.char,
+Z.char = covar.char, ProvID.char = ProvID.char)
 fit_fe3 <- logis_fe(formula, data)
 
 }

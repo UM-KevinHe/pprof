@@ -4,7 +4,7 @@
 #'
 #' @param Y a numeric vector indicating the outcome variable.
 #' @param Z a matrix or data frame representing covariates.
-#' @param ID a numeric vector representing the provider identifier.
+#' @param ProvID a numeric vector representing the provider identifier.
 #'
 #' @details The function performs the following checks:
 #'   \itemize{
@@ -26,13 +26,13 @@
 #' data(ExampleDataBinary)
 #' outcome = ExampleDataBinary$Y
 #' covar = ExampleDataBinary$Z
-#' ID = ExampleDataBinary$ID
-#' data_check(outcome, covar, ID)
+#' ProvID = ExampleDataBinary$ProvID
+#' data_check(outcome, covar, ProvID)
 #'
 #' @export
 
-data_check <- function(Y, Z, ID) {
-  data <- as.data.frame(cbind(Y, ID, Z))
+data_check <- function(Y, Z, ProvID) {
+  data <- as.data.frame(cbind(Y, ProvID, Z))
   Y.char <- colnames(data)[1]
   prov.char <- colnames(data)[2]
   Z.char <- colnames(Z)

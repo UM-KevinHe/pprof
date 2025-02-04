@@ -10,7 +10,7 @@ A list containing the following elements:
 \item{Y}{a vector representing continuous outcomes.
 Generated as a linear combination of provider-specific effects, covariates, and a random error term (\eqn{\epsilon}),
 where \eqn{\epsilon} follows a normal distribution with mean 0 and standard deviation 1.}
-\item{ID}{a vector representing identifier for each provider.
+\item{ProvID}{a vector representing identifier for each provider.
 The number of individuals per provider is generated from a Poisson distribution with mean 80.}
 \item{Z}{a data frame containing 5 continuous variables.
 Generated from a multivariate normal distribution, where the mean is calculated as
@@ -27,7 +27,7 @@ A simulated data set containing 7901 observations, 5 continuous covariates and 1
 \examples{
 data(ExampleDataLinear)
 head(ExampleDataLinear$Y)
-head(ExampleDataLinear$ID)
+head(ExampleDataLinear$ProvID)
 head(ExampleDataLinear$Z)
 }
 \keyword{datasets}

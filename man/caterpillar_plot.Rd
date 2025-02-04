@@ -76,8 +76,8 @@ This provides a simpler visualization without flagging individual providers.
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
-ID <- ExampleDataLinear$ID
-fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+ProvID <- ExampleDataLinear$ProvID
+fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 CI_linear <- confint(fit_linear)
 caterpillar_plot(CI_linear$CI.indirect, use_flag = TRUE,
                  errorbar_width = 0.5, errorbar_size = 1)
@@ -85,7 +85,7 @@ caterpillar_plot(CI_linear$CI.indirect, use_flag = TRUE,
 data(ExampleDataBinary)
 fit_logis <- logis_fe(Y = ExampleDataBinary$Y,
                       Z = ExampleDataBinary$Z,
-                      ID = ExampleDataBinary$ID, message = FALSE)
+                      ProvID = ExampleDataBinary$ProvID, message = FALSE)
 CI_logis <- confint(fit_logis)
 caterpillar_plot(CI_logis$CI.indirect_ratio, use_flag = TRUE,
                  errorbar_width = 0.5, errorbar_size = 1)

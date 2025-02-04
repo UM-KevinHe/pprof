@@ -9,10 +9,10 @@ linear_re(
   data = NULL,
   Y = NULL,
   Z = NULL,
-  ID = NULL,
+  ProvID = NULL,
   Y.char = NULL,
   Z.char = NULL,
-  ID.char = NULL,
+  ProvID.char = NULL,
   ...
 )
 }
@@ -22,19 +22,19 @@ with the response variable on the left of a ~ operator and covariates on the rig
 separated by + operators. The random effect of the provider identifier is specified using \code{(1 | )}.}
 
 \item{data}{a data frame containing the variables named in the \code{formula},
-or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ID.char}.}
+or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ProvID.char}.}
 
 \item{Y}{a numeric vector representing the response variable.}
 
 \item{Z}{a matrix or data frame representing the covariates, which can include both numeric and categorical variables.}
 
-\item{ID}{a numeric vector representing the provider identifier.}
+\item{ProvID}{a numeric vector representing the provider identifier.}
 
 \item{Y.char}{a character string specifying the column name of the response variable in the \code{data}.}
 
 \item{Z.char}{a character vector specifying the column names of the covariates in the \code{data}.}
 
-\item{ID.char}{a character string specifying the column name of the provider identifier in the \code{data}.}
+\item{ProvID.char}{a character string specifying the column name of the provider identifier in the \code{data}.}
 
 \item{\dots}{additional arguments passed to \code{\link[lme4]{lmer}} for further customization.}
 }
@@ -87,16 +87,17 @@ For datasets with missing values, this function automatically removes observatio
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
-ID <- ExampleDataLinear$ID
-data <- data.frame(outcome, ID, covar)
+ProvID <- ExampleDataLinear$ProvID
+data <- data.frame(outcome, ProvID, covar)
 covar.char <- colnames(covar)
 outcome.char <- colnames(data)[1]
-ID.char <- colnames(data)[2]
-formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ (1|ID)"))
+ProvID.char <- colnames(data)[2]
+formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ (1|ProvID)"))
 
 # Fit random effect linear model using three input formats
-fit_re1 <- linear_re(Y = outcome, Z = covar, ID = ID)
-fit_re2 <- linear_re(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
+fit_re1 <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
+fit_re2 <- linear_re(data = data, Y.char = outcome.char,
+Z.char = covar.char, ProvID.char = ProvID.char)
 fit_re3 <- linear_re(formula, data)
 
 }

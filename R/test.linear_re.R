@@ -30,9 +30,9 @@
 #' @examples
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
-#' ID <- ExampleDataLinear$ID
+#' ProvID <- ExampleDataLinear$ProvID
 #' covar <- ExampleDataLinear$Z
-#' fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
+#' fit_re <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' test(fit_re)
 #'
 #' @importFrom stats pnorm qnorm pt qt
@@ -44,17 +44,17 @@ test.linear_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two
 
   data <- fit$data_include
   Y.char <- fit$char_list$Y.char
-  ID.char <- fit$char_list$ID.char
+  ProvID.char <- fit$char_list$ProvID.char
   Z.char <- fit$char_list$Z.char
   FEcoef <- fit$coefficient$FE
 
   var_alpha <- fit$variance$alpha
   sigma_sq <- fit$sigma^2
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+  n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
   R_i <- as.vector(var_alpha) / (as.vector(var_alpha) + as.vector(sigma_sq) / n.prov)
 
-  # Y_bar_i <- sapply(split(data[, Y.char], data[, ID.char]), mean)
-  # Z_bar_i <- t(matrix(sapply(split(data[,Z.char, drop = FALSE], data[,ID.char]), colMeans),
+  # Y_bar_i <- sapply(split(data[, Y.char], data[, ProvID.char]), mean)
+  # Z_bar_i <- t(matrix(sapply(split(data[,Z.char, drop = FALSE], data[,ProvID.char]), colMeans),
   #                             ncol=length(Y_bar_i), nrow = length(beta)))
   #
   # estimate_alpha <- Y_bar_i - Z_bar_i%*%beta - mu
@@ -90,7 +90,7 @@ test.linear_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, ID.char])) {
+    if (class(parm) == class(data[, ProvID.char])) {
       attr(result, "provider size") <- n.prov[names(n.prov) %in% parm]
       result <- result[row.names(result) %in% parm, ]
       return(result)

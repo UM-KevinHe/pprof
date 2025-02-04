@@ -72,8 +72,8 @@ We suggest using score or exact test to generate confidence intervals.
 data(ExampleDataBinary)
 outcome = ExampleDataBinary$Y
 covar = ExampleDataBinary$Z
-ID = ExampleDataBinary$ID
-fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+ProvID = ExampleDataBinary$ProvID
+fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 confint(fit_fe, option = "gamma")
 confint(fit_fe, option = "SM")
 

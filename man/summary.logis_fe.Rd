@@ -53,9 +53,9 @@ Provide the summary statistics for the covariate estimates for a fixed effect lo
 data(ExampleDataBinary)
 outcome = ExampleDataBinary$Y
 covar = ExampleDataBinary$Z
-ID = ExampleDataBinary$ID
+ProvID = ExampleDataBinary$ProvID
 
-fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 summary.wald <- summary(fit_fe, level = 0.95, test = "wald")
 summary.wald
 

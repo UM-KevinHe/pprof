@@ -30,9 +30,9 @@
 #' data(ExampleDataBinary)
 #' outcome = ExampleDataBinary$Y
 #' covar = ExampleDataBinary$Z
-#' ID = ExampleDataBinary$ID
+#' ProvID = ExampleDataBinary$ProvID
 #'
-#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 #' summary.wald <- summary(fit_fe, level = 0.95, test = "wald")
 #' summary.wald
 #'
@@ -48,7 +48,7 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
 
   Y.char <- object$char_list$Y.char
   Z.char <- object$char_list$Z.char
-  ID.char <- object$char_list$ID.char
+  ProvID.char <- object$char_list$ProvID.char
   beta <- object$coefficient$beta
   gamma <- object$coefficient$gamma
   alpha <- 1 - level
@@ -95,12 +95,12 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
 
     return(result[ind, ])
 
-    # data <- object$data_include[, c(Y.char,Z.char,ID.char)]
-    # gamma.obs <- rep(object$df.prov$gamma_est, sapply(split(data[,Y.char],data[,ID.char]),length))
+    # data <- object$data_include[, c(Y.char,Z.char,ProvID.char)]
+    # gamma.obs <- rep(object$df.prov$gamma_est, sapply(split(data[,Y.char],data[,ProvID.char]),length))
     # probs <- as.numeric(plogis(gamma.obs+as.matrix(data[,Z.char]) %*% object$coefficient$beta))
     # probs <- pmin(pmax(probs,1e-10),1-1e-10)
-    # info.gamma.inv <- 1/sapply(split(probs*(1-probs), data[,ID.char]),sum)
-    # info.betagamma <- sapply(by(probs*(1-probs)*as.matrix(data[,Z.char]),data[,ID.char],identity),colSums)
+    # info.gamma.inv <- 1/sapply(split(probs*(1-probs), data[,ProvID.char]),sum)
+    # info.betagamma <- sapply(by(probs*(1-probs)*as.matrix(data[,Z.char]),data[,ProvID.char],identity),colSums)
     # info.beta <- t(as.matrix(data[,Z.char]))%*%(probs*(1-probs)*as.matrix(data[,Z.char]))
     # se.beta <- sqrt(diag(solve(info.beta-info.betagamma%*%(info.gamma.inv*t(info.betagamma)))))[ind] #S^-1
     # p <- pnorm((object$beta[ind]-null)/se.beta, lower=F)
@@ -113,8 +113,8 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
     #return(df)
   }
   # else if (test=="wald.cpp") {  #use cpp function to calculate Cov(\beta)
-  #   data <- object$data_include[, c(Y.char,Z.char,ID.char)]
-  #   n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+  #   data <- object$data_include[, c(Y.char,Z.char,ProvID.char)]
+  #   n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
   #   ls <- wald_covar(data[,Y.char], as.matrix(data[,Z.char]), n.prov, object$df.prov$gamma_est, as.numeric(object$beta), ind, null, alpha)
   #   #ls$p <- c(ls$p); ls$stat <- c(ls$stat); ls$se.beta <- c(ls$se.beta)
   #   #ls$beta.lower <- c(ls$beta.lower); ls$beta.upper <- c(ls$beta.upper)
@@ -130,18 +130,18 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
   else if (test=="lr") { # Note: only null=0 allowed for now and no CIs
     if (null!=0) stop("Argument 'null' is invalid!")
     data <- object$data_include
-    gamma.obs <- rep(pmax(pmin(gamma,median(gamma)+10),median(gamma)-10), sapply(split(data[,Y.char],data[,ID.char]),length))
+    gamma.obs <- rep(pmax(pmin(gamma,median(gamma)+10),median(gamma)-10), sapply(split(data[,Y.char],data[,ProvID.char]),length))
     neg2Loglkd <- -2*sum((gamma.obs+as.matrix(data[,Z.char])%*%beta)*data[,Y.char]-log(1+exp(gamma.obs+as.matrix(data[,Z.char])%*%beta)))
     lr <- function(index) {
-      data.null <- as.data.frame(cbind(data[,Y.char], data[,ID.char], data[,Z.char[-index]], data[, (ncol(data) - 2):ncol(data)]))
+      data.null <- as.data.frame(cbind(data[,Y.char], data[,ProvID.char], data[,Z.char[-index]], data[, (ncol(data) - 2):ncol(data)]))
       char_list.null <- object$char_list
       char_list.null$Z.char <- char_list.null$Z.char[-index]
-      colnames(data.null)[1:2] <- c(char_list.null$Y.char, char_list.null$ID.char)
+      colnames(data.null)[1:2] <- c(char_list.null$Y.char, char_list.null$ProvID.char)
       data.prep.null <- list(data = data.null,
                              char_list = char_list.null)
-      fe.null <- logis_fe(data = data.null, Y.char = char_list.null$Y.char, Z.char = char_list.null$Z.char, ID.char = char_list.null$ID.char, message = F)
+      fe.null <- logis_fe(data = data.null, Y.char = char_list.null$Y.char, Z.char = char_list.null$Z.char, ProvID.char = char_list.null$ProvID.char, message = F)
       Z.null <- as.matrix(data[,Z.char[-index]])
-      gamma.obs.null <- rep(pmax(pmin(fe.null$coefficient$gamma,median(fe.null$coefficient$gamma)+10),median(fe.null$coefficient$gamma)-10), sapply(split(data[,Y.char],data[,ID.char]),length))
+      gamma.obs.null <- rep(pmax(pmin(fe.null$coefficient$gamma,median(fe.null$coefficient$gamma)+10),median(fe.null$coefficient$gamma)-10), sapply(split(data[,Y.char],data[,ProvID.char]),length))
       neg2Loglkd.null <- -2*sum((gamma.obs.null+Z.null%*%fe.null$coefficient$beta)*data[,Y.char]-log(1+exp(gamma.obs.null+Z.null%*%fe.null$coefficient$beta)))
       #p <- pchisq(neg2Loglkd.null-neg2Loglkd, 1, lower.tail=F)
       test_stat <- neg2Loglkd.null - neg2Loglkd
@@ -164,26 +164,26 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
     if (null!=0) stop("Argument 'null' is invalid!")
     data <- object$data_include
     score <- function(index) {
-      data.null <- as.data.frame(cbind(data[,Y.char], data[,ID.char], data[,Z.char[-index]], data[, (ncol(data) - 2):ncol(data)]))
+      data.null <- as.data.frame(cbind(data[,Y.char], data[,ProvID.char], data[,Z.char[-index]], data[, (ncol(data) - 2):ncol(data)]))
       char_list.null <- object$char_list
       char_list.null$Z.char <- char_list.null$Z.char[-index]
-      colnames(data.null)[1:2] <- c(char_list.null$Y.char, char_list.null$ID.char)
+      colnames(data.null)[1:2] <- c(char_list.null$Y.char, char_list.null$ProvID.char)
       data.prep.null <- list(data = data.null,
                              char_list = char_list.null)
-      fe.null <- logis_fe(data = data.null, Y.char = char_list.null$Y.char, Z.char = char_list.null$Z.char, ID.char = char_list.null$ID.char, message = F)
+      fe.null <- logis_fe(data = data.null, Y.char = char_list.null$Y.char, Z.char = char_list.null$Z.char, ProvID.char = char_list.null$ProvID.char, message = F)
       Z.null <- as.matrix(data[,Z.char[-index]])
-      gamma.obs.null <- rep(fe.null$coefficient$gamma, sapply(split(data[,Y.char],data[,ID.char]),length))
+      gamma.obs.null <- rep(fe.null$coefficient$gamma, sapply(split(data[,Y.char],data[,ProvID.char]),length))
       probs.null <- as.numeric(plogis(gamma.obs.null+as.matrix(data[,Z.char[-index]])%*%fe.null$coefficient$beta))
       probs.null <- pmin(pmax(probs.null,1e-10),1-1e-10)
-      info.gamma.inv.null <- 1/sapply(split(probs.null*(1-probs.null), data[,ID.char]),sum)
-      info.betagamma.null <- sapply(by(probs.null*(1-probs.null)*Z.null,data[,ID.char],identity),colSums)
+      info.gamma.inv.null <- 1/sapply(split(probs.null*(1-probs.null), data[,ProvID.char]),sum)
+      info.betagamma.null <- sapply(by(probs.null*(1-probs.null)*Z.null,data[,ProvID.char],identity),colSums)
       info.beta.null <- t(Z.null)%*%(probs.null*(1-probs.null)*Z.null)
       mat.tmp <- info.gamma.inv.null*t(info.betagamma.null)
       schur.inv.null <- solve(info.beta.null-info.betagamma.null%*%mat.tmp)
       info.inv.11 <- mat.tmp%*%schur.inv.null%*%t(mat.tmp)
       diag(info.inv.11) <- diag(info.inv.11) + info.gamma.inv.null
       info.inv.21 <- -schur.inv.null%*%t(mat.tmp)
-      info.beta.add.gamma <- sapply(by(probs.null*(1-probs.null)*data[,Z.char[index]],data[,ID.char],identity),sum)
+      info.beta.add.gamma <- sapply(by(probs.null*(1-probs.null)*data[,Z.char[index]],data[,ProvID.char],identity),sum)
       info.beta.add.beta <- t(as.matrix(data[,Z.char[index]]))%*%(probs.null*(1-probs.null)*Z.null)
       info.beta.add <- t(data[,Z.char[index]])%*%(probs.null*(1-probs.null)*data[,Z.char[index]]) -
         t(info.beta.add.gamma)%*%info.inv.11%*%info.beta.add.gamma -

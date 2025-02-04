@@ -57,8 +57,8 @@ Provide direct/indirect standardized ratios/rates for a fixed effect logistic mo
 data(ExampleDataBinary)
 outcome = ExampleDataBinary$Y
 covar = ExampleDataBinary$Z
-ID = ExampleDataBinary$ID
-fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+ProvID = ExampleDataBinary$ProvID
+fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 SR <- SM_output(fit_fe, stdz = "direct", measure = "rate")
 SR$direct.rate
 

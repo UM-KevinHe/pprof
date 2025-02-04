@@ -71,8 +71,8 @@ However, the user can specify \code{score_modified = FALSE} to perform a standar
 data(ExampleDataBinary)
 outcome = ExampleDataBinary$Y
 covar = ExampleDataBinary$Z
-ID = ExampleDataBinary$ID
-fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+ProvID = ExampleDataBinary$ProvID
+fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 test(fit_fe, test = "score")
 
 }

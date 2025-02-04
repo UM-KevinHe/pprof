@@ -6,13 +6,13 @@
 #' with the response variable on the left of a ~ operator and covariates on the right,
 #' separated by + operators. The fixed effect of the provider identifier is specified using \code{id()}.
 #' @param data a data frame containing the variables named in the `formula`,
-#' or the columns specified by `Y.char`, `Z.char`, and `ID.char`.
+#' or the columns specified by `Y.char`, `Z.char`, and `ProvID.char`.
 #' @param Y.char a character string specifying the column name of the response variable in the `data`.
 #' @param Z.char a character vector specifying the column names of the covariates in the `data`.
-#' @param ID.char a character string specifying the column name of the provider identifier in the `data`.
+#' @param ProvID.char a character string specifying the column name of the provider identifier in the `data`.
 #' @param Y a numeric vector representing the response variable.
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
-#' @param ID a numeric vector representing the provider identifier.
+#' @param ProvID a numeric vector representing the provider identifier.
 #' @param option.gamma.var a character string specifying the method to calculate the variance of provider effects \code{gamma},
 #' must be \code{"full"} or \code{"simplified"}. You can specify just the initial letter.
 #' \itemize{
@@ -68,16 +68,17 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' data <- data.frame(outcome, ID, covar)
+#' ProvID <- ExampleDataLinear$ProvID
+#' data <- data.frame(outcome, ProvID, covar)
 #' covar.char <- colnames(covar)
 #' outcome.char <- colnames(data)[1]
-#' ID.char <- colnames(data)[2]
-#' formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ID)"))
+#' ProvID.char <- colnames(data)[2]
+#' formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ProvID)"))
 #'
 #' # Fit fixed linear effect model using three input formats
-#' fit_fe1 <- linear_fe(Y = outcome, Z = covar, ID = ID)
-#' fit_fe2 <- linear_fe(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
+#' fit_fe1 <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
+#' fit_fe2 <- linear_fe(data = data, Y.char = outcome.char,
+#' Z.char = covar.char, ProvID.char = ProvID.char)
 #' fit_fe3 <- linear_fe(formula, data)
 #'
 #' @references
@@ -86,8 +87,8 @@
 #'
 
 linear_fe <- function(formula = NULL, data = NULL,
-                      Y = NULL, Z = NULL, ID = NULL,
-                      Y.char = NULL, Z.char = NULL, ID.char = NULL,
+                      Y = NULL, Z = NULL, ProvID = NULL,
+                      Y.char = NULL, Z.char = NULL, ProvID.char = NULL,
                       option.gamma.var = "simplified"){
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
@@ -97,10 +98,10 @@ linear_fe <- function(formula = NULL, data = NULL,
     Y.char <- as.character(attr(formula_terms, "variables"))[2]
     predictors <- attr(formula_terms, "term.labels")
 
-    ID.char <- gsub(".*id\\(([^)]+)\\).*", "\\1", predictors[grepl("id\\(", predictors)])
+    ProvID.char <- gsub(".*id\\(([^)]+)\\).*", "\\1", predictors[grepl("id\\(", predictors)])
     Z.char <- predictors[!grepl("id\\(", predictors)]
 
-    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+    if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
 
     #mf <- model.frame(formula, data)
@@ -108,54 +109,54 @@ linear_fe <- function(formula = NULL, data = NULL,
     Y <- data[,Y.char, drop = F]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = F]
     # Z <- model.matrix(~ data[[predictors]] - 1)
-    ID <- data[,ID.char, drop = F]
+    ProvID <- data[,ProvID.char, drop = F]
   }
-  else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
-    message("Input format: data, Y.char, Z.char, and ID.char.")
+  else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ProvID.char)) {
+    message("Input format: data, Y.char, Z.char, and ProvID.char.")
 
-    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+    if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
 
     data <- data[complete.cases(data), ] # Remove rows with missing values
     Y <- data[, Y.char]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
-    ID <- data[, ID.char, drop = F]
+    ProvID <- data[, ProvID.char, drop = F]
   }
-  else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
-    message("Input format: Y, Z, and ID.")
+  else if (!is.null(Y) && !is.null(Z) && !is.null(ProvID)) {
+    message("Input format: Y, Z, and ProvID.")
 
-    if (length(Y) != length(ID) | (length(ID) != nrow(Z))) {
+    if (length(Y) != length(ProvID) | (length(ProvID) != nrow(Z))) {
       stop("Dimensions of the input data do not match!!", call.=F)
     }
 
-    data <- data.frame(Y, ID, Z)
+    data <- data.frame(Y, ProvID, Z)
     data <- data[complete.cases(data), ] # Remove rows with missing values
     Y.char <- colnames(data)[1]
-    ID.char <- colnames(data)[2]
+    ProvID.char <- colnames(data)[2]
     Z.char <- colnames(Z)
     Y <- data[, Y.char]
-    ID <- data[, ID.char]
+    ProvID <- data[, ProvID.char]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
   }
   else {
-    stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ID.char, or (3) Y, Z, and ID.", call.=FALSE)
+    stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ProvID.char, or (3) Y, Z, and ProvID.", call.=FALSE)
   }
 
-  data <- data.frame(Y, ID, Z)
+  data <- data.frame(Y, ProvID, Z)
   data <- data[complete.cases(data), ] # Remove rows with missing values
   Y.char <- colnames(data)[1]
-  ID.char <- colnames(data)[2]
+  ProvID.char <- colnames(data)[2]
   Z.char <- colnames(Z)
-  data <- data[order(factor(data[,ID.char])),]
+  data <- data[order(factor(data[,ProvID.char])),]
 
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+  n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
   m <- length(n.prov) # number of providers
   n <- sum(n.prov) # number of observations
   p <- length(Z.char) # number of covariates
 
   Z <- as.matrix(data[,Z.char], drop = F)
   Y <- as.matrix(data[, Y.char, drop = F])
-  ID <- as.matrix(data[, ID.char, drop = F])
+  ProvID <- as.matrix(data[, ProvID.char, drop = F])
 
   Q <- lapply(n.prov, function(n) diag(n)-matrix(1, nrow = n, ncol = n)/n)
 
@@ -164,8 +165,8 @@ linear_fe <- function(formula = NULL, data = NULL,
   colnames(beta) <- "beta"
   rownames(beta) <- Z.char
 
-  y_bar <- sapply(split(data[,Y.char], data[,ID.char]),mean)
-  Z_bar <- t(matrix(sapply(split(data[,Z.char, drop = FALSE], data[,ID.char]), colMeans),
+  y_bar <- sapply(split(data[,Y.char], data[,ProvID.char]),mean)
+  Z_bar <- t(matrix(sapply(split(data[,Z.char, drop = FALSE], data[,ProvID.char]), colMeans),
                     ncol=length(y_bar), nrow = length(beta)))
   gamma.prov <- as.matrix(y_bar - Z_bar %*% beta)
   colnames(gamma.prov) <- "gamma"
@@ -216,7 +217,7 @@ linear_fe <- function(formula = NULL, data = NULL,
   BIC <- -2*log_likelihood + (m+p+1) * log(n)
 
   char_list <- list(Y.char = Y.char,
-                    ID.char = ID.char,
+                    ProvID.char = ProvID.char,
                     Z.char = Z.char)
 
   result <- structure(list(coefficient = coefficient,

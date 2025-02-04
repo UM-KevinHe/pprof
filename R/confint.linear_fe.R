@@ -30,8 +30,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' confint(fit_linear)
 #'
 #' @importFrom stats pnorm qnorm pt qt
@@ -52,12 +52,12 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
     stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
 
   data <- object$data_include
-  prov <- data[ ,object$char_list$ID.char]
+  prov <- data[ ,object$char_list$ProvID.char]
   prov.name <- rownames(object$coefficient$gamma)
   m <- length(object$coefficient$gamma)
   p <- length(object$coefficient$beta)
   n <- nrow(object$data_include)
-  n.prov <- sapply(split(data[, object$char_list$Y.char], data[, object$char_list$ID.char]), length)
+  n.prov <- sapply(split(data[, object$char_list$Y.char], data[, object$char_list$ProvID.char]), length)
 
   # CI of Gamma
   gamma <- object$coefficient$gamma
@@ -95,7 +95,7 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, object$char_list$ID.char])) {
+    if (class(parm) == class(data[, object$char_list$ProvID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements.")

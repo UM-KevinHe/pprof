@@ -10,7 +10,7 @@
 #'   \item{Y}{a vector representing binary outcomes with 0 or 1.
 #'   Generated from a Bernoulli distribution with the probability of success (\eqn{\boldsymbol{\mu}}), which is
 #'   determined by applying the logistic function to the linear combination of provider effects and covariates.}
-#'   \item{ID}{a vector representing identifier for each provider.
+#'   \item{ProvID}{a vector representing identifier for each provider.
 #'   The number of individuals per provider is generated from a
 #'   Poisson distribution with mean 80, with a minimum value of 11.}
 #'   \item{Z}{a data frame containing 5 continuous variables.
@@ -22,7 +22,7 @@
 #' @examples
 #' data(ExampleDataBinary)
 #' head(ExampleDataBinary$Y)
-#' head(ExampleDataBinary$ID)
+#' head(ExampleDataBinary$ProvID)
 #' head(ExampleDataBinary$Z)
 "ExampleDataBinary"
 
@@ -39,7 +39,7 @@
 #'   \item{Y}{a vector representing continuous outcomes.
 #'   Generated as a linear combination of provider-specific effects, covariates, and a random error term (\eqn{\epsilon}),
 #'   where \eqn{\epsilon} follows a normal distribution with mean 0 and standard deviation 1.}
-#'   \item{ID}{a vector representing identifier for each provider.
+#'   \item{ProvID}{a vector representing identifier for each provider.
 #'   The number of individuals per provider is generated from a Poisson distribution with mean 80.}
 #'   \item{Z}{a data frame containing 5 continuous variables.
 #'   Generated from a multivariate normal distribution, where the mean is calculated as
@@ -50,7 +50,7 @@
 #' @examples
 #' data(ExampleDataLinear)
 #' head(ExampleDataLinear$Y)
-#' head(ExampleDataLinear$ID)
+#' head(ExampleDataLinear$ProvID)
 #' head(ExampleDataLinear$Z)
 "ExampleDataLinear"
 

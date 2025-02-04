@@ -59,8 +59,8 @@ The first value in the vector is used as the significance level for flagging eac
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
-ID <- ExampleDataLinear$ID
-fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
+ProvID <- ExampleDataLinear$ProvID
+fit_fe <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 plot(fit_fe)
 
 }

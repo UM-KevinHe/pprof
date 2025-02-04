@@ -6,13 +6,13 @@
 #' with the response variable on the left of a ~ operator and covariates on the right,
 #' separated by + operators. The random effect of the provider identifier is specified using \code{(1 | )}.
 #' @param data a data frame containing the variables named in the `formula`,
-#' or the columns specified by `Y.char`, `Z.char`, and `ID.char`.
+#' or the columns specified by `Y.char`, `Z.char`, and `ProvID.char`.
 #' @param Y.char a character string specifying the column name of the response variable in the `data`.
 #' @param Z.char a character vector specifying the column names of the covariates in the `data`.
-#' @param ID.char a character string specifying the column name of the provider identifier in the `data`.
+#' @param ProvID.char a character string specifying the column name of the provider identifier in the `data`.
 #' @param Y a numeric vector representing the response variable.
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
-#' @param ID a numeric vector representing the provider identifier.
+#' @param ProvID a numeric vector representing the provider identifier.
 #' @param \dots additional arguments passed to \code{\link[lme4]{lmer}} for further customization.
 #'
 #' @return A list of objects with S3 class \code{"random_re"}:
@@ -67,16 +67,17 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' data <- data.frame(outcome, ID, covar)
+#' ProvID <- ExampleDataLinear$ProvID
+#' data <- data.frame(outcome, ProvID, covar)
 #' covar.char <- colnames(covar)
 #' outcome.char <- colnames(data)[1]
-#' ID.char <- colnames(data)[2]
-#' formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ (1|ID)"))
+#' ProvID.char <- colnames(data)[2]
+#' formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ (1|ProvID)"))
 #'
 #' # Fit random effect linear model using three input formats
-#' fit_re1 <- linear_re(Y = outcome, Z = covar, ID = ID)
-#' fit_re2 <- linear_re(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
+#' fit_re1 <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
+#' fit_re2 <- linear_re(data = data, Y.char = outcome.char,
+#' Z.char = covar.char, ProvID.char = ProvID.char)
 #' fit_re3 <- linear_re(formula, data)
 #'
 #' @references
@@ -85,8 +86,8 @@
 #' \cr
 
 linear_re <- function(formula = NULL, data = NULL,
-                      Y = NULL, Z = NULL, ID = NULL,
-                      Y.char = NULL, Z.char = NULL, ID.char = NULL, ...) {
+                      Y = NULL, Z = NULL, ProvID = NULL,
+                      Y.char = NULL, Z.char = NULL, ProvID.char = NULL, ...) {
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
     data <- data[complete.cases(data), ] # Remove rows with missing values
@@ -98,60 +99,60 @@ linear_re <- function(formula = NULL, data = NULL,
     id_var <- trimws(gsub(".*\\|", "", RE_term))
 
     Y.char <- response
-    ID.char <- id_var
+    ProvID.char <- id_var
     Z.char <- predictors[!grepl("\\|", predictors)]
-    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+    if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
 
     data <- data[order(factor(data[[id_var]])),]
     # Y <- data[, Y.char, drop = F]
     # Z <- as.matrix(data[, Z.char, drop = F])
-    # ID <- data[, ID.char, drop = F]
+    # ProvID <- data[, ProvID.char, drop = F]
     fit_re <- lmer(formula, data, ...)
   }
-  else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
-    message("Input format: data, Y.char, Z.char, and ID.char.")
+  else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ProvID.char)) {
+    message("Input format: data, Y.char, Z.char, and ProvID.char.")
 
-    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+    if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
 
     data <- data[complete.cases(data), ] # Remove rows with missing values
-    data <- data[order(factor(data[, ID.char])),]
+    data <- data[order(factor(data[, ProvID.char])),]
     # Y <- data[, Y.char, drop = F]
     # Z <- as.matrix(data[, Z.char, drop = F])
-    # ID <- data[, ID.char, drop = F]
+    # ProvID <- data[, ProvID.char, drop = F]
 
-    formula <- as.formula(paste(Y.char, "~ (1|", ID.char, ") +", paste(Z.char, collapse = " + ")))
+    formula <- as.formula(paste(Y.char, "~ (1|", ProvID.char, ") +", paste(Z.char, collapse = " + ")))
     fit_re <- lmer(formula, data, ...)
   }
-  else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
-    message("Input format: Y, Z, and ID.")
+  else if (!is.null(Y) && !is.null(Z) && !is.null(ProvID)) {
+    message("Input format: Y, Z, and ProvID.")
 
-    if (length(Y) != length(ID) | length(ID) != nrow(Z)){
+    if (length(Y) != length(ProvID) | length(ProvID) != nrow(Z)){
       stop("Dimensions of the input data do not match!!", call.=F)}
 
-    data <- as.data.frame(cbind(Y, ID, Z))
+    data <- as.data.frame(cbind(Y, ProvID, Z))
     data <- data[complete.cases(data), ] # Remove rows with missing values
     Y.char <- colnames(data)[1]
-    ID.char <- colnames(data)[2]
+    ProvID.char <- colnames(data)[2]
     Z.char <- colnames(Z)
-    data <- data[order(factor(data[,ID.char])),]
+    data <- data[order(factor(data[,ProvID.char])),]
 
     # Z <- as.matrix(data[,Z.char], drop = F)
     # Y <- as.matrix(data[, Y.char, drop = F])
-    # ID <- as.matrix(data[, ID.char, drop = F])
+    # ProvID <- as.matrix(data[, ProvID.char, drop = F])
 
-    formula <- as.formula(paste(Y.char, "~ (1|", ID.char, ")+", paste0(Z.char, collapse = "+")))
+    formula <- as.formula(paste(Y.char, "~ (1|", ProvID.char, ")+", paste0(Z.char, collapse = "+")))
 
     fit_re <- lmer(formula, data, ...)
   }
 
   X.model <- model.matrix(fit_re)
   Y <- as.matrix(data[, Y.char, drop = F])
-  ID <- as.matrix(data[, ID.char, drop = F])
-  data <- as.data.frame(cbind(Y, ID, X.model))
+  ProvID <- as.matrix(data[, ProvID.char, drop = F])
+  data <- as.data.frame(cbind(Y, ProvID, X.model))
 
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+  n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
   m <- length(n.prov) # number of providers
   n <- sum(n.prov) # number of observations
   # p <- length(Z.char) # number of covariates
@@ -161,7 +162,7 @@ linear_re <- function(formula = NULL, data = NULL,
   colnames(FE_coefficient) <- "Coefficient"
   rownames(FE_coefficient) <- names(fixef(fit_re))
 
-  RE_coefficient <- as.matrix(ranef(fit_re)[[ID.char]], ncol = 1)
+  RE_coefficient <- as.matrix(ranef(fit_re)[[ProvID.char]], ncol = 1)
   colnames(RE_coefficient) <- "alpha"
   rownames(RE_coefficient) <- names(n.prov)
 
@@ -173,7 +174,7 @@ linear_re <- function(formula = NULL, data = NULL,
   sum <- summary(fit_re)
   var_alpha <- matrix(as.data.frame(sum$varcor)[1,"sdcor"]^2)
   colnames(var_alpha) <- "Variance.Alpha"
-  rownames(var_alpha) <- "ID"
+  rownames(var_alpha) <- "ProvID"
 
   varcov_FE <- matrix(sum$vcov, ncol = length(FE_coefficient))
   colnames(varcov_FE) <- colnames(sum$vcov)
@@ -204,7 +205,7 @@ linear_re <- function(formula = NULL, data = NULL,
   BIC <- BIC(fit_re)
 
   char_list <- list(Y.char = Y.char,
-                    ID.char = ID.char,
+                    ProvID.char = ProvID.char,
                     Z.char = Z.char)
 
   result <- structure(list(coefficient = coefficient,

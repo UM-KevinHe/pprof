@@ -4,8 +4,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_re <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_re <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' summary(fit_re)
 #'
 #' @importFrom stats pnorm qnorm

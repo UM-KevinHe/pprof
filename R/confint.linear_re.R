@@ -27,9 +27,9 @@
 #' @examples
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
-#' ID <- ExampleDataLinear$ID
+#' ProvID <- ExampleDataLinear$ProvID
 #' covar <- ExampleDataLinear$Z
-#' fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
+#' fit_re <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' confint(fit_re)
 #'
 #' @importFrom stats pnorm qnorm pt qt
@@ -50,17 +50,17 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
     stop("Provider effect (option = 'alpha') only supports two-sided confidence intervals.", call. = FALSE)
 
   data <- object$data_include
-  prov <- data[ ,object$char_list$ID.char]
+  prov <- data[ ,object$char_list$ProvID.char]
   n <- nrow(data)
   Y.char <- object$char_list$Y.char
-  ID.char <- object$char_list$ID.char
+  ProvID.char <- object$char_list$ProvID.char
   Z.char <- object$char_list$Z.char
   prov.name <- rownames(object$coefficient$RE)
   REcoef <- object$coefficient$RE
 
   var_alpha <- object$variance$alpha
   sigma_sq <- object$sigma^2
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+  n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
   R_i <- as.vector(var_alpha) / (as.vector(var_alpha) + as.vector(sigma_sq) / n.prov)
 
   se.alpha <- sqrt(R_i * sigma_sq / n.prov)
@@ -97,7 +97,7 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
       parm <- as.numeric(parm)
     }
 
-    if (class(parm) == class(data[, ID.char])) {
+    if (class(parm) == class(data[, ProvID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements!")

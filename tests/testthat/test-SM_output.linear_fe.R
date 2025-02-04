@@ -2,9 +2,9 @@ test_that("SM_output.linear_fe function behaves correctly", {
   data(ExampleDataLinear)
   Y <- ExampleDataLinear$Y
   Z <- ExampleDataLinear$Z
-  ID <- ExampleDataLinear$ID
+  ProvID <- ExampleDataLinear$ProvID
 
-  fit_fe1 <- linear_fe(Y = Y, Z = Z, ID = ID)
+  fit_fe1 <- linear_fe(Y = Y, Z = Z, ProvID = ProvID)
   SM_median <- SM_output(fit_fe1, stdz = c("indirect", "direct"))
   dimnames(SM_median$indirect.difference) <- NULL
   dimnames(SM_median$direct.difference) <- NULL

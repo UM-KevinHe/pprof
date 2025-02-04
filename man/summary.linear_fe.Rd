@@ -41,15 +41,15 @@ Provide the summary statistics for the covariate estimates for a fixed/random ef
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
-ID <- ExampleDataLinear$ID
-fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
+ProvID <- ExampleDataLinear$ProvID
+fit_fe <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 summary(fit_fe)
 
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
-ID <- ExampleDataLinear$ID
-fit_re <- linear_fe(Y = outcome, Z = covar, ID = ID)
+ProvID <- ExampleDataLinear$ProvID
+fit_re <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 summary(fit_re)
 
 }

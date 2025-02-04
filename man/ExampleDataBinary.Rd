@@ -10,7 +10,7 @@ A list containing the following elements:
 \item{Y}{a vector representing binary outcomes with 0 or 1.
 Generated from a Bernoulli distribution with the probability of success (\eqn{\boldsymbol{\mu}}), which is
 determined by applying the logistic function to the linear combination of provider effects and covariates.}
-\item{ID}{a vector representing identifier for each provider.
+\item{ProvID}{a vector representing identifier for each provider.
 The number of individuals per provider is generated from a
 Poisson distribution with mean 80, with a minimum value of 11.}
 \item{Z}{a data frame containing 5 continuous variables.
@@ -28,7 +28,7 @@ A simulated data set containing 7994 observations, 5 continuous covariates and 1
 \examples{
 data(ExampleDataBinary)
 head(ExampleDataBinary$Y)
-head(ExampleDataBinary$ID)
+head(ExampleDataBinary$ProvID)
 head(ExampleDataBinary$Z)
 }
 \keyword{datasets}

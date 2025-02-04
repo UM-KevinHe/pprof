@@ -45,8 +45,8 @@
 #' data(ExampleDataBinary)
 #' outcome = ExampleDataBinary$Y
 #' covar = ExampleDataBinary$Z
-#' ID = ExampleDataBinary$ID
-#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+#' ProvID = ExampleDataBinary$ProvID
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 #' test(fit_fe, test = "score")
 #'
 #' @importFrom stats plogis qnorm pnorm rbinom
@@ -70,9 +70,9 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
 
   Y.char <- fit$char_list$Y.char
   Z.char <- fit$char_list$Z.char
-  ID.char <- fit$char_list$ID.char
-  data <- fit$data_include[, c(Y.char, Z.char, ID.char)] #already sorted by provider ID
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+  ProvID.char <- fit$char_list$ProvID.char
+  data <- fit$data_include[, c(Y.char, Z.char, ProvID.char)] #already sorted by provider ID
+  n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
 
   # gamma <- fit$df.prov$gamma_est #not use the potential Inf of gamma here
   gamma <- fit$coefficient$gamma
@@ -87,11 +87,11 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, ID.char]) & !(test == "wald" | (test == "score" & !score_modified))) {
+    if (class(parm) == class(data[, ProvID.char]) & !(test == "wald" | (test == "score" & !score_modified))) {
       n.prov <- n.prov[names(n.prov) %in% parm]
-      data <- data[data[, ID.char] %in% parm, ]
-    } else if (class(parm) == class(data[, ID.char]) & (test == "wald" | (test == "score" & !score_modified))) {
-      indices <- which(unique(data[, ID.char]) %in% parm)
+      data <- data[data[, ProvID.char] %in% parm, ]
+    } else if (class(parm) == class(data[, ProvID.char]) & (test == "wald" | (test == "score" & !score_modified))) {
+      indices <- which(unique(data[, ProvID.char]) %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements!")
     }
@@ -130,13 +130,13 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
 
       return(c(flag, p.val, z.score))
     }
-    results <- sapply(by(data, data[,ID.char], identity),
+    results <- sapply(by(data, data[,ProvID.char], identity),
                       FUN=function(x) exact.bootstrap(x, n, alternative))
 
     return_df <- data.frame(flag = factor(results[1,]),
                             p = results[2,],
                             stat = results[3,],
-                            row.names = unique(data[, ID.char]))
+                            row.names = unique(data[, ProvID.char]))
     colnames(return_df) <- c("flag", "p value", "stat")
     attr(return_df, "provider size") <- n.prov
 
@@ -144,7 +144,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
 
   } else if (test == "score") {
     if (score_modified == FALSE) {  #standard score test
-      n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+      n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
       m <- length(n.prov)
       if (missing(parm)) {
         indices <- 1:m
@@ -171,7 +171,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
       return_df <- data.frame(flag=factor(flag),
                               p=p.val,
                               stat=z.score,
-                              row.names = unique(data[, ID.char])[indices])
+                              row.names = unique(data[, ProvID.char])[indices])
       colnames(return_df) <- c("flag", "p value", "stat")
       attr(return_df, "provider size") <- n.prov[indices]
 
@@ -180,8 +180,8 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
     } else {  #modified score test
       probs <- plogis(gamma.null + unname(as.matrix(data[, Z.char])) %*% beta)
       probs <- pmin(pmax(probs,1e-10),1-1e-10)
-      z.score <- sapply(split(data[,Y.char]-probs,data[,ID.char]),sum) /
-        sqrt(sapply(split(probs*(1-probs),data[,ID.char]),sum))
+      z.score <- sapply(split(data[,Y.char]-probs,data[,ProvID.char]),sum) /
+        sqrt(sapply(split(probs*(1-probs),data[,ProvID.char]),sum))
 
       if (alternative == "two.sided") {
         p <- pnorm(z.score, lower.tail=F)
@@ -202,7 +202,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
       return_df <- data.frame(flag=factor(flag),
                               p=p.val,
                               stat=z.score,
-                              row.names = unique(data[, ID.char]))
+                              row.names = unique(data[, ProvID.char]))
       colnames(return_df) <- c("flag", "p value", "stat")
       attr(return_df, "provider size") <- n.prov
 
@@ -240,13 +240,13 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
 
       return(c(flag, p.val, z.score))
     }
-    results <- sapply(by(data, data[,ID.char],identity),
+    results <- sapply(by(data, data[,ProvID.char],identity),
                       FUN=function(x) exact.poisbinom(x, alternative))
 
     return_df <- data.frame(flag = factor(results[1,]),
                             p = results[2,],
                             stat = results[3,],
-                            row.names = unique(data[, ID.char]))
+                            row.names = unique(data[, ProvID.char]))
     colnames(return_df) <- c("flag", "p value", "stat")
     attr(return_df, "provider size") <- n.prov
 
@@ -254,20 +254,20 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
   } else if (test=="wald") { # invalid in presence of outlying providers
     warning("Wald test fails for datasets with providers having all or no events. Score test or exact test are recommended.")
 
-    # gamma.obs <- rep(gamma, sapply(split(data[,Y.char],data[,ID.char]),length)) #find gamma-hat
+    # gamma.obs <- rep(gamma, sapply(split(data[,Y.char],data[,ProvID.char]),length)) #find gamma-hat
     # probs <- as.numeric(plogis(gamma.obs+as.matrix(data[,Z.char])%*%beta))
-    # info.gamma.inv <- 1/sapply(split(probs*(1-probs), data[,ID.char]),sum) #I_11^-1
-    # info.betagamma <- sapply(by(probs*(1-probs)*as.matrix(data[,Z.char]),data[,ID.char],identity),colSums) #I_21
+    # info.gamma.inv <- 1/sapply(split(probs*(1-probs), data[,ProvID.char]),sum) #I_11^-1
+    # info.betagamma <- sapply(by(probs*(1-probs)*as.matrix(data[,Z.char]),data[,ProvID.char],identity),colSums) #I_21
     # info.beta <- t(as.matrix(data[,Z.char]))%*%(probs*(1-probs)*as.matrix(data[,Z.char]))
     # schur.inv <- solve(info.beta-info.betagamma%*%(info.gamma.inv*t(info.betagamma))) # inv of Schur complement; S^-1
     # if (missing(parm)) {
     #   mat.tmp <- info.gamma.inv*t(info.betagamma) #J_1^T
-    #   names <- unique(data[, ID.char])
+    #   names <- unique(data[, ProvID.char])
     # } else {
     #   mat.tmp <- info.gamma.inv[indices]*t(info.betagamma[,indices])
     #   info.gamma.inv <- info.gamma.inv[indices]
     #   gamma <- gamma[indices]
-    #   names <- unique(data[, ID.char])[indices]
+    #   names <- unique(data[, ProvID.char])[indices]
     # }
     # se.gamma <- sqrt(info.gamma.inv+apply(mat.tmp, 1, FUN=function(x) t(matrix(x))%*%schur.inv%*%matrix(x))) #only diagonal elements of (1,1) block of I^-1(\theta)
     # stat <- (gamma-gamma.null)/se.gamma

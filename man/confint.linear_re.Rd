@@ -50,9 +50,9 @@ Provide confidence intervals for provider effects or standardized measures from 
 \examples{
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
-ID <- ExampleDataLinear$ID
+ProvID <- ExampleDataLinear$ProvID
 covar <- ExampleDataLinear$Z
-fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
+fit_re <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 confint(fit_re)
 
 }

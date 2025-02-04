@@ -43,8 +43,8 @@
 #' data(ExampleDataBinary)
 #' outcome = ExampleDataBinary$Y
 #' covar = ExampleDataBinary$Z
-#' ID = ExampleDataBinary$ID
-#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+#' ProvID = ExampleDataBinary$ProvID
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 #' confint(fit_fe, option = "gamma")
 #' confint(fit_fe, option = "SM")
 #'
@@ -65,7 +65,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
 
   Y.char <- object$char_list$Y.char
   Z.char <- object$char_list$Z.char
-  ID.char <- object$char_list$ID.char
+  ProvID.char <- object$char_list$ProvID.char
   gamma <- object$coefficient$gamma
   beta <- object$coefficient$beta
   # df.prov <- object$df.prov
@@ -81,13 +81,13 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
   #confidence of gamma
   confint_fe_gamma <- function(object, test, parm, alpha, alternative) {
     data <- object$data_include
-    Obs_provider <- sapply(split(data[,Y.char],data[,ID.char]),sum)
+    Obs_provider <- sapply(split(data[,Y.char],data[,ProvID.char]),sum)
     if (missing(parm)) {
       # pass
-    } else if (class(parm)==class(data[,ID.char]) & test!="wald") {
-      data <- data[data[,ID.char] %in% parm,]
-    } else if (class(parm)==class(data[,ID.char]) & test=="wald") {
-      indices <- which(unique(data[,ID.char]) %in% parm)
+    } else if (class(parm)==class(data[,ProvID.char]) & test!="wald") {
+      data <- data[data[,ProvID.char] %in% parm,]
+    } else if (class(parm)==class(data[,ProvID.char]) & test=="wald") {
+      indices <- which(unique(data[,ProvID.char]) %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements!")
     }
@@ -97,7 +97,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
         qnorm.halfalpha <- qnorm(alpha/2, lower.tail=F)
         qnorm.alpha <- qnorm(alpha, lower.tail=F)
         CL.finite <- function(df, alternative) {
-          prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+          prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                          stop("Number of providers involved NOT equal to one!"))
           UL.gamma <- function(Gamma) { #increasing function w.r.t gamma_null
             p <- plogis(Gamma+Z.beta)
@@ -153,7 +153,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
           return(return_mat)
         }
         CL.no.events <- function(df) { #only upper bound
-          prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+          prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                          stop("Number of providers involved NOT equal to one!"))
           Z.beta <- as.matrix(df[,Z.char])%*%beta
           max.Z.beta <- norm(Z.beta, "I")
@@ -177,7 +177,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
           return(return_mat)
         }
         CL.all.events <- function(df) { #only lower bound
-          prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+          prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                          stop("Number of providers involved NOT equal to one!"))
           Z.beta <- as.matrix(df[,Z.char])%*%beta
           max.Z.beta <- norm(Z.beta, "I")
@@ -220,7 +220,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
               1-poibin::ppoibin(Obs-1,plogis(Gamma+Z.beta))-alpha
             }
           }
-          prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+          prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                          stop("Number of providers involved NOT equal to one!"))
           # Obs <- df.prov[as.character(prov), "Obs_provider"]
           Obs <- Obs_provider[[as.character(prov)]]
@@ -258,7 +258,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
           return(return_mat)
         }
         CL.no.events <- function(df) {
-          prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+          prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                          stop("Number of providers involved NOT equal to one!"))
           Z.beta <- as.matrix(df[,Z.char])%*%beta
           max.Z.beta <- norm(Z.beta, "I")
@@ -280,7 +280,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
           return(return_mat)
         }
         CL.all.events <- function(df) {
-          prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+          prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                          stop("Number of providers involved NOT equal to one!"))
           Z.beta <- as.matrix(df[,Z.char])%*%beta
           max.Z.beta <- norm(Z.beta, "I")
@@ -303,15 +303,15 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
         }
       }
       confint.finite <- sapply(by(data[(data$no.events==0) & (data$all.events==0),],
-                                  data[(data$no.events==0) & (data$all.events==0),ID.char],identity),
+                                  data[(data$no.events==0) & (data$all.events==0),ProvID.char],identity),
                                FUN=function(df) CL.finite(df, alternative))
-      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),ID.char])
-      confint.no.events <- sapply(by(data[data$no.events==1,], data[data$no.events==1,ID.char],identity),
+      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),ProvID.char])
+      confint.no.events <- sapply(by(data[data$no.events==1,], data[data$no.events==1,ProvID.char],identity),
                                   FUN=function(df) CL.no.events(df))
-      prov_no.events <- unique(data[data$no.events==1,ID.char])
-      confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,ID.char],identity),
+      prov_no.events <- unique(data[data$no.events==1,ProvID.char])
+      confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,ProvID.char],identity),
                                    FUN=function(df) CL.all.events(df))
-      prov_all.events <- unique(data[data$all.events==1,ID.char])
+      prov_all.events <- unique(data[data$all.events==1,ProvID.char])
       confint_df <- as.numeric(cbind(confint.finite, confint.no.events, confint.all.events))
       confint_df <- as.data.frame(matrix(confint_df, ncol = 3, byrow = T))
       colnames(confint_df) <- c("gamma", "gamma.lower", "gamma.upper")
@@ -368,9 +368,9 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
         indirect.ratio_df <- SR.indirect$indirect.ratio
         indirect.rate_df <- SR.indirect$indirect.rate
         data <- data.ori
-      } else if (class(parm) == class(data.ori[,ID.char])) {
+      } else if (class(parm) == class(data.ori[,ProvID.char])) {
         OE_df.indirect <- SR.indirect$OE$OE_indirect[rownames(SR.indirect$OE$OE_indirect) %in% parm, , drop = FALSE]
-        data <- data.ori[data.ori[,ID.char] %in% parm,]
+        data <- data.ori[data.ori[,ProvID.char] %in% parm,]
         indirect.ratio_df <- SR.indirect$indirect.ratio[rownames(SR.indirect$indirect.ratio) %in% parm, , drop = FALSE]
         indirect.rate_df <- SR.indirect$indirect.rate[rownames(SR.indirect$indirect.rate) %in% parm, , drop = FALSE]
       } else {
@@ -380,24 +380,24 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
       qnorm.halfalpha <- qnorm(alpha/2, lower.tail=F)
       qnorm.alpha <- qnorm(alpha, lower.tail=F)
       SR_indirect.finite <- function(df) {
-        prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+        prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ProvID.char]), alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         gamma.upper <- confint_gamma$gamma.upper
-        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
+        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ProvID.char]), "Exp.indirect_provider"]
         SR.lower <- sum(plogis(gamma.lower+Z.beta)) / EXP.i
         SR.upper <- sum(plogis(gamma.upper+Z.beta)) / EXP.i
         return(c(SR.lower, SR.upper))
       }
       SR_indirect.no.events <- function(df) {
-        prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+        prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ProvID.char]), alpha = alpha, alternative = alternative)
         gamma.upper <- confint_gamma$gamma.upper
-        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
+        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ProvID.char]), "Exp.indirect_provider"]
         if (alternative == "greater") {
           SR.upper <- nrow(df) / EXP.i
         }
@@ -407,12 +407,12 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
         return(c(0, SR.upper))
       }
       SR_indirect.all.events <- function(df) {
-        prov <- ifelse(length(unique(df[,ID.char]))==1, unique(df[,ID.char]),
+        prov <- ifelse(length(unique(df[,ProvID.char]))==1, unique(df[,ProvID.char]),
                        stop("Number of providers involved NOT equal to one!"))
         Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ID.char]), alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = unique(df[,ProvID.char]), alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
-        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ID.char]), "Exp.indirect_provider"]
+        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,ProvID.char]), "Exp.indirect_provider"]
         if (alternative == "less") {
           SR.lower <- 0
         }
@@ -424,15 +424,15 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
       }
 
       confint.finite <- sapply(by(data[(data$no.events==0) & (data$all.events==0),],
-                                  data[(data$no.events==0) & (data$all.events==0),ID.char],identity),
+                                  data[(data$no.events==0) & (data$all.events==0),ProvID.char],identity),
                                FUN=function(df) SR_indirect.finite(df))
-      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),ID.char])
-      confint.no.events <- sapply(by(data[data$no.events==1,], data[data$no.events==1,ID.char],identity),
+      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),ProvID.char])
+      confint.no.events <- sapply(by(data[data$no.events==1,], data[data$no.events==1,ProvID.char],identity),
                                   FUN=function(df) SR_indirect.no.events(df))
-      prov_no.events <- unique(data[data$no.events==1,ID.char])
-      confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,ID.char],identity),
+      prov_no.events <- unique(data[data$no.events==1,ProvID.char])
+      confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,ProvID.char],identity),
                                    FUN=function(df) SR_indirect.all.events(df))
-      prov_all.events <- unique(data[data$all.events==1,ID.char])
+      prov_all.events <- unique(data[data$all.events==1,ProvID.char])
       CI.combined <- cbind(confint.finite, confint.no.events, confint.all.events)
       if (ncol(CI.combined) > 1) {
         CI.combined <- CI.combined[, order(as.numeric(colnames(CI.combined)))]
@@ -478,11 +478,11 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
         direct.ratio_df <- SR.direct$direct.ratio
         direct.rate_df <- SR.direct$direct.rate
         data <- data.ori
-      } else if (class(parm) == class(data[,ID.char])) {
+      } else if (class(parm) == class(data[,ProvID.char])) {
         OE_df.direct <- SR.direct$OE$OE_direct[1,1]
         direct.ratio_df <- SR.direct$direct.ratio[rownames(SR.direct$direct.ratio) %in% parm, , drop = FALSE]
         direct.rate_df <- SR.direct$direct.rate[rownames(SR.direct$direct.rate) %in% parm, , drop = FALSE]
-        data <- data.ori[data.ori[,ID.char] %in% parm,]
+        data <- data.ori[data.ori[,ProvID.char] %in% parm,]
       } else {
         stop("Argument 'parm' includes invalid elements!")
       }
@@ -490,18 +490,18 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
       qnorm.halfalpha <- qnorm(alpha/2, lower.tail=F)
       qnorm.alpha <- qnorm(alpha, lower.tail=F)
 
-      SR_direct.finite <- function(ID) {
+      SR_direct.finite <- function(ProvID) {
         Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(object, test = test, parm = ID, alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = ProvID, alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         gamma.upper <- confint_gamma$gamma.upper
         SR.lower <- sum(plogis(gamma.lower+Z.beta.all)) / OE_df.direct
         SR.upper <- sum(plogis(gamma.upper+Z.beta.all)) / OE_df.direct
         return(c(SR.lower, SR.upper))
       }
-      SR_direct.no.events <- function(ID) {
+      SR_direct.no.events <- function(ProvID) {
         Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(object, test = test, parm = ID, alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = ProvID, alpha = alpha, alternative = alternative)
         gamma.upper <- confint_gamma$gamma.upper
         if (alternative == "greater") {
           SR.upper <- nrow(data.ori)/sum(data.ori[,Y.char])
@@ -511,9 +511,9 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
         }
         return(c(0, SR.upper))
       }
-      SR_direct.all.events <- function(ID) {
+      SR_direct.all.events <- function(ProvID) {
         Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(object, test = test, parm = ID, alpha = alpha, alternative = alternative)
+        confint_gamma <- confint_fe_gamma(object, test = test, parm = ProvID, alpha = alpha, alternative = alternative)
         gamma.lower <- confint_gamma$gamma.lower
         if (alternative == "less") {
           SR.lower <- 0
@@ -525,15 +525,15 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
         return(c(SR.lower, SR.upper))
       }
 
-      confint.finite <- sapply(unique(data[(data$no.events==0) & (data$all.events==0),]$ID),
-                               FUN = function(ID) SR_direct.finite(ID))
-      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),ID.char])
-      confint.no.events <- sapply(unique(data[(data$no.events==1) & (data$all.events==0),]$ID),
-                                  FUN = function(ID) SR_direct.no.events(ID))
-      prov_no.events <- unique(data[data$no.events==1,ID.char])
-      confint.all.events <- sapply(unique(data[(data$no.events==0) & (data$all.events==1),]$ID),
-                                   FUN = function(ID) SR_direct.all.events(ID))
-      prov_all.events <- unique(data[data$all.events==1,ID.char])
+      confint.finite <- sapply(unique(data[(data$no.events==0) & (data$all.events==0),]$ProvID),
+                               FUN = function(ProvID) SR_direct.finite(ProvID))
+      prov_finite <- unique(data[(data$no.events==0) & (data$all.events==0),ProvID.char])
+      confint.no.events <- sapply(unique(data[(data$no.events==1) & (data$all.events==0),]$ProvID),
+                                  FUN = function(ProvID) SR_direct.no.events(ProvID))
+      prov_no.events <- unique(data[data$no.events==1,ProvID.char])
+      confint.all.events <- sapply(unique(data[(data$no.events==0) & (data$all.events==1),]$ProvID),
+                                   FUN = function(ProvID) SR_direct.all.events(ProvID))
+      prov_all.events <- unique(data[data$all.events==1,ProvID.char])
       CI.combined <- cbind(confint.finite, confint.no.events, confint.all.events)
       colnames(CI.combined) <- c(prov_finite, prov_no.events, prov_all.events)
       if (ncol(CI.combined) > 1) {

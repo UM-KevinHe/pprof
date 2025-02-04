@@ -62,8 +62,8 @@ The first value in the vector is used as the significance level for flagging eac
 data(ExampleDataBinary)
 outcome <- ExampleDataBinary$Y
 covar <- ExampleDataBinary$Z
-ID <- ExampleDataBinary$ID
-fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID)
+ProvID <- ExampleDataBinary$ProvID
+fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID)
 plot(fit_fe)
 
 }

@@ -44,9 +44,9 @@ Outlying providers are determined by the test statistic falling beyond the thres
 \examples{
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
-ID <- ExampleDataLinear$ID
+ProvID <- ExampleDataLinear$ProvID
 covar <- ExampleDataLinear$Z
-fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
+fit_re <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 test(fit_re)
 
 }
