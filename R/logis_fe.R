@@ -71,7 +71,7 @@
 #' \item{variance}{a list containing the variance estimates:
 #'   \code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the provider effects.}
 #' \item{linear_pred}{the linear predictor of each individual.}
-#' \item{prediction}{predicted probability of each individual}
+#' \item{fitted}{the predicted probability of each observation having a response of 1.}
 #' \item{observation}{the original response of each individual.}
 #' \item{Loglkd}{the log-likelihood.}
 #' \item{AIC}{Akaike info criterion.}
@@ -263,9 +263,9 @@ logis_fe <- function(formula = NULL, data = NULL,
   colnames(linear_pred) <- "Linear Predictor"
   rownames(linear_pred) <- seq_len(nrow(linear_pred))
   pred <- as.numeric(plogis(gamma.obs + linear_pred))
-  prediction <- matrix(pred, ncol = 1)
-  colnames(prediction) <- "Predicted Probability"
-  rownames(prediction) <- seq_len(nrow(prediction))
+  fitted <- matrix(pred, ncol = 1)
+  colnames(fitted) <- "Predicted Probability"
+  rownames(fitted) <- seq_len(nrow(fitted))
 
   coefficient <- list()
   coefficient$beta <- beta
@@ -277,7 +277,7 @@ logis_fe <- function(formula = NULL, data = NULL,
 
   return_ls <- structure(list(coefficient = coefficient,
                               variance = variance,
-                              prediction = prediction, #predicted probability
+                              fitted = fitted, #predicted probability
                               observation = data[, Y.char], #patient-level obs
                               linear_pred = linear_pred, #linear predictor
                               Loglkd = Loglkd,

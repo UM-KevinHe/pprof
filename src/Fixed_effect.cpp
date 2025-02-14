@@ -89,12 +89,12 @@ double logist(double x) {
     return 1.0 / (1.0 + exp(-x));
 }
 
-double Exp_direct(double gamma, const arma::vec& Z_beta) {
+double Exp_direct(double est, const arma::vec& Z_beta) {
     double sum = 0.0;
 
     #pragma omp parallel for reduction(+:sum)
     for (unsigned int i = 0; i < Z_beta.n_elem; ++i) {
-        sum += logist(gamma + Z_beta[i]);
+        sum += logist(est + Z_beta[i]);
     }
 
     return sum;
@@ -106,13 +106,13 @@ double p_binomial(double &eta) {
 
 
 // [[Rcpp::export]]
-arma::vec computeDirectExp(const arma::vec& gamma_prov, const arma::vec& Z_beta, const int &threads) {
+arma::vec computeDirectExp(const arma::vec& est, const arma::vec& Z_beta, const int &threads) {
     omp_set_num_threads(threads);
-    arma::vec results(gamma_prov.n_elem);
+    arma::vec results(est.n_elem);
 
     #pragma omp parallel for schedule(static)
-    for (unsigned int i = 0; i < gamma_prov.n_elem; ++i) {
-        results[i] = Exp_direct(gamma_prov[i], Z_beta);
+    for (unsigned int i = 0; i < est.n_elem; ++i) {
+        results[i] = Exp_direct(est[i], Z_beta);
     }
     return results;
 }

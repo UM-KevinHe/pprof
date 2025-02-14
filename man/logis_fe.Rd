@@ -85,7 +85,7 @@ A list of objects with S3 class \code{"logis_fe"}:
 \item{variance}{a list containing the variance estimates:
 \code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the provider effects.}
 \item{linear_pred}{the linear predictor of each individual.}
-\item{prediction}{predicted probability of each individual}
+\item{fitted}{the predicted probability of each observation having a response of 1.}
 \item{observation}{the original response of each individual.}
 \item{Loglkd}{the log-likelihood.}
 \item{AIC}{Akaike info criterion.}
