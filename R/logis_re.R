@@ -158,19 +158,23 @@ logis_re <- function(formula = NULL, data = NULL,
   colnames(FE_coefficient) <- "Coefficient"
   rownames(FE_coefficient) <- names(fixef(fit_re))
 
-  RE_coefficient <- as.matrix(ranef(fit_re)[[ProvID.char]], ncol = 1)
+  RE_coefs <- ranef(fit_re, condVar = TRUE)
+  RE_coefficient <- as.matrix(RE_coefs[[ProvID.char]], ncol = 1)
   colnames(RE_coefficient) <- "alpha"
   rownames(RE_coefficient) <- names(n.prov)
 
-  coefficient <- list()
-  coefficient$FE <- FE_coefficient
-  coefficient$RE <- RE_coefficient
+  coefficient <- list(FE = FE_coefficient, RE = RE_coefficient)
 
   # Variance
   sum <- summary(fit_re)
   var_alpha <- matrix(as.data.frame(sum$varcor)[1,"sdcor"]^2)
   colnames(var_alpha) <- "Variance.Alpha"
   rownames(var_alpha) <- "ProvID"
+
+  postVar <- matrix(attr(RE_coefs[[ProvID.char]], "postVar")[1,1,], ncol = 1)
+  rownames(postVar) <- rownames(RE_coefficient)
+  colnames(postVar) <- "PostVar"
+  attr(coefficient$RE, "PostVar") <- postVar
 
   varcov_FE <- matrix(sum$vcov, ncol = length(FE_coefficient))
   colnames(varcov_FE) <- colnames(sum$vcov)
