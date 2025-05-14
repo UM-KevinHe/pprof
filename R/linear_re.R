@@ -206,7 +206,7 @@ linear_re <- function(formula = NULL, data = NULL,
 
   char_list <- list(Y.char = Y.char,
                     ProvID.char = ProvID.char,
-                    Z.char = Z.char)
+                    Z.char = rownames(FE_coefficient)[2:length(rownames(FE_coefficient))])
 
   result <- structure(list(coefficient = coefficient,
                            variance = variance,
@@ -223,7 +223,19 @@ linear_re <- function(formula = NULL, data = NULL,
   result$data_include <- data
   result$char_list <- char_list
 
+  attr(result, "model") <- fit_re
+
   return(result)
+}
+
+
+#' @noRd
+#' @exportS3Method print linear_re
+print.linear_re <- function(x, ...) {
+  x2 <- x
+  attr(x2, "model") <- NULL
+  base::print.default(x2, ...)
+  invisible(x)
 }
 
 

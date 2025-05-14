@@ -40,6 +40,8 @@
 #' @exportS3Method test logis_re
 
 test.logis_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
+  model <- attributes(fit)$model
+
   alpha <- 1 - level
 
   data <- fit$data_include
@@ -48,8 +50,10 @@ test.logis_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two.
   Z.char <- fit$char_list$Z.char
   n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
 
-  PostVar <- attr(fit$coefficient$RE, "PostVar")
-  PostSE <- sqrt(PostVar)
+  postVar <- matrix(attr(ranef(model, condVar = TRUE)[[ProvID.char]], "postVar")[1,1,], ncol = 1)
+  rownames(postVar) <- rownames(fit$coefficient$RE)
+  colnames(postVar) <- "PostVar"
+  PostSE <- sqrt(postVar)
 
   Z_score <- (fit$coefficient$RE - null)/PostSE
   p <- pnorm(Z_score, lower.tail=F)

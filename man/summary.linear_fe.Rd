@@ -5,9 +5,9 @@
 \alias{summary.linear_re}
 \title{Result Summaries of Covariate Estimates from a fitted \code{linear_fe} or \code{linear_re} object}
 \usage{
-\method{summary}{linear_fe}(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...)
+\method{summary}{linear_fe}(object, parm, level = 0.95, null = 0, ...)
 
-\method{summary}{linear_re}(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...)
+\method{summary}{linear_re}(object, parm, level = 0.95, null = 0, ...)
 }
 \arguments{
 \item{object}{a model fitted from \code{linear_fe} or \code{linear_re}.}
@@ -19,9 +19,6 @@ By default, all covariates are included.}
 The default value is 0.95.}
 
 \item{null}{a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.}
-
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of
-\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
 
 \item{\dots}{additional arguments that can be passed to the function.}
 }

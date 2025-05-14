@@ -143,22 +143,22 @@ individual- and summary-level information. <em>Health Services and Outcomes Rese
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Y</span></span></span>
 <span class="r-in"><span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Z</span></span></span>
-<span class="r-in"><span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ID</span></span></span>
-<span class="r-in"><span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="logis_fe.html">logis_fe</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ID.</span>
+<span class="r-in"><span><span class="va">ProvID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ProvID</span></span></span>
+<span class="r-in"><span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="logis_fe.html">logis_fe</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ProvID <span class="op">=</span> <span class="va">ProvID</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ProvID.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>0 out of 100 providers considered small and filtered out!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 3 out of 100 remaining providers with no events.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 0 out of 100 remaining providers with all events.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> After screening, 38.77% of all records exhibit occurrences of events (Y = 1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Implementing SerBIN algorithm (Rcpp) for fixed provider effects model ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Iter 1: Minimum criterion across all checks is 5.021e-01;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Iter 1: Minimum criterion across all checks is 5.022e-01;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Iter 2: Minimum criterion across all checks is 1.422e-01;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Iter 3: Minimum criterion across all checks is 3.528e-02;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Iter 4: Minimum criterion across all checks is 5.671e-03;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Iter 5: Minimum criterion across all checks is 1.214e-03;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Iter 6: Minimum criterion across all checks is 2.151e-04;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Iter 7: Minimum criterion across all checks is 6.647e-05;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Iter 8: Minimum criterion across all checks is 7.349e-06;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Iter 8: Minimum criterion across all checks is 7.565e-06;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> serBIN (Rcpp) algorithm converged after 8 iterations!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Setting levels: control = 0, case = 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>

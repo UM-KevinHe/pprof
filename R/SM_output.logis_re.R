@@ -76,7 +76,7 @@ SM_output.logis_re <- function(fit, parm, stdz = "indirect", measure = c("rate",
   if ("indirect" %in% stdz) {
     n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
     Obs <- fit$fitted
-    Exp <- as.numeric(plogis(Z_beta)) # expected prob of events under null
+    Exp <- as.numeric(plogis(Z_beta)) # expected prob of events under alpha = 0
 
     df.prov <- data.frame(Obs.indirect_provider = sapply(split(Obs, prov), sum),
                           Exp.indirect_provider = sapply(split(Exp, prov), sum))

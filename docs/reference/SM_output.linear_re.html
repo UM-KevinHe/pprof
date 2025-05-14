@@ -99,9 +99,9 @@ used for their calculation.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Y</span></span></span>
 <span class="r-in"><span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Z</span></span></span>
-<span class="r-in"><span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ID</span></span></span>
-<span class="r-in"><span><span class="va">fit_linear</span> <span class="op">&lt;-</span> <span class="fu"><a href="linear_re.html">linear_re</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ID.</span>
+<span class="r-in"><span><span class="va">ProvID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ProvID</span></span></span>
+<span class="r-in"><span><span class="va">fit_linear</span> <span class="op">&lt;-</span> <span class="fu"><a href="linear_re.html">linear_re</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ProvID <span class="op">=</span> <span class="va">ProvID</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ProvID.</span>
 <span class="r-in"><span><span class="fu"><a href="SM_output.html">SM_output</a></span><span class="op">(</span><span class="va">fit_linear</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $indirect.difference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Indirect_standardized.difference</span>
@@ -146,7 +146,7 @@ used for their calculation.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 39                       0.354251227</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 40                      -0.881389857</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 41                       0.803002465</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42                      -0.517811990</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42                      -0.517811989</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 43                       0.293492361</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 44                       0.035110130</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 45                      -0.110060527</span>
@@ -183,7 +183,7 @@ used for their calculation.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 76                      -0.431149420</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 77                       0.166323929</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 78                       0.152830117</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 79                      -0.047475405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79                      -0.047475404</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 80                       0.005401941</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 81                       0.711346301</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 82                       0.115364610</span>
@@ -193,10 +193,10 @@ used for their calculation.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 86                      -0.543695052</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 87                       0.393472922</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 88                       0.008107068</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 89                       0.633800388</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89                       0.633800387</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 90                      -0.041475064</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 91                      -0.310329631</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 92                      -1.084831958</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92                      -1.084831957</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 93                       0.625010127</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 94                      -0.119090926</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95                      -0.004338301</span>
@@ -259,14 +259,14 @@ used for their calculation.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 48    55.8796613   -0.6696483</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 49  -101.9947619  -80.0121174</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 50   -62.0058309  -74.0988830</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 51   -32.3735136  -67.6569024</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 51   -32.3735137  -67.6569024</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 52  -122.7049541  -94.8452042</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 53  -109.8554040 -115.1008809</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 54    32.3683647  -26.7068096</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 55   -48.2208443  -52.6190622</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 56  -142.8737905 -129.4004961</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 57    47.7652308    7.2677739</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 58   -94.6838819  -75.0999462</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 58   -94.6838818  -75.0999462</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 59    -0.9095513  -33.6135571</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 60   -85.6139396  -86.9338856</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 61  -113.8481691  -89.7586024</span>

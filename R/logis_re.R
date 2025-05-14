@@ -171,10 +171,10 @@ logis_re <- function(formula = NULL, data = NULL,
   colnames(var_alpha) <- "Variance.Alpha"
   rownames(var_alpha) <- "ProvID"
 
-  postVar <- matrix(attr(RE_coefs[[ProvID.char]], "postVar")[1,1,], ncol = 1)
-  rownames(postVar) <- rownames(RE_coefficient)
-  colnames(postVar) <- "PostVar"
-  attr(coefficient$RE, "PostVar") <- postVar
+  # postVar <- matrix(attr(RE_coefs[[ProvID.char]], "postVar")[1,1,], ncol = 1)
+  # rownames(postVar) <- rownames(RE_coefficient)
+  # colnames(postVar) <- "PostVar"
+  # attr(coefficient$RE, "PostVar") <- postVar
 
   varcov_FE <- matrix(sum$vcov, ncol = length(FE_coefficient))
   colnames(varcov_FE) <- colnames(sum$vcov)
@@ -204,7 +204,7 @@ logis_re <- function(formula = NULL, data = NULL,
 
   char_list <- list(Y.char = Y.char,
                     ProvID.char = ProvID.char,
-                    Z.char = Z.char)
+                    Z.char = rownames(FE_coefficient)[2:length(rownames(FE_coefficient))])
 
   result <- structure(list(coefficient = coefficient,
                            variance = variance,
@@ -219,5 +219,18 @@ logis_re <- function(formula = NULL, data = NULL,
   result$data_include <- data
   result$char_list <- char_list
 
+  attr(result, "model") <- fit_re
+
   return(result)
+}
+
+
+
+#' @noRd
+#' @exportS3Method print logis_re
+print.logis_re <- function(x, ...) {
+  x2 <- x
+  attr(x2, "model") <- NULL
+  base::print.default(x2, ...)
+  invisible(x)
 }

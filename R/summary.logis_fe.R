@@ -14,8 +14,6 @@
 #'     \item{\code{"score"}:} score test.
 #'   }
 #' @param null a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.
-#' @param alternative a character string specifying the alternative hypothesis when \code{test = "wald"}, must be one of
-#' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 #' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A data frame containing summary statistics for covariate estimates, with the following columns:
@@ -41,7 +39,7 @@
 #'
 #' @exportS3Method summary logis_fe
 
-summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0, alternative = "two.sided", ...) {
+summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0, ...) {
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
   if (!class(object) %in% c("logis_fe")) stop("Object `object` is not of the classes 'logis_fe'!",call.=F)
   if (!(test %in% c("wald", "lr", "score"))) stop("Argument 'test' NOT as required!",call.=F)
@@ -67,27 +65,34 @@ summary.logis_fe <- function(object, parm, level = 0.95, test = "wald", null = 0
     se.beta <- sqrt(diag(object$variance$beta))
     stat <- (beta - null) / se.beta
 
-    if (alternative == "two.sided") {
-      p_value <-  2 * (1 - pnorm(abs(stat)))
-      crit_value <- qnorm(1 - alpha / 2)
-      lower_bound <- beta - crit_value * se.beta
-      upper_bound <- beta + crit_value * se.beta
-    }
-    else if (alternative == "greater") {
-      p_value <- 1 - pnorm(stat)
-      crit_value <- qnorm(1-alpha)
-      lower_bound <- beta - crit_value * se.beta
-      upper_bound <- Inf
-    }
-    else if (alternative == "less") {
-      p_value <- pnorm(stat)
-      crit_value <- qnorm(1-alpha)
-      lower_bound <- -Inf
-      upper_bound <- beta + crit_value * se.beta
-    }
-    else {
-      stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
-    }
+    p_value <-  2 * (1 - pnorm(abs(stat)))
+    crit_value <- qnorm(1 - alpha / 2)
+    lower_bound <- beta - crit_value * se.beta
+    upper_bound <- beta + crit_value * se.beta
+
+    # if (alternative == "two.sided") {
+    #   p_value <-  2 * (1 - pnorm(abs(stat)))
+    #   crit_value <- qnorm(1 - alpha / 2)
+    #   lower_bound <- beta - crit_value * se.beta
+    #   upper_bound <- beta + crit_value * se.beta
+    # }
+    # else if (alternative == "greater") {
+    #   p_value <- 1 - pnorm(stat)
+    #   crit_value <- qnorm(1-alpha)
+    #   lower_bound <- beta - crit_value * se.beta
+    #   upper_bound <- Inf
+    # }
+    # else if (alternative == "less") {
+    #   p_value <- pnorm(stat)
+    #   crit_value <- qnorm(1-alpha)
+    #   lower_bound <- -Inf
+    #   upper_bound <- beta + crit_value * se.beta
+    # }
+    # else {
+    #   stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
+    # }
+
+    p_value <- format.pval(p_value, digits = 7, eps = 1e-10)
 
     result <- data.frame(beta = beta, se.beta = se.beta, stat = stat, p_value = p_value,
                          lower_bound = lower_bound, upper_bound = upper_bound)

@@ -48,11 +48,11 @@
 <span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  Y <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  Z <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ID <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ProvID <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  Y.char <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  Z.char <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ID.char <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  option.gamma.var <span class="op">=</span> <span class="st">"complete"</span></span>
+<span>  ProvID.char <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  option.gamma.var <span class="op">=</span> <span class="st">"simplified"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -68,7 +68,7 @@ separated by + operators. The fixed effect of the provider identifier is specifi
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
 <dd><p>a data frame containing the variables named in the <code>formula</code>,
-or the columns specified by <code>Y.char</code>, <code>Z.char</code>, and <code>ID.char</code>.</p></dd>
+or the columns specified by <code>Y.char</code>, <code>Z.char</code>, and <code>ProvID.char</code>.</p></dd>
 
 
 <dt id="arg-y">Y<a class="anchor" aria-label="anchor" href="#arg-y"></a></dt>
@@ -79,7 +79,7 @@ or the columns specified by <code>Y.char</code>, <code>Z.char</code>, and <code>
 <dd><p>a matrix or data frame representing the covariates, which can include both numeric and categorical variables.</p></dd>
 
 
-<dt id="arg-id">ID<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
+<dt id="arg-provid">ProvID<a class="anchor" aria-label="anchor" href="#arg-provid"></a></dt>
 <dd><p>a numeric vector representing the provider identifier.</p></dd>
 
 
@@ -91,14 +91,16 @@ or the columns specified by <code>Y.char</code>, <code>Z.char</code>, and <code>
 <dd><p>a character vector specifying the column names of the covariates in the <code>data</code>.</p></dd>
 
 
-<dt id="arg-id-char">ID.char<a class="anchor" aria-label="anchor" href="#arg-id-char"></a></dt>
+<dt id="arg-provid-char">ProvID.char<a class="anchor" aria-label="anchor" href="#arg-provid-char"></a></dt>
 <dd><p>a character string specifying the column name of the provider identifier in the <code>data</code>.</p></dd>
 
 
 <dt id="arg-option-gamma-var">option.gamma.var<a class="anchor" aria-label="anchor" href="#arg-option-gamma-var"></a></dt>
 <dd><p>a character string specifying the method to calculate the variance of provider effects <code>gamma</code>,
-must be <code>"complete"</code> or <code>"simplified"</code>. You can specify just the initial letter.</p><ul><li><p><code>"complete"</code> (default) considering the correlation between provider effects and regression coefficients.</p></li>
-<li><p><code>"simplified"</code> calculating the variance of provider effects assuming regression coefficients are known.</p></li>
+must be <code>"full"</code> or <code>"simplified"</code>. You can specify just the initial letter.</p><ul><li><p><code>"simplified"</code> (default) calculating the simplified variance of provider effects assuming regression coefficients are known.
+This approach is suitable for large datasets where the results of the full and simplified methods are similar,
+or when the full method may become unstable due to complex settings.</p></li>
+<li><p><code>"full"</code> considering the correlation between provider effects and regression coefficients.</p></li>
 </ul></dd>
 
 </dl></div>
@@ -177,18 +179,19 @@ For datasets with missing values, this function automatically removes observatio
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Y</span></span></span>
 <span class="r-in"><span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Z</span></span></span>
-<span class="r-in"><span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ID</span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">outcome</span>, <span class="va">ID</span>, <span class="va">covar</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ProvID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ProvID</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">outcome</span>, <span class="va">ProvID</span>, <span class="va">covar</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">covar.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">covar</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outcome.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">ID.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"outcome ~"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">covar.char</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span>, <span class="st">"+ id(ID)"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ProvID.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">formula</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/formula.html" class="external-link">as.formula</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"outcome ~"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="va">covar.char</span>, collapse <span class="op">=</span> <span class="st">" + "</span><span class="op">)</span>, <span class="st">"+ id(ProvID)"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Fit fixed linear effect model using three input formats</span></span></span>
-<span class="r-in"><span><span class="va">fit_fe1</span> <span class="op">&lt;-</span> <span class="fu">linear_fe</span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ID.</span>
-<span class="r-in"><span><span class="va">fit_fe2</span> <span class="op">&lt;-</span> <span class="fu">linear_fe</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, Y.char <span class="op">=</span> <span class="va">outcome.char</span>, Z.char <span class="op">=</span> <span class="va">covar.char</span>, ID.char <span class="op">=</span> <span class="va">ID.char</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: data, Y.char, Z.char, and ID.char.</span>
+<span class="r-in"><span><span class="va">fit_fe1</span> <span class="op">&lt;-</span> <span class="fu">linear_fe</span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ProvID <span class="op">=</span> <span class="va">ProvID</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ProvID.</span>
+<span class="r-in"><span><span class="va">fit_fe2</span> <span class="op">&lt;-</span> <span class="fu">linear_fe</span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, Y.char <span class="op">=</span> <span class="va">outcome.char</span>,</span></span>
+<span class="r-in"><span>Z.char <span class="op">=</span> <span class="va">covar.char</span>, ProvID.char <span class="op">=</span> <span class="va">ProvID.char</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: data, Y.char, Z.char, and ProvID.char.</span>
 <span class="r-in"><span><span class="va">fit_fe3</span> <span class="op">&lt;-</span> <span class="fu">linear_fe</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: formula and data.</span>
 <span class="r-in"><span></span></span>
