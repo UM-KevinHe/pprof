@@ -30,6 +30,9 @@ should be provided for provider effects or standardized measures:
 \item {\code{"SM"}} standardized measures.
 }}
 
+\item{measure}{a character string or a vector indicating whether the output measure is "ratio" or "rate" if \code{option = "SM"}.
+Both "rate" and "ratio" will be provided by default.}
+
 \item{stdz}{a character string or a vector specifying the standardization method
 if \code{option} includes \code{"SM"}. See \code{stdz} argument in \code{\link{SM_output.linear_re}}.}
 

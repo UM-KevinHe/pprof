@@ -32,7 +32,7 @@
 #' fit_re <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' confint(fit_re)
 #'
-#' @importFrom stats pnorm qnorm pt qt
+#' @importFrom stats pnorm qnorm pt qt confint
 #'
 #' @exportS3Method confint linear_re
 
@@ -44,7 +44,7 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
 
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
   if (!class(object) %in% c("linear_re")) stop("Object 'object' is not of the classes 'linear_re'!",call.=F)
-  if (! "alpha" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
+  if (option != "alpha" & option != "SM") stop("Argument 'option' should be 'alpha' or 'SM'", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
   if ("alpha" %in% option && alternative != "two.sided")
     stop("Provider effect (option = 'alpha') only supports two-sided confidence intervals.", call. = FALSE)
@@ -104,13 +104,7 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
     }
   }
 
-  if ("alpha" %in% option) {
-    if (alternative == "greater") {
-      CI_alpha$alpha.Upper <- NULL
-    }
-    else if (alternative == "less") {
-      CI_alpha$alpha.Lower <- NULL
-    }
+  if (option == "alpha") {
     attr(CI_alpha, "description") <- "Provider Effects"
     return (CI_alpha[ind, ])
     # return_ls$CI.alpha <- CI_alpha[ind, ]
@@ -118,7 +112,7 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
 
 
   # CI of SR
-  if ("SM" %in% option) {
+  else if (option == "SM") {
     if ("indirect" %in% stdz) {
       SR <- SM_output(object, stdz = "indirect")
 

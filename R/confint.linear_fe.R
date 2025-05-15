@@ -46,7 +46,7 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
 
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
   if (!class(object) %in% c("linear_fe")) stop("Object 'object' is not of the classes 'linear_fe'!",call.=F)
-  if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
+  if (option != "gamma" & option != "SM") stop("Argument 'option' should be 'gamma' or 'SM'", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
   if ("gamma" %in% option && alternative != "two.sided")
     stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
@@ -105,7 +105,7 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
   if (option == "gamma") return (CI_gamma[ind, ])
 
   # CI of SM
-  if (option == "SM") {
+  else if (option == "SM") {
     if ("indirect" %in% stdz) {
       SM <- SM_output(object, stdz = "indirect", null = null)
 

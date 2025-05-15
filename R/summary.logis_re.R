@@ -26,7 +26,7 @@
 #' fit_re <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' summary(fit_re)
 #'
-#' @importFrom stats pt qt
+#' @importFrom stats pt qt confint
 #'
 #' @exportS3Method summary logis_re
 

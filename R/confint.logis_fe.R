@@ -57,7 +57,7 @@ confint.logis_fe <- function(object, parm, level = 0.95, test = "exact",
                              measure = c("rate", "ratio"), alternative = "two.sided", ...) {
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
   if (!class(object) %in% c("logis_fe")) stop("Object 'object' is not of the classes 'logis_fe'!",call.=F)
-  if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
+  if (option != "gamma" & option != "SM") stop("Argument 'option' should be 'gamma' or 'SM'", call.=F)
   if (!(test %in% c("exact", "score", "wald"))) stop("Argument 'test' NOT as required!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
 

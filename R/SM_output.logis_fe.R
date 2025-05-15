@@ -81,7 +81,7 @@ SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate",
   }
 
   if ("indirect" %in% stdz) {
-    gamma.null <- ifelse(null=="median", median(gamma),
+    gamma.null <- ifelse(null=="median", median(gamma, na.rm = TRUE),
                          ifelse(class(null)=="numeric", null[1],
                                 stop("Argument 'null' NOT as required!", call.=F)))
     Exp <- as.numeric(plogis(gamma.null + Z_beta)) # expected prob of events under null

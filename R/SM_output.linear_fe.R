@@ -76,8 +76,8 @@ SM_output.linear_fe <- function(fit, parm, stdz = "indirect", null = "median", .
 
   gamma <- fit$coefficient$gamma
   n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ProvID.char]), length)
-  gamma.null <- ifelse(null=="median", median(gamma),
-                       ifelse(null=="mean", sum(n.prov*gamma)/n,
+  gamma.null <- ifelse(null=="median", median(gamma, na.rm = TRUE),
+                       ifelse(null=="mean", sum(n.prov*gamma, na.rm = TRUE)/n,
                               ifelse(class(null)=="numeric", null[1],
                                      stop("Argument 'null' NOT as required!",call.=F))))
   if ("indirect" %in% stdz) {
