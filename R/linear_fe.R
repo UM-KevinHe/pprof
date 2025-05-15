@@ -93,7 +93,6 @@ linear_fe <- function(formula = NULL, data = NULL,
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
 
-    data <- data[complete.cases(data), ] # Remove rows with missing values
     formula_terms <- terms(formula)
     Y.char <- as.character(attr(formula_terms, "variables"))[2]
     predictors <- attr(formula_terms, "term.labels")
@@ -103,6 +102,9 @@ linear_fe <- function(formula = NULL, data = NULL,
 
     if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
+
+    data <- data[,c(Y.char, ProvID.char, Z.char)]
+    data <- data[complete.cases(data), ] # Remove rows with missing values
 
     #mf <- model.frame(formula, data)
     #Y <- model.response(mf)
@@ -117,7 +119,9 @@ linear_fe <- function(formula = NULL, data = NULL,
     if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
 
+    data <- data[,c(Y.char, ProvID.char, Z.char)]
     data <- data[complete.cases(data), ] # Remove rows with missing values
+
     Y <- data[, Y.char]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
     ProvID <- data[, ProvID.char, drop = F]

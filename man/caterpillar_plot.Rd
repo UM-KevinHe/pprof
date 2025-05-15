@@ -17,6 +17,7 @@ caterpillar_plot(
   errorbar_alpha = 0.5,
   errorbar_color = "#94a3b8",
   use_flag = FALSE,
+  orientation = "vertical",
   flag_color = c("#E69F00", "#56B4E9", "#009E73")
 )
 }
@@ -44,6 +45,12 @@ caterpillar_plot(
 \item{errorbar_color}{color of the error bars. The default value is "#94a3b8".}
 
 \item{use_flag}{logical; if \code{TRUE}, the error bars are colored to show providers' flags based on their performance. The default is \code{FALSE}.}
+
+\item{orientation}{a string specifies the orientation of the caterpillar plot:
+\describe{
+\item{"vertical"}{(default) providers on the x‑axis and values on the y‑axis.}
+\item{"horizontal"}{providers on the y‑axis and values on the x‑axis.}
+}}
 
 \item{flag_color}{vector of colors used for flagging providers when \code{use_flag = TRUE}. The default value is \code{c("#E69F00", "#56B4E9", "#009E73")}.}
 }
@@ -88,7 +95,8 @@ fit_logis <- logis_fe(Y = ExampleDataBinary$Y,
                       ProvID = ExampleDataBinary$ProvID, message = FALSE)
 CI_logis <- confint(fit_logis)
 caterpillar_plot(CI_logis$CI.indirect_ratio, use_flag = TRUE,
-                 errorbar_width = 0.5, errorbar_size = 1)
+                 errorbar_width = 0.5, errorbar_size = 1,
+                 orientation = "horizontal")
 
 }
 \seealso{

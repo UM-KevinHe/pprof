@@ -87,7 +87,7 @@ logis_re <- function(formula = NULL, data = NULL,
                       Y.char = NULL, Z.char = NULL, ProvID.char = NULL, ...) {
   if (!is.null(formula) && !is.null(data)) {
     message("Input format: formula and data.")
-    data <- data[complete.cases(data), ] # Remove rows with missing values
+
     terms <- terms(formula)
     response <- as.character(attr(terms, "variables"))[2]
     predictors <- attr(terms, "term.labels")
@@ -101,6 +101,9 @@ logis_re <- function(formula = NULL, data = NULL,
     if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
 
+    data <- data[,c(Y.char, ProvID.char, Z.char)]
+    data <- data[complete.cases(data), ] # Remove rows with missing values
+
     data <- data[order(factor(data[[id_var]])),]
     # Y <- data[, Y.char, drop = F]
     # Z <- as.matrix(data[, Z.char, drop = F])
@@ -113,7 +116,9 @@ logis_re <- function(formula = NULL, data = NULL,
     if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
 
+    data <- data[,c(Y.char, ProvID.char, Z.char)]
     data <- data[complete.cases(data), ] # Remove rows with missing values
+
     data <- data[order(factor(data[, ProvID.char])),]
     # Y <- data[, Y.char, drop = F]
     # Z <- as.matrix(data[, Z.char, drop = F])
