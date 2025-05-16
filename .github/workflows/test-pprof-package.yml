@@ -15,6 +15,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     # actions/checkout@v3
+
+    - name: Install system dependencies (Automake/Autoconf, etc.)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          automake \
+          autoconf \
+          libtool \
+          m4 \
+          perl
+
     - name: Install dependencies
       run: |
         install2.r --error --deps TRUE remotes
