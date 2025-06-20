@@ -73,9 +73,11 @@
 #'
 #' # Fit logistic linear effect model using three input formats
 #' fit_re1 <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
+#' \donttest{
 #' fit_re2 <- logis_re(data = data, Y.char = outcome.char,
 #' Z.char = covar.char, ProvID.char = ProvID.char)
 #' fit_re3 <- logis_re(formula, data)
+#' }
 #'
 #' @references
 #' Bates D, Maechler M, Bolker B, Walker S (2015). \emph{Fitting Linear Mixed-Effects Models Using lme4}.

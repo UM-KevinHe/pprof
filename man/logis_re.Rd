@@ -93,9 +93,11 @@ formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+
 
 # Fit logistic linear effect model using three input formats
 fit_re1 <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
+\donttest{
 fit_re2 <- logis_re(data = data, Y.char = outcome.char,
 Z.char = covar.char, ProvID.char = ProvID.char)
 fit_re3 <- logis_re(formula, data)
+}
 
 }
 \references{
