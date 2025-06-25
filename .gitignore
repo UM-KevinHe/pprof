@@ -16,4 +16,6 @@
 
 # Ignore package tarballs
 *.tar.gz
+
+.DS_Store
 ```
