@@ -2,16 +2,16 @@ test_that("linear_re function behaves correctly", {
   data(ExampleDataLinear)
   Y <- ExampleDataLinear$Y
   Z <- ExampleDataLinear$Z
-  ID <- ExampleDataLinear$ID
-  data <- data.frame(Y, ID, Z)
+  ProvID <- ExampleDataLinear$ProvID
+  data <- data.frame(Y, ProvID, Z)
   Z.char <- colnames(Z)
   Y.char <- "Y"
-  ID.char <- "ID"
-  formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ (1 | ID)"))
+  ProvID.char <- "ProvID"
+  formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ (1 | ProvID)"))
 
   # Fit random effect linear model using three input formats
-  fit_re1 <- linear_re(Y = Y, Z = Z, ID = ID)
-  fit_re2 <- linear_re(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char)
+  fit_re1 <- linear_re(Y = Y, Z = Z, ProvID = ProvID)
+  fit_re2 <- linear_re(data = data, Y.char = Y.char, Z.char = Z.char, ProvID.char = ProvID.char)
   fit_re3 <- linear_re(formula, data)
 
 

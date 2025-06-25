@@ -8,8 +8,6 @@
 #' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
 #' The default value is 0.95.
 #' @param null a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.
-#' @param alternative a character string specifying the alternative hypothesis, must be one of
-#' \code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.
 #' @param \dots additional arguments that can be passed to the function.
 #'
 #' @return A data frame containing summary statistics for covariate estimates, with the following columns:
@@ -24,15 +22,15 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_fe <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_fe <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' summary(fit_fe)
 #'
 #' @importFrom stats pt qt
 #'
 #' @exportS3Method summary linear_fe
 
-summary.linear_fe <- function(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
+summary.linear_fe <- function(object, parm, level = 0.95, null = 0, ...) {
   alpha <- 1 - level
 
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
@@ -48,31 +46,36 @@ summary.linear_fe <- function(object, parm, level = 0.95, null = 0, alternative 
   # Test Statistics
   stat <- (beta - null) / se.beta
 
-  if (alternative == "two.sided") {
-    p_value <- 2 * (1 - pt(abs(stat), df = n - p - m))
-    crit_value <- qt(1 - alpha / 2, df = n - p - m)
-    lower_bound <- beta - crit_value * se.beta
-    upper_bound <- beta + crit_value * se.beta
-  }
-  else if (alternative == "greater") {
-    p_value <- 1 - pt(stat, df = n - p - m)
-    crit_value <- qt(level, df = n - p - m)
+  p_value <- 2 * (1 - pt(abs(stat), df = n - p - m))
+  crit_value <- qt(1 - alpha / 2, df = n - p - m)
+  lower_bound <- beta - crit_value * se.beta
+  upper_bound <- beta + crit_value * se.beta
 
-    lower_bound <- beta - crit_value * se.beta
-    upper_bound <- Inf
-  }
-  else if (alternative == "less") {
-    p_value <- pt(stat, df = n - p - m)
-    crit_value <- qt(level, df = n - p - m)
+  # if (alternative == "two.sided") {
+  #   p_value <- 2 * (1 - pt(abs(stat), df = n - p - m))
+  #   crit_value <- qt(1 - alpha / 2, df = n - p - m)
+  #   lower_bound <- beta - crit_value * se.beta
+  #   upper_bound <- beta + crit_value * se.beta
+  # }
+  # else if (alternative == "greater") {
+  #   p_value <- 1 - pt(stat, df = n - p - m)
+  #   crit_value <- qt(level, df = n - p - m)
+  #
+  #   lower_bound <- beta - crit_value * se.beta
+  #   upper_bound <- Inf
+  # }
+  # else if (alternative == "less") {
+  #   p_value <- pt(stat, df = n - p - m)
+  #   crit_value <- qt(level, df = n - p - m)
+  #
+  #   lower_bound <- -Inf
+  #   upper_bound <- beta + crit_value * se.beta
+  # }
+  # else {
+  #   stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
+  # }
 
-    lower_bound <- -Inf
-    upper_bound <- beta + crit_value * se.beta
-  }
-  else {
-    stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
-  }
-
-  p_value <- format.pval(p_value, digits = 7, eps = .Machine$double.eps)
+  p_value <- format.pval(p_value, digits = 7, eps = 1e-10)
 
   result <- data.frame(beta = beta, se.beta = se.beta, stat = stat, p_value = p_value,
                        lower_bound = lower_bound, upper_bound = upper_bound)

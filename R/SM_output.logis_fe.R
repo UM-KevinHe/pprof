@@ -35,8 +35,8 @@
 #' data(ExampleDataBinary)
 #' outcome = ExampleDataBinary$Y
 #' covar = ExampleDataBinary$Z
-#' ID = ExampleDataBinary$ID
-#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+#' ProvID = ExampleDataBinary$ProvID
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 #' SR <- SM_output(fit_fe, stdz = "direct", measure = "rate")
 #' SR$direct.rate
 #'
@@ -56,12 +56,12 @@ SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate",
   if (!"rate" %in% measure & !"ratio" %in% measure)stop("Argument 'measure' NOT as required!", call.=F)
 
   Y.char <- fit$char_list$Y.char
-  ID.char <- fit$char_list$ID.char
+  ProvID.char <- fit$char_list$ProvID.char
   Z.char <- fit$char_list$Z.char
   gamma <- fit$coefficient$gamma
   data <- fit$data_include
   Z_beta <- fit$linear_pred
-  prov <- data[ ,ID.char]
+  prov <- data[ ,ProvID.char]
   prov.name <- rownames(fit$coefficient$gamma)
 
   return_ls <- list()
@@ -73,7 +73,7 @@ SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate",
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, ID.char])) {
+    if (class(parm) == class(data[, ProvID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements.")
@@ -81,12 +81,12 @@ SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate",
   }
 
   if ("indirect" %in% stdz) {
-    gamma.null <- ifelse(null=="median", median(gamma),
+    gamma.null <- ifelse(null=="median", median(gamma, na.rm = TRUE),
                          ifelse(class(null)=="numeric", null[1],
                                 stop("Argument 'null' NOT as required!", call.=F)))
     Exp <- as.numeric(plogis(gamma.null + Z_beta)) # expected prob of events under null
 
-    df.prov <- data.frame(Obs_provider = sapply(split(data[,Y.char],data[, ID.char]),sum),
+    df.prov <- data.frame(Obs_provider = sapply(split(data[,Y.char],data[, ProvID.char]),sum),
                           Exp.indirect_provider = sapply(split(Exp, prov), sum),
                           Var.indirect_provider = sapply(split(Exp*(1-Exp), prov), sum))
     rownames(df.prov) <- rownames(gamma)
@@ -141,11 +141,3 @@ SM_output.logis_fe <- function(fit, parm, stdz = "indirect", measure = c("rate",
 
   return(return_ls)
 }
-
-
-
-
-
-
-
-

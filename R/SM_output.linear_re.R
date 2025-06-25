@@ -30,8 +30,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_linear <- linear_re(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_linear <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' SM_output(fit_linear)
 #'
 #' @exportS3Method SM_output linear_re
@@ -42,7 +42,7 @@ SM_output.linear_re <- function(fit, parm, stdz = "indirect", ...) {
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
 
   data <- fit$data_include
-  prov <- data[ ,fit$char_list$ID.char]
+  prov <- data[ ,fit$char_list$ProvID.char]
   prov.name <- rownames(fit$coefficient$RE)
   alpha.prov <- fit$coefficient$RE
   Z_beta <- fit$linear_pred
@@ -57,7 +57,7 @@ SM_output.linear_re <- function(fit, parm, stdz = "indirect", ...) {
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, fit$char_list$ID.char])) {
+    if (class(parm) == class(data[, fit$char_list$ProvID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements.")
@@ -65,7 +65,7 @@ SM_output.linear_re <- function(fit, parm, stdz = "indirect", ...) {
   }
 
   if ("indirect" %in% stdz) {
-    n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
+    n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ProvID.char]), length)
 
     Exp <- Z_beta
     Exp.indirect_provider <- sapply(split(Exp, prov), sum)

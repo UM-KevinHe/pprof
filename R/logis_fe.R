@@ -6,13 +6,13 @@
 #' with the response variable on the left of a ~ operator and covariates on the right,
 #' separated by + operators. The fixed effect of the provider identifier is specified using \code{id()}.
 #' @param data a data frame containing the variables named in the `formula`,
-#' or the columns specified by `Y.char`, `Z.char`, and `ID.char`.
+#' or the columns specified by `Y.char`, `Z.char`, and `ProvID.char`.
 #' @param Y.char a character string specifying the column name of the response variable in the `data`.
 #' @param Z.char a character vector specifying the column names of the covariates in the `data`.
-#' @param ID.char a character string specifying the column name of the provider identifier in the `data`.
+#' @param ProvID.char a character string specifying the column name of the provider identifier in the `data`.
 #' @param Y a numeric vector representing the response variable.
 #' @param Z a matrix or data frame representing the covariates, which can include both numeric and categorical variables.
-#' @param ID a numeric vector representing the provider identifier.
+#' @param ProvID a numeric vector representing the provider identifier.
 #' @param method a string specifying the algorithm to be used. The default value is "SerBIN".
 #'   \itemize{
 #'   \item{\code{"SerBIN"}} uses the Serial blockwise inversion Newton algorithm to fit the model (See [Wu et al. (2022)](https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387)).
@@ -71,7 +71,7 @@
 #' \item{variance}{a list containing the variance estimates:
 #'   \code{beta}, the variance-covariance matrix of the predictor coefficients, and \code{gamma}, the variance of the provider effects.}
 #' \item{linear_pred}{the linear predictor of each individual.}
-#' \item{prediction}{predicted probability of each individual}
+#' \item{fitted}{the predicted probability of each observation having a response of 1.}
 #' \item{observation}{the original response of each individual.}
 #' \item{Loglkd}{the log-likelihood.}
 #' \item{AIC}{Akaike info criterion.}
@@ -91,16 +91,17 @@
 #' data(ExampleDataBinary)
 #' outcome <- ExampleDataBinary$Y
 #' covar <- ExampleDataBinary$Z
-#' ID <- ExampleDataBinary$ID
-#' data <- data.frame(outcome, ID, covar)
+#' ProvID <- ExampleDataBinary$ProvID
+#' data <- data.frame(outcome, ProvID, covar)
 #' covar.char <- colnames(covar)
 #' outcome.char <- colnames(data)[1]
-#' ID.char <- colnames(data)[2]
-#' formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ID)"))
+#' ProvID.char <- colnames(data)[2]
+#' formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ProvID)"))
 #'
 #' # Fit logistic linear effect model using three input formats
-#' fit_fe1 <- logis_fe(Y = outcome, Z = covar, ID = ID)
-#' fit_fe2 <- logis_fe(data = data, Y.char = outcome.char, Z.char = covar.char, ID.char = ID.char)
+#' fit_fe1 <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID)
+#' fit_fe2 <- logis_fe(data = data, Y.char = outcome.char,
+#' Z.char = covar.char, ProvID.char = ProvID.char)
 #' fit_fe3 <- logis_fe(formula, data)
 #'
 #' @importFrom Rcpp evalCpp
@@ -122,83 +123,86 @@
 #' @useDynLib pprof, .registration = TRUE
 #'
 logis_fe <- function(formula = NULL, data = NULL,
-                     Y.char = NULL, Z.char = NULL, ID.char = NULL,
-                     Y = NULL, Z = NULL, ID = NULL,
+                     Y.char = NULL, Z.char = NULL, ProvID.char = NULL,
+                     Y = NULL, Z = NULL, ProvID = NULL,
                      method = "SerBIN", max.iter = 1000, tol = 1e-5, bound = 10,
                      cutoff = 10, backtrack = TRUE, stop = "or", threads = 1, message = TRUE) {
   if (!is.null(formula) && !is.null(data)) {
     if (message == TRUE) message("Input format: formula and data.")
 
-    data <- data[complete.cases(data), ] # Remove rows with missing values
     formula_terms <- terms(formula)
     Y.char <- as.character(attr(formula_terms, "variables"))[2]
     predictors <- attr(formula_terms, "term.labels")
 
-    ID.char <- gsub(".*id\\(([^)]+)\\).*", "\\1", predictors[grepl("id\\(", predictors)])
+    ProvID.char <- gsub(".*id\\(([^)]+)\\).*", "\\1", predictors[grepl("id\\(", predictors)])
     Z.char <- predictors[!grepl("id\\(", predictors)]
 
-    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+    if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Formula contains variables not in the data or is incorrectly structured.", call.=F)
+
+    data <- data[,c(Y.char, ProvID.char, Z.char)]
+    data <- data[complete.cases(data), ] # Remove rows with missing values
 
     Y <- data[,Y.char, drop = F]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = F]
     # Z <- model.matrix(~ data[[predictors]] - 1)
-    ID <- data[,ID.char, drop = F]
+    ProvID <- data[,ProvID.char, drop = F]
   }
-  else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ID.char)) {
-    if (message == TRUE) message("Input format: data, Y.char, Z.char, and ID.char.")
+  else if (!is.null(data) && !is.null(Y.char) && !is.null(Z.char) && !is.null(ProvID.char)) {
+    if (message == TRUE) message("Input format: data, Y.char, Z.char, and ProvID.char.")
 
-    if (!all(c(Y.char, Z.char, ID.char) %in% colnames(data)))
+    if (!all(c(Y.char, Z.char, ProvID.char) %in% colnames(data)))
       stop("Some of the specified columns are not in the data!", call.=FALSE)
 
+    data <- data[,c(Y.char, ProvID.char, Z.char)]
     data <- data[complete.cases(data), ] # Remove rows with missing values
     Y <- data[, Y.char]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
-    ID <- data[, ID.char, drop = F]
+    ProvID <- data[, ProvID.char, drop = F]
   }
-  else if (!is.null(Y) && !is.null(Z) && !is.null(ID)) {
-    if (message == TRUE) message("Input format: Y, Z, and ID.")
+  else if (!is.null(Y) && !is.null(Z) && !is.null(ProvID)) {
+    if (message == TRUE) message("Input format: Y, Z, and ProvID.")
 
-    if (length(Y) != length(ID) | (length(ID) != nrow(Z))) {
+    if (length(Y) != length(ProvID) | (length(ProvID) != nrow(Z))) {
       stop("Dimensions of the input data do not match!!", call.=F)
     }
 
-    data <- data.frame(Y, ID, Z)
+    data <- data.frame(Y, ProvID, Z)
     data <- data[complete.cases(data), ] # Remove rows with missing values
     Y.char <- colnames(data)[1]
-    ID.char <- colnames(data)[2]
+    ProvID.char <- colnames(data)[2]
     Z.char <- colnames(Z)
     Y <- data[, Y.char]
-    ID <- data[, ID.char]
+    ProvID <- data[, ProvID.char]
     Z <- model.matrix(reformulate(Z.char), data)[, -1, drop = FALSE]
   }
   else {
-    stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ID.char, or (3) Y, Z, and ID.", call.=FALSE)
+    stop("Insufficient or incompatible arguments provided. Please provide either (1) formula and data, (2) data, Y.char, Z.char, and ProvID.char, or (3) Y, Z, and ProvID.", call.=FALSE)
   }
 
-  data <- data.frame(Y, ID, Z)
+  data <- data.frame(Y, ProvID, Z)
   Y.char <- colnames(data)[1]
-  ID.char <- colnames(data)[2]
+  ProvID.char <- colnames(data)[2]
   Z.char <- colnames(Z)
 
-  data <- data[order(factor(data[,ID.char])),] # sort data by provider ID
-  prov.size <- as.integer(table(data[,ID.char])) # provider sizes
+  data <- data[order(factor(data[,ProvID.char])),] # sort data by provider ID
+  prov.size <- as.integer(table(data[,ProvID.char])) # provider sizes
   prov.size.long <- rep(prov.size,prov.size) # provider sizes assigned to patients
   data$included <- 1 * (prov.size.long >= cutoff) # create variable 'included' as an indicator
   if (message == TRUE) warning(sum(prov.size<=cutoff)," out of ",length(prov.size),
                                " providers considered small and filtered out!",immediate.=T,call.=F)
 
-  prov.list <- unique(data[data$included==1,ID.char])   # a reduced list of provider IDs
+  prov.list <- unique(data[data$included==1,ProvID.char])   # a reduced list of provider IDs
   prov.no.events <-      # providers with no events
-    prov.list[sapply(split(data[data$included==1,Y.char], factor(data[data$included==1,ID.char])),sum)==0]
+    prov.list[sapply(split(data[data$included==1,Y.char], factor(data[data$included==1,ProvID.char])),sum)==0]
   data$no.events <- 0
-  data$no.events[data[,ID.char]%in%c(prov.no.events)] <- 1
+  data$no.events[data[,ProvID.char]%in%c(prov.no.events)] <- 1
   if (message == TRUE) message(paste(length(prov.no.events),"out of",length(prov.list),
                                      "remaining providers with no events."))
   prov.all.events <-     # providers with all events
-    prov.list[sapply(split(1-data[data$included==1,Y.char],factor(data[data$included==1,ID.char])),sum)==0]
+    prov.list[sapply(split(1-data[data$included==1,Y.char],factor(data[data$included==1,ProvID.char])),sum)==0]
   data$all.events <- 0
-  data$all.events[data[,ID.char]%in%c(prov.all.events)] <- 1
+  data$all.events[data[,ProvID.char]%in%c(prov.all.events)] <- 1
   if (message == TRUE) message(paste(length(prov.all.events),"out of",length(prov.list),
                                      "remaining providers with all events."))
   if (message == TRUE) message(paste0("After screening, ", round(sum(data[data$included==1,Y.char])/length(data[data$included==1,Y.char])*100,2),
@@ -207,8 +211,8 @@ logis_fe <- function(formula = NULL, data = NULL,
 
   # for the remaining parts, only use the data with "included==1" ("cutoff" of provider size)
   data <- data[data$included==1,]
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length) # provider-specific number of discharges
-  n.events.prov <- sapply(split(data[, Y.char], data[, ID.char]), sum) # provider-specific number of events
+  n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length) # provider-specific number of discharges
+  n.events.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), sum) # provider-specific number of events
   Z <- as.matrix(data[,Z.char])
   gamma.prov <- rep(log(mean(data[,Y.char])/(1-mean(data[,Y.char]))), length(n.prov))
   beta <- rep(0, NCOL(Z))
@@ -256,27 +260,27 @@ logis_fe <- function(formula = NULL, data = NULL,
   AIC <- neg2Loglkd + 2 * (length(gamma.prov)+length(beta))
   BIC <- neg2Loglkd + log(nrow(data)) * (length(gamma.prov)+length(beta))
 
-  # df.prov <- data.frame(Obs_provider = sapply(split(data[,Y.char],data[,ID.char]),sum),
+  # df.prov <- data.frame(Obs_provider = sapply(split(data[,Y.char],data[,ProvID.char]),sum),
   #                       gamma_est = gamma.prov) #original gamma-hat, for internal using
   linear_pred <- Z %*% beta
   colnames(linear_pred) <- "Linear Predictor"
   rownames(linear_pred) <- seq_len(nrow(linear_pred))
   pred <- as.numeric(plogis(gamma.obs + linear_pred))
-  prediction <- matrix(pred, ncol = 1)
-  colnames(prediction) <- "Predicted Probability"
-  rownames(prediction) <- seq_len(nrow(prediction))
+  fitted <- matrix(pred, ncol = 1)
+  colnames(fitted) <- "Predicted Probability"
+  rownames(fitted) <- seq_len(nrow(fitted))
 
   coefficient <- list()
   coefficient$beta <- beta
   coefficient$gamma <- gamma.prov
 
   char_list <- list(Y.char = Y.char,
-                    ID.char = ID.char,
+                    ProvID.char = ProvID.char,
                     Z.char = Z.char)
 
   return_ls <- structure(list(coefficient = coefficient,
                               variance = variance,
-                              prediction = prediction, #predicted probability
+                              fitted = fitted, #predicted probability
                               observation = data[, Y.char], #patient-level obs
                               linear_pred = linear_pred, #linear predictor
                               Loglkd = Loglkd,
@@ -299,48 +303,48 @@ logis_fe <- function(formula = NULL, data = NULL,
   return(return_ls)
 }
 
-# logis_fe.fit <- function(Y, Z, ID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
+# logis_fe.fit <- function(Y, Z, ProvID, algorithm = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
 #                      backtrack = TRUE, Rcpp = TRUE, AUC = FALSE, message = TRUE, cutoff = 10,
 #                      stop = "or", check = FALSE){
 #
 #   # Check input
-#   if (missing(Y) || missing(Z) || missing(ID))
-#     stop("Arguments 'Y', 'Z', and 'ID' are all required!", call.=FALSE)
+#   if (missing(Y) || missing(Z) || missing(ProvID))
+#     stop("Arguments 'Y', 'Z', and 'ProvID' are all required!", call.=FALSE)
 #
 #   if (!is.logical(backtrack)) stop("Argument 'backtrack' NOT as required!", call.=F)
 #
 #   #check dimensions of the input data
-#   if (length(Y) != length(ID) | length(ID) != nrow(Z)){
+#   if (length(Y) != length(ProvID) | length(ProvID) != nrow(Z)){
 #     stop("Dimensions of the input data do not match!!", call.=F)
 #   }
 #
 #   if (check == TRUE)
-#     data_check(Y, Z, ID)
+#     data_check(Y, Z, ProvID)
 #
 #   # Data Preparation
-#   data <- as.data.frame(cbind(Y, ID, Z))
+#   data <- as.data.frame(cbind(Y, ProvID, Z))
 #   Y.char <- colnames(data)[1]
-#   ID.char <- colnames(data)[2]
+#   ProvID.char <- colnames(data)[2]
 #   Z.char <- colnames(Z)
 #
-#   data <- data[order(factor(data[,ID.char])),] # sort data by provider ID
-#   prov.size <- as.integer(table(data[,ID.char])) # provider sizes
+#   data <- data[order(factor(data[,ProvID.char])),] # sort data by provider ID
+#   prov.size <- as.integer(table(data[,ProvID.char])) # provider sizes
 #   prov.size.long <- rep(prov.size,prov.size) # provider sizes assigned to patients
 #   data$included <- 1 * (prov.size.long > cutoff) # create variable 'included' as an indicator
 #   if (message == TRUE) warning(sum(prov.size<=cutoff)," out of ",length(prov.size),
 #                                " providers considered small and filtered out!",immediate.=T,call.=F)
 #
-#   prov.list <- unique(data[data$included==1,ID.char])   # a reduced list of provider IDs
+#   prov.list <- unique(data[data$included==1,ProvID.char])   # a reduced list of provider IDs
 #   prov.no.events <-      # providers with no events
-#     prov.list[sapply(split(data[data$included==1,Y.char], factor(data[data$included==1,ID.char])),sum)==0]
+#     prov.list[sapply(split(data[data$included==1,Y.char], factor(data[data$included==1,ProvID.char])),sum)==0]
 #   data$no.events <- 0
-#   data$no.events[data[,ID.char]%in%c(prov.no.events)] <- 1
+#   data$no.events[data[,ProvID.char]%in%c(prov.no.events)] <- 1
 #   if (message == TRUE) message(paste(length(prov.no.events),"out of",length(prov.list),
 #                                      "remaining providers with no events."))
 #   prov.all.events <-     # providers with all events
-#     prov.list[sapply(split(1-data[data$included==1,Y.char],factor(data[data$included==1,ID.char])),sum)==0]
+#     prov.list[sapply(split(1-data[data$included==1,Y.char],factor(data[data$included==1,ProvID.char])),sum)==0]
 #   data$all.events <- 0
-#   data$all.events[data[,ID.char]%in%c(prov.all.events)] <- 1
+#   data$all.events[data[,ProvID.char]%in%c(prov.all.events)] <- 1
 #   if (message == TRUE) message(paste(length(prov.all.events),"out of",length(prov.list),
 #                                      "remaining providers with all events."))
 #   if (message == TRUE) message(paste0("After screening, ", round(sum(data[data$included==1,Y.char])/length(data[data$included==1,Y.char])*100,2),
@@ -349,8 +353,8 @@ logis_fe <- function(formula = NULL, data = NULL,
 #
 #   # for the remaining parts, only use the data with "included==1" ("cutoff" of provider size)
 #   data <- data[data$included==1,]
-#   n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length) # provider-specific number of discharges
-#   n.events.prov <- sapply(split(data[, Y.char], data[, ID.char]), sum) # provider-specific number of events
+#   n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length) # provider-specific number of discharges
+#   n.events.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), sum) # provider-specific number of events
 #   Z <- as.matrix(data[,Z.char])
 #   gamma.prov <- rep(log(mean(data[,Y.char])/(1-mean(data[,Y.char]))), length(n.prov))
 #   beta <- rep(0, NCOL(Z))
@@ -386,10 +390,10 @@ logis_fe <- function(formula = NULL, data = NULL,
 #         p <- c(plogis(gamma.obs+Z%*%beta))
 #         pq <- p*(1-p)
 #         pq[pq == 0] <- 1e-20
-#         score.gamma <- sapply(split(data[,Y.char]-p, data[,ID.char]), sum)
+#         score.gamma <- sapply(split(data[,Y.char]-p, data[,ProvID.char]), sum)
 #         score.beta <- t(Z)%*%(data[,Y.char]-p)
-#         info.gamma.inv <- 1/sapply(split(pq, data[,ID.char]),sum) #I_11^(-1)
-#         info.betagamma <- sapply(by(pq*Z,data[,ID.char],identity),colSums) #I_21
+#         info.gamma.inv <- 1/sapply(split(pq, data[,ProvID.char]),sum) #I_11^(-1)
+#         info.betagamma <- sapply(by(pq*Z,data[,ProvID.char],identity),colSums) #I_21
 #         info.beta <- t(Z)%*%(pq*Z) #I_22
 #         mat.tmp1 <- info.gamma.inv*t(info.betagamma) #J_1^T
 #         schur.inv <- solve(info.beta-info.betagamma%*%mat.tmp1) #S^-1
@@ -484,8 +488,8 @@ logis_fe <- function(formula = NULL, data = NULL,
 #         Z.beta <- Z%*%beta
 #         p <- c(plogis(gamma.obs+Z.beta)); pq <- p*(1-p)
 #         pq[pq == 0] <- 1e-20
-#         score.gamma.prov <- sapply(split(data[,Y.char]-p, data[,ID.char]), sum)
-#         d.gamma.prov <- score.gamma.prov / sapply(split(pq, data[,ID.char]), sum)
+#         score.gamma.prov <- sapply(split(data[,Y.char]-p, data[,ProvID.char]), sum)
+#         d.gamma.prov <- score.gamma.prov / sapply(split(pq, data[,ProvID.char]), sum)
 #         v <- 1 # initialize step size
 #         if (backtrack) {
 #           loglkd <- Loglkd(rep(gamma.prov, n.prov), beta)
@@ -583,7 +587,7 @@ logis_fe <- function(formula = NULL, data = NULL,
 #   AIC <- neg2Loglkd + 2 * (length(gamma.prov)+length(beta))
 #   BIC <- neg2Loglkd + log(nrow(data)) * (length(gamma.prov)+length(beta))
 #
-#   df.prov <- data.frame(Obs_provider = sapply(split(data[,Y.char],data[,ID.char]),sum),
+#   df.prov <- data.frame(Obs_provider = sapply(split(data[,Y.char],data[,ProvID.char]),sum),
 #                         gamma_est = gamma.prov) #original gamma-hat, for internal using
 #   linear_pred <- Z %*% beta
 #   pred <- as.numeric(plogis(gamma.obs + linear_pred))
@@ -591,7 +595,7 @@ logis_fe <- function(formula = NULL, data = NULL,
 #
 #
 #   char_list <- list(Y.char = Y.char,
-#                     ID.char = ID.char,
+#                     ProvID.char = ProvID.char,
 #                     Z.char = Z.char)
 #
 #   return_ls <- structure(list(beta = beta,
@@ -602,7 +606,7 @@ logis_fe <- function(formula = NULL, data = NULL,
 #                               AIC = AIC,
 #                               BIC = BIC,
 #                               obs = data[, Y.char], #patient-level obs
-#                               prov = data[, ID.char],
+#                               prov = data[, ProvID.char],
 #                               var = var_ls),
 #                          class = "logis_fe")
 #   if (AUC) {

@@ -140,7 +140,7 @@ example in this section.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">)</span></span>
 <span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Y</span></span>
 <span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Z</span></span>
-<span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ID</span></span>
+<span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ProvID</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">outcome</span>, <span class="va">covar</span>, <span class="va">ID</span><span class="op">)</span></span></code></pre></div>
 <p>Each model function supports three different ways to input data.
 Users have the flexibility to choose the one that best suits their data
@@ -158,11 +158,11 @@ the provider identifier vector.</p>
 <span><span class="va">Y.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">Z.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
 <span><span class="va">ID.char</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">[</span><span class="fl">7</span><span class="op">]</span></span>
-<span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logis_fe.html">logis_fe</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, Y.char <span class="op">=</span> <span class="va">Y.char</span>, Z.char <span class="op">=</span> <span class="va">Z.char</span>, ID.char <span class="op">=</span> <span class="va">ID.char</span>, message <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logis_fe.html">logis_fe</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">data</span>, Y.char <span class="op">=</span> <span class="va">Y.char</span>, Z.char <span class="op">=</span> <span class="va">Z.char</span>, ProvID.char <span class="op">=</span> <span class="va">ID.char</span>, message <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
 <p>Finally, the function also accepts the outcome vector, the covariate
 matrix/data frame, and the provider identifier vector.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logis_fe.html">logis_fe</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span>, message <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fit_fe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logis_fe.html">logis_fe</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ProvID <span class="op">=</span> <span class="va">ID</span>, message <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
 <p>By default, each model fitting function automatically removes all
 observations containing missing values. If users encounter data-related
 issues, they can utilize our built-in function <code>data_check</code>
@@ -253,11 +253,11 @@ intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_fe</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Estimate  Std.Error     Stat p value  CI.Lower CI.Upper</span></span>
-<span><span class="co">#&gt; z1 1.0512744 0.04179173 25.15508       0 0.9693641 1.133185</span></span>
-<span><span class="co">#&gt; z2 1.0229572 0.04093213 24.99154       0 0.9427316 1.103183</span></span>
-<span><span class="co">#&gt; z3 0.9918962 0.04035333 24.58028       0 0.9128051 1.070987</span></span>
-<span><span class="co">#&gt; z4 1.0413031 0.04115101 25.30443       0 0.9606486 1.121958</span></span>
-<span><span class="co">#&gt; z5 1.0930890 0.04173967 26.18825       0 1.0112808 1.174897</span></span></code></pre></div>
+<span><span class="co">#&gt; z1 1.0926220 0.04148974 26.33475       0 1.0113036 1.173940</span></span>
+<span><span class="co">#&gt; z2 1.0178412 0.04116559 24.72553       0 0.9371581 1.098524</span></span>
+<span><span class="co">#&gt; z3 0.9950259 0.04025412 24.71861       0 0.9161293 1.073923</span></span>
+<span><span class="co">#&gt; z4 1.0386844 0.04119677 25.21276       0 0.9579402 1.119429</span></span>
+<span><span class="co">#&gt; z5 1.0563464 0.04186183 25.23412       0 0.9742987 1.138394</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="confidence-interval">Confidence Interval<a class="anchor" aria-label="anchor" href="#confidence-interval"></a>

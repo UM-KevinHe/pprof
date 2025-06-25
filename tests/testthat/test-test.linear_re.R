@@ -2,9 +2,9 @@ test_that("test.linear_re function behaves correctly", {
   data(ExampleDataLinear)
   Y <- ExampleDataLinear$Y
   Z <- ExampleDataLinear$Z
-  ID <- ExampleDataLinear$ID
+  ProvID <- ExampleDataLinear$ProvID
 
-  fit_re <- linear_re(Y = Y, Z = Z, ID = ID)
+  fit_re <- linear_re(Y = Y, Z = Z, ProvID = ProvID)
 
   test_all <- test(fit_re)
   test_parm <- test(fit_re, parm = c(1, 3:5, 9))

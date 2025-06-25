@@ -112,16 +112,16 @@ Note that <code>"alpha"</code> for argument <code>option</code> only supports <c
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Y</span></span></span>
-<span class="r-in"><span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ID</span></span></span>
+<span class="r-in"><span><span class="va">ProvID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ProvID</span></span></span>
 <span class="r-in"><span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Z</span></span></span>
-<span class="r-in"><span><span class="va">fit_re</span> <span class="op">&lt;-</span> <span class="fu"><a href="linear_re.html">linear_re</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ID.</span>
+<span class="r-in"><span><span class="va">fit_re</span> <span class="op">&lt;-</span> <span class="fu"><a href="linear_re.html">linear_re</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ProvID <span class="op">=</span> <span class="va">ProvID</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ProvID.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_re</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $CI.indirect</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     Indirect.Difference indirect.Lower indirect.Upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          -0.338240958   -0.539449412   -0.137032504</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2          -0.794389223   -1.003428639   -0.585349807</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3          -0.646058872   -0.862592005   -0.429525739</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1          -0.338240958   -0.539449411   -0.137032504</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          -0.794389223   -1.003428638   -0.585349807</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3          -0.646058872   -0.862592005   -0.429525738</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4           0.260222333    0.041006319    0.479438347</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5           0.253447824    0.045583295    0.461312354</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6           0.511178626    0.299728406    0.722628846</span>
@@ -132,12 +132,12 @@ Note that <code>"alpha"</code> for argument <code>option</code> only supports <c
 <span class="r-out co"><span class="r-pr">#&gt;</span> 11         -0.403966192   -0.624561591   -0.183370793</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 12          0.258342952    0.041809819    0.474876085</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 13         -0.353891953   -0.565342173   -0.142441733</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14         -0.480798587   -0.715106075   -0.246491099</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15          0.228403421    0.014457016    0.442349827</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14         -0.480798587   -0.715106075   -0.246491098</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15          0.228403421    0.014457016    0.442349826</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 16          0.652245404    0.416251313    0.888239495</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 17         -0.180256778   -0.406642134    0.046128578</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 18         -0.508231543   -0.726093728   -0.290369358</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19          0.288147391    0.074200986    0.502093796</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19          0.288147391    0.074200985    0.502093796</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 20         -0.317763248   -0.524472482   -0.111054015</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 21          0.501834328    0.276939105    0.726729550</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 22         -0.054292981   -0.265743201    0.157157239</span>
@@ -151,26 +151,26 @@ Note that <code>"alpha"</code> for argument <code>option</code> only supports <c
 <span class="r-out co"><span class="r-pr">#&gt;</span> 30         -0.224160405   -0.430869638   -0.017451171</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 31          0.074646030   -0.141887103    0.291179163</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 32         -0.454060915   -0.665511135   -0.242610695</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 33          0.088741486   -0.120297930    0.297780902</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 33          0.088741486   -0.120297930    0.297780901</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 34         -0.369611317   -0.582298645   -0.156923990</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 35         -0.270597627   -0.488459812   -0.052735442</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 36         -0.324613417   -0.530186406   -0.119040428</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 37         -0.534115124   -0.736388605   -0.331841643</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 38         -0.285213112   -0.505808511   -0.064617714</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 39          0.354251227    0.153042773    0.555459681</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 40         -0.881389857   -1.100605871   -0.662173844</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 40         -0.881389857   -1.100605871   -0.662173843</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 41          0.803002465    0.567008374    1.038996556</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42         -0.517811990   -0.760936092   -0.274687887</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42         -0.517811989   -0.760936092   -0.274687887</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 43          0.293492361    0.083257910    0.503726813</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 44          0.035110130   -0.166098324    0.236318584</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 45         -0.110060527   -0.308172084    0.088051029</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 46         -0.211669804   -0.429531989    0.006192381</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 47          0.241146710    0.030912258    0.451381162</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 48          0.621420984    0.422293071    0.820548897</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 47          0.241146710    0.030912258    0.451381161</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 48          0.621420984    0.422293071    0.820548896</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 49         -0.255612145   -0.460067423   -0.051156867</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 50          0.165658248   -0.054937151    0.386253647</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 51          0.383515095    0.185403539    0.581626651</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 52         -0.392390843   -0.615824976   -0.168956710</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 52         -0.392390843   -0.615824975   -0.168956710</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 53          0.068123077   -0.147105035    0.283351189</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 54          0.679024992    0.475669390    0.882380594</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 55          0.048869088   -0.151290986    0.249029162</span>
@@ -179,7 +179,7 @@ Note that <code>"alpha"</code> for argument <code>option</code> only supports <c
 <span class="r-out co"><span class="r-pr">#&gt;</span> 58         -0.197817532   -0.389225270   -0.006409795</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 59          0.448000079    0.227404680    0.668595478</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 60          0.020624157   -0.213683332    0.254931645</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 61         -0.308840599   -0.522787004   -0.094894194</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 61         -0.308840599   -0.522787004   -0.094894193</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 62          0.163885562   -0.045153854    0.372924977</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 63          0.397151882    0.170766527    0.623537238</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 64          0.110659002   -0.108557011    0.329875016</span>
@@ -195,22 +195,22 @@ Note that <code>"alpha"</code> for argument <code>option</code> only supports <c
 <span class="r-out co"><span class="r-pr">#&gt;</span> 74          0.159376193   -0.034820204    0.353572590</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 75          0.315175243    0.118064638    0.512285848</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 76         -0.431149420   -0.647682554   -0.214616287</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 77          0.166323929   -0.086693344    0.419341203</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 77          0.166323929   -0.086693344    0.419341202</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 78          0.152830117   -0.044280488    0.349940722</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 79         -0.047475405   -0.262703516    0.167752707</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 79         -0.047475404   -0.262703516    0.167752707</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 80          0.005401941   -0.208544464    0.219348346</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 81          0.711346301    0.505773312    0.916919290</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 82          0.115364610   -0.096085610    0.326814830</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 83         -0.495816092   -0.716411491   -0.275220693</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 84          0.569053793    0.369925880    0.768181706</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 85          0.223492669    0.027367995    0.419617343</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 86         -0.543695052   -0.752734468   -0.334655636</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 86         -0.543695052   -0.752734467   -0.334655636</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 87          0.393472922    0.190117320    0.596828524</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 88          0.008107068   -0.208426065    0.224640202</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 89          0.633800388    0.439603990    0.827996785</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 89          0.633800387    0.439603990    0.827996785</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 90         -0.041475064   -0.249339594    0.166389465</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 91         -0.310329631   -0.536714987   -0.083944276</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 92         -1.084831958   -1.301365091   -0.868298824</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 92         -1.084831957   -1.301365091   -0.868298824</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 93          0.625010127    0.409782015    0.840238239</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 94         -0.119090926   -0.320299380    0.082117528</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 95         -0.004338301   -0.217025628    0.208349026</span>

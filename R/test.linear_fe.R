@@ -36,8 +36,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' test(fit_linear)
 #'
 #' @importFrom stats pt qt median
@@ -48,10 +48,10 @@ test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative
   alpha <- 1 - level
 
   data <- fit$data_include
-  ID.char <- fit$char_list$ID.char
+  ProvID.char <- fit$char_list$ProvID.char
   gamma <- fit$coefficient$gamma
   se.gamma <- sqrt(fit$variance$gamma)
-  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, ID.char]), length)
+  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, ProvID.char]), length)
   m <- length(fit$coefficient$gamma)
   p <- length(fit$coefficient$beta)
   n <- nrow(fit$data_include)
@@ -95,7 +95,7 @@ test.linear_fe <- function(fit, parm, level = 0.95, null = "median", alternative
     if (is.integer(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, ID.char])) {
+    if (class(parm) == class(data[, ProvID.char])) {
       attr(result, "provider size") <- n.prov[names(n.prov) %in% parm]
       result <- result[row.names(result) %in% parm, ]
       return(result)

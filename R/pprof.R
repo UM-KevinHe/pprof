@@ -3,5 +3,5 @@
 #' Description
 #'
 #'
-#' @useDynLib ppsrr, .registration = TRUE
+#' @useDynLib pprof, .registration = TRUE
 #' @importFrom Rcpp sourceCpp

@@ -53,7 +53,7 @@
 Generated as a linear combination of provider-specific effects, covariates, and a random error term (\(\epsilon\)),
 where \(\epsilon\) follows a normal distribution with mean 0 and standard deviation 1.</p></dd>
 
-<dt>ID</dt>
+<dt>ProvID</dt>
 <dd><p>a vector representing identifier for each provider.
 The number of individuals per provider is generated from a Poisson distribution with mean 80.</p></dd>
 
@@ -71,16 +71,16 @@ and the correlation between covariates and provider effects is 0.1.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  2.341395  1.726385 -6.085487 -4.459568 -5.392451 -3.747529</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ID</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ProvID</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1 1 1 1</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Z</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           z1         z2          z3          z4          z5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.4371968  0.5030609  0.27799816  0.85035519  2.09705116</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -0.7367012  1.3282275  0.77115851  0.11971217  1.62687441</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -1.0977921  0.2010389 -1.33315545 -0.90291325 -1.17277380</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -0.1943289 -1.1456950 -1.55959090 -0.89686805 -1.00715112</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 -1.3703641 -0.9746820 -0.05484035 -0.22093583 -0.73052043</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 -0.4016549 -1.7874646 -1.54723763 -0.06955694 -0.01465253</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           z1         z2         z3         z4          z5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.9076523  0.3966139  0.2295083  0.9965029  1.63538482</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  1.2768349 -0.2514242  0.9709646  1.6304805 -0.51758434</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.3510678 -0.5429142 -0.3862969 -1.3255520 -1.69976484</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -0.6409343 -0.8019597 -1.2999300 -1.6362957 -0.42451428</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 -1.2625848 -0.4706832 -0.8130136  0.1509436 -0.95600474</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 -0.2724952 -0.6752503 -2.1985430 -0.6236876 -0.05059055</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

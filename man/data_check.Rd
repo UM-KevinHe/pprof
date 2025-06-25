@@ -4,14 +4,14 @@
 \alias{data_check}
 \title{Data quality check function}
 \usage{
-data_check(Y, Z, ID)
+data_check(Y, Z, ProvID)
 }
 \arguments{
 \item{Y}{a numeric vector indicating the outcome variable.}
 
 \item{Z}{a matrix or data frame representing covariates.}
 
-\item{ID}{a numeric vector representing the provider identifier.}
+\item{ProvID}{a numeric vector representing the provider identifier.}
 }
 \value{
 No return value, called for side effects.
@@ -34,7 +34,7 @@ this function can be called for data quality checking purposes.
 data(ExampleDataBinary)
 outcome = ExampleDataBinary$Y
 covar = ExampleDataBinary$Z
-ID = ExampleDataBinary$ID
-data_check(outcome, covar, ID)
+ProvID = ExampleDataBinary$ProvID
+data_check(outcome, covar, ProvID)
 
 }

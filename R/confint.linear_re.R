@@ -27,12 +27,12 @@
 #' @examples
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
-#' ID <- ExampleDataLinear$ID
+#' ProvID <- ExampleDataLinear$ProvID
 #' covar <- ExampleDataLinear$Z
-#' fit_re <- linear_re(Y = outcome, Z = covar, ID = ID)
+#' fit_re <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' confint(fit_re)
 #'
-#' @importFrom stats pnorm qnorm pt qt
+#' @importFrom stats pnorm qnorm pt qt confint
 #'
 #' @exportS3Method confint linear_re
 
@@ -44,23 +44,23 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
 
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
   if (!class(object) %in% c("linear_re")) stop("Object 'object' is not of the classes 'linear_re'!",call.=F)
-  if (! "alpha" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
+  if (option != "alpha" & option != "SM") stop("Argument 'option' should be 'alpha' or 'SM'", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
   if ("alpha" %in% option && alternative != "two.sided")
     stop("Provider effect (option = 'alpha') only supports two-sided confidence intervals.", call. = FALSE)
 
   data <- object$data_include
-  prov <- data[ ,object$char_list$ID.char]
+  prov <- data[ ,object$char_list$ProvID.char]
   n <- nrow(data)
   Y.char <- object$char_list$Y.char
-  ID.char <- object$char_list$ID.char
+  ProvID.char <- object$char_list$ProvID.char
   Z.char <- object$char_list$Z.char
   prov.name <- rownames(object$coefficient$RE)
   REcoef <- object$coefficient$RE
 
   var_alpha <- object$variance$alpha
   sigma_sq <- object$sigma^2
-  n.prov <- sapply(split(data[, Y.char], data[, ID.char]), length)
+  n.prov <- sapply(split(data[, Y.char], data[, ProvID.char]), length)
   R_i <- as.vector(var_alpha) / (as.vector(var_alpha) + as.vector(sigma_sq) / n.prov)
 
   se.alpha <- sqrt(R_i * sigma_sq / n.prov)
@@ -97,20 +97,14 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
       parm <- as.numeric(parm)
     }
 
-    if (class(parm) == class(data[, ID.char])) {
+    if (class(parm) == class(data[, ProvID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements!")
     }
   }
 
-  if ("alpha" %in% option) {
-    if (alternative == "greater") {
-      CI_alpha$alpha.Upper <- NULL
-    }
-    else if (alternative == "less") {
-      CI_alpha$alpha.Lower <- NULL
-    }
+  if (option == "alpha") {
     attr(CI_alpha, "description") <- "Provider Effects"
     return (CI_alpha[ind, ])
     # return_ls$CI.alpha <- CI_alpha[ind, ]
@@ -118,7 +112,7 @@ confint.linear_re <- function(object, parm, level = 0.95, option = "SM",
 
 
   # CI of SR
-  if ("SM" %in% option) {
+  else if (option == "SM") {
     if ("indirect" %in% stdz) {
       SR <- SM_output(object, stdz = "indirect")
 

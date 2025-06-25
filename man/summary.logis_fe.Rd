@@ -4,15 +4,7 @@
 \alias{summary.logis_fe}
 \title{Result Summaries of Covariate Estimates from a fitted \code{logis_fe} object}
 \usage{
-\method{summary}{logis_fe}(
-  object,
-  parm,
-  level = 0.95,
-  test = "wald",
-  null = 0,
-  alternative = "two.sided",
-  ...
-)
+\method{summary}{logis_fe}(object, parm, level = 0.95, test = "wald", null = 0, ...)
 }
 \arguments{
 \item{object}{a model fitted from \code{logis_fe}.}
@@ -32,9 +24,6 @@ The default value is 0.95.}
 
 \item{null}{a number defining the null hypothesis for the covariate estimates. The default value is \code{0}.}
 
-\item{alternative}{a character string specifying the alternative hypothesis when \code{test = "wald"}, must be one of
-\code{"two.sided"} (default), \code{"greater"}, or \code{"less"}.}
-
 \item{\dots}{additional arguments that can be passed to the function.}
 }
 \value{
@@ -53,9 +42,9 @@ Provide the summary statistics for the covariate estimates for a fixed effect lo
 data(ExampleDataBinary)
 outcome = ExampleDataBinary$Y
 covar = ExampleDataBinary$Z
-ID = ExampleDataBinary$ID
+ProvID = ExampleDataBinary$ProvID
 
-fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = FALSE)
+fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID, message = FALSE)
 summary.wald <- summary(fit_fe, level = 0.95, test = "wald")
 summary.wald
 

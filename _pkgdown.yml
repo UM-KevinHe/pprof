@@ -30,18 +30,21 @@ reference:
 - title: Model Fitting Functions
   contents:
   - logis_fe
+  - logis_re
   - linear_fe
   - linear_re
 - title: Standardized Measure Calculation
   contents:
   - SM_output
   - SM_output.logis_fe
+  - SM_output.logis_re
   - SM_output.linear_fe
   - SM_output.linear_re
 - title: Hypothesis Testing for Provider Effects
   contents:
   - test
   - test.logis_fe
+  - test.logis_re
   - test.linear_fe
   - test.linear_re
 - title: Confidence Interval for Provider Effects
@@ -52,6 +55,7 @@ reference:
 - title: Summary Statistics for Covariate Estimates
   contents:
   - summary.logis_fe
+  - summary.logis_re
   - summary.linear_fe
   - summary.linear_re
 - title: Plotting Functions

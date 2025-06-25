@@ -4,19 +4,21 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_re <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_re <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' summary(fit_re)
 #'
 #' @importFrom stats pnorm qnorm
 #'
 #' @exportS3Method summary linear_re
 
-summary.linear_re <- function(object, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
+summary.linear_re <- function(object, parm, level = 0.95, null = 0, ...) {
   alpha <- 1 - level
 
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
   if (!class(object) %in% c("linear_re")) stop("Object `object` is not of the classes 'linear_re'!",call.=F)
+
+  model <- attributes(object)$model
 
   covar_char <- c("(intercept)", object$char_list$Z.char)
 
@@ -27,34 +29,17 @@ summary.linear_re <- function(object, parm, level = 0.95, null = 0, alternative 
   n <- nrow(object$data_includ)
   df <- n - length(object$coefficient$FE) - length(object$coefficient$RE) + 1
 
-  if (alternative == "two.sided") {
-    p_value <- 2 * (1 - pt(abs(stat), df = df))
-    crit_value <- qt(1 - alpha / 2, df = df)
-    lower_bound <- FE_est - crit_value * se.FE
-    upper_bound <- FE_est + crit_value * se.FE
-  }
-  else if (alternative == "greater") {
-    p_value <- 1 - pt(abs(stat), df = df)
-    crit_value <- qt(1 - alpha, df = df)
+  p_value <- 2 * (1 - pt(abs(stat), df = df))
+  p_value <- format.pval(p_value, digits = 7, eps = 1e-10)
 
-    lower_bound <- FE_est - crit_value * se.FE
-    upper_bound <- Inf
-  }
-  else if (alternative == "less") {
-    p_value <- pt(abs(stat), df = df)
-    crit_value <- qt(1 - alpha, df = df)
+  CI <- confint(model, parm = "beta_", method = "Wald", level = level)
 
-    lower_bound <- -Inf
-    upper_bound <- FE_est + crit_value * se.FE
-  }
-  else {
-    stop("Argument 'alternative' should be one of 'two.sided', 'less', 'greater'.")
-  }
-
-  p_value <- format.pval(p_value, digits = 7, eps = .Machine$double.eps)
+  # crit_value <- qnorm(1-alpha/2)
+  # lower_bound <- FE_est - crit_value * se.FE
+  # upper_bound <- FE_est + crit_value * se.FE
 
   result <- data.frame(FE = FE_est, se.FE = se.FE, stat = stat, p_value = p_value,
-                       lower_bound = lower_bound, upper_bound = upper_bound)
+                       lower_bound = CI[,1], upper_bound = CI[,2])
   colnames(result) <- c("Estimate", "Std.Error", "Stat", "p value", "CI.Lower", "CI.Upper")
 
   if (missing(parm)) {

@@ -30,8 +30,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' confint(fit_linear)
 #'
 #' @importFrom stats pnorm qnorm pt qt
@@ -46,18 +46,18 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
 
   if (missing(object)) stop ("Argument 'object' is required!",call.=F)
   if (!class(object) %in% c("linear_fe")) stop("Object 'object' is not of the classes 'linear_fe'!",call.=F)
-  if (! "gamma" %in% option & !"SM" %in% option) stop("Argument 'option' NOT as required!", call.=F)
+  if (option != "gamma" & option != "SM") stop("Argument 'option' should be 'gamma' or 'SM'", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
   if ("gamma" %in% option && alternative != "two.sided")
     stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
 
   data <- object$data_include
-  prov <- data[ ,object$char_list$ID.char]
+  prov <- data[ ,object$char_list$ProvID.char]
   prov.name <- rownames(object$coefficient$gamma)
   m <- length(object$coefficient$gamma)
   p <- length(object$coefficient$beta)
   n <- nrow(object$data_include)
-  n.prov <- sapply(split(data[, object$char_list$Y.char], data[, object$char_list$ID.char]), length)
+  n.prov <- sapply(split(data[, object$char_list$Y.char], data[, object$char_list$ProvID.char]), length)
 
   # CI of Gamma
   gamma <- object$coefficient$gamma
@@ -95,7 +95,7 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, object$char_list$ID.char])) {
+    if (class(parm) == class(data[, object$char_list$ProvID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements.")
@@ -105,7 +105,7 @@ confint.linear_fe <- function(object, parm, level = 0.95, option = "SM", stdz = 
   if (option == "gamma") return (CI_gamma[ind, ])
 
   # CI of SM
-  if (option == "SM") {
+  else if (option == "SM") {
     if ("indirect" %in% stdz) {
       SM <- SM_output(object, stdz = "indirect", null = null)
 

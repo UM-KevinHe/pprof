@@ -2,16 +2,16 @@ test_that("linear_fe function behaves correctly", {
   data(ExampleDataLinear)
   Y <- ExampleDataLinear$Y
   Z <- ExampleDataLinear$Z
-  ID <- ExampleDataLinear$ID
-  data <- data.frame(Y, ID, Z)
+  ProvID <- ExampleDataLinear$ProvID
+  data <- data.frame(Y, ProvID, Z)
   Z.char <- colnames(Z)
   Y.char <- "Y"
-  ID.char <- "ID"
-  formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ id(ID)"))
+  ProvID.char <- "ProvID"
+  formula <- as.formula(paste("Y ~", paste(Z.char, collapse = " + "), "+ id(ProvID)"))
 
   # Fit random effect linear model using three input formats
-  fit_fe1 <- linear_fe(Y = Y, Z = Z, ID = ID)
-  fit_fe2 <- linear_fe(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char)
+  fit_fe1 <- linear_fe(Y = Y, Z = Z, ProvID = ProvID)
+  fit_fe2 <- linear_fe(data = data, Y.char = Y.char, Z.char = Z.char, ProvID.char = ProvID.char)
   fit_fe3 <- linear_fe(formula, data)
 
   # Check if the three models the correct class "linear_fe"

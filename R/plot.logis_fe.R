@@ -29,8 +29,8 @@
 #' data(ExampleDataBinary)
 #' outcome <- ExampleDataBinary$Y
 #' covar <- ExampleDataBinary$Z
-#' ID <- ExampleDataBinary$ID
-#' fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataBinary$ProvID
+#' fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' plot(fit_fe)
 #'
 #' @importFrom dplyr filter arrange cross_join mutate select
@@ -67,14 +67,14 @@ plot.logis_fe <- function(x, null = "median", test = "score", target = 1, alpha 
 
   data <- x$data_include
   Z_beta <- x$linear_pred
-  prov <- data[ ,x$char_list$ID.char]
+  prov <- data[ ,x$char_list$ProvID.char]
   gamma <- x$coefficient$gamma
   gamma.null <- ifelse(null=="median", median(gamma),
                        ifelse(class(null)=="numeric", null[1],
                               stop("Argument 'null' NOT as required!", call.=F)))
   probs_all <- as.numeric(plogis(gamma.null + Z_beta)) # expected prob of events under null
   probs_list <- split(probs_all, prov)
-  n.prov <- sapply(split(data[, x$char_list$Y.char], data[, x$char_list$ID.char]), length)
+  n.prov <- sapply(split(data[, x$char_list$Y.char], data[, x$char_list$ProvID.char]), length)
 
   if (test == "exact") {
     flagging <- test(x, level = 1-alpha[1], test = "exact.poisbinom", null = null)

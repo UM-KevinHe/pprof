@@ -109,10 +109,10 @@ Outlying providers are determined by the test statistic falling beyond the thres
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataLinear</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outcome</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Y</span></span></span>
-<span class="r-in"><span><span class="va">ID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ID</span></span></span>
+<span class="r-in"><span><span class="va">ProvID</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">ProvID</span></span></span>
 <span class="r-in"><span><span class="va">covar</span> <span class="op">&lt;-</span> <span class="va">ExampleDataLinear</span><span class="op">$</span><span class="va">Z</span></span></span>
-<span class="r-in"><span><span class="va">fit_re</span> <span class="op">&lt;-</span> <span class="fu"><a href="linear_re.html">linear_re</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ID <span class="op">=</span> <span class="va">ID</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ID.</span>
+<span class="r-in"><span><span class="va">fit_re</span> <span class="op">&lt;-</span> <span class="fu"><a href="linear_re.html">linear_re</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">outcome</span>, Z <span class="op">=</span> <span class="va">covar</span>, ProvID <span class="op">=</span> <span class="va">ProvID</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Input format: Y, Z, and ProvID.</span>
 <span class="r-in"><span><span class="fu"><a href="test.html">test</a></span><span class="op">(</span><span class="va">fit_re</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     flag      p value        stat  Std.Error</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1     -1 9.849440e-04 -3.29479245 0.10265926</span>
@@ -156,7 +156,7 @@ Outlying providers are determined by the test statistic falling beyond the thres
 <span class="r-out co"><span class="r-pr">#&gt;</span> 39     1 5.590355e-04  3.45074788 0.10265926</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 40    -1 3.330669e-15 -7.88032018 0.11184696</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 41     1 2.574681e-11  6.66904796 0.12040736</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 42    -1 2.987962e-05 -4.17438190 0.12404519</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 42    -1 2.987962e-05 -4.17438189 0.12404519</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 43     1 6.216137e-03  2.73615696 0.10726445</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 44     0 7.323460e-01  0.34200646 0.10265926</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 45     0 2.762180e-01 -1.08885455 0.10107918</span>
@@ -167,7 +167,7 @@ Outlying providers are determined by the test statistic falling beyond the thres
 <span class="r-out co"><span class="r-pr">#&gt;</span> 50     0 1.410603e-01  1.47185391 0.11255074</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 51     1 1.481175e-04  3.79420458 0.10107918</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 52    -1 5.773191e-04 -3.44205208 0.11399910</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 53     0 5.350212e-01  0.62035938 0.10981228</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 53     0 5.350212e-01  0.62035937 0.10981228</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 54     1 5.968732e-11  6.54451864 0.10375476</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 55     0 6.322764e-01  0.47852526 0.10212436</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 56     0 9.345902e-02 -1.67742697 0.11474457</span>
@@ -195,10 +195,10 @@ Outlying providers are determined by the test statistic falling beyond the thres
 <span class="r-out co"><span class="r-pr">#&gt;</span> 78     0 1.285959e-01  1.51966215 0.10056848</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 79     0 6.654999e-01 -0.43233239 0.10981228</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 80     0 9.605310e-01  0.04948721 0.10915833</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 81     1 1.184552e-11  6.78208328 0.10488611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 81     1 1.184552e-11  6.78208327 0.10488611</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 82     0 2.849201e-01  1.06933197 0.10788475</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 83    -1 1.056535e-05 -4.40526724 0.11255074</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 84     1 2.130601e-08  5.60104771 0.10159774</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 84     1 2.130601e-08  5.60104770 0.10159774</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 85     1 2.551830e-02  2.23346493 0.10006545</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 86    -1 3.437835e-07 -5.09771191 0.10665472</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 87     1 1.492368e-04  3.79233593 0.10375476</span>

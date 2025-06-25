@@ -38,8 +38,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' SM_output(fit_linear)
 #' SM_output(fit_linear, stdz = "direct", null = "mean")
 #'
@@ -53,7 +53,7 @@ SM_output.linear_fe <- function(fit, parm, stdz = "indirect", null = "median", .
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
 
   data <- fit$data_include
-  prov <- data[ ,fit$char_list$ID.char]
+  prov <- data[ ,fit$char_list$ProvID.char]
   prov.name <- rownames(fit$coefficient$gamma)
   Z_beta <- fit$linear_pred
   n <- nrow(fit$data_include)
@@ -67,7 +67,7 @@ SM_output.linear_fe <- function(fit, parm, stdz = "indirect", null = "median", .
     if (is.numeric(parm)) {  #avoid "integer" class
       parm <- as.numeric(parm)
     }
-    if (class(parm) == class(data[, fit$char_list$ID.char])) {
+    if (class(parm) == class(data[, fit$char_list$ProvID.char])) {
       ind <- which(prov.name %in% parm)
     } else {
       stop("Argument 'parm' includes invalid elements.")
@@ -75,9 +75,9 @@ SM_output.linear_fe <- function(fit, parm, stdz = "indirect", null = "median", .
   }
 
   gamma <- fit$coefficient$gamma
-  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ID.char]), length)
-  gamma.null <- ifelse(null=="median", median(gamma),
-                       ifelse(null=="mean", sum(n.prov*gamma)/n,
+  n.prov <- sapply(split(data[, fit$char_list$Y.char], data[, fit$char_list$ProvID.char]), length)
+  gamma.null <- ifelse(null=="median", median(gamma, na.rm = TRUE),
+                       ifelse(null=="mean", sum(n.prov*gamma, na.rm = TRUE)/n,
                               ifelse(class(null)=="numeric", null[1],
                                      stop("Argument 'null' NOT as required!",call.=F))))
   if ("indirect" %in% stdz) {

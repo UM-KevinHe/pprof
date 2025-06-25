@@ -12,15 +12,15 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // computeDirectExp
-arma::vec computeDirectExp(const arma::vec& gamma_prov, const arma::vec& Z_beta, const int& threads);
-RcppExport SEXP _pprof_computeDirectExp(SEXP gamma_provSEXP, SEXP Z_betaSEXP, SEXP threadsSEXP) {
+arma::vec computeDirectExp(const arma::vec& est, const arma::vec& Z_beta, const int& threads);
+RcppExport SEXP _pprof_computeDirectExp(SEXP estSEXP, SEXP Z_betaSEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type gamma_prov(gamma_provSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type est(estSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type Z_beta(Z_betaSEXP);
     Rcpp::traits::input_parameter< const int& >::type threads(threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(computeDirectExp(gamma_prov, Z_beta, threads));
+    rcpp_result_gen = Rcpp::wrap(computeDirectExp(est, Z_beta, threads));
     return rcpp_result_gen;
 END_RCPP
 }

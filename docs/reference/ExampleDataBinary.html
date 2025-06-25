@@ -53,7 +53,7 @@
 Generated from a Bernoulli distribution with the probability of success (\(\boldsymbol{\mu}\)), which is
 determined by applying the logistic function to the linear combination of provider effects and covariates.</p></dd>
 
-<dt>ID</dt>
+<dt>ProvID</dt>
 <dd><p>a vector representing identifier for each provider.
 The number of individuals per provider is generated from a
 Poisson distribution with mean 80, with a minimum value of 11.</p></dd>
@@ -72,16 +72,16 @@ and the correlation between covariates and provider effects is 0.1.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Y</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 0 0 1 0</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ID</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ProvID</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1 1 1 1</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">Z</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          z1         z2          z3          z4          z5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.4222353  1.2901256  0.18618604  1.45383568  0.54869608</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1.5952225 -0.6379755  0.95796887 -0.03400311  0.09561614</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.7988354 -0.7243116  1.00367469 -1.22336606 -0.16760091</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.4850902  1.4883909  0.35125182  0.72302769 -0.83167772</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 1.2920051  0.6865298 -0.88208441  0.21011013  0.40801256</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.4446510 -0.5466993  0.02647889 -2.35711231  0.42658309</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           z1         z2         z3          z4          z5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.1588563  1.5038359 0.51678022  0.64381150  0.07779473</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -0.4065060  0.0988566 0.42928104 -0.02097142  1.87616869</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.9162474 -1.0128945 0.68255389 -0.21407813  1.14789766</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  0.1946768  1.4542295 1.19780422 -0.34841782 -0.28220979</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  1.3290611  0.4604717 0.09888742 -0.83724543  0.66339830</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 -0.1260386 -2.2552490 0.48275904 -0.72250452  0.61493456</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

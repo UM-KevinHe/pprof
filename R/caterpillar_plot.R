@@ -14,6 +14,11 @@
 #' @param errorbar_alpha transparency level for the error bars. A value between 0 and 1, where 0 is completely transparent and 1 is fully opaque. The default value is 0.5.
 #' @param errorbar_color color of the error bars. The default value is "#94a3b8".
 #' @param use_flag logical; if \code{TRUE}, the error bars are colored to show providers' flags based on their performance. The default is \code{FALSE}.
+#' @param orientation a string specifies the orientation of the caterpillar plot:
+#'   \describe{
+#'     \item{"vertical"}{(default) providers on the x‑axis and values on the y‑axis.}
+#'     \item{"horizontal"}{providers on the y‑axis and values on the x‑axis.}
+#'   }
 #' @param flag_color vector of colors used for flagging providers when \code{use_flag = TRUE}. The default value is \code{c("#E69F00", "#56B4E9", "#009E73")}.
 #'
 #' @details
@@ -41,8 +46,8 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' CI_linear <- confint(fit_linear)
 #' caterpillar_plot(CI_linear$CI.indirect, use_flag = TRUE,
 #'                  errorbar_width = 0.5, errorbar_size = 1)
@@ -50,22 +55,23 @@
 #' data(ExampleDataBinary)
 #' fit_logis <- logis_fe(Y = ExampleDataBinary$Y,
 #'                       Z = ExampleDataBinary$Z,
-#'                       ID = ExampleDataBinary$ID, message = FALSE)
+#'                       ProvID = ExampleDataBinary$ProvID, message = FALSE)
 #' CI_logis <- confint(fit_logis)
 #' caterpillar_plot(CI_logis$CI.indirect_ratio, use_flag = TRUE,
-#'                  errorbar_width = 0.5, errorbar_size = 1)
+#'                  errorbar_width = 0.5, errorbar_size = 1,
+#'                  orientation = "horizontal")
 #'
 #' @seealso \code{\link{confint.linear_fe}}, \code{\link{confint.linear_re}}, \code{\link{confint.logis_fe}}
 #'
 #' @importFrom stats reorder
 #' @importFrom rlang .data
-#' @importFrom ggplot2 ggplot geom_errorbar aes scale_color_manual guide_legend geom_point geom_hline scale_x_discrete expansion theme theme_bw labs element_blank element_text element_rect margin
+#' @importFrom ggplot2 ggplot geom_errorbar aes scale_color_manual guide_legend geom_point geom_hline scale_x_discrete expansion theme theme_bw labs element_blank element_text element_rect margin geom_errorbarh geom_vline scale_y_discrete
 #' @export
 
 caterpillar_plot <- function(CI, point_size = 2, point_color = "#475569",
                              refline_value = NULL, refline_color = "#64748b", refline_size = 1, refline_type = "dashed",
                              errorbar_width = 0, errorbar_size = 0.5, errorbar_alpha = 0.5, errorbar_color = "#94a3b8",
-                             use_flag = FALSE, flag_color = c("#E69F00", "#56B4E9", "#009E73")) {
+                             use_flag = FALSE, orientation = "vertical", flag_color = c("#E69F00", "#56B4E9", "#009E73")) {
   if (missing(CI)) stop ("Argument 'CI' is required!",call.=F)
   if (!class(CI) %in% c("data.frame")) stop("Object CI should be a data frame!",call.=F)
   if (attr(CI, "description") == "Provider Effects") stop("Caterpillar plot only supports standardized measure")
@@ -76,7 +82,7 @@ caterpillar_plot <- function(CI, point_size = 2, point_color = "#475569",
   if (attr(CI, "model") == "FE linear" | attr(CI, "model") == "RE linear") {
     refline_value <- if (is.null(refline_value)) 0 else refline_value
   }
-  else if (attr(CI, "model") == "FE logis") {
+  else if (attr(CI, "model") == "FE logis" | attr(CI, "model") == "RE logis") {
     if (grepl("Ratio", attr(CI, "description"))) {
       refline_value <- if (is.null(refline_value)) 1 else refline_value
     }
@@ -96,44 +102,91 @@ caterpillar_plot <- function(CI, point_size = 2, point_color = "#475569",
   }
 
   # CI$flag <- factor(CI$flag, levels = c("Normal", "Lower", "Higher"), ordered = T)
-  caterpillar_p <- ggplot(CI, aes(x = reorder(.data$prov, .data$SM), y = .data$SM))
-  if (use_flag == TRUE) {
-    caterpillar_p <- caterpillar_p +
-      geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
-                        ymax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper,
-                        color = .data$flag),
-                    width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
-      scale_color_manual(values = flag_color, guide = guide_legend(title = NULL, box.linetype = "solid",
-                                                                   override.aes = list(linewidth = 1.5)))
 
-  } else {
+  if (orientation == "vertical") {
+    caterpillar_p <- ggplot(CI, aes(x = reorder(.data$prov, .data$SM), y = .data$SM))
+    if (use_flag == TRUE) {
+      caterpillar_p <- caterpillar_p +
+        geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
+                          ymax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper,
+                          color = .data$flag),
+                      width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
+        scale_color_manual(values = flag_color, guide = guide_legend(title = NULL, box.linetype = "solid",
+                                                                     override.aes = list(linewidth = 1.5)))
+
+    } else {
+      caterpillar_p <- caterpillar_p +
+        geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
+                          ymax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper),
+                      width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha, color = errorbar_color)
+    }
+
     caterpillar_p <- caterpillar_p +
-      geom_errorbar(aes(ymin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
-                        ymax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper),
-                    width = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha, color = errorbar_color)
+      geom_point(size = point_size, color = point_color) +
+      geom_hline(aes(yintercept = refline_value),
+                 color = refline_color, linetype = refline_type, linewidth = refline_size) +
+      scale_x_discrete(expand = expansion(add = 5)) +
+      labs(x = "Provider", y = attr(CI, "description"), title = paste(attr(CI, "description"), "Caterpillar Plot")) +
+      theme_bw() +
+      theme(
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title = element_text(size = 18, face = "bold"),
+        axis.text = element_text(size = 15, face = "bold"),
+        plot.title = element_text(size = 20, face = "bold"),
+        legend.position = c(0.95, 0.05),
+        legend.justification = c("right", "bottom"),
+        legend.box.background = element_rect(color = "black", linewidth = 0.5),
+        legend.box.margin = margin(5, 5, 5, 5),
+        legend.text = element_text(size = 15, face = "bold")
+      )
   }
+  else if (orientation == "horizontal") {
+    caterpillar_p <- ggplot(CI, aes(x = .data$SM, y = reorder(.data$prov, .data$SM)))
 
-  caterpillar_p <- caterpillar_p +
-    geom_point(size = point_size, color = point_color) +
-    geom_hline(aes(yintercept = refline_value),
-               color = refline_color, linetype = refline_type, linewidth = refline_size) +
-    scale_x_discrete(expand = expansion(add = 5)) +
-    labs(x = "Provider", y = attr(CI, "description"), title = paste(attr(CI, "description"), "Caterpillar Plot")) +
-    theme_bw() +
-    theme(
-      panel.grid.major = element_blank(),
-      panel.grid.minor = element_blank(),
-      axis.text.x = element_blank(),
-      axis.ticks.x = element_blank(),
-      axis.title = element_text(size = 18, face = "bold"),
-      axis.text = element_text(size = 15, face = "bold"),
-      plot.title = element_text(size = 20, face = "bold"),
-      legend.position = c(0.95, 0.05),
-      legend.justification = c("right", "bottom"),
-      legend.box.background = element_rect(color = "black", linewidth = 0.5),
-      legend.box.margin = margin(5, 5, 5, 5),
-      legend.text = element_text(size = 15, face = "bold")
-    )
+    if (use_flag) {
+      caterpillar_p <- caterpillar_p +
+        geom_errorbarh(aes(xmin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
+                           xmax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper,
+                           color = .data$flag),
+                       height = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha) +
+        scale_color_manual(values = flag_color,
+                           guide = guide_legend(title = NULL,
+                                                box.linetype = "solid",
+                                                override.aes = list(linewidth = 1.5)))
+    } else {
+      caterpillar_p <- caterpillar_p +
+        geom_errorbarh(aes(xmin = if (attr(CI, "type") == "lower one-sided") .data$SM else .data$Lower,
+                           xmax = if (attr(CI, "type") == "upper one-sided") .data$SM else .data$Upper),
+                       height = errorbar_width, linewidth = errorbar_size, alpha = errorbar_alpha, color = errorbar_color)
+    }
+    caterpillar_p <- caterpillar_p +
+      geom_point(aes(x = .data$SM), size = point_size, color = point_color) +
+      geom_vline(aes(xintercept = refline_value),
+                 color = refline_color, linetype  = refline_type, linewidth = refline_size) +
+      scale_y_discrete(expand = expansion(add = 5)) +
+      labs(x = attr(CI, "description"), y = "Provider", title = paste(attr(CI, "description"), "Caterpillar Plot")) +
+      theme_bw() +
+      theme(
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title = element_text(size = 18, face = "bold"),
+        axis.text = element_text(size = 15, face = "bold"),
+        plot.title = element_text(size = 20, face = "bold"),
+        legend.position = c(0.95, 0.05),
+        legend.justification = c("right", "bottom"),
+        legend.box.background = element_rect(color = "black", linewidth = 0.5),
+        legend.box.margin = margin(5, 5, 5, 5),
+        legend.text = element_text(size = 15, face = "bold")
+      )
+  }
+  else {
+    stop("Argument 'orientation' should be 'vertical' or 'horizontal'.")
+  }
 
   return(caterpillar_p)
 }

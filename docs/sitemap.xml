@@ -17,6 +17,7 @@
 <url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.linear_fe.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.linear_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/SM_output.logis_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/SR_output.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/bar_plot.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/caterpillar_plot.html</loc></url>
@@ -33,15 +34,18 @@
 <url><loc>https://um-kevinhe.github.io/pprof/reference/linear_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/logis_fe.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/logis_firth.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/logis_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/plot.linear_fe.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/plot.logis_fe.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/summary.linear_fe.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/summary.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/summary.logis_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/summary_fe_covar.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/test.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/test.linear_fe.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/test.linear_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/test.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/test.logis_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/test_fe.html</loc></url>
 </urlset>
 

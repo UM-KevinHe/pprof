@@ -17,15 +17,17 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{=html}
 <style>
 body {
   text-align: justify
 }
 </style>
+```
 
 ## Introduction
 
-The `pprof` software package is designed to provide different risk-adjusted models for data with various types of outcomes, specifically focusing on the field of provider profiling. In addition to model fitting, the package equips a suite of functions for calculating standardized ratios and rates, conducting statistical inference, and generating various plots to aid in the interpretation of results. Currently, the package supports logistic fixed effect models for binary outcomes, as well as linear fixed effect and linear random effect models for continuous outcomes. It is under ongoing development, with plans to incorporate additional models and more robust testing methods.
+The `pprof` software package is designed to provide different risk-adjusted models for data with various types of outcomes, specifically focusing on the field of provider profiling. In addition to model fitting, the package equips a suite of functions for calculating standardized measures, conducting statistical inference, and generating various plots to aid in the interpretation of results. Currently, the package supports logistic fixed effect models for binary outcomes, as well as linear fixed effect and linear random effect models for continuous outcomes. It is under ongoing development, with plans to incorporate additional models and more robust testing methods.
 
 This tutorial provides a brief overview of the package’s structure and a detailed guide of how to utilize the various functions. Simulated example data (`ExampleDataBinary`) with binary outcomes will be used as an illustration, alongside a real data set with continuous outcomes (`ecls_data`) to demonstrate its application with continuous outcomes. Throughout the tutorial, we will cover the key features and capabilities of `pprof`, presenting examples and use cases to illustrate its functionality comprehensively.
 
@@ -56,7 +58,7 @@ library(pprof)
 data(ExampleDataBinary)
 outcome <- ExampleDataBinary$Y
 covar <- ExampleDataBinary$Z
-ID <- ExampleDataBinary$ID
+ID <- ExampleDataBinary$ProvID
 data <- data.frame(outcome, covar, ID)
 ```
 
@@ -74,13 +76,13 @@ colnames(data)
 Y.char <- colnames(data)[1]
 Z.char <- colnames(data)[2:6]
 ID.char <- colnames(data)[7]
-fit_fe <- logis_fe(data = data, Y.char = Y.char, Z.char = Z.char, ID.char = ID.char, message = F)
+fit_fe <- logis_fe(data = data, Y.char = Y.char, Z.char = Z.char, ProvID.char = ID.char, message = F)
 ```
 
 Finally, the function also accepts the outcome vector, the covariate matrix/data frame, and the provider identifier vector.
 
 ```{r}
-fit_fe <- logis_fe(Y = outcome, Z = covar, ID = ID, message = F)
+fit_fe <- logis_fe(Y = outcome, Z = covar, ProvID = ID, message = F)
 ```
 
 By default, each model fitting function automatically removes all observations containing missing values. If users encounter data-related issues, they can utilize our built-in function `data_check` to perform data quality checks. This function can assist in examining missingness, variation, correlation, and the variance inflation factor (VIF) of variables to ensure data quality before fitting a model.

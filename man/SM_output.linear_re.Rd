@@ -42,8 +42,8 @@ used for their calculation.
 data(ExampleDataLinear)
 outcome <- ExampleDataLinear$Y
 covar <- ExampleDataLinear$Z
-ID <- ExampleDataLinear$ID
-fit_linear <- linear_re(Y = outcome, Z = covar, ID = ID)
+ProvID <- ExampleDataLinear$ProvID
+fit_linear <- linear_re(Y = outcome, Z = covar, ProvID = ProvID)
 SM_output(fit_linear)
 
 }

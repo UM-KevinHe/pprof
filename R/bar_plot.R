@@ -22,15 +22,15 @@
 #' data(ExampleDataLinear)
 #' outcome <- ExampleDataLinear$Y
 #' covar <- ExampleDataLinear$Z
-#' ID <- ExampleDataLinear$ID
-#' fit_linear <- linear_fe(Y = outcome, Z = covar, ID = ID)
+#' ProvID <- ExampleDataLinear$ProvID
+#' fit_linear <- linear_fe(Y = outcome, Z = covar, ProvID = ProvID)
 #' test_linear <- test(fit_linear)
 #' bar_plot(test_linear)
 #'
 #' data(ExampleDataBinary)
 #' fit_logis <- logis_fe(Y = ExampleDataBinary$Y,
 #'                       Z = ExampleDataBinary$Z,
-#'                       ID = ExampleDataBinary$ID, message = FALSE)
+#'                       ProvID = ExampleDataBinary$ProvID, message = FALSE)
 #' test_logis <- test(fit_logis)
 #' bar_plot(test_logis)
 #'
