@@ -24,6 +24,10 @@ remotes::install_github("UM-KevinHe/pprof", ref = "main")
 
 If you encounter any problems or bugs, please contact us at: [xhliuu\@umich.edu](mailto:xhliuu@umich.edu){.email}, [lfluo\@umich.edu](mailto:lfluo@umich.edu){.email}, [kevinhe\@umich.edu](mailto:kevinhe@umich.edu){.email}.
 
+## Contributing
+
+We welcome contributions to the `pprof` package. Please see our [CONTRIBUTING.md](https://github.com/UM-KevinHe/pprof/blob/main/.github/CONTRIBUTING.md) file for detailed guidelines of how to contribute.
+
 ## References
 
 $$1$$ Bates, D., Mächler, M., Bolker, B., & Walker, S. (2015). Fitting linear mixed-effects models using lme4. Journal of Statistical Software, 67(1), 1-48. <https://doi.org/10.18637/jss.v067.i01>
