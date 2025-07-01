@@ -8,9 +8,9 @@ If you discover a bug or have a suggestion, please [file an issue](https://githu
 
 When creating an issue, include:
 
--   A clear title and concise description\
--   Steps to reproduce or a minimal reproducible example\
--   Expected vs. actual behavior\
+-   A clear title and concise description
+-   Steps to reproduce or a minimal reproducible example
+-   Expected vs. actual behavior
 -   Your R version, OS, and `pprof` version
 
 ## Submitting code changes
