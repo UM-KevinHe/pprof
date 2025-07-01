@@ -1,11 +1,14 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://um-kevinhe.github.io/pprof/404.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/CONTRIBUTING.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/LICENSE-text.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/LICENSE.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/articles/Articles.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/Linear-FE.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/articles/Logis-FE.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/articles/Models.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/articles/Quick-start.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/articles/Risk-adjustment_Model.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/articles/index.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/articles/pprof.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/articles/srrFE.html</loc></url>
@@ -25,6 +28,7 @@
 <url><loc>https://um-kevinhe.github.io/pprof/reference/confint.linear_fe.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/confint.linear_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/confint.logis_fe.html</loc></url>
+<url><loc>https://um-kevinhe.github.io/pprof/reference/confint.logis_re.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/data_FE.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/data_check.html</loc></url>
 <url><loc>https://um-kevinhe.github.io/pprof/reference/ecls_data.html</loc></url>

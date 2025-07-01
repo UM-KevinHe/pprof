@@ -37,7 +37,9 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-appendix" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Appendix</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-appendix">
-<li><a class="dropdown-item" href="../articles/Logis-FE.html">Logis FE</a></li>
+<li><a class="dropdown-item" href="../articles/Risk-adjustment_Model.html">Risk-adjustment Model</a></li>
+    <li><a class="dropdown-item" href="../articles/Logis-FE.html">Logistic Fixed Effect Model</a></li>
+    <li><a class="dropdown-item" href="../articles/Linear-FE.html">Linear Fixed Effect Model</a></li>
   </ul>
 </li>
       </ul>
@@ -155,13 +157,13 @@ It’s worth noting that
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝛃</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">I(\boldsymbol{\beta})</annotation></semantics></math>
 is symmetric, so there’s a need to calculate only the upper triangular
 entries.</p>
-<p><em>(To avoid instability for
+<p><em>(To avoid instability for</em>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛄</mi><annotation encoding="application/x-tex">\boldsymbol{\gamma}</annotation></semantics></math>
 estimation in our code, we restrict the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo stretchy="true" form="postfix">]</mo></mrow></msup><annotation encoding="application/x-tex">{\hat{\boldsymbol{\gamma}}}^{[l]}</annotation></semantics></math>
 estimates to a specific range during each iteration. The default range
 is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><msub><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>m</mi><mi>e</mi><mi>d</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></msup><mo>±</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">{\hat{\boldsymbol{\gamma}}_{med}}^{[l-1]} \pm 10</annotation></semantics></math>.)</em></p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><msub><mover><mi>𝛄</mi><mo accent="true">̂</mo></mover><mrow><mi>m</mi><mi>e</mi><mi>d</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></msup><mo>±</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">{\hat{\boldsymbol{\gamma}}_{med}}^{[l-1]} \pm 10</annotation></semantics></math>.)</p>
 <hr>
 </div>
 <div class="section level3">
@@ -290,9 +292,9 @@ The
 can be computed using the formula mentioned earlier
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>I</mi><mn>11</mn><mrow><mi>−</mi><mn>1</mn></mrow></msubsup><mo>+</mo><msup><msub><mi>J</mi><mn>1</mn></msub><mi>T</mi></msup><msup><mi>S</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><msub><mi>J</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">I_{11}^{-1} + {J_1}^{T} S^{-1} J_1</annotation></semantics></math>)
 but with only diagonal elements. <em>(The “Wald test” is not valid for
-outlying providers
-(i.e. <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>=</mo><mi>±</mi><mi>∞</mi></mrow><annotation encoding="application/x-tex">\hat{\gamma}_i = \pm \infty</annotation></semantics></math>).
-“Error message” is added in the code to inform users.)</em></p></li>
+outlying providers (i.e.</em>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>=</mo><mi>±</mi><mi>∞</mi></mrow><annotation encoding="application/x-tex">\hat{\gamma}_i = \pm \infty</annotation></semantics></math>).
+“Error message” is added in the code to inform users.)</p></li>
 <li><p><strong>“score”</strong>: In the standard score test procedure,
 the first step involves computing the “restricted MLE” of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo stretchy="true" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">\hat{\boldsymbol{\beta}}^{(i)}</annotation></semantics></math>.
@@ -359,13 +361,13 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mrow><mi>i</mi><mo>,</mo><mi>U</mi></mrow></msub><annotation encoding="application/x-tex">\gamma_{i,U}</annotation></semantics></math>
 are the lower and upper bounds of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\gamma_i</annotation></semantics></math>.
-<em>(If
+<em>(If</em>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>I</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>γ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">CI(\gamma_i)</annotation></semantics></math>
 covers
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_0</annotation></semantics></math>,
 then
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><msub><mi>I</mi><mrow><mi>I</mi><mi>S</mi><msub><mi>R</mi><mi>i</mi></msub></mrow></msub></mrow><annotation encoding="application/x-tex">CI_{ISR_i}</annotation></semantics></math>
-will cover 1.)</em></p>
+will cover 1.)</p>
 <ul>
 <li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>S</mi><msub><mi>R</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">DSR_k</annotation></semantics></math>:
@@ -382,14 +384,14 @@ and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mrow><mi>k</mi><mo>,</mo><mi>U</mi></mrow></msub><annotation encoding="application/x-tex">\gamma_{k,U}</annotation></semantics></math>
 are the lower and upper bounds of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\gamma_k</annotation></semantics></math>.
-<em>(If
+<em>(If</em>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mi>I</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>γ</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">CI(\gamma_k)</annotation></semantics></math>
 covers
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>γ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\gamma_0</annotation></semantics></math>,
 then
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><msub><mi>I</mi><mrow><mi>D</mi><mi>S</mi><msub><mi>R</mi><mi>k</mi></msub></mrow></msub></mrow><annotation encoding="application/x-tex">CI_{DSR_k}</annotation></semantics></math>
 will cover
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>S</mi><msub><mi>R</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">DSR_k</annotation></semantics></math>.)</em></p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mi>S</mi><msub><mi>R</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">DSR_k</annotation></semantics></math>.)</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

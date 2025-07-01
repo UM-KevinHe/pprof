@@ -19,7 +19,9 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-appendix" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Appendix</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-appendix"><li><a class="dropdown-item" href="../articles/Logis-FE.html">Logis FE</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-appendix"><li><a class="dropdown-item" href="../articles/Risk-adjustment_Model.html">Risk-adjustment Model</a></li>
+    <li><a class="dropdown-item" href="../articles/Logis-FE.html">Logistic Fixed Effect Model</a></li>
+    <li><a class="dropdown-item" href="../articles/Linear-FE.html">Linear Fixed Effect Model</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -56,6 +58,7 @@
 <span>  errorbar_alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  errorbar_color <span class="op">=</span> <span class="st">"#94a3b8"</span>,</span>
 <span>  use_flag <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  orientation <span class="op">=</span> <span class="st">"vertical"</span>,</span>
 <span>  flag_color <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#E69F00"</span>, <span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -112,6 +115,17 @@
 <dd><p>logical; if <code>TRUE</code>, the error bars are colored to show providers' flags based on their performance. The default is <code>FALSE</code>.</p></dd>
 
 
+<dt id="arg-orientation">orientation<a class="anchor" aria-label="anchor" href="#arg-orientation"></a></dt>
+<dd><p>a string specifies the orientation of the caterpillar plot:</p><dl><dt>"vertical"</dt>
+<dd><p>(default) providers on the x‑axis and values on the y‑axis.</p></dd>
+
+<dt>"horizontal"</dt>
+<dd><p>providers on the y‑axis and values on the x‑axis.</p></dd>
+
+
+</dl></dd>
+
+
 <dt id="arg-flag-color">flag_color<a class="anchor" aria-label="anchor" href="#arg-flag-color"></a></dt>
 <dd><p>vector of colors used for flagging providers when <code>use_flag = TRUE</code>. The default value is <code>c("#E69F00", "#56B4E9", "#009E73")</code>.</p></dd>
 
@@ -162,7 +176,8 @@ This provides a simpler visualization without flagging individual providers.</p>
 <span class="r-in"><span>                      ProvID <span class="op">=</span> <span class="va">ExampleDataBinary</span><span class="op">$</span><span class="va">ProvID</span>, message <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">CI_logis</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_logis</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">caterpillar_plot</span><span class="op">(</span><span class="va">CI_logis</span><span class="op">$</span><span class="va">CI.indirect_ratio</span>, use_flag <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>                 errorbar_width <span class="op">=</span> <span class="fl">0.5</span>, errorbar_size <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                 errorbar_width <span class="op">=</span> <span class="fl">0.5</span>, errorbar_size <span class="op">=</span> <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                 orientation <span class="op">=</span> <span class="st">"horizontal"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="caterpillar_plot-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

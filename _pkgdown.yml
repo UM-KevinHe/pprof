@@ -23,8 +23,12 @@ navbar:
    articles:
     text: Appendix
     menu:
-    - text: Logis FE
+    - text: Risk-adjustment Model
+      href: articles/Risk-adjustment_Model.html
+    - text: Logistic Fixed Effect Model
       href: articles/Logis-FE.html
+    - text: Linear Fixed Effect Model
+      href: articles/Linear-FE.html
 
 reference:
 - title: Model Fitting Functions
@@ -50,6 +54,7 @@ reference:
 - title: Confidence Interval for Provider Effects
   contents:
   - confint.logis_fe
+  - confint.logis_re
   - confint.linear_fe
   - confint.linear_re
 - title: Summary Statistics for Covariate Estimates

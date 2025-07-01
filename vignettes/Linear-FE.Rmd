@@ -1,0 +1,87 @@
+---
+title: "Linear Fixed Effect Model"
+output: 
+  rmarkdown::html_vignette:
+    self_contained: yes
+    mode: selfcontained
+vignette: >
+  %\VignetteIndexEntry{Linear Fixed Effect Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  eval = F, 
+  collapse = T, 
+  comment = "#>")
+```
+
+```{=html}
+<style>
+body {
+  text-align: justify
+}
+</style>
+```
+
+### Estimation
+
+In general R methods such as `lm` and `glm`, fitting fixed-effects models requires converting the provider factor into dummy variables. Each provider is represented by one dummy column in the design matrix $\mathbf{D}$, set to 1 for observations belonging to that provider and 0 otherwise. Combined with the covariate matrix $\mathbf{Z}$, the full design matrix is $\mathbf{X} = [\mathbf{Z}, \mathbf{D}]$, where $\mathbf{Z}$ is the covariate matrix and $\mathbf{D}$ is the $m$-column dummy matrix indicating provider membership.
+
+When the number of providers $m$ is large, creating and inverting this many dummy variables becomes computationally expensive in terms of both memory and processing time. To avoid the high dimensionality of dummy variables, `pprof` uses a profile likelihood approach. The ordinary least squares objective is
+
+$$
+S(\gamma, \beta) = \sum_{i=1}^{m} \sum_{j=1}^{n_i} \bigl(Y_{ij} - \gamma_i - \mathbf{Z}_{ij}^\top \boldsymbol\beta\bigr)^2.
+$$
+
+Fixing $\boldsymbol\beta$, set $\frac{\partial S}{\partial \gamma_i} = 0$ to obtain
+
+$$
+\hat\gamma_{FE,i} = \bar{Y}_i - \bar{\mathbf{Z}}_i^\top \boldsymbol\beta, \quad i = 1, \ldots, m,
+$$
+
+where
+
+$$
+\bar{Y}_i = n_i^{-1}\sum_{j=1}^{n_i} Y_{ij}, \quad
+\bar{\mathbf{Z}}_i = n_i^{-1}\sum_{j=1}^{n_i} \mathbf{Z}_{ij}.
+$$
+
+Substituting back yields the profile objective for $\boldsymbol\beta$, equivalent to centering each provider's data:
+
+$$
+\tilde{Y}_{ij} = \tilde{\mathbf{Z}}_{ij}^\top \boldsymbol\beta + \tilde{\epsilon}_{ij},
+$$
+
+with $\tilde{Y}_{ij} = Y_{ij} - \bar{Y}_i,
+\tilde{\mathbf{Z}}_{ij} = \mathbf{Z}_{ij} - \bar{\mathbf{Z}}_i,
+\tilde{\epsilon}_{ij} = \epsilon_{ij} - \bar{\epsilon}_i$.
+
+# Estimation of Regression Coefficients
+
+The closed-form estimator for $\boldsymbol\beta$ is
+
+$$
+\widehat{\boldsymbol\beta}_{FE} = 
+\Bigl(\sum_{i=1}^m \sum_{j=1}^{n_i} \tilde{\mathbf{Z}}_{ij} \tilde{\mathbf{Z}}_{ij}^\top\Bigr)^{-1} \Bigl(\sum_{i=1}^m \sum_{j=1}^{n_i} \tilde{\mathbf{Z}}_{ij} \tilde{Y}_{ij}\Bigr) 
+= \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i \mathbf{Z}_i\Bigr)^{-1} \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i \mathbf{Y}_i\Bigr),
+$$
+
+where $\mathbf{Q}_i = \mathbf{I}_{n_i} - \mathbf{1}_{n_i}\mathbf{1}_{n_i}^\top / n_i$.
+
+# Variance and Inference
+
+The residual variance is estimated by
+
+$$
+\hat\sigma_{\epsilon}^2 = \frac{1}{n - m - p} \sum_{i=1}^m \sum_{j=1}^{n_i} \bigl(Y_{ij} - \hat\gamma_{FE,i} - \mathbf{Z}_{ij}^\top \widehat{\boldsymbol\beta}_{FE}\bigr)^2.
+$$
+
+Under this model, $\widehat{\boldsymbol\beta}_{FE}$ and $\hat\gamma_{FE,i}$ are unbiased, with
+
+$$
+\mathrm{Var}(\widehat{\boldsymbol\beta}_{FE}) = \sigma_{\epsilon}^2 \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i \mathbf{Z}_i\Bigr)^{-1},
+\quad
+\mathrm{Var}(\hat\gamma_{FE,i}) = \frac{\sigma_{\epsilon}^2}{n_i}.
+$$

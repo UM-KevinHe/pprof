@@ -37,7 +37,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-appendix" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Appendix</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-appendix">
-<li><a class="dropdown-item" href="../articles/Logis-FE.html">Logis FE</a></li>
+<li><a class="dropdown-item" href="../articles/Risk-adjustment_Model.html">Risk-adjustment Model</a></li>
+    <li><a class="dropdown-item" href="../articles/Logis-FE.html">Logistic Fixed Effect Model</a></li>
+    <li><a class="dropdown-item" href="../articles/Linear-FE.html">Linear Fixed Effect Model</a></li>
   </ul>
 </li>
       </ul>
@@ -77,15 +79,16 @@ body {
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>The <code>pprof</code> software package is designed to provide
-different risk-adjusted models for data with various types of outcomes,
-specifically focusing on the field of provider profiling. In addition to
-model fitting, the package equips a suite of functions for calculating
-standardized ratios and rates, conducting statistical inference, and
+different risk-adjustment models for data with various types of
+outcomes, specifically focusing on the field of provider profiling. In
+addition to model fitting, the package equips a suite of functions for
+calculating standardized measures, conducting statistical inference, and
 generating various plots to aid in the interpretation of results.
-Currently, the package supports logistic fixed effect models for binary
-outcomes, as well as linear fixed effect and linear random effect models
-for continuous outcomes. It is under ongoing development, with plans to
-incorporate additional models and more robust testing methods.</p>
+Currently, the package supports logistic fixed effect and logistic
+random effect models for binary outcomes, as well as linear fixed effect
+and linear random effect models for continuous outcomes. It is under
+ongoing development, with plans to incorporate additional models and
+more robust testing methods.</p>
 <p>This tutorial provides a brief overview of the package’s structure
 and a detailed guide of how to utilize the various functions. Simulated
 example data (<code>ExampleDataBinary</code>) with binary outcomes will
@@ -253,11 +256,11 @@ intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_fe</span><span class="op">)</span></span>
 <span><span class="co">#&gt;     Estimate  Std.Error     Stat p value  CI.Lower CI.Upper</span></span>
-<span><span class="co">#&gt; z1 1.0926220 0.04148974 26.33475       0 1.0113036 1.173940</span></span>
-<span><span class="co">#&gt; z2 1.0178412 0.04116559 24.72553       0 0.9371581 1.098524</span></span>
-<span><span class="co">#&gt; z3 0.9950259 0.04025412 24.71861       0 0.9161293 1.073923</span></span>
-<span><span class="co">#&gt; z4 1.0386844 0.04119677 25.21276       0 0.9579402 1.119429</span></span>
-<span><span class="co">#&gt; z5 1.0563464 0.04186183 25.23412       0 0.9742987 1.138394</span></span></code></pre></div>
+<span><span class="co">#&gt; z1 1.0926220 0.04148974 26.33475 &lt; 1e-10 1.0113036 1.173940</span></span>
+<span><span class="co">#&gt; z2 1.0178412 0.04116559 24.72553 &lt; 1e-10 0.9371581 1.098524</span></span>
+<span><span class="co">#&gt; z3 0.9950259 0.04025412 24.71861 &lt; 1e-10 0.9161293 1.073923</span></span>
+<span><span class="co">#&gt; z4 1.0386844 0.04119677 25.21276 &lt; 1e-10 0.9579402 1.119429</span></span>
+<span><span class="co">#&gt; z5 1.0563464 0.04186183 25.23412 &lt; 1e-10 0.9742987 1.138394</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="confidence-interval">Confidence Interval<a class="anchor" aria-label="anchor" href="#confidence-interval"></a>

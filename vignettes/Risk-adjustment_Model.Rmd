@@ -1,0 +1,79 @@
+---
+title: "Risk-Adjustment Model"
+output: 
+  rmarkdown::html_vignette:
+    self_contained: yes
+    mode: selfcontained
+vignette: >
+  %\VignetteIndexEntry{Risk-Adjustment Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  eval = F, 
+  collapse = T, 
+  comment = "#>")
+```
+
+```{=html}
+<style>
+body {
+  text-align: justify
+}
+</style>
+```
+
+### Overview
+
+Risk-adjustment models are crucial for generating reliable and meaningful comparative analyses of healthcare provider performance. These models do not rely on unadjusted provider averages but account for confounding patient-level factors that providers cannot control, such as demographics and comorbidities. By adjusting for these factors, risk adjustment enables fair comparisons across providers, ensuring that observed differences in outcomes reflect true provider effects rather than variations in patient mix.
+
+### Model Annotation
+
+Let $Y_{ij}$ denote the outcome for subject $j$ ($j = 1, \ldots, n_i$) treated by provider $i$ ($i = 1, \ldots, m$), and let $\mathbf{Z}_{ij}$ be a $p$-dimensional vector of covariates. The relationship between the outcomes and their corresponding risk factors is modeled by the following linear regression model:
+
+$$
+Y_{ij} = \mu + \alpha_i + \mathbf{Z}_{ij}^\top \boldsymbol\beta + \epsilon_{ij},
+$$
+
+where:
+
+-   $\mu$ is the overall population mean.
+-   $\alpha_i$ is the provider-specific effect.
+-   $\boldsymbol\beta$ is the vector of regression coefficients.
+-   $\epsilon_{ij} \sim N(0, \sigma_\epsilon^2)$ is the error term.
+
+In this context, $n_i$ is the number of subjects for provider $i$, $n = \sum_{i=1}^m n_i$ is the total sample size, and $m$ is the number of providers.
+
+### Fixed-Effects (FE) Approach
+
+The Fixed Effect approach assumes that each provider’s individual effect $\alpha_i$ is treated as fixed and unique, accounting for provider-specific characteristics that remain constant over time. This method enables the estimation of within-provider relationships by controlling for these unobserved heterogeneities, ensuring that the analysis focuses on the effects of the covariates of interest. Without additional constraints, $\mu$ and $\alpha_i$ are not separately identifiable. By defining:
+
+$$
+\gamma_i = \mu + \alpha_i, \quad i = 1, \ldots, m,
+$$
+
+we directly estimate $\gamma_i$. The FE working model becomes:
+
+$$
+Y_{ij} = \gamma_i + \mathbf{X}_{ij}^\top \boldsymbol\beta + \epsilon_{ij},
+$$
+
+where $\mathbf{X}_{ij}$ is a covariate vector and $\boldsymbol\beta$ are the regression coefficients.
+
+### Random-Effects (RE) Approach
+
+The random-effects approach treats provider effects $\alpha_i$ as i.i.d. random variables. Conditionally on the design matrix $\mathbf{X} \in \mathbb{R}^{n \times p}$, we assume:
+
+$$
+\alpha_i \mid \mathbf{X} \overset{\mathrm{i.i.d.}}{\sim} N(0, \sigma_\alpha^2).
+$$
+
+The full RE model is:
+
+$$
+Y_{ij} = \mu + \alpha_i + \mathbf{Z}_{ij}^\top \boldsymbol\beta + \epsilon_{ij},
+$$
+
+with $\epsilon_{ij} \sim N(0, \sigma_\epsilon^2)$. The RE framework pools information across providers, shrinking the provider estimates toward the overall mean based on the variance component $\sigma_\alpha^2$.
