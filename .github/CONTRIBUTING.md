@@ -19,8 +19,8 @@ When creating an issue, include:
 
 2.  Make your changes
 
-    -   Add or update an entry in `NEWS.md`, briefly describing what you changed.\
-    -   If relevant, add unit tests under the `tests/` directory.\
+    -   Add or update an entry in `NEWS.md`, briefly describing what you changed.
+    -   If relevant, add unit tests under the `tests/` directory.
     -   Run **Build → Check Package** in RStudio or call `devtools::check()` to ensure no errors, warnings, or notes remain.
 
 3.  [Submit a Pull Request](https://github.com/UM-KevinHe/pprof/pulls)
@@ -29,10 +29,10 @@ When creating an issue, include:
 
 We greatly appreciate your contribution. However, please understand that we may need to modify your submission or, in some cases, decide not to merge it. Possible reasons include:
 
--   Breaking backward compatibility\
--   Difficulty in understanding the proposed changes\
--   Maintenance challenges in the future\
--   Increased computational overhead\
+-   Breaking backward compatibility
+-   Difficulty in understanding the proposed changes
+-   Maintenance challenges in the future
+-   Increased computational overhead
 -   Non-intuitive usage for end users
 
 If we are unable to merge your pull request, we will do our best to respond promptly and provide constructive feedback.
