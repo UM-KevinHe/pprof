@@ -96,7 +96,7 @@ errorbar_width = 0.5)
 
 # Availability
 
-Stable releases of the `pprof` package is already available via the Comprehensive R Archive Network. Alternatively, the `pprof` package is available on GitHub (<https://github.com/UMKevinHe/pprof>).
+Stable releases of the `pprof` package is already available via the Comprehensive R Archive Network. Alternatively, the `pprof` package is available on GitHub (<https://github.com/UM-KevinHe/pprof>).
 
 # Funding
 
