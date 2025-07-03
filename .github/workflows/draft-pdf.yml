@@ -2,7 +2,7 @@ name: Draft PDF
 on:
   push:
     branches:
-      - joss
+      - JOSS
 
 jobs:
   paper:
