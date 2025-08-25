@@ -1,8 +1,8 @@
-#' Calculate direct/indirect standardized ratios/rates from a fitted `logis_re` object
+#' Calculate direct/indirect standardized ratios/rates from a fitted `logis_cre` object
 #'
-#' Provide direct/indirect standardized ratios/rates for a random effect logistic model.
+#' Provide direct/indirect standardized ratios/rates for a correlated random effect logistic model.
 #'
-#' @param fit a model fitted from \code{logis_re}.
+#' @param fit a model fitted from \code{logis_cre}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
 #' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param stdz a character string or a vector specifying the standardization method(s).
@@ -32,19 +32,26 @@
 #'
 #' @examples
 #' data(ExampleDataBinary)
-#' outcome = ExampleDataBinary$Y
-#' covar = ExampleDataBinary$Z
-#' ProvID = ExampleDataBinary$ProvID
-#' fit_re <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
-#' SR <- SM_output(fit_re, stdz = "direct", measure = "rate")
+#' outcome <- ExampleDataBinary$Y
+#' covar <- ExampleDataBinary$Z
+#' ProvID <- ExampleDataBinary$ProvID
+#' data <- data.frame(outcome, ProvID, covar)
+#' outcome.char <- colnames(data)[1]
+#' ProvID.char <- colnames(data)[2]
+#' wb.char <- c("z1", "z2")
+#' other.char <- c("z3", "z4", "z5")
+#' fit_cre <- logis_cre(data = data, Y.char = outcome.char, ProvID.char = ProvID.char,
+#' wb.char = wb.char, other.char = other.char)
+#'
+#' SR <- SM_output(fit_cre, stdz = "direct", measure = "rate")
 #' SR$direct.rate
 #'
-#' @exportS3Method SM_output logis_re
+#' @exportS3Method SM_output logis_cre
 
-SM_output.logis_re <- function(fit, parm, stdz = "indirect", measure = c("rate", "ratio"), threads = 2, ...){
+SM_output.logis_cre <- function(fit, parm, stdz = "indirect", measure = c("rate", "ratio"), threads = 2, ...){
 
   if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("logis_re")) stop("Object fit is not of the classes 'logis_re'!", call.=F)
+  if (!class(fit) %in% c("logis_cre")) stop("Object fit is not of the classes 'logis_cre'!", call.=F)
   if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call.=F)
   if (!"rate" %in% measure & !"ratio" %in% measure)stop("Argument 'measure' NOT as required!", call.=F)
 

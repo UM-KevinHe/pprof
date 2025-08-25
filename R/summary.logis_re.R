@@ -1,8 +1,8 @@
-#' Result Summaries of Covariate Estimates from a fitted `logis_re` object
+#' Result Summaries of Covariate Estimates from a fitted `logis_re` or `logis_cre` object
 #'
-#' Provide the summary statistics for the covariate estimates for a random effect logistic model.
+#' Provide the summary statistics for the covariate estimates for a random/correlated random effect logistic model.
 #'
-#' @param object a model fitted from \code{logis_re}.
+#' @param object a model fitted from \code{logis_re} or \code{logis_cre}.
 #' @param parm specifies a subset of covariates for which the result summaries should be output.
 #' By default, all covariates are included.
 #' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
@@ -26,7 +26,7 @@
 #' fit_re <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' summary(fit_re)
 #'
-#' @importFrom stats pt qt confint
+#' @importFrom stats pnorm qnorm confint
 #'
 #' @exportS3Method summary logis_re
 

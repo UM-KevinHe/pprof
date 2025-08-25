@@ -63,7 +63,7 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
                           null = "median", n = 10000, threads = 1, alternative = "two.sided", ...) {
   if (missing(fit)) stop ("Argument 'fit is required!", call.=F)
   if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
-  if (!(test %in% c("exact.poisbinom", "exact.bootstrap", "score", "wald")))
+  if (!(test %in% c("exact.poisbinom", "exact.bootstrap", "score", "wald", "robust_wald")))
     stop("Argument 'test' NOT as required!",call.=F)
 
   alpha <- 1 - level
@@ -305,5 +305,8 @@ test.logis_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", sco
       attr(result, "provider size") <- n.prov[indices]
       return(result[indices, ])
     }
+  } else if (test == "robust wald") {
+    return(fit)
   }
+
 }

@@ -79,10 +79,10 @@ caterpillar_plot <- function(CI, point_size = 2, point_color = "#475569",
   colnames(CI) <- c("SM", "Lower", "Upper")
   CI$prov <- rownames(CI)
 
-  if (attr(CI, "model") == "FE linear" | attr(CI, "model") == "RE linear") {
+  if (attr(CI, "model") == "FE linear" | attr(CI, "model") == "RE linear" | attr(CI, "model") == "CRE linear") {
     refline_value <- if (is.null(refline_value)) 0 else refline_value
   }
-  else if (attr(CI, "model") == "FE logis" | attr(CI, "model") == "RE logis") {
+  else if (attr(CI, "model") == "FE logis" | attr(CI, "model") == "RE logis" | attr(CI, "model") == "CRE logis") {
     if (grepl("Ratio", attr(CI, "description"))) {
       refline_value <- if (is.null(refline_value)) 1 else refline_value
     }

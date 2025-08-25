@@ -1,9 +1,9 @@
-#' Result Summaries of Covariate Estimates from a fitted `linear_fe` or `linear_re` object
+#' Result Summaries of Covariate Estimates from a fitted `linear_fe`, `linear_re` or `linear_cre` object
 #'
-#' Provide the summary statistics for the covariate estimates for a fixed/random effect linear model.
+#' Provide the summary statistics for the covariate estimates for a fixed/random/correlated random effect linear model.
 #'
-#' @param object a model fitted from \code{linear_fe} or \code{linear_re}.
-#' @param parm Specifies a subset of covariates for which the result summaries should be output.
+#' @param object a model fitted from \code{linear_fe} or \code{linear_re} or \code{linear_cre}.
+#' @param parm specifies a subset of covariates for which the result summaries should be output.
 #' By default, all covariates are included.
 #' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
 #' The default value is 0.95.

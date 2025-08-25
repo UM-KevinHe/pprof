@@ -1,8 +1,8 @@
-#' Conduct hypothesis testing for provider effects from a fitted `logis_re` object
+#' Conduct hypothesis testing for provider effects from a fitted `logis_cre` object
 #'
-#' Conduct hypothesis tests on provider effects and identify outlying providers for a random effect logistic model.
+#' Conduct hypothesis tests on provider effects and identify outlying providers for a correlated random effect logistic model.
 #'
-#' @param fit a model fitted from \code{logis_re}.
+#' @param fit a model fitted from \code{logis_cre}.
 #' @param parm specifies a subset of providers for which confidence intervals are to be given.
 #' By default, all providers are included. The class of `parm` should match the class of the provider IDs.
 #' @param level the confidence level during the hypothesis test, meaning a significance level of \eqn{1 - \text{level}}.
@@ -30,16 +30,22 @@
 #' @examples
 #' data(ExampleDataBinary)
 #' outcome <- ExampleDataBinary$Y
-#' ProvID <- ExampleDataBinary$ProvID
 #' covar <- ExampleDataBinary$Z
-#' fit_re <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
-#' test(fit_re)
+#' ProvID <- ExampleDataBinary$ProvID
+#' data <- data.frame(outcome, ProvID, covar)
+#' outcome.char <- colnames(data)[1]
+#' ProvID.char <- colnames(data)[2]
+#' wb.char <- c("z1", "z2")
+#' other.char <- c("z3", "z4", "z5")
+#' fit_cre <- logis_cre(data = data, Y.char = outcome.char, ProvID.char = ProvID.char,
+#' wb.char = wb.char, other.char = other.char)
+#' test(fit_cre)
 #'
 #' @importFrom stats pnorm qnorm
 #'
-#' @exportS3Method test logis_re
+#' @exportS3Method test logis_cre
 
-test.logis_re <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
+test.logis_cre <- function(fit, parm, level = 0.95, null = 0, alternative = "two.sided", ...) {
   model <- attributes(fit)$model
 
   alpha <- 1 - level

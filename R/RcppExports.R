@@ -29,3 +29,11 @@ logis_fe_var <- function(Y, Z, n_prov, gamma, beta) {
     .Call(`_pprof_logis_fe_var`, Y, Z, n_prov, gamma, beta)
 }
 
+logis_LR_prov <- function(Y, Z, n_prov, gamma, beta, n_obs, m, threads, tol = 1e-5, max_iter = 100L, bound = 10.0, message = TRUE, stop = "beta") {
+    .Call(`_pprof_logis_LR_prov`, Y, Z, n_prov, gamma, beta, n_obs, m, threads, tol, max_iter, bound, message, stop)
+}
+
+logis_firth_prov <- function(Y, Z, n_prov, gamma, beta, n_obs, m, threads, tol = 1e-5, max_iter = 100L, bound = 10.0, message = TRUE) {
+    .Call(`_pprof_logis_firth_prov`, Y, Z, n_prov, gamma, beta, n_obs, m, threads, tol, max_iter, bound, message)
+}
+
