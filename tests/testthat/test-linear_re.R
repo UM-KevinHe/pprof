@@ -15,7 +15,7 @@ test_that("linear_re function behaves correctly", {
   fit_re3 <- linear_re(formula, data)
 
 
-  # Check if the three models the correct class "linear_fe"
+  # Check if the three models the correct class "linear_re"
   expect_true(all(class(fit_re1) == "linear_re", class(fit_re2) == "linear_re", class(fit_re3) == "linear_re"),
               info = "All models should be of class 'linear_re'.")
 

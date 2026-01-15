@@ -87,7 +87,7 @@ set to 1 for observations belonging to that provider and 0 otherwise.
 Combined with the covariate matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>,
 the full design matrix is
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>𝐙</mi><mo>,</mo><mi>𝐃</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{X} = [\mathbf{Z}, \mathbf{D}]</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mo>=</mo><mo stretchy="false" form="prefix">[</mo><mi>𝐙</mi><mo>,</mo><mi>𝐃</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\mathbf{X} = [\mathbf{Z}, \mathbf{D}]</annotation></semantics></math>,
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐙</mi><annotation encoding="application/x-tex">\mathbf{Z}</annotation></semantics></math>
 is the covariate matrix and
@@ -102,7 +102,7 @@ computationally expensive in terms of both memory and processing time.
 To avoid the high dimensionality of dummy variables, <code>pprof</code>
 uses a profile likelihood approach. The ordinary least squares objective
 is</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></munderover><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>γ</mi><mi>i</mi></msub><mo>−</mo><msubsup><mi>𝐙</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>⊤</mi></msubsup><mi>𝛃</mi><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>γ</mi><mo>,</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></munderover><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>γ</mi><mi>i</mi></msub><mo>−</mo><msubsup><mi>𝐙</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>⊤</mi></msubsup><mi>𝛃</mi><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mn>2</mn></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
 S(\gamma, \beta) = \sum_{i=1}^{m} \sum_{j=1}^{n_i} \bigl(Y_{ij} - \gamma_i - \mathbf{Z}_{ij}^\top \boldsymbol\beta\bigr)^2.
 </annotation></semantics></math></p>
 <p>Fixing
@@ -135,15 +135,11 @@ equivalent to centering each provider’s data:</p>
 <p>The closed-form estimator for
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol\beta</annotation></semantics></math>
 is</p>
-<p><span class="math display">$$
-\widehat{\boldsymbol\beta}_{FE} =
-\Bigl(\sum_{i=1}^m \sum_{j=1}^{n_i} \tilde{\mathbf{Z}}_{ij}
-\tilde{\mathbf{Z}}_{ij}^\top\Bigr)^{-1} \Bigl(\sum_{i=1}^m
-\sum_{j=1}^{n_i} \tilde{\mathbf{Z}}_{ij} \tilde{Y}_{ij}\Bigr)
-= \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i
-\mathbf{Z}_i\Bigr)^{-1} \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top
-\mathbf{Q}_i \mathbf{Y}_i\Bigr),
-$$</span></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi></mrow></msub><mo>=</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></munderover><msub><mover><mi>𝐙</mi><mo accent="true">̃</mo></mover><mrow><mi>i</mi><mi>j</mi></mrow></msub><msubsup><mover><mi>𝐙</mi><mo accent="true">̃</mo></mover><mrow><mi>i</mi><mi>j</mi></mrow><mi>⊤</mi></msubsup><msup><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></munderover><msub><mover><mi>𝐙</mi><mo accent="true">̃</mo></mover><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mover><mi>Y</mi><mo accent="true">̃</mo></mover><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">)</mo><mo>=</mo><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msubsup><mi>𝐙</mi><mi>i</mi><mi>⊤</mi></msubsup><msub><mi>𝐐</mi><mi>i</mi></msub><msub><mi>𝐙</mi><mi>i</mi></msub><msup><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msubsup><mi>𝐙</mi><mi>i</mi><mi>⊤</mi></msubsup><msub><mi>𝐐</mi><mi>i</mi></msub><msub><mi>𝐘</mi><mi>i</mi></msub><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\widehat{\boldsymbol\beta}_{FE} = 
+\Bigl(\sum_{i=1}^m \sum_{j=1}^{n_i} \tilde{\mathbf{Z}}_{ij} \tilde{\mathbf{Z}}_{ij}^\top\Bigr)^{-1} \Bigl(\sum_{i=1}^m \sum_{j=1}^{n_i} \tilde{\mathbf{Z}}_{ij} \tilde{Y}_{ij}\Bigr) 
+= \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i \mathbf{Z}_i\Bigr)^{-1} \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i \mathbf{Y}_i\Bigr),
+</annotation></semantics></math></p>
 <p>where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐐</mi><mi>i</mi></msub><mo>=</mo><msub><mi>𝐈</mi><msub><mi>n</mi><mi>i</mi></msub></msub><mo>−</mo><msub><mn>𝟏</mn><msub><mi>n</mi><mi>i</mi></msub></msub><msubsup><mn>𝟏</mn><msub><mi>n</mi><mi>i</mi></msub><mi>⊤</mi></msubsup><mi>/</mi><msub><mi>n</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{Q}_i = \mathbf{I}_{n_i} - \mathbf{1}_{n_i}\mathbf{1}_{n_i}^\top / n_i</annotation></semantics></math>.</p>
 </div>
@@ -151,7 +147,7 @@ $$</span></p>
 <h2 id="variance-and-inference">Variance and Inference<a class="anchor" aria-label="anchor" href="#variance-and-inference"></a>
 </h2>
 <p>The residual variance is estimated by</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>ϵ</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mn>1</mn><mrow><mi>n</mi><mo>−</mo><mi>m</mi><mo>−</mo><mi>p</mi></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></munderover><mo minsize="1.2" maxsize="1.2" stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>−</mo><msubsup><mi>𝐙</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>⊤</mi></msubsup><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi></mrow></msub><msup><mo minsize="1.2" maxsize="1.2" stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mi>ϵ</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mn>1</mn><mrow><mi>n</mi><mo>−</mo><mi>m</mi><mo>−</mo><mi>p</mi></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>n</mi><mi>i</mi></msub></munderover><mo minsize="120%" maxsize="120%" stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>−</mo><msubsup><mi>𝐙</mi><mrow><mi>i</mi><mi>j</mi></mrow><mi>⊤</mi></msubsup><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi></mrow></msub><msup><mo minsize="120%" maxsize="120%" stretchy="true" form="postfix">)</mo><mn>2</mn></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \hat\sigma_{\epsilon}^2 = \frac{1}{n - m - p} \sum_{i=1}^m \sum_{j=1}^{n_i} \bigl(Y_{ij} - \hat\gamma_{FE,i} - \mathbf{Z}_{ij}^\top \widehat{\boldsymbol\beta}_{FE}\bigr)^2.
 </annotation></semantics></math></p>
 <p>Under this model,
@@ -159,13 +155,11 @@ $$</span></p>
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi><mo>,</mo><mi>i</mi></mrow></msub><annotation encoding="application/x-tex">\hat\gamma_{FE,i}</annotation></semantics></math>
 are unbiased, with</p>
-<p><span class="math display">$$
-\mathrm{Var}(\widehat{\boldsymbol\beta}_{FE}) = \sigma_{\epsilon}^2
-\Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i
-\mathbf{Z}_i\Bigr)^{-1},
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>𝛃</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mi>σ</mi><mi>ϵ</mi><mn>2</mn></msubsup><mo minsize="180%" maxsize="180%" stretchy="true" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msubsup><mi>𝐙</mi><mi>i</mi><mi>⊤</mi></msubsup><msub><mi>𝐐</mi><mi>i</mi></msub><msub><mi>𝐙</mi><mi>i</mi></msub><msup><mo minsize="180%" maxsize="180%" stretchy="true" form="postfix">)</mo><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo>,</mo><mspace width="1.0em"></mspace><mrow><mi mathvariant="normal">V</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">r</mi></mrow><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>γ</mi><mo accent="true">̂</mo></mover><mrow><mi>F</mi><mi>E</mi><mo>,</mo><mi>i</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><msubsup><mi>σ</mi><mi>ϵ</mi><mn>2</mn></msubsup><msub><mi>n</mi><mi>i</mi></msub></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathrm{Var}(\widehat{\boldsymbol\beta}_{FE}) = \sigma_{\epsilon}^2 \Bigl(\sum_{i=1}^m \mathbf{Z}_i^\top \mathbf{Q}_i \mathbf{Z}_i\Bigr)^{-1},
 \quad
 \mathrm{Var}(\hat\gamma_{FE,i}) = \frac{\sigma_{\epsilon}^2}{n_i}.
-$$</span></p>
+</annotation></semantics></math></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

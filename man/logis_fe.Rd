@@ -14,14 +14,16 @@ logis_fe(
   Z = NULL,
   ProvID = NULL,
   method = "SerBIN",
-  max.iter = 1000,
+  max.iter = 10000,
   tol = 1e-05,
   bound = 10,
   cutoff = 10,
   backtrack = TRUE,
   stop = "or",
   threads = 1,
-  message = TRUE
+  message = TRUE,
+  version = "ParaFLR",
+  firth = TRUE
 )
 }
 \arguments{

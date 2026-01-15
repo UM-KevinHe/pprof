@@ -62,6 +62,18 @@
         <dd>Main Function for fitting the random effect logistic model</dd>
       </dl><dl><dt>
 
+          <code><a href="logis_cre.html">logis_cre()</a></code>
+
+        </dt>
+        <dd>Main Function for fitting correlated random effect logistic model</dd>
+      </dl><dl><dt>
+
+          <code><a href="logis_firth.html">logis_firth()</a></code>
+
+        </dt>
+        <dd>Main function for fitting the fixed effect logistic model</dd>
+      </dl><dl><dt>
+
           <code><a href="linear_fe.html">linear_fe()</a></code>
 
         </dt>
@@ -72,6 +84,12 @@
 
         </dt>
         <dd>Main Function for fitting the random effect linear model</dd>
+      </dl><dl><dt>
+
+          <code><a href="linear_cre.html">linear_cre()</a></code>
+
+        </dt>
+        <dd>Main Function for fitting correlated random effect linear model</dd>
       </dl></div><div class="section level2">
       <h2 id="standardized-measure-calculation">Standardized Measure Calculation<a class="anchor" aria-label="anchor" href="#standardized-measure-calculation"></a></h2>
 
@@ -103,6 +121,12 @@
         <dd>Calculate direct/indirect standardized ratios/rates from a fitted <code>logis_re</code> object</dd>
       </dl><dl><dt>
 
+          <code><a href="SM_output.logis_cre.html">SM_output(<i>&lt;logis_cre&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Calculate direct/indirect standardized ratios/rates from a fitted <code>logis_cre</code> object</dd>
+      </dl><dl><dt>
+
           <code><a href="SM_output.linear_fe.html">SM_output(<i>&lt;linear_fe&gt;</i>)</a></code>
 
         </dt>
@@ -113,6 +137,12 @@
 
         </dt>
         <dd>Calculate direct/indirect standardized differences from a fitted <code>linear_re</code> object</dd>
+      </dl><dl><dt>
+
+          <code><a href="SM_output.linear_cre.html">SM_output(<i>&lt;linear_cre&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Calculate direct/indirect standardized differences from a fitted <code>linear_cre</code> object</dd>
       </dl></div><div class="section level2">
       <h2 id="hypothesis-testing-for-provider-effects">Hypothesis Testing for Provider Effects<a class="anchor" aria-label="anchor" href="#hypothesis-testing-for-provider-effects"></a></h2>
 
@@ -144,6 +174,12 @@
         <dd>Conduct hypothesis testing for provider effects from a fitted <code>logis_re</code> object</dd>
       </dl><dl><dt>
 
+          <code><a href="test.logis_cre.html">test(<i>&lt;logis_cre&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Conduct hypothesis testing for provider effects from a fitted <code>logis_cre</code> object</dd>
+      </dl><dl><dt>
+
           <code><a href="test.linear_fe.html">test(<i>&lt;linear_fe&gt;</i>)</a></code>
 
         </dt>
@@ -154,6 +190,12 @@
 
         </dt>
         <dd>Conduct hypothesis testing for provider effects from a fitted <code>linear_re</code> object</dd>
+      </dl><dl><dt>
+
+          <code><a href="test.linear_cre.html">test(<i>&lt;linear_cre&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Conduct hypothesis testing for provider effects from a fitted <code>linear_cre</code> object</dd>
       </dl></div><div class="section level2">
       <h2 id="confidence-interval-for-provider-effects">Confidence Interval for Provider Effects<a class="anchor" aria-label="anchor" href="#confidence-interval-for-provider-effects"></a></h2>
 
@@ -179,6 +221,12 @@
         <dd>Get confidence intervals for provider effects or standardized measures from a fitted <code>logis_re</code> object</dd>
       </dl><dl><dt>
 
+          <code><a href="confint.logis_cre.html">confint(<i>&lt;logis_cre&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Get confidence intervals for provider effects or standardized measures from a fitted <code>logis_cre</code> object</dd>
+      </dl><dl><dt>
+
           <code><a href="confint.linear_fe.html">confint(<i>&lt;linear_fe&gt;</i>)</a></code>
 
         </dt>
@@ -189,6 +237,12 @@
 
         </dt>
         <dd>Get confidence intervals for provider effects or standardized measures from a fitted <code>linear_re</code> object</dd>
+      </dl><dl><dt>
+
+          <code><a href="confint.linear_cre.html">confint(<i>&lt;linear_cre&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Get confidence intervals for provider effects or standardized measures from a fitted <code>linear_cre</code> object</dd>
       </dl></div><div class="section level2">
       <h2 id="summary-statistics-for-covariate-estimates">Summary Statistics for Covariate Estimates<a class="anchor" aria-label="anchor" href="#summary-statistics-for-covariate-estimates"></a></h2>
 
@@ -208,16 +262,16 @@
         <dd>Result Summaries of Covariate Estimates from a fitted <code>logis_fe</code> object</dd>
       </dl><dl><dt>
 
-          <code><a href="summary.logis_re.html">summary(<i>&lt;logis_re&gt;</i>)</a></code>
+          <code><a href="summary.logis_re.html">summary(<i>&lt;logis_cre&gt;</i>)</a></code> <code><a href="summary.logis_re.html">summary(<i>&lt;logis_re&gt;</i>)</a></code>
 
         </dt>
-        <dd>Result Summaries of Covariate Estimates from a fitted <code>logis_re</code> object</dd>
+        <dd>Result Summaries of Covariate Estimates from a fitted <code>logis_re</code> or <code>logis_cre</code> object</dd>
       </dl><dl><dt>
 
-          <code><a href="summary.linear_fe.html">summary(<i>&lt;linear_fe&gt;</i>)</a></code> <code><a href="summary.linear_fe.html">summary(<i>&lt;linear_re&gt;</i>)</a></code>
+          <code><a href="summary.linear_fe.html">summary(<i>&lt;linear_cre&gt;</i>)</a></code> <code><a href="summary.linear_fe.html">summary(<i>&lt;linear_fe&gt;</i>)</a></code> <code><a href="summary.linear_fe.html">summary(<i>&lt;linear_re&gt;</i>)</a></code>
 
         </dt>
-        <dd>Result Summaries of Covariate Estimates from a fitted <code>linear_fe</code> or <code>linear_re</code> object</dd>
+        <dd>Result Summaries of Covariate Estimates from a fitted <code>linear_fe</code>, <code>linear_re</code> or <code>linear_cre</code> object</dd>
       </dl></div><div class="section level2">
       <h2 id="plotting-functions">Plotting Functions<a class="anchor" aria-label="anchor" href="#plotting-functions"></a></h2>
 

@@ -125,8 +125,9 @@
 logis_fe <- function(formula = NULL, data = NULL,
                      Y.char = NULL, Z.char = NULL, ProvID.char = NULL,
                      Y = NULL, Z = NULL, ProvID = NULL,
-                     method = "SerBIN", max.iter = 1000, tol = 1e-5, bound = 10,
-                     cutoff = 10, backtrack = TRUE, stop = "or", threads = 1, message = TRUE) {
+                     method = "SerBIN", max.iter = 10000, tol = 1e-5, bound = 10,
+                     cutoff = 10, backtrack = TRUE, stop = "or", threads = 1, message = TRUE,
+                     version = "ParaFLR", firth = TRUE) {
   if (!is.null(formula) && !is.null(data)) {
     if (message == TRUE) message("Input format: formula and data.")
 
@@ -217,11 +218,31 @@ logis_fe <- function(formula = NULL, data = NULL,
   gamma.prov <- rep(log(mean(data[,Y.char])/(1-mean(data[,Y.char]))), length(n.prov))
   beta <- rep(0, NCOL(Z))
 
+  start_time_cpp <- Sys.time()
+
   if (method == "SerBIN") {
-    ls <- logis_BIN_fe_prov(as.matrix(data[,Y.char]), Z, n.prov, gamma.prov, beta,
-                            threads = threads, tol, max.iter, bound, message, backtrack, stop)
-    gamma.prov <- as.numeric(ls$gamma)
-    beta <- as.numeric(ls$beta)
+    if (version == "SerBIN") {
+      ls <- logis_BIN_fe_prov(as.matrix(data[,Y.char]), Z, n.prov, gamma.prov, beta,
+                              threads = threads, tol, max.iter, bound, message, backtrack, stop)
+      gamma.prov <- as.numeric(ls$gamma)
+      beta <- as.numeric(ls$beta)
+    }
+    else if (version == "ParaFLR") {
+      n_obs <- nrow(data)
+      if (firth) {
+        ls <- logis_firth_prov(as.matrix(data[,Y.char]), Z, n.prov, gamma.prov, beta,
+                               n_obs = n_obs, m = length(n.prov), threads = threads, tol = tol,
+                               max_iter = max.iter, bound = bound, message = message)
+      }
+      else {
+        ls <- logis_LR_prov(as.matrix(data[,Y.char]), Z, n.prov, gamma.prov, beta,
+                               n_obs = n_obs, m = length(n.prov), threads = threads, tol = tol,
+                               max_iter = max.iter, bound = bound, message = message, stop)
+      }
+      gamma.prov <- as.numeric(ls$gamma)
+      beta <- as.numeric(ls$beta)
+    }
+
   }
   else if (method == "BAN") {
     ls <- logis_fe_prov(as.matrix(data[,Y.char]), Z, n.prov, gamma.prov, beta,
@@ -232,6 +253,9 @@ logis_fe <- function(formula = NULL, data = NULL,
   else {
     stop("Argument 'method' NOT as required!")
   }
+
+  end_time_cpp <- Sys.time()
+  cpp_time <- end_time_cpp - start_time_cpp
 
   # Coefficient
   beta <- matrix(beta)
@@ -300,6 +324,8 @@ logis_fe <- function(formula = NULL, data = NULL,
   # return_ls$df.prov <- df.prov
   return_ls$char_list <- char_list
   return_ls$data_include <- data
+
+  #return_ls$cpp_time <- cpp_time
   return(return_ls)
 }
 

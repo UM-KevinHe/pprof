@@ -1,4 +1,4 @@
-pandoc: '3.2'
+pandoc: 3.7.0.2
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
@@ -7,7 +7,7 @@ articles:
   pprof: pprof.html
   Quick-start: Quick-start.html
   Risk-adjustment_Model: Risk-adjustment_Model.html
-last_built: 2025-07-01T03:33Z
+last_built: 2026-01-15T03:57Z
 urls:
   reference: https://um-kevinhe.github.io/pprof/reference
   article: https://um-kevinhe.github.io/pprof/articles

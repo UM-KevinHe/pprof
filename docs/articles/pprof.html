@@ -127,7 +127,7 @@ showing flagging percentages overall and stratified by provider sizes,
 and funnel plots for indirect standardized measures in fixed effect
 models. These visualizations offer multiple perspectives for
 understanding the results effectively.</p>
-<p><img src="Charts%2Fpprof_flowchart.png" width="3000"></p>
+<p><img src="Charts/pprof_flowchart.png" width="3000"></p>
 </div>
 <div class="section level2">
 <h2 id="model-fitting">Model Fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
@@ -193,28 +193,28 @@ standardized measures under different definitions.</p>
 <code class="sourceCode R"><span><span class="va">SR</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SM_output.html">SM_output</a></span><span class="op">(</span><span class="va">fit_fe</span>, stdz <span class="op">=</span> <span class="st">"indirect"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SR</span><span class="op">$</span><span class="va">indirect.ratio</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Indirect_standardized.ratio</span></span>
-<span><span class="co">#&gt; 1                   0.9025369</span></span>
-<span><span class="co">#&gt; 2                   1.1081224</span></span>
-<span><span class="co">#&gt; 3                   0.8994107</span></span>
-<span><span class="co">#&gt; 4                   1.0742682</span></span>
-<span><span class="co">#&gt; 5                   0.9771412</span></span>
-<span><span class="co">#&gt; 6                   1.0311867</span></span>
+<span><span class="co">#&gt; 1                   0.9023178</span></span>
+<span><span class="co">#&gt; 2                   1.1041807</span></span>
+<span><span class="co">#&gt; 3                   0.8983017</span></span>
+<span><span class="co">#&gt; 4                   1.0727439</span></span>
+<span><span class="co">#&gt; 5                   0.9760779</span></span>
+<span><span class="co">#&gt; 6                   1.0315284</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SR</span><span class="op">$</span><span class="va">indirect.rate</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Indirect_standardized.rate</span></span>
-<span><span class="co">#&gt; 1                   34.99262</span></span>
-<span><span class="co">#&gt; 2                   42.96346</span></span>
-<span><span class="co">#&gt; 3                   34.87141</span></span>
-<span><span class="co">#&gt; 4                   41.65088</span></span>
-<span><span class="co">#&gt; 5                   37.88513</span></span>
-<span><span class="co">#&gt; 6                   39.98055</span></span>
+<span><span class="co">#&gt; 1                   34.98412</span></span>
+<span><span class="co">#&gt; 2                   42.81063</span></span>
+<span><span class="co">#&gt; 3                   34.82841</span></span>
+<span><span class="co">#&gt; 4                   41.59178</span></span>
+<span><span class="co">#&gt; 5                   37.84391</span></span>
+<span><span class="co">#&gt; 6                   39.99380</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SR</span><span class="op">$</span><span class="va">OE</span><span class="op">$</span><span class="va">OE_indirect</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   Obs_provider Exp.indirect_provider Var.indirect_provider</span></span>
-<span><span class="co">#&gt; 1           31              34.34763              8.009189</span></span>
-<span><span class="co">#&gt; 2           16              14.43884              6.107131</span></span>
-<span><span class="co">#&gt; 3           35              38.91437             11.132482</span></span>
-<span><span class="co">#&gt; 4           39              36.30378             10.725251</span></span>
-<span><span class="co">#&gt; 5           23              23.53805              8.296404</span></span>
-<span><span class="co">#&gt; 6           34              32.97172              9.162980</span></span></code></pre></div>
+<span><span class="co">#&gt; 1           31              34.35597              8.163345</span></span>
+<span><span class="co">#&gt; 2           16              14.49038              6.190541</span></span>
+<span><span class="co">#&gt; 3           35              38.96241             11.317177</span></span>
+<span><span class="co">#&gt; 4           39              36.35537             10.888484</span></span>
+<span><span class="co">#&gt; 5           23              23.56369              8.392094</span></span>
+<span><span class="co">#&gt; 6           34              32.96080              9.283093</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="hypothesis-testing-for-provider-effects">Hypothesis Testing for Provider Effects<a class="anchor" aria-label="anchor" href="#hypothesis-testing-for-provider-effects"></a>
@@ -235,16 +235,16 @@ providers without being overwhelmed by extensive data.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">16</span><span class="op">:</span><span class="fl">20</span>, <span class="fl">61</span><span class="op">:</span><span class="fl">65</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    flag      p value        stat</span></span>
-<span><span class="co">#&gt; 16   -1 0.0299553164 -2.17068071</span></span>
-<span><span class="co">#&gt; 17    0 0.0745112915  1.78346100</span></span>
-<span><span class="co">#&gt; 18   -1 0.0361175315 -2.09560178</span></span>
-<span><span class="co">#&gt; 19    0 0.5606615895  0.58185910</span></span>
-<span><span class="co">#&gt; 20    0 0.9903105282  0.01214425</span></span>
-<span><span class="co">#&gt; 61    1 0.0004267554  3.52296022</span></span>
-<span><span class="co">#&gt; 62    0 0.0677680598  1.82654599</span></span>
-<span><span class="co">#&gt; 63    0 0.3526406608  0.92947947</span></span>
-<span><span class="co">#&gt; 64    0 0.3894835561  0.86055432</span></span>
-<span><span class="co">#&gt; 65    0 0.1026006595 -1.63237430</span></span></code></pre></div>
+<span><span class="co">#&gt; 16   -1 0.0293507385 -2.17874336</span></span>
+<span><span class="co">#&gt; 17    0 0.0820948215  1.73865866</span></span>
+<span><span class="co">#&gt; 18   -1 0.0368963514 -2.08690911</span></span>
+<span><span class="co">#&gt; 19    0 0.5711551148  0.56635112</span></span>
+<span><span class="co">#&gt; 20    0 0.9889308166  0.01387361</span></span>
+<span><span class="co">#&gt; 61    1 0.0004249288  3.52409694</span></span>
+<span><span class="co">#&gt; 62    0 0.0687880865  1.81980907</span></span>
+<span><span class="co">#&gt; 63    0 0.3664856157  0.90307590</span></span>
+<span><span class="co">#&gt; 64    0 0.4039388686  0.83460727</span></span>
+<span><span class="co">#&gt; 65    0 0.1029509218 -1.63071286</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="hypothesis-testing-for-covariate-coefficients">Hypothesis Testing for Covariate Coefficients<a class="anchor" aria-label="anchor" href="#hypothesis-testing-for-covariate-coefficients"></a>
@@ -255,12 +255,12 @@ may include the estimates, standard errors, p-values, and confindence
 intervals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_fe</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     Estimate  Std.Error     Stat p value  CI.Lower CI.Upper</span></span>
-<span><span class="co">#&gt; z1 1.0926220 0.04148974 26.33475 &lt; 1e-10 1.0113036 1.173940</span></span>
-<span><span class="co">#&gt; z2 1.0178412 0.04116559 24.72553 &lt; 1e-10 0.9371581 1.098524</span></span>
-<span><span class="co">#&gt; z3 0.9950259 0.04025412 24.71861 &lt; 1e-10 0.9161293 1.073923</span></span>
-<span><span class="co">#&gt; z4 1.0386844 0.04119677 25.21276 &lt; 1e-10 0.9579402 1.119429</span></span>
-<span><span class="co">#&gt; z5 1.0563464 0.04186183 25.23412 &lt; 1e-10 0.9742987 1.138394</span></span></code></pre></div>
+<span><span class="co">#&gt;    Estimate  Std.Error     Stat p value  CI.Lower CI.Upper</span></span>
+<span><span class="co">#&gt; z1 1.069908 0.04089025 26.16535 &lt; 1e-10 0.9897641 1.150051</span></span>
+<span><span class="co">#&gt; z2 0.996783 0.04060010 24.55124 &lt; 1e-10 0.9172083 1.076358</span></span>
+<span><span class="co">#&gt; z3 0.974553 0.03970973 24.54192 &lt; 1e-10 0.8967233 1.052383</span></span>
+<span><span class="co">#&gt; z4 1.016876 0.04061079 25.03956 &lt; 1e-10 0.9372807 1.096472</span></span>
+<span><span class="co">#&gt; z5 1.034205 0.04126037 25.06534 &lt; 1e-10 0.9533365 1.115074</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="confidence-interval">Confidence Interval<a class="anchor" aria-label="anchor" href="#confidence-interval"></a>
@@ -274,30 +274,30 @@ intervals.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">55</span><span class="op">:</span><span class="fl">60</span><span class="op">)</span>, option <span class="op">=</span> <span class="st">"gamma"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         gamma gamma.lower  gamma.upper</span></span>
-<span><span class="co">#&gt; 55 -1.4176768   -2.057409 -0.792812684</span></span>
-<span><span class="co">#&gt; 56 -0.6624298   -1.239835 -0.091294432</span></span>
-<span><span class="co">#&gt; 57 -0.6411525   -1.295789 -0.006435919</span></span>
-<span><span class="co">#&gt; 58 -1.3264628   -1.966684 -0.699596625</span></span>
-<span><span class="co">#&gt; 59 -0.8219975   -1.473821 -0.178134425</span></span>
-<span><span class="co">#&gt; 60 -1.1748531   -1.834632 -0.526685839</span></span>
+<span><span class="co">#&gt; 55 -1.3887223   -2.031742 -0.776076819</span></span>
+<span><span class="co">#&gt; 56 -0.6494507   -1.226268 -0.085347867</span></span>
+<span><span class="co">#&gt; 57 -0.6273724   -1.287363 -0.007755105</span></span>
+<span><span class="co">#&gt; 58 -1.2998787   -1.942296 -0.684813729</span></span>
+<span><span class="co">#&gt; 59 -0.8045835   -1.455856 -0.169767482</span></span>
+<span><span class="co">#&gt; 60 -1.1514712   -1.811593 -0.515183844</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit_fe</span>, parm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80</span><span class="op">:</span><span class="fl">85</span><span class="op">)</span>, option <span class="op">=</span> <span class="st">"SM"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; $CI.indirect_ratio</span></span>
 <span><span class="co">#&gt;    indirect_ratio CI_ratio.lower CI_ratio.upper</span></span>
-<span><span class="co">#&gt; 80      0.6651076      0.4614515      0.8967515</span></span>
-<span><span class="co">#&gt; 81      0.0000000      0.0000000      1.1422604</span></span>
-<span><span class="co">#&gt; 82      1.0857752      0.8814482      1.3007155</span></span>
-<span><span class="co">#&gt; 83      1.0965577      0.9548462      1.2299472</span></span>
-<span><span class="co">#&gt; 84      1.1255589      0.9578273      1.2922141</span></span>
-<span><span class="co">#&gt; 85      1.1540167      0.9741097      1.3352526</span></span>
+<span><span class="co">#&gt; 80      0.6640426      0.4596421      0.8968505</span></span>
+<span><span class="co">#&gt; 81      0.0000000      0.0000000      1.0962265</span></span>
+<span><span class="co">#&gt; 82      1.0830968      0.8779316      1.2989710</span></span>
+<span><span class="co">#&gt; 83      1.0978356      0.9549863      1.2323897</span></span>
+<span><span class="co">#&gt; 84      1.1251051      0.9562863      1.2928238</span></span>
+<span><span class="co">#&gt; 85      1.1529445      0.9718890      1.3353695</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $CI.indirect_rate</span></span>
 <span><span class="co">#&gt;    indirect_rate CI_rate.lower CI_rate.upper</span></span>
-<span><span class="co">#&gt; 80      25.78715      17.89112      34.76831</span></span>
-<span><span class="co">#&gt; 81       0.00000       0.00000      44.28703</span></span>
-<span><span class="co">#&gt; 82      42.09702      34.17498      50.43056</span></span>
-<span><span class="co">#&gt; 83      42.51508      37.02073      47.68678</span></span>
-<span><span class="co">#&gt; 84      43.63949      37.13631      50.10095</span></span>
-<span><span class="co">#&gt; 85      44.74284      37.76760      51.76961</span></span></code></pre></div>
+<span><span class="co">#&gt; 80      25.74586      17.82097      34.77215</span></span>
+<span><span class="co">#&gt; 81       0.00000       0.00000      42.50224</span></span>
+<span><span class="co">#&gt; 82      41.99318      34.03864      50.36292</span></span>
+<span><span class="co">#&gt; 83      42.56462      37.02616      47.78147</span></span>
+<span><span class="co">#&gt; 84      43.62190      37.07656      50.12459</span></span>
+<span><span class="co">#&gt; 85      44.70127      37.68150      51.77415</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="plotting">Plotting<a class="anchor" aria-label="anchor" href="#plotting"></a>

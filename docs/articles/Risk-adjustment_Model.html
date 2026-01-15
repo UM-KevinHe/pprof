@@ -120,7 +120,7 @@ is the provider-specific effect.</li>
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝛃</mi><annotation encoding="application/x-tex">\boldsymbol\beta</annotation></semantics></math>
 is the vector of regression coefficients.</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>ϵ</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\epsilon_{ij} \sim N(0, \sigma_\epsilon^2)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>ϵ</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\epsilon_{ij} \sim N(0, \sigma_\epsilon^2)</annotation></semantics></math>
 is the error term.</li>
 </ul>
 <p>In this context,
@@ -170,7 +170,7 @@ are the regression coefficients.</p>
 as i.i.d. random variables. Conditionally on the design matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mo>∈</mo><msup><mi>ℝ</mi><mrow><mi>n</mi><mo>×</mo><mi>p</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\mathbf{X} \in \mathbb{R}^{n \times p}</annotation></semantics></math>,
 we assume:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mi>i</mi></msub><mo>∣</mo><mi>𝐗</mi><mover><mo>∼</mo><mrow><mi mathvariant="normal">i</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">.</mi></mrow></mover><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>α</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mi>i</mi></msub><mo>∣</mo><mi>𝐗</mi><mover><mo>∼</mo><mrow><mi mathvariant="normal">i</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">i</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">.</mi></mrow></mover><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>α</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
 \alpha_i \mid \mathbf{X} \overset{\mathrm{i.i.d.}}{\sim} N(0, \sigma_\alpha^2).
 </annotation></semantics></math></p>
 <p>The full RE model is:</p>
@@ -178,7 +178,7 @@ we assume:</p>
 Y_{ij} = \mu + \alpha_i + \mathbf{Z}_{ij}^\top \boldsymbol\beta + \epsilon_{ij},
 </annotation></semantics></math></p>
 <p>with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>∼</mo><mi>N</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>ϵ</mi><mn>2</mn></msubsup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\epsilon_{ij} \sim N(0, \sigma_\epsilon^2)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϵ</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>∼</mo><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msubsup><mi>σ</mi><mi>ϵ</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\epsilon_{ij} \sim N(0, \sigma_\epsilon^2)</annotation></semantics></math>.
 The RE framework pools information across providers, shrinking the
 provider estimates toward the overall mean based on the variance
 component

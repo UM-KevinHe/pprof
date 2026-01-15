@@ -35,28 +35,37 @@ reference:
   contents:
   - logis_fe
   - logis_re
+  - logis_cre
+  - logis_firth
   - linear_fe
   - linear_re
+  - linear_cre
 - title: Standardized Measure Calculation
   contents:
   - SM_output
   - SM_output.logis_fe
   - SM_output.logis_re
+  - SM_output.logis_cre
   - SM_output.linear_fe
   - SM_output.linear_re
+  - SM_output.linear_cre
 - title: Hypothesis Testing for Provider Effects
   contents:
   - test
   - test.logis_fe
   - test.logis_re
+  - test.logis_cre
   - test.linear_fe
   - test.linear_re
+  - test.linear_cre
 - title: Confidence Interval for Provider Effects
   contents:
   - confint.logis_fe
   - confint.logis_re
+  - confint.logis_cre
   - confint.linear_fe
   - confint.linear_re
+  - confint.linear_cre
 - title: Summary Statistics for Covariate Estimates
   contents:
   - summary.logis_fe
