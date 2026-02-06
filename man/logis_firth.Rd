@@ -2,7 +2,7 @@
 % Please edit documentation in R/logis_firth.R
 \name{logis_firth}
 \alias{logis_firth}
-\title{Main function for fitting the fixed effect logistic model}
+\title{Main function for fitting the fixed effect logistic model using firth correction}
 \usage{
 logis_firth(
   formula = NULL,
@@ -17,8 +17,6 @@ logis_firth(
   tol = 1e-05,
   bound = 10,
   cutoff = 10,
-  backtrack = TRUE,
-  stop = "or",
   threads = 1,
   message = TRUE
 )
@@ -52,30 +50,9 @@ or the columns specified by \code{Y.char}, \code{Z.char}, and \code{ProvID.char}
 \item{cutoff}{An integer specifying the minimum number of observations required for providers.
 Providers with fewer observations than the cutoff will be labeled as \code{"include = 0"} and excluded from model fitting. The default is 10.}
 
-\item{backtrack}{a Boolean indicating whether backtracking line search is implemented. The default is FALSE.}
-
-\item{stop}{a character string specifying the stopping rule to determine convergence.
-\itemize{
-\item{\code{"beta"}} stop the algorithm when the infinity norm of the difference between current and previous beta coefficients is less than the \code{tol}.
-\item{\code{"relch"}} stop the algorithm when the \eqn{(loglik(m)-loglik(m-1))/(loglik(m))} (the difference between the log-likelihood of
-the current iteration and the previous iteration divided by the log-likelihood of the current iteration) is less than the \code{tol}.
-\item{\code{"ratch"}} stop the algorithm when \eqn{(loglik(m)-loglik(m-1))/(loglik(m)-loglik(0))} (the difference between the log-likelihood of
-the current iteration and the previous iteration divided by the difference of the log-likelihood of the current iteration and the initial iteration)
-is less than the \code{tol}.
-\item{\code{"all"}} stop the algorithm when all the stopping rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) are met.
-\item{\code{"or"}} stop the algorithm if any one of the rules (\code{"beta"}, \code{"relch"}, \code{"ratch"}) is met.
-}
-The default value is \code{or}. If \code{iter.max} is achieved, it overrides any stop rule for algorithm termination.}
-
 \item{threads}{a positive integer specifying the number of threads to be used. The default value is 1.}
 
 \item{message}{a Boolean indicating whether to print the progress of the fitting process. The default is TRUE.}
-
-\item{method}{a string specifying the algorithm to be used. The default value is "SerBIN".
-\itemize{
-\item{\code{"SerBIN"}} uses the Serial blockwise inversion Newton algorithm to fit the model (See \href{https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387}{Wu et al. (2022)}).
-\item{\code{"BAN"}} uses the block ascent Newton algorithm to fit the model (See \href{https://link.springer.com/article/10.1007/s10985-013-9264-6}{He et al. (2013)}).
-}}
 }
 \value{
 A list of objects with S3 class \code{"logis_fe"}:
@@ -101,31 +78,16 @@ all categories except the reference level. Additionally, it contains three extra
 \code{no.events}, indicating if all observations in the provider are 0.}
 }
 \description{
-Fit a fixed effect logistic model via Serial blockwise inversion Newton (SerBIN) or block ascent Newton (BAN) algorithm.
+Fixed effects (FE) models suffer from separation issues when all outcomes in a cluster are the same,
+leading to infinite estimates and unreliable inference.
+Firth’s corrected logistic regression (FLR) overcomes this limitation and
+outperforms both FE and random effects (RE) models in terms of bias and RMSE.
 }
 \details{
 The function accepts three different input formats:
 a formula and dataset, where the formula is of the form \code{response ~ covariates + id(provider)}, with \code{provider} representing the provider identifier;
 a dataset along with the column names of the response, covariates, and provider identifier;
 or the binary outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector.
-
-The default algorithm is based on Serial blockwise inversion Newton (SerBIN) proposed by
-\href{https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387}{Wu et al. (2022)},
-but users can also choose to use the block ascent Newton (BAN) algorithm proposed by
-\href{https://link.springer.com/article/10.1007/s10985-013-9264-6}{He et al. (2013)} to fit the model.
-Both methodologies build upon the Newton-Raphson method, yet SerBIN simultaneously updates both the provider effect and covariate coefficient.
-This concurrent update necessitates the inversion of the whole information matrix at each iteration.
-In contrast, BAN adopts a two-layer updating approach, where the covariate coefficient is sequentially fixed to update the provider effect,
-followed by fixing the provider effect to update the covariate coefficient.
-
-We suggest using the default \code{"SerBIN"} option as it typically converges subsequently much faster for most datasets.
-However, in rare cases where the SerBIN algorithm encounters second-order derivative irreversibility leading to an error,
-users can consider using the \code{"BAN"} option as an alternative.
-For a deeper understanding, please consult the original article for detailed insights.
-
-If issues arise during model fitting, consider using the \code{data_check} function to perform a data quality check,
-which can help identify missing values, low variation in covariates, high-pairwise correlation, and multicollinearity.
-For datasets with missing values, this function automatically removes observations (rows) with any missing values before fitting the model.
 }
 \examples{
 data(ExampleDataBinary)
@@ -139,20 +101,14 @@ ProvID.char <- colnames(data)[2]
 formula <- as.formula(paste("outcome ~", paste(covar.char, collapse = " + "), "+ id(ProvID)"))
 
 # Fit logistic linear effect model using three input formats
-fit_fe1 <- logis_fe(Y = outcome, Z = covar, ProvID = ProvID)
-fit_fe2 <- logis_fe(data = data, Y.char = outcome.char,
+fit_fe1 <- logis_firth(Y = outcome, Z = covar, ProvID = ProvID)
+fit_fe2 <- logis_firth(data = data, Y.char = outcome.char,
 Z.char = covar.char, ProvID.char = ProvID.char)
-fit_fe3 <- logis_fe(formula, data)
+fit_fe3 <- logis_firth(formula, data)
 
 }
 \references{
-He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis providers; adjusting for hospital effects.
-\emph{Lifetime Data Analysis}, \strong{19}: 490-512.
-\cr
-
-Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and inference for profiling health care providers.
-\emph{Statistics in Medicine}, \strong{41(15)}: 2840-2853.
-\cr
+He K,
 }
 \seealso{
 \code{\link{data_check}}

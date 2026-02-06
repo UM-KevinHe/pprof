@@ -21,9 +21,7 @@ logis_fe(
   backtrack = TRUE,
   stop = "or",
   threads = 1,
-  message = TRUE,
-  version = "ParaFLR",
-  firth = TRUE
+  message = TRUE
 )
 }
 \arguments{
