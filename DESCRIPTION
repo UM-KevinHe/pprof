@@ -34,7 +34,8 @@ Imports:
     magrittr,
     scales,
     tibble,
-    rlang
+    rlang,
+    tidyselect
 LinkingTo: Rcpp, RcppArmadillo, RcppParallel
 Depends:
     R (>= 4.1.0)

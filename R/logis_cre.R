@@ -60,7 +60,8 @@
 #'
 #' @importFrom lme4 glmer fixef ranef
 #' @importFrom stats complete.cases as.formula model.matrix fitted logLik
-#' @importFrom dplyr group_by mutate ungroup
+#' @importFrom dplyr group_by mutate ungroup across
+#' @importFrom tidyselect all_of
 #'
 #' @export
 #'

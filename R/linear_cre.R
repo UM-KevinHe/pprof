@@ -63,7 +63,8 @@
 #'
 #' @importFrom lme4 lmer fixef ranef
 #' @importFrom stats complete.cases as.formula model.matrix fitted residuals logLik
-#' @importFrom dplyr group_by mutate ungroup
+#' @importFrom dplyr group_by mutate ungroup across
+#' @importFrom tidyselect all_of
 #'
 #' @export
 #'

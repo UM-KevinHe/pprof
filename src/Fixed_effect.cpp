@@ -403,8 +403,8 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       arma::vec score_gamma(m), d_gamma(m);
       ind = 0;
       for (int i = 0; i < m; i++) {
-        score_gamma(i) = sum(Yp(span(ind,ind+n_prov(i)-1)));
-        d_gamma(i) = score_gamma(i) / sum(pq(span(ind,ind+n_prov(i)-1)));
+        score_gamma(i) = sum(Yp(arma::span(ind,ind+n_prov(i)-1)));
+        d_gamma(i) = score_gamma(i) / sum(pq(arma::span(ind,ind+n_prov(i)-1)));
         ind += n_prov(i);
       }
       v = 1.0; // initialize step size
@@ -509,8 +509,8 @@ List logis_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamm
       }
       ind = 0;
       for (int i = 0; i < m; i++) {
-        gamma(i) += sum(Yp(span(ind,ind+n_prov(i)-1))) /
-          sum(pq(span(ind,ind+n_prov(i)-1)));
+        gamma(i) += sum(Yp(arma::span(ind,ind+n_prov(i)-1))) /
+          sum(pq(arma::span(ind,ind+n_prov(i)-1)));
         ind += n_prov(i);
       }
 
@@ -618,8 +618,8 @@ List logis_BIN_fe_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec 
     arma::mat info_betagamma(Z.n_cols,m);
     ind = 0;
     for (int i = 0; i < m; i++) {
-      score_gamma(i) = sum(Yp(span(ind,ind+n_prov(i)-1)));
-      info_gamma_inv(i) = 1 / sum(pq(span(ind,ind+n_prov(i)-1)));
+      score_gamma(i) = sum(Yp(arma::span(ind,ind+n_prov(i)-1)));
+      info_gamma_inv(i) = 1 / sum(pq(arma::span(ind,ind+n_prov(i)-1)));
       info_betagamma.col(i) =
         sum(Z.rows(ind,ind+n_prov(i)-1).each_col()%(p.subvec(ind,ind+n_prov(i)-1)%(1-p.subvec(ind,ind+n_prov(i)-1)))).t();
       ind += n_prov(i);

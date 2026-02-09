@@ -30,6 +30,10 @@
 #' a dataset along with the column names of the response, covariates, and provider identifier;
 #' or the binary outcome vector \eqn{\boldsymbol{Y}}, the covariate matrix or data frame \eqn{\mathbf{Z}}, and the provider identifier vector.
 #'
+#' This function utilizes OpenMP for parallel processing. For macOS, to enable multi-threading,
+#' users may need to install the OpenMP library (e.g., brew install libomp) or use a supported compiler such as GCC.
+#' If OpenMP is not detected during installation, the function will transparently fall back to single-threaded execution.
+#'
 #' @seealso \code{\link{data_check}}
 #'
 #' @return A list of objects with S3 class \code{"logis_fe"}:
