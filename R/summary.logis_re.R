@@ -19,12 +19,14 @@
 #' \item{CI.lower}{the upper bound of the confidence interval.}
 #'
 #' @examples
+#' \donttest{
 #' data(ExampleDataBinary)
 #' outcome <- ExampleDataBinary$Y
 #' covar <- ExampleDataBinary$Z
 #' ProvID <- ExampleDataBinary$ProvID
 #' fit_re <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
 #' summary(fit_re)
+#' }
 #'
 #' @importFrom stats pnorm qnorm confint
 #'

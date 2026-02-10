@@ -86,7 +86,7 @@ List logis_firth_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec g
                       double bound = 10.0, bool message = true, const std::string &stop = "beta",
                       bool need_trace = false) {
   if (message == true) {
-    cout << "Implementing firth-corrected fixed provider effects model (Rcpp) ..." << endl;
+    Rcpp::Rcout << "Implementing firth-corrected fixed provider effects model (Rcpp) ..." << endl;
   }
 
   // make "provider" as the basic unit of parallelization (so ideally maximum number of threads = number of providers)
@@ -355,7 +355,7 @@ List logis_firth_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec g
             if (stop == "beta"){
                 crit = norm(d_beta, "inf");
                 if (message == true) {
-                    Rcout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+                  Rcpp::Rcout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
                 }
             } else {
                 double d_loglkd = loglik_pen - old_pen;
@@ -364,12 +364,12 @@ List logis_firth_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec g
                 if (stop == "relch") {
                     crit = abs(d_loglkd/loglik_pen);
                     if (message == true) {
-                        Rcout << "Iter " << iter << ": Relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+                      Rcpp::Rcout << "Iter " << iter << ": Relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
                     }
                 } else if (stop == "ratch") {
                     crit = abs(d_loglkd/(loglik_pen-pen_init));
                     if (message == true) {
-                        Rcout << "Iter " << iter << ": Adjusted relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
+                      Rcpp::Rcout << "Iter " << iter << ": Adjusted relative change in est log likelihood is " << setprecision(3) << scientific << crit << ";" << endl;
                     }
                 } else if (stop == "all") {
                     arma::vec crits(3);
@@ -378,7 +378,7 @@ List logis_firth_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec g
                     crits(2) = crit = abs(d_loglkd/(loglik_pen-pen_init));
                     crit = crits.max();
                     if (message == true) {
-                        Rcout << "Iter " << iter << ": Maximum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+                      Rcpp::Rcout << "Iter " << iter << ": Maximum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
                     }
                 } else if (stop == "or") {
                     arma::vec crits(3);
@@ -387,7 +387,7 @@ List logis_firth_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec g
                     crits(2) = crit = abs(d_loglkd/(loglik_pen-pen_init));
                     crit = crits.min();
                     if (message == true) {
-                        Rcout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
+                      Rcpp::Rcout << "Iter " << iter << ": Minimum criterion across all checks is " << setprecision(3) << scientific << crit << ";" << endl;
                     }
                 } else {
                     Rcpp::stop("Argument 'stop' NOT as required!");
@@ -404,7 +404,7 @@ List logis_firth_prov(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec g
   }
 
   if (message == true) {
-    std::cout << "Algorithm with " << threads <<  " cores converged after " << iter << " iterations." << endl;
+    Rcpp::Rcout << "Algorithm with " << threads <<  " cores converged after " << iter << " iterations." << endl;
   }
 
   return List::create(_["gamma"]=gamma,

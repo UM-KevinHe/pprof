@@ -112,7 +112,9 @@ fit_fe3 <- logis_firth(formula, data)
 
 }
 \references{
-He K,
+Firth, D. (1993) Bias reduction of maximum likelihood estimates.
+\emph{Biometrika}, \strong{80(1)}: 27-38.
+\cr
 }
 \seealso{
 \code{\link{data_check}}

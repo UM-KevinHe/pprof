@@ -48,11 +48,13 @@ fit_cre <- logis_cre(data = data, Y.char = outcome.char, ProvID.char = ProvID.ch
 wb.char = wb.char, other.char = other.char)
 summary(fit_cre)
 
+\donttest{
 data(ExampleDataBinary)
 outcome <- ExampleDataBinary$Y
 covar <- ExampleDataBinary$Z
 ProvID <- ExampleDataBinary$ProvID
 fit_re <- logis_re(Y = outcome, Z = covar, ProvID = ProvID)
 summary(fit_re)
+}
 
 }
