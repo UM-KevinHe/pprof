@@ -2,40 +2,35 @@
 % Please edit documentation in R/summary_fe_covar.R
 \name{summary_fe_covar}
 \alias{summary_fe_covar}
-\title{Provide the summary statistics for covariate estimates}
+\title{Tests and confidence intervals for covariate coefficients}
 \usage{
-summary_fe_covar(fit, parm, level = 0.95, test = "wald.cpp", null = 0)
+summary_fe_covar(fit, parm, level = 0.95, test = "wald", null = 0)
 }
 \arguments{
-\item{fit}{an object as output of \code{logis_fe} function.}
+\item{fit}{a model fitted by \code{\link[=logis_fe]{logis_fe()}}.}
 
-\item{parm}{a character vector specifies a subset of covariates. All covariates are included by default.}
+\item{parm}{optional subset of covariates, by name or position.}
 
-\item{level}{confidence level used for constructing confidence intervals. Defaulting to 0.95.}
+\item{level}{confidence level. Default 0.95.}
 
-\item{test}{a character string specifying the type of testing method. Defaulting to "wald.cpp".
+\item{test}{the test:
 \itemize{
-\item "wald": wald test
-\item "wald.cpp": wald test using cpp function
-\item "lr": likelihood ratio test
-\item "score": score test
+\item \code{"wald"} (default): model-based Wald test and confidence interval;
+\item \code{"robust_wald"}: Wald test with the patient-clustered sandwich
+variance (requires \code{PatientID} in \code{\link[=fe_data_prep]{fe_data_prep()}});
+\item \code{"lr"}: likelihood ratio test (refits the model without the covariate);
+\item \code{"score"}: score test (refits the model without the covariate).
 }}
 
-\item{null}{the null value of the covariate estimate that requires testing. (e.g. test \eqn{H_0: \beta = 0})}
-
-\item{...}{}
+\item{null}{the null value of the coefficient. \code{"lr"} and \code{"score"} only
+allow 0.}
 }
 \value{
-a dataframe containing summary statistics for covariate estimates
+A data frame with one row per covariate. For \code{"wald"} and
+\code{"robust_wald"}: \code{beta}, \code{se.beta}, \code{Z} (test statistic), \code{p},
+\code{CI.lower}, \code{CI.upper}. For \code{"lr"} and \code{"score"}: \code{beta}, \code{stat}
+(chi-square statistic, 1 df) and \code{p}.
 }
 \description{
-Provide the summary statistics for covariate estimates
-}
-\examples{
-data(data_FE)
-data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-fit_fe <- logis_fe(data.prep)
-summary.wald.cpp <- summary_fe_covar(fit_fe, level = 0.95, test = "wald")
-summary.wald.cpp
-
+Tests and confidence intervals for covariate coefficients
 }

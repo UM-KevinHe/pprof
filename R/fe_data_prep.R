@@ -1,179 +1,105 @@
-#=== FUNCTIONS FOR DATA PREPARATION FOR FIXED EFFECTS MODEL =================================
-#' Data preparation before modelling
+#' Data preparation for the fixed provider effects model
 #'
-#' @param N a numerical vector, with values of 1 or more, indicating the number of trials. If missing, defaulting to 1.
+#' Combines outcome, number of trials, provider identifier, optional patient
+#' identifier and covariates into one data frame sorted by provider (and
+#' patient), flags small providers and providers with no or all events.
 #'
-#' @param Y a numerical vector, with values of 0 or 1, indicating the outcome variable.
+#' @param N number of trials for each row (binomial outcome), a vector or
+#'   one-column data frame. If missing, every row is a single Bernoulli trial
+#'   (`N = 1`), the binary case.
+#' @param Y outcome: number of events for each row (0/1 when `N = 1`), a
+#'   one-column data frame or a vector.
+#' @param Z a numeric matrix or data frame of covariates.
+#' @param ProvID provider identifier, a one-column data frame or a vector.
+#' @param PatientID optional patient identifier. Required for the
+#'   patient-clustered robust Wald tests.
+#' @param cutoff providers with fewer than `cutoff` patients (or rows when
+#'   `PatientID` is missing) are labelled `included = 0` and are left out of
+#'   model fitting. Default 10.
+#' @param check a logical; run [data_check()]-style checks (missingness,
+#'   variation, correlation, VIF). Default `TRUE`.
+#' @param message a logical; print progress information. Default `TRUE`.
 #'
-#' @param Z a matrix or data frame containing covariates.
+#' @details The returned data frame keeps all providers; small ones are marked
+#' `included = 0`, and [logis_fe()] only uses rows with `included == 1`.
+#' Columns `no.events` and `all.events` flag included providers whose
+#' outcomes are all 0 or all equal to the number of trials.
 #'
-#' @param ID a vector representing the provider id. Its elements can be either numeric values or characters.
-#'
-#' @param cutoff an integer as cutoff of provider size with 10 as default. Providers with observations fewer than the "cutoff" value will be labeled as "include = 0".
-#'
-#' @param check a Boolean indicating whether checking missingness, variation, correlation and VIF of variables in the data. Defaulting to "TRUE".
-#'
-#' @param message a Boolean indicating whether printing out the information of the data preparation process. Defaulting to "TRUE".
-#'
-#' @param ...
-#'
-#'
-#' @details
-#' Major steps in this stage include (in order):
-#'   \itemize{
-#'   \item checking missingness, variation, correlation and VIF of variables in the data,
-#'   \item provider screening based on the provider size, 10 as default,
-#'   \item reporting proportions of providers with no events (i.e. all "0" outcomes) and with all events (i.e. all "1" outcomes),
-#'   \item sorting data by provider identifiers.
-#'   }
-#'
-#' The `fe_data_prep()` function returns data sorted by the provider identifiers,
-#' accompanied by additional provider-related information indicating whether the provider's size is smaller than a specified "cutoff"
-#' and whether the respective provider has experienced either zero or all events.
-#' The reason behind introducing a "cutoff" lies in findings from both simulated and real data studies,
-#' revealing the instability of coefficient estimates for providers with small sizes.
-#' Consequently, we recommend excluding small providers during the model fitting process.
-#' It is important to note that the resultant data frame retains all providers, including small ones,
-#' but utilizes the "included = 0" label to signify the small providers. Subsequently, during the model fitting stage,
-#' the `logis_fe()` function disregards records marked with "included = 0".
-#'
-#'
-#' @return
-#'
-#' \item{data}{a sorted data frame including response, provider identifiers, covariates, and additional provider information.}
-#'
-#' \item{char_list}{a list including variable names.}
-#'
-#'
-#' @examples
-#' data(data_FE)
-#' data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID)
-#' head(data.prep$data)
-#' data.prep$char_list
-#'
-#' @importFrom caret nearZeroVar
-#' @importFrom olsrr ols_vif_tol
-#'
-#' @keywords Data Preparation, Fixed Provider Effects
+#' @return An object of class `data_prep`: a list with
+#' \item{data}{the sorted data frame.}
+#' \item{char_list}{column names: `N.char`, `Y.char`, `prov.char`, `Z.char`
+#'   and, when supplied, `PatientID.char`.}
 #'
 #' @export
-
-fe_data_prep <- function(N, Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE) {
+fe_data_prep <- function(N, Y, Z, ProvID, PatientID, cutoff = 10, check = TRUE, message = TRUE) {
   if (missing(N)) {
-    N <- rep(1, length(Y))
-    if (message == TRUE) message("No number of trails provided. Defaulting to 1.")
+    N <- rep(1, NROW(Y))
+    if (message == TRUE) message("No number of trials provided. Defaulting to 1.")
   }
 
-  #check dimensions of the input data
-  if (length(N) != length(Y) | length(Y) != length(ID) | length(ID) != nrow(Z)){
-    stop("Dimensions of the input data do not match!!", call.=F)
+  # check dimensions of the input data
+  if (NROW(N) != NROW(Y) | NROW(Y) != NROW(ProvID) | NROW(ProvID) != NROW(Z)) {
+    stop("Dimensions of the input data do not match!!", call. = FALSE)
   }
 
   N <- data.frame(N)
-  data <- as.data.frame(cbind(N, Y, ID, Z))
+  if (missing(PatientID)) {
+    data <- as.data.frame(cbind(N, Y, ProvID, Z))
+  } else {
+    if (NROW(PatientID) != NROW(Y)) stop("Dimensions of the input data do not match!!", call. = FALSE)
+    data <- as.data.frame(cbind(N, Y, ProvID, PatientID, Z))
+    PatientID.char <- colnames(data)[4]
+  }
   N.char <- colnames(data)[1]
   Y.char <- colnames(data)[2]
   prov.char <- colnames(data)[3]
   Z.char <- colnames(Z)
+  if (is.null(Z.char)) stop("Covariates 'Z' must have column names!", call. = FALSE)
 
   if (check) {
-    ## check missingness of variables
-    if (message == TRUE) message("Checking missingness of variables ... ")
-    if (sum(complete.cases(data[,c(N.char,Y.char,Z.char,prov.char)]))==NROW(data)) {
-      if (message == TRUE) message("Missing values NOT found. Checking missingness of variables completed!")
-    } else {
-      check.na <- function(name) {
-        if (sum(is.na(data[,name])) > 0) {
-          warning(sum(is.na(data[,name]))," out of ",NROW(data[,name])," in '",name,"' missing!",immediate.=T,call.=F)
-        }
-      }
-      invisible(sapply(c(N.char,Y.char,Z.char,prov.char), check.na))
-      missingness <- (1 - sum(complete.cases(data[,c(N.char,Y.char,Z.char,prov.char)])) / NROW(data)) * 100
-      stop(paste(round(missingness,2), "% of all observations are missing!",sep=""),call.=F)
-    }
-    ## check variation in covariates
-    if (message == TRUE) message("Checking variation in covariates ... ")
-    nzv <- caret::nearZeroVar(data[,Z.char], saveMetrics=T)
-    if (sum(nzv$zeroVar==T) > 0) {
-      stop("Covariate(s) '", paste(row.names(nzv[nzv$zeroVar==T,]), collapse="', '"),
-           "' with zero variance(s)!", call.=F)
-    } else if (sum(nzv$nzv==T) > 0) {
-      warning("Covariate(s) '",paste(row.names(nzv[nzv$nzv==T,]), collapse="', '"),
-              "' with near zero variance(s)!",immediate.=T,call.=F)
-    }
-    if (message == TRUE) message("Checking variation in covariates completed!")
-    ## check correlation
-    if (message == TRUE) message("Checking pairwise correlation among covariates ... ")
-    cor <- cor(data[,Z.char])
-    threshold.cor <- 0.9
-    if (sum(abs(cor[upper.tri(cor)])>threshold.cor) > 0) {
-      cor[lower.tri(cor,diag=T)] <- 0
-      ind <- which(abs(cor)>threshold.cor)
-      pairs <- sapply(ind, function(ind) c(rownames(cor)[ind%%NROW(cor)],
-                                           colnames(cor)[ind%/%NROW(cor)+1]))
-      warning("The following ", NCOL(pairs),
-              " pair(s) of covariates are highly correlated (correlation > ",
-              threshold.cor,"): ", immediate.=T, call.=F)
-      invisible(apply(pairs,2,function(col) message('("',paste(col, collapse='", "'),'")')))
-    }
-    if (message == TRUE) message("Checking pairwise correlation among covariates completed!")
-    ## check VIF
-    if (message == TRUE) message("Checking VIF of covariates ... ")
-    m.lm <- lm(as.formula(paste(Y.char,"~",paste(Z.char, collapse="+"))), data=data)
-    vif <- olsrr::ols_vif_tol(m.lm)
-    if(sum(vif$VIF >= 10) > 0){
-      warning("Covariate(s) '",
-              paste(as.data.frame(vif)[vif$VIF>=10,"Variables"], collapse="', '"),
-              "' with serious multicollinearity!",immediate.=T,call.=F)
-    }
-    if (message == TRUE) message("Checking VIF of covariates completed!")
+    check_vars(data, N.char, Y.char, Z.char, prov.char, message = message)
   }
 
-  data <- data[order(factor(data[,prov.char])),] # sort data by provider ID
-  prov.size <- as.integer(table(data[,prov.char])) # provider sizes
-  prov.size.long <- rep(prov.size,prov.size) # provider sizes assigned to patients
-  data$included <- 1 * (prov.size.long >= cutoff) # create variable 'included' as an indicator
-  if (message == TRUE) warning(sum(prov.size < cutoff)," out of ",length(prov.size),
-          " providers considered small and filtered out!",immediate.=T,call.=F)
+  prov.size.r <- as.integer(table(data[, prov.char])) # provider sizes (based on # records)
+  if (missing(PatientID)) {
+    data <- data[order(factor(data[, prov.char])), ] # sort data by provider ID
+    prov.size.p <- prov.size.r
+  } else {
+    data <- data[order(factor(data[, prov.char]), factor(data[, PatientID.char])), ] # sort by provider & patient
+    prov.size.p <- as.integer(table(unique(data[, c(prov.char, PatientID.char)])[, 1])) # provider sizes (based on # patients)
+  }
+  prov.size.long <- rep(prov.size.p, prov.size.r) # provider sizes assigned to records
 
+  data$included <- 1 * (prov.size.long >= cutoff) # indicator of providers kept for model fitting
+  if (message == TRUE) warning(sum(prov.size.p < cutoff), " out of ", length(prov.size.p),
+                               " providers considered small and filtered out!", immediate. = TRUE, call. = FALSE)
 
-  prov.list <- unique(data[data$included==1,prov.char])   # a reduced list of provider IDs
-  prov.no.events <-      # providers with no events
-    prov.list[sapply(split(data[data$included==1,Y.char], factor(data[data$included==1,prov.char])),sum)==0]
+  inc <- data$included == 1
+  prov.list <- unique(data[inc, prov.char]) # a reduced list of provider IDs
+  prov.inc <- factor(data[inc, prov.char])
+  prov.no.events <- # providers with no events
+    prov.list[sapply(split(data[inc, Y.char], prov.inc), sum) == 0]
   data$no.events <- 0
-  data$no.events[data[,prov.char]%in%c(prov.no.events)] <- 1
-  if (message == TRUE) message(paste(length(prov.no.events),"out of",length(prov.list),
-                "remaining providers with no events."))
-  prov.all.events <-     # providers with all events
-    prov.list[sapply(split(N-data[data$included==1,Y.char],factor(data[data$included==1,prov.char])),sum)==0]
+  data$no.events[data[, prov.char] %in% c(prov.no.events)] <- 1
+  if (message == TRUE) message(paste(length(prov.no.events), "out of", length(prov.list),
+                                     "remaining providers with no events."))
+  prov.all.events <- # providers with all events (Y = N for every row)
+    prov.list[sapply(split(data[inc, N.char] - data[inc, Y.char], prov.inc), sum) == 0]
   data$all.events <- 0
-  data$all.events[data[,prov.char]%in%c(prov.all.events)] <- 1
-  if (message == TRUE) message(paste(length(prov.all.events),"out of",length(prov.list),
-                "remaining providers with all events."))
-  if (message == TRUE) message(paste0("After screening, ", round(sum(data[data$included==1,Y.char])/length(data[data$included==1,Y.char])*100,2),
-                 "% of all records exhibit occurrences of events (Y = 1)"))
-
+  data$all.events[data[, prov.char] %in% c(prov.all.events)] <- 1
+  if (message == TRUE) message(paste(length(prov.all.events), "out of", length(prov.list),
+                                     "remaining providers with all events."))
+  if (message == TRUE) message(paste0("After screening, ",
+                                      round(sum(data[inc, Y.char]) / sum(data[inc, N.char]) * 100, 2),
+                                      "% of all trials exhibit occurrences of events"))
 
   char_list <- list(N.char = N.char,
                     Y.char = Y.char,
                     prov.char = prov.char,
                     Z.char = Z.char)
+  if (!missing(PatientID)) {
+    char_list$PatientID.char <- PatientID.char
+  }
 
-  return_ls <- list(data = data,
-                    char_list = char_list)
-
-
-  return_ls <- structure(list(data = data,
-                              char_list = char_list),
-                         class = "data_prep")
-  return(return_ls)
+  structure(list(data = data, char_list = char_list), class = "data_prep")
 }
-
-
-
-
-
-
-
-
-

@@ -2,70 +2,71 @@
 % Please edit documentation in R/SR_output.R
 \name{SR_output}
 \alias{SR_output}
-\title{Provide direct/indirect standardization ratio or rate}
+\title{Direct and indirect standardized ratios and rates}
 \usage{
 SR_output(
   fit,
   stdz = "indirect",
   measure = c("rate", "ratio"),
   null = "median",
-  Rcpp = TRUE,
   threads = 1,
+  se = TRUE,
+  N_pop,
+  parm,
   ...
 )
 }
 \arguments{
-\item{fit}{an object as output of \code{logis_fe} function.}
+\item{fit}{a model fitted by \code{\link[=logis_fe]{logis_fe()}}. \code{fit$gamma} may be replaced by
+a longer vector of provider effects (e.g. with the +/-17 values assigned
+to providers with 0\% / 100\% crude rates) before calling, as the PPPW
+measure does for direct standardization.}
 
-\item{stdz}{a character string specifying the standardization method. Defaulting to "indirect".
-\itemize{
-\item{"indirect":} using indirect standardized method
-\item{"direct":} using direct standardized method
-}}
+\item{stdz}{\code{"indirect"} (default), \code{"direct"}, or both.}
 
-\item{measure}{a boolean indicating whether the output measure is "ratio" or "rate". Both "rate" and "ratio" will be provided by default.
-\itemize{
-\item{"rate":} output the standardized rate. The "rate" has been restricted to 0\% - 100\%.
-\item{"ratio":} output the standardized ratio.
-}}
+\item{measure}{\code{"rate"}, \code{"ratio"}, or both (default).}
 
-\item{null}{if "stdz = indirect", a character string or real number specifying null hypotheses of fixed provider effects for calculating standardized rate/ratio. Defaulting to "median".}
+\item{null}{for indirect standardization, the population norm of the
+provider effect: \code{"median"} (default) or a number.}
 
-\item{Rcpp}{a boolean indicating whether to use Rcpp. Defaulting to TRUE.}
+\item{threads}{number of OpenMP threads for direct standardization.}
 
-\item{threads}{an integer specifying the number of threads to use if "Rcpp = T". Defaulting to 1.}
+\item{se}{a logical; for direct standardization also return the
+delta-method numerator of the standard error (\code{numer_se}) and the
+expected count scaled by \code{N_pop} (\code{numer_measure}). Default \code{TRUE}.
+Ignored when \code{stdz} does not include \code{"direct"}.}
 
-\item{...}{}
+\item{N_pop}{the denominator of the rates: the total number of trials in
+the standard population. Defaults to the number of trials among the rows
+used to fit the model.}
+
+\item{parm}{optional subset of providers.}
+
+\item{...}{unused.}
 }
 \value{
-The return values depend on the user's choice of standardization method and measure type
-
-\item{indirect.ratio}{a vector of standardization ratio using indirect method}
-
-\item{direct.ratio}{a vector of standardization ratio using direct method}
-
-\item{indirect.rate}{a vector of standardization rate using indirect method}
-
-\item{direct.rate}{a vector of standardization rate using direct method}
+A list with the requested \code{indirect.ratio}, \code{indirect.rate},
+\code{direct.ratio}, \code{direct.rate} (one-column matrices), \code{OE} (observed and
+expected counts) and, for direct standardization with \code{se = TRUE},
+\code{numer_se}, \code{N_pop} and \code{numer_measure}.
 }
 \description{
-Provide direct/indirect standardization ratio or rate
+Direct and indirect standardized ratios and rates
 }
 \details{
-The \code{"stdz"} and \code{"measure"} arguments must be explicitly provided.
-Users are allowed to specify \verb{"stdz = c("indirect", "direct")"} or \verb{"measure = c("rate", "ratio")"} to get multiple measures.
+With \eqn{p_{ij}(\gamma) = expit(\gamma + Z_{ij}^T\hat\beta)} and
+\eqn{N_{ij}} trials per row:
+\itemize{
+\item indirect: \eqn{E_i = \sum_{j} N_{ij} p_{ij}(\gamma_0)} over provider
+i's rows, ratio \eqn{O_i / E_i}, rate = ratio x \eqn{\sum O / N_{pop}};
+\item direct: \eqn{E_i = \sum_{k} N_k p_k(\hat\gamma_i)} over the whole
+standard population, ratio \eqn{E_i / \sum O}, rate = ratio x
+\eqn{\sum O / N_{pop}}.
 }
-\examples{
-data(data_FE)
-data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-fit_fe <- logis_fe(data.prep)
-SR <- SR_output(fit_fe, stdz = "direct", measure = "rate")
-SR$direct.rate
-
+Rates are truncated to [0, 1]. The direct-rate standard error used by
+the measures is \code{numer_se / N_pop * se(gamma_i)}.
 }
 \references{
-\itemize{
-\item He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects.
-\emph{Lifetime Data Analysis}, \strong{19}: 490-512.
-}
+He K. (2019) Indirect and direct standardization for evaluating
+transplant centers. \emph{Journal of Hospital Administration}, 8(1): 9-14.
 }

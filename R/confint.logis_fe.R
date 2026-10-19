@@ -1,378 +1,229 @@
-#=== CONFIDENCE INTERVAL FUNCTION =================================
-#' Provide confidence interval for provider effects or standardization ratios/rates
+#' Confidence intervals for provider effects and standardized measures
 #'
-#' @param fit an object as output of \code{logis_fe} function.
+#' Ported from `pprof` and extended to binomial outcomes. Intervals for the
+#' provider effects are obtained by inverting a test; intervals for the
+#' standardized ratios / rates map the provider-effect limits through the
+#' standardization.
 #'
-#' @param parm specify a subset of which providers are to be given confidence intervals. All providers are included by default.
+#' @param object a model fitted by [logis_fe()].
+#' @param parm optional subset of providers.
+#' @param level confidence level. Default 0.95.
+#' @param test `"exact"` (default; inverts the exact Poisson-binomial test),
+#'   `"score"` (inverts the modified score test), `"wald"` (model-based
+#'   standard error) or `"robust_wald"` (patient-clustered standard error).
+#' @param option `"SM"` (default) for standardized measures or `"gamma"` for
+#'   provider effects.
+#' @param stdz for `option = "SM"`: `"indirect"` (default), `"direct"`, or both.
+#' @param null the population norm for indirect standardization.
+#' @param measure `"rate"`, `"ratio"` or both (default).
+#' @param alternative `"two.sided"` (default), `"greater"` (lower limit only)
+#'   or `"less"` (upper limit only). Provider-effect intervals are two-sided.
+#' @param N_pop denominator of the rates, as in [SR_output()].
+#' @param ... unused.
 #'
-#' @param level confidence level used for constructing confidence intervals. Defaulting to 0.95.
+#' @details Providers with no events have no finite lower limit for the
+#' provider effect and providers with all events have no finite upper limit;
+#' as in `pprof`, their finite limit is one-sided at level `1 - level`. The
+#' exact test works on the individual Bernoulli trials, so it can be slow for
+#' providers with a very large number of trials; the score or Wald versions
+#' are then preferable.
 #'
-#' @param option the confidence interval for the function's output, whether it is for gamma or standardization ratios/rates.
-#'   \itemize{
-#'   \item "gamma": provider effect
-#'   \item "SR": standardization ratios/rates
-#'   }
+#' @return For `option = "gamma"`, a data frame with `gamma`, `gamma.lower`,
+#'   `gamma.upper`. For `option = "SM"`, a list with the requested
+#'   `CI.indirect_ratio`, `CI.indirect_rate`, `CI.direct_ratio`,
+#'   `CI.direct_rate` data frames.
 #'
-#' @param test a character string specifying the type of testing method. Defaulting to "exact".
-#'   \itemize{
-#'   \item "exact": exact test
-#'   \item "wald": wald test
-#'   \item "score": score test
-#'   }
-#'
-#' @param stdz if option = 'SR', a character string specifying the standardization method. Defaulting to "indirect".
-#'   \itemize{
-#'   \item "indirect": using indirect standardized method
-#'   \item "direct": using direct standardized method
-#'   }
-#'
-#' @param measure if option = 'SR', a boolean indicating whether the output measure is "ratio" or "rate". Both "rate" and "ratio" will be provided by default.
-#'   \itemize{
-#'   \item "rate": output the standardized rate. The "rate" has been restricted to 0% - 100%.
-#'   \item "ratio":  output the standardized ratio
-#'   }
-#'
-#' @param ...
-#'
-#' @return A dataframe containing the point estimate, and lower and upper bounds of the estimate.
-#'
-#' @examples
-#' data(data_FE)
-#' data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-#' fit_fe <- logis_fe(data.prep)
-#' confint(fit_fe, option = "gamma")
-#' confint(fit_fe, option = "SR")
-#'
-#' @importFrom stats plogis
-#'
-#' @exportS3Method confint logis_fe
-
-confint.logis_fe <- function(fit, parm, level = 0.95, test = "exact",
-                             option = c("gamma", "SR"),
-                             stdz = "indirect", measure = c("rate", "ratio")) {
-  if (missing(fit)) stop ("Argument 'fit' is required!",call.=F)
-  if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!",call.=F)
-  if (! "gamma" %in% option & !"SR" %in% option) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
+#' @export
+confint.logis_fe <- function(object, parm, level = 0.95, test = "exact", option = "SM",
+                             stdz = "indirect", null = "median", measure = c("rate", "ratio"),
+                             alternative = "two.sided", N_pop, ...) {
+  check_fit(object)
+  if (!option %in% c("gamma", "SM")) stop("Argument 'option' should be 'gamma' or 'SM'", call. = FALSE)
+  if (!test %in% c("exact", "score", "wald", "robust_wald")) stop("Argument 'test' NOT as required!", call. = FALSE)
+  if (!"indirect" %in% stdz & !"direct" %in% stdz) stop("Argument 'stdz' NOT as required!", call. = FALSE)
+  alternative <- match_alternative(alternative)
+  if (option == "gamma" && alternative != "two.sided")
+    stop("Provider effect (option = 'gamma') only supports two-sided confidence intervals.", call. = FALSE)
   alpha <- 1 - level
 
-  Y.char <- fit$char_list$Y.char
-  Z.char <- fit$char_list$Z.char
-  prov.char <- fit$char_list$prov.char
-  gamma <- fit$df.prov$gamma_est
-  beta <- fit$beta
-  df.prov <- fit$df.prov
-  prov.order <- rownames(fit$gamma)
+  cl <- object$char_list
+  data <- object$data_include
+  N <- trials_of(data, cl$N.char)
+  prov <- data[, cl$prov.char]
+  n.prov <- sapply(split(data[, cl$Y.char], prov), length)
+  prov_levels <- names(n.prov)
+  indices <- provider_indices(if (missing(parm)) NULL else parm, prov, prov_levels)
+  selected <- prov_levels[indices]
+  gamma <- object$df.prov$gamma_est
+  Z_beta <- as.numeric(object$linear_pred)
 
-  #confidence of gamma
-  confint_fe_gamma <- function(fit, test, parm, alpha) {
-    data <- fit$data_include
-    if (missing(parm)) {
-      # pass
-    } else if (class(parm)==class(data[,prov.char]) & test!="wald") {
-      data <- data[data[,prov.char] %in% parm,]
-    } else if (class(parm)==class(data[,prov.char]) & test=="wald") {
-      indices <- which(unique(data[,prov.char]) %in% parm)
+  ci_gamma <- gamma_limits(object, test, indices, alpha, alternative, data, N, prov, prov_levels, Z_beta)
+  rownames(ci_gamma) <- selected
+  if (option == "gamma") {
+    attr(ci_gamma, "description") <- "Provider Effects"
+    return(ci_gamma)
+  }
+
+  if (missing(N_pop)) N_pop <- sum(N)
+  population_rate <- sum(object$obs) / N_pop
+  no_events <- as.logical(tapply(data$no.events, factor(as.character(prov), levels = prov_levels), max))[indices]
+  all_events <- as.logical(tapply(data$all.events, factor(as.character(prov), levels = prov_levels), max))[indices]
+  return_ls <- list()
+
+  make_output <- function(est, lo, up, label) {
+    out <- list()
+    type <- switch(alternative, greater = "upper one-sided", less = "lower one-sided", "two-sided")
+    ratio <- data.frame(est, lo, up, row.names = selected)
+    colnames(ratio) <- c(paste0(label, "_ratio"), "CI_ratio.lower", "CI_ratio.upper")
+    attr(ratio, "confidence_level") <- paste(level * 100, "%")
+    attr(ratio, "type") <- type
+    if ("ratio" %in% measure) out[[paste0("CI.", label, "_ratio")]] <- ratio
+    if ("rate" %in% measure) {
+      clip <- function(x) pmax(pmin(x * population_rate, 1), 0)
+      rate <- data.frame(clip(est), clip(lo), clip(up), row.names = selected)
+      colnames(rate) <- c(paste0(label, "_rate"), "CI_rate.lower", "CI_rate.upper")
+      attr(rate, "confidence_level") <- paste(level * 100, "%")
+      attr(rate, "type") <- type
+      attr(rate, "population_rate") <- population_rate
+      out[[paste0("CI.", label, "_rate")]] <- rate
+    }
+    out
+  }
+
+  if ("indirect" %in% stdz) {
+    gamma.null <- gamma_null_value(null, object$gamma)
+    grp <- factor(as.character(prov), levels = prov_levels)
+    Exp <- sapply(split(N * stats::plogis(gamma.null + Z_beta), grp), sum)[indices]
+    Obs <- object$df.prov$Obs_provider[indices]
+    rows_of <- split(seq_along(prov), grp)[indices]
+    expected_at <- function(g) mapply(function(r, gi) {
+      if (!is.finite(gi)) return(if (gi > 0) sum(N[r]) else 0)
+      sum(N[r] * stats::plogis(gi + Z_beta[r]))
+    }, rows_of, g)
+    lo <- expected_at(ci_gamma$gamma.lower) / Exp
+    up <- expected_at(ci_gamma$gamma.upper) / Exp
+    lo[no_events] <- 0
+    up[all_events] <- (sapply(rows_of, function(r) sum(N[r])) / Exp)[all_events]
+    if (alternative == "less") lo <- rep(0, length(lo))
+    if (alternative == "greater") up <- sapply(rows_of, function(r) sum(N[r])) / Exp
+    return_ls <- c(return_ls, make_output(Obs / Exp, lo, up, "indirect"))
+  }
+
+  if ("direct" %in% stdz) {
+    Obs_all <- sum(object$obs)
+    direct_at <- function(g) {
+      out <- rep(NA_real_, length(g))
+      fin <- is.finite(g)
+      out[fin] <- computeDirectExp(g[fin], Z_beta, N, 1L)[, 1]
+      out[!fin & g > 0] <- sum(N)
+      out[!fin & g < 0] <- 0
+      out
+    }
+    est <- computeDirectExp(gamma[indices], Z_beta, N, 1L)[, 1] / Obs_all
+    lo <- direct_at(ci_gamma$gamma.lower) / Obs_all
+    up <- direct_at(ci_gamma$gamma.upper) / Obs_all
+    lo[no_events] <- 0
+    up[all_events] <- sum(N) / Obs_all
+    if (alternative == "less") lo <- rep(0, length(lo))
+    if (alternative == "greater") up <- rep(sum(N) / Obs_all, length(up))
+    return_ls <- c(return_ls, make_output(est, lo, up, "direct"))
+  }
+  return_ls
+}
+
+# Confidence limits for the provider effects of the providers `indices`.
+gamma_limits <- function(object, test, indices, alpha, alternative, data, N, prov, prov_levels, Z_beta) {
+  cl <- object$char_list
+  gamma <- object$df.prov$gamma_est
+  if (test %in% c("wald", "robust_wald")) {
+    if (test == "wald") {
+      se <- sqrt(attr(vcov.logis_fe(object), "var.gamma"))[indices]
     } else {
-      stop("Argument 'parm' includes invalid elements!")
+      se <- test_fe(object, test = "robust_wald")$se.gamma[indices]
     }
-
-    if (test %in% c("score", "exact")) {
-      if (test=="score") {
-        qnorm.halfalpha <- qnorm(alpha/2, lower=F)
-        qnorm.alpha <- qnorm(alpha, lower=F)
-        CL.finite <- function(df) {
-          prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                         stop("Number of providers involved NOT equal to one!"))
-          UL.gamma <- function(Gamma) { #increasing function w.r.t gamma_null
-            p <- plogis(Gamma+Z.beta)
-            return((Obs - sum(p)) / sqrt(sum(p*(1-p))) + qnorm.halfalpha)
-          }
-          LL.gamma <- function(Gamma) {
-            p <- plogis(Gamma+Z.beta)
-            return((Obs-sum(p)) / sqrt(sum(p*(1-p))) - qnorm.halfalpha)
-          }
-          Obs <- df.prov[prov, "Obs_provider"]
-          Z.beta <- as.matrix(df[,Z.char])%*%beta
-          gamma.lower <- uniroot(LL.gamma, gamma[prov]+c(-5,0))$root
-          gamma.upper <- uniroot(UL.gamma, gamma[prov]+c(0,5))$root
-          return_mat <- c(gamma[prov], gamma.lower, gamma.upper)
-          return(return_mat)
-        }
-        CL.no.events <- function(df) { #only upper bound
-          prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                         stop("Number of providers involved NOT equal to one!"))
-          Z.beta <- as.matrix(df[,Z.char])%*%beta
-          max.Z.beta <- norm(Z.beta, "I")
-          UL.gamma <- function(Gamma) {
-            p <- plogis(Gamma+Z.beta)
-            return(qnorm.alpha-sum(p)/sqrt(sum(p*(1-p))))
-          }
-          gamma.upper <- uniroot(UL.gamma,(10+max.Z.beta)*c(-1,1))$root
-          return_mat <- c(gamma[prov], -Inf, gamma.upper)
-          return(return_mat)
-        }
-        CL.all.events <- function(df) { #only lower bound
-          prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                         stop("Number of providers involved NOT equal to one!"))
-          Z.beta <- as.matrix(df[,Z.char])%*%beta
-          max.Z.beta <- norm(Z.beta, "I")
-          LL.gamma <- function(Gamma) {
-            p <- plogis(Gamma+Z.beta)
-            return(sum(1-p)/sqrt(sum(p*(1-p)))-qnorm.alpha)
-          }
-          gamma.lower <- uniroot(LL.gamma,(10+max.Z.beta)*c(-1,1))$root
-          return_mat <- c(gamma[prov], gamma.lower, Inf)
-          return(return_mat)
-        }
-      } else {
-        CL.finite <- function(df) {
-          UL.gamma <- function(Gamma)
-            poibin::ppoibin(Obs-1,plogis(Gamma+Z.beta))+0.5*poibin::dpoibin(Obs,plogis(Gamma+Z.beta))-alpha/2
-          LL.gamma <- function(Gamma)
-            1-poibin::ppoibin(Obs,plogis(Gamma+Z.beta))+0.5*poibin::dpoibin(Obs,plogis(Gamma+Z.beta))-alpha/2
-          prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                         stop("Number of providers involved NOT equal to one!"))
-          Obs <- df.prov[prov, "Obs_provider"]
-          Z.beta <- as.matrix(df[,Z.char])%*%beta
-          gamma.lower <- uniroot(LL.gamma, gamma[prov]+c(-5,0))$root
-          gamma.upper <- uniroot(UL.gamma, gamma[prov]+c(0,5))$root
-          return_mat <- c(gamma[prov], gamma.lower, gamma.upper)
-          return(return_mat)
-        }
-        CL.no.events <- function(df) {
-          prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                         stop("Number of providers involved NOT equal to one!"))
-          Z.beta <- as.matrix(df[,Z.char])%*%beta
-          max.Z.beta <- norm(Z.beta, "I")
-          gamma.upper <- uniroot(function(x) prod(plogis(-x-Z.beta))/2-alpha,
-                                 (10+max.Z.beta)*c(-1,1))$root
-          return_mat <- c(gamma[prov], -Inf, gamma.upper)
-          return(return_mat)
-        }
-        CL.all.events <- function(df) {
-          prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                         stop("Number of providers involved NOT equal to one!"))
-          Z.beta <- as.matrix(df[,Z.char])%*%beta
-          max.Z.beta <- norm(Z.beta, "I")
-          gamma.lower <- uniroot(function(x) prod(plogis(x+Z.beta))/2-alpha,
-                                 (10+max.Z.beta)*c(-1,1))$root
-          return_mat <- c(gamma[prov], gamma.lower, Inf)
-          return(return_mat)
-        }
-      }
-      confint.finite <- sapply(by(data[(data$no.events==0) & (data$all.events==0),],
-                                  data[(data$no.events==0) & (data$all.events==0),prov.char],identity),
-                               FUN=function(df) CL.finite(df))
-      confint.no.events <- sapply(by(data[data$no.events==1,], data[data$no.events==1,prov.char],identity),
-                                 FUN=function(df) CL.no.events(df))
-      confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,prov.char],identity),
-                                  FUN=function(df) CL.all.events(df))
-      confint_df <- as.numeric(cbind(confint.finite, confint.no.events, confint.all.events))
-      confint_df <- as.data.frame(matrix(confint_df, ncol = 3, byrow = T))
-      colnames(confint_df) <- c("gamma", "gamma.lower", "gamma.upper")
-      return(confint_df[order(match(rownames(confint_df), prov.order)),])
-    } else if (test=="wald") {
-      if(!missing(parm)){
-        if (sum(!is.finite(gamma[indices])) != 0){
-          stop("wald test cannot be performed on providers with zero or all events!!")
-        }
-      } else {
-        if (sum(!is.finite(gamma)) != 0){
-          stop("wald test cannot be performed on providers with zero or all events!!")
-        }
-      }
-      n.prov <- sapply(split(data[, Y.char], data[, prov.char]), length)
-      gamma.obs <- rep(gamma, n.prov)
-      probs <- as.numeric(plogis(gamma.obs+as.matrix(data[,Z.char])%*%beta))
-      info.gamma.inv <- 1/sapply(split(probs*(1-probs), data[,prov.char]),sum)
-      info.betagamma <- sapply(by(probs*(1-probs)*as.matrix(data[,Z.char]),data[,prov.char],identity),colSums)
-      info.beta <- t(as.matrix(data[,Z.char]))%*%(probs*(1-probs)*as.matrix(data[,Z.char]))
-      schur.inv <- solve(info.beta-info.betagamma%*%(info.gamma.inv*t(info.betagamma))) # inv of Schur complement
-      if (missing(parm)) {
-        mat.tmp <- info.gamma.inv*t(info.betagamma)
-        names <- unique(data[, prov.char])
-        Z.beta <- as.matrix(data[data[,prov.char], Z.char]) %*% beta
-      } else {
-        mat.tmp <- info.gamma.inv[indices]*t(info.betagamma[,indices])
-        info.gamma.inv <- info.gamma.inv[indices]
-        gamma <- gamma[indices]
-        Z.beta <- as.matrix(data[data[,prov.char] %in% parm, Z.char]) %*% beta
-        n.prov <- n.prov[indices]
-        names <- unique(data[, prov.char])[indices]
-      }
-      se.gamma <- sqrt(info.gamma.inv+apply(mat.tmp, 1, FUN=function(x) t(matrix(x))%*%schur.inv%*%matrix(x)))
-      gamma.lower <- gamma - qnorm(alpha/2, lower=F)*se.gamma
-      gamma.upper <- gamma + qnorm(alpha/2, lower=F)*se.gamma
-      return_mat <- data.frame(gamma, gamma.lower, gamma.upper,
-                               row.names=names)
-      return(return_mat)
-    }
-  }
-  if (option == "gamma"){
-    return_mat <- confint_fe_gamma(fit, test, parm, alpha)
-    return(return_mat)
-  } else if (option == "SR"){
-    data.ori <- fit$data_include
-    population_rate <- sum(data.ori[,Y.char])/nrow(data.ori) * 100  #sum(O_i)/N *100%
-    return_ls <- list()
-    if ("indirect" %in% stdz) {
-      SR.indirect <- SR_output(fit, stdz = c("indirect"), measure = c("ratio", "rate"))
-      if (missing(parm)) {
-        OE_df.indirect <- SR.indirect$OE$OE_indirect
-        indirect.ratio_df <- SR.indirect$indirect.ratio
-        indirect.rate_df <- SR.indirect$indirect.rate
-        data <- data.ori
-      } else if (class(parm) == class(data.ori[,prov.char])) {
-        OE_df.indirect <- SR.indirect$OE$OE_indirect[rownames(SR.indirect$OE$OE_indirect) %in% parm,]
-        data <- data.ori[data.ori[,prov.char] %in% parm,]
-        indirect.ratio_df <- SR.indirect$indirect.ratio[rownames(SR.indirect$indirect.ratio) %in% parm,]
-        indirect.rate_df <- SR.indirect$indirect.rate[rownames(SR.indirect$indirect.rate) %in% parm,]
-      } else {
-        stop("Argument 'parm' includes invalid elements!")
-      }
-      #functions for calculate CI of SRs
-      qnorm.halfalpha <- qnorm(alpha/2, lower=F)
-      qnorm.alpha <- qnorm(alpha, lower=F)
-      SR_indirect.finite <- function(df) {
-        prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                       stop("Number of providers involved NOT equal to one!"))
-        Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df$ID), alpha = alpha)
-        gamma.lower <- confint_gamma$gamma.lower
-        gamma.upper <- confint_gamma$gamma.upper
-        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,prov.char]), "Exp.indirect_provider"]
-        SR.lower <- sum(plogis(gamma.lower+Z.beta)) / EXP.i
-        SR.upper <- sum(plogis(gamma.upper+Z.beta)) / EXP.i
-        return(c(SR.lower, SR.upper))
-      }
-      SR_indirect.no.events <- function(df) {
-        prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                       stop("Number of providers involved NOT equal to one!"))
-        Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df$ID), alpha = alpha)
-        gamma.upper <- confint_gamma$gamma.upper
-        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,prov.char]), "Exp.indirect_provider"]
-        SR.upper <- sum(plogis(gamma.upper+Z.beta)) / EXP.i
-        return(c(0, SR.upper))
-      }
-      SR_indirect.all.events <- function(df) {
-        prov <- ifelse(length(unique(df[,prov.char]))==1, unique(df[,prov.char]),
-                       stop("Number of providers involved NOT equal to one!"))
-        Z.beta <- as.matrix(df[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = unique(df$ID), alpha = alpha)
-        gamma.lower <- confint_gamma$gamma.lower
-        EXP.i <- OE_df.indirect[rownames(OE_df.indirect) == unique(df[,prov.char]), "Exp.indirect_provider"]
-        SR.lower <- sum(plogis(gamma.lower+Z.beta)) / EXP.i
-        SR.upper <- nrow(df) / EXP.i
-        return(c(SR.lower, SR.upper))
-      }
-
-      confint.finite <- sapply(by(data[(data$no.events==0) & (data$all.events==0),],
-                                  data[(data$no.events==0) & (data$all.events==0),prov.char],identity),
-                               FUN=function(df) SR_indirect.finite(df))
-      confint.no.events <- sapply(by(data[data$no.events==1,], data[data$no.events==1,prov.char],identity),
-                                 FUN=function(df) SR_indirect.no.events(df))
-      confint.all.events <- sapply(by(data[data$all.events==1,], data[data$all.events==1,prov.char],identity),
-                                  FUN=function(df) SR_indirect.all.events(df))
-
-
-      CI.indirect_ratio <- as.numeric(rbind(t(indirect.ratio_df),
-                                            cbind(confint.finite,
-                                                  confint.no.events,
-                                                  confint.all.events)))
-      CI.indirect_ratio <- as.data.frame(matrix(CI.indirect_ratio, ncol = 3, byrow = T))
-      colnames(CI.indirect_ratio) <- c("indirect_ratio", "CI_ratio.lower", "CI_ratio.upper")
-      rownames(CI.indirect_ratio) <- names(indirect.rate_df)
-
-      if ("ratio" %in% measure){
-        return_ls$CI.indirect_ratio <- CI.indirect_ratio
-
-      }
-
-      if ("rate" %in% measure){
-        rate.lower <- pmax(pmin(CI.indirect_ratio$CI_ratio.lower * population_rate, 100), 0)
-        rate.upper <- pmax(pmin(CI.indirect_ratio$CI_ratio.upper * population_rate, 100), 0)
-        CI.indirect_rate <- as.data.frame(cbind(indirect.rate_df, rate.lower, rate.upper))
-        colnames(CI.indirect_rate) <- c("indirect_rate", "CI_rate.lower", "CI_rate.upper")
-        return_ls$CI.indirect_rate <- CI.indirect_rate
-      }
-    }
-
-
-    if ("direct" %in% stdz) {
-      SR.direct <- SR_output(fit, stdz = c("direct"), measure = c("ratio", "rate"))
-      if (missing(parm)) {
-        OE_df.direct <- SR.direct$OE$OE_direct[1,1]
-        direct.ratio_df <- SR.direct$direct.ratio
-        direct.rate_df <- SR.direct$direct.rate
-        data <- data.ori
-      } else if (class(parm) == class(data[,prov.char])) {
-        OE_df.direct <- SR.direct$OE$OE_direct[1,1]
-        direct.ratio_df <- SR.direct$direct.ratio[rownames(SR.direct$direct.ratio) %in% parm,]
-        direct.rate_df <- SR.direct$direct.rate[rownames(SR.direct$direct.rate) %in% parm,]
-        data <- data.ori[data.ori[,prov.char] %in% parm,]
-      } else {
-        stop("Argument 'parm' includes invalid elements!")
-      }
-      #funcitons for calculate CI of SRs
-      qnorm.halfalpha <- qnorm(alpha/2, lower=F)
-      qnorm.alpha <- qnorm(alpha, lower=F)
-
-      SR_direct.finite <- function(ID) {
-        Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = ID, alpha = alpha)
-        gamma.lower <- confint_gamma$gamma.lower
-        gamma.upper <- confint_gamma$gamma.upper
-        SR.lower <- sum(plogis(gamma.lower+Z.beta.all)) / OE_df.direct
-        SR.upper <- sum(plogis(gamma.upper+Z.beta.all)) / OE_df.direct
-        return(c(SR.lower, SR.upper))
-      }
-      SR_direct.no.events <- function(ID) {
-        Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = ID, alpha = alpha)
-        gamma.upper <- confint_gamma$gamma.upper
-        SR.upper <- sum(plogis(gamma.upper+Z.beta.all)) / OE_df.direct
-        return(c(0, SR.upper))
-      }
-      SR_direct.all.events <- function(ID) {
-        Z.beta.all <- as.matrix(data.ori[,Z.char])%*%beta
-        confint_gamma <- confint_fe_gamma(fit, test = test, parm = ID, alpha = alpha)
-        gamma.lower <- confint_gamma$gamma.lower
-        SR.lower <- sum(plogis(gamma.lower+Z.beta.all)) / OE_df.direct
-        SR.upper <- nrow(data.ori) / OE_df.direct
-        return(c(SR.lower, SR.upper))
-      }
-
-      confint.finite <- sapply(unique(data[(data$no.events==0) & (data$all.events==0),]$ID),
-                               FUN = function(ID) SR_direct.finite(ID))
-      confint.no.events <- sapply(unique(data[(data$no.events==1) & (data$all.events==0),]$ID),
-                                 FUN = function(ID) SR_direct.no.events(ID))
-      confint.all.events <- sapply(unique(data[(data$no.events==0) & (data$all.events==1),]$ID),
-                                  FUN = function(ID) SR_direct.all.events(ID))
-      CI.direct_ratio <- as.numeric(rbind(t(direct.ratio_df),
-                                          cbind(confint.finite,
-                                                confint.no.events,
-                                                confint.all.events)))
-
-      CI.direct_ratio <- as.data.frame(matrix(CI.direct_ratio, ncol = 3, byrow = T))
-      colnames(CI.direct_ratio) <- c("direct_ratio", "CI_ratio.lower", "CI_ratio.upper")
-      rownames(CI.direct_ratio) <- names(direct.rate_df)
-
-      if ("ratio" %in% measure){
-        return_ls$CI.direct_ratio <- CI.direct_ratio
-
-      }
-
-      if ("rate" %in% measure){
-        rate.lower <- pmax(pmin(CI.direct_ratio$CI_ratio.lower * population_rate, 100), 0)
-        rate.upper <- pmax(pmin(CI.direct_ratio$CI_ratio.upper * population_rate, 100), 0)
-        CI.direct_rate <- as.data.frame(cbind(direct.rate_df, rate.lower, rate.upper))
-        colnames(CI.direct_rate) <- c("direct_rate", "CI_rate.lower", "CI_rate.upper")
-        return_ls$CI.direct_rate <- CI.direct_rate
-      }
-    }
-    return(return_ls)
+    q <- if (alternative == "two.sided") stats::qnorm(1 - alpha / 2) else stats::qnorm(1 - alpha)
+    lo <- gamma[indices] - q * se
+    up <- gamma[indices] + q * se
+    if (alternative == "less") lo <- rep(-Inf, length(lo))
+    if (alternative == "greater") up <- rep(Inf, length(up))
+    return(data.frame(gamma = gamma[indices], gamma.lower = lo, gamma.upper = up))
   }
 
+  grp <- factor(as.character(prov), levels = prov_levels)
+  rows_of <- split(seq_along(prov), grp)
+  Y <- data[, cl$Y.char]
+  q2 <- stats::qnorm(alpha / 2, lower.tail = FALSE)
+  q1 <- stats::qnorm(alpha, lower.tail = FALSE)
+  no_events <- tapply(data$no.events, grp, max) == 1
+  all_events <- tapply(data$all.events, grp, max) == 1
 
+  limits_one <- function(i) {
+    r <- rows_of[[i]]
+    zb <- Z_beta[r]
+    nt <- N[r]
+    obs <- sum(Y[r])
+    g_hat <- gamma[i]
+    if (test == "exact") {
+      trials <- function(G) {
+        p <- stats::plogis(G + zb)
+        if (all(nt == 1)) p else rep(p, nt)
+      }
+      upper_fun <- function(G) {
+        p <- trials(G)
+        if (alternative == "two.sided") poibin::ppoibin(obs - 1, p) + 0.5 * poibin::dpoibin(obs, p) - alpha / 2
+        else poibin::ppoibin(obs, p) - alpha
+      }
+      lower_fun <- function(G) {
+        p <- trials(G)
+        if (alternative == "two.sided") 1 - poibin::ppoibin(obs, p) + 0.5 * poibin::dpoibin(obs, p) - alpha / 2
+        else 1 - poibin::ppoibin(obs - 1, p) - alpha
+      }
+      # one-sided limits at level alpha for providers at the boundary
+      none_fun <- function(G) exp(sum(nt * stats::plogis(-(G + zb), log.p = TRUE))) / 2 - alpha
+      all_fun <- function(G) exp(sum(nt * stats::plogis(G + zb, log.p = TRUE))) / 2 - alpha
+    } else {
+      z_of <- function(G) {
+        p <- stats::plogis(G + zb)
+        (obs - sum(nt * p)) / sqrt(sum(nt * p * (1 - p)))
+      }
+      q <- if (alternative == "two.sided") q2 else q1
+      upper_fun <- function(G) z_of(G) + q
+      lower_fun <- function(G) z_of(G) - q
+      none_fun <- function(G) {
+        p <- stats::plogis(G + zb)
+        q1 - sum(nt * p) / sqrt(sum(nt * p * (1 - p)))
+      }
+      all_fun <- function(G) {
+        p <- stats::plogis(G + zb)
+        sum(nt * (1 - p)) / sqrt(max(sum(nt * p * (1 - p)), 1e-20)) - q1
+      }
+    }
+    span <- 10 + max(abs(zb))
+    if (no_events[i]) {
+      return(c(g_hat, -Inf, find_root(none_fun, -span, span)))
+    }
+    if (all_events[i]) {
+      return(c(g_hat, find_root(all_fun, -span, span), Inf))
+    }
+    lo <- if (alternative == "less") -Inf else find_root(lower_fun, g_hat - span, g_hat)
+    up <- if (alternative == "greater") Inf else find_root(upper_fun, g_hat, g_hat + span)
+    c(g_hat, lo, up)
+  }
+  res <- t(vapply(indices, limits_one, numeric(3)))
+  data.frame(gamma = res[, 1], gamma.lower = res[, 2], gamma.upper = res[, 3])
+}
+
+# Root of a monotone function on [a, b], widening the interval if needed.
+find_root <- function(f, a, b, max_widen = 5) {
+  width <- b - a
+  for (k in 0:max_widen) {
+    fa <- f(a)
+    fb <- f(b)
+    if (is.finite(fa) && is.finite(fb) && sign(fa) != sign(fb)) {
+      return(stats::uniroot(f, c(a, b), tol = 1e-8)$root)
+    }
+    a <- a - width
+    b <- b + width
+  }
+  NA_real_
 }

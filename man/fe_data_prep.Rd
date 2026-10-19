@@ -2,63 +2,57 @@
 % Please edit documentation in R/fe_data_prep.R
 \name{fe_data_prep}
 \alias{fe_data_prep}
-\title{Data preparation before modelling}
+\title{Data preparation for the fixed provider effects model}
 \usage{
-fe_data_prep(N, Y, Z, ID, cutoff = 10, check = TRUE, message = TRUE)
+fe_data_prep(
+  N,
+  Y,
+  Z,
+  ProvID,
+  PatientID,
+  cutoff = 10,
+  check = TRUE,
+  message = TRUE
+)
 }
 \arguments{
-\item{N}{a numerical vector, with values of 1 or more, indicating the number of trials. If missing, defaulting to 1.}
+\item{N}{number of trials for each row (binomial outcome), a vector or
+one-column data frame. If missing, every row is a single Bernoulli trial
+(\code{N = 1}), the binary case.}
 
-\item{Y}{a numerical vector, with values of 0 or 1, indicating the outcome variable.}
+\item{Y}{outcome: number of events for each row (0/1 when \code{N = 1}), a
+one-column data frame or a vector.}
 
-\item{Z}{a matrix or data frame containing covariates.}
+\item{Z}{a numeric matrix or data frame of covariates.}
 
-\item{ID}{a vector representing the provider id. Its elements can be either numeric values or characters.}
+\item{ProvID}{provider identifier, a one-column data frame or a vector.}
 
-\item{cutoff}{an integer as cutoff of provider size with 10 as default. Providers with observations fewer than the "cutoff" value will be labeled as "include = 0".}
+\item{PatientID}{optional patient identifier. Required for the
+patient-clustered robust Wald tests.}
 
-\item{check}{a Boolean indicating whether checking missingness, variation, correlation and VIF of variables in the data. Defaulting to "TRUE".}
+\item{cutoff}{providers with fewer than \code{cutoff} patients (or rows when
+\code{PatientID} is missing) are labelled \code{included = 0} and are left out of
+model fitting. Default 10.}
 
-\item{message}{a Boolean indicating whether printing out the information of the data preparation process. Defaulting to "TRUE".}
+\item{check}{a logical; run \code{\link[=data_check]{data_check()}}-style checks (missingness,
+variation, correlation, VIF). Default \code{TRUE}.}
 
-\item{...}{}
+\item{message}{a logical; print progress information. Default \code{TRUE}.}
 }
 \value{
-\item{data}{a sorted data frame including response, provider identifiers, covariates, and additional provider information.}
-
-\item{char_list}{a list including variable names.}
+An object of class \code{data_prep}: a list with
+\item{data}{the sorted data frame.}
+\item{char_list}{column names: \code{N.char}, \code{Y.char}, \code{prov.char}, \code{Z.char}
+and, when supplied, \code{PatientID.char}.}
 }
 \description{
-Data preparation before modelling
+Combines outcome, number of trials, provider identifier, optional patient
+identifier and covariates into one data frame sorted by provider (and
+patient), flags small providers and providers with no or all events.
 }
 \details{
-Major steps in this stage include (in order):
-\itemize{
-\item checking missingness, variation, correlation and VIF of variables in the data,
-\item provider screening based on the provider size, 10 as default,
-\item reporting proportions of providers with no events (i.e. all "0" outcomes) and with all events (i.e. all "1" outcomes),
-\item sorting data by provider identifiers.
+The returned data frame keeps all providers; small ones are marked
+\code{included = 0}, and \code{\link[=logis_fe]{logis_fe()}} only uses rows with \code{included == 1}.
+Columns \code{no.events} and \code{all.events} flag included providers whose
+outcomes are all 0 or all equal to the number of trials.
 }
-
-The \code{fe_data_prep()} function returns data sorted by the provider identifiers,
-accompanied by additional provider-related information indicating whether the provider's size is smaller than a specified "cutoff"
-and whether the respective provider has experienced either zero or all events.
-The reason behind introducing a "cutoff" lies in findings from both simulated and real data studies,
-revealing the instability of coefficient estimates for providers with small sizes.
-Consequently, we recommend excluding small providers during the model fitting process.
-It is important to note that the resultant data frame retains all providers, including small ones,
-but utilizes the "included = 0" label to signify the small providers. Subsequently, during the model fitting stage,
-the \code{logis_fe()} function disregards records marked with "included = 0".
-}
-\examples{
-data(data_FE)
-data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID)
-head(data.prep$data)
-data.prep$char_list
-
-}
-\keyword{Data}
-\keyword{Effects}
-\keyword{Fixed}
-\keyword{Preparation,}
-\keyword{Provider}

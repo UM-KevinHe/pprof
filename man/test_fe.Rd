@@ -2,76 +2,96 @@
 % Please edit documentation in R/test_fe.R
 \name{test_fe}
 \alias{test_fe}
-\title{Conduct hypothesis testing for identifying outlying providers}
+\title{Hypothesis tests for provider effects}
 \usage{
 test_fe(
   fit,
   parm,
   level = 0.95,
   test = "exact.poisbinom",
-  score_modified = TRUE,
   null = "median",
   n = 10000,
   threads = 1,
+  alternative = "two.sided",
   ...
 )
 }
 \arguments{
-\item{fit}{an object as output of \code{logis_fe} function.}
+\item{fit}{a model fitted by \code{\link[=logis_fe]{logis_fe()}}.}
 
-\item{parm}{specify a subset of which providers are to be given confidence intervals. All providers are included by default.}
+\item{parm}{optional subset of providers (same class as the provider IDs).}
 
-\item{level}{confidence level used for constructing confidence intervals. Defaulting to 0.95.}
+\item{level}{confidence level; the significance level is \code{1 - level}.
+Default 0.95.}
 
-\item{test}{a character string specifying the type of testing method to be conducted. Defaulting to "exact.poisbinom".
+\item{test}{the test:
 \itemize{
-\item"exact.poisbinom": two-sided exact test based on Poisson-binomial distribution of \eqn{O_i|Z_i}
-\item"exact.bootstrap": two-sided exact test based on bootstrap procedure
-\item"wald": wald test
-\item"score": score test
+\item \code{"exact.poisbinom"} (default): exact test using the Poisson-binomial
+distribution of the provider's total events under the null (each row
+contributes \code{N} Bernoulli trials);
+\item \code{"exact.bootstrap"}: the same exact test by simulation (\code{n} draws);
+\item \code{"wald"}: model-based Wald test;
+\item \code{"robust_wald"}: Wald test with a patient-clustered sandwich
+standard error (requires \code{PatientID} in \code{\link[=fe_data_prep]{fe_data_prep()}});
+\item \code{"stabilized_wald"}: Wald test with the stabilized sandwich
+standard error (requires \code{PatientID}; see Details);
+\item \code{"score"}: score test with \eqn{\hat\beta} held fixed;
+\item \code{"robust_score"}: score test with a patient-clustered variance
+(requires \code{PatientID});
+\item \code{"stabilized_score"}: score test with the stabilized variance
+(requires \code{PatientID}).
 }}
 
-\item{score_modified}{a logical indicating whether to use the modified score test which ignore the randomness of covariate coefficient if "test = score". Defaulting to TRUE.}
+\item{null}{the null value \eqn{\gamma_0}: \code{"median"} (default) or a number.}
 
-\item{null}{a character string or real number specifying null hypotheses of fixed provider effects.}
+\item{n}{number of simulated draws for \code{"exact.bootstrap"}. Default 10,000.}
 
-\item{n}{resample size for bootstrapping. Defaulting to 10,000.}
+\item{threads}{number of OpenMP threads (\code{"wald"}).}
 
-\item{threads}{an integer specifying the number of threads to use. Defaulting to 1.}
+\item{alternative}{\code{"two.sided"} (default), \code{"greater"} or \code{"less"}.}
 
-\item{...}{}
+\item{...}{unused. The standard score test of version 0.1.0
+(\code{score_modified = FALSE}) was removed.}
 }
 \value{
-a dataframe containing:
-
-\item{flag}{a vector of flagging indicator. "1" means statistically higher than expected,
-and "-1" means statistically lower than expected}
-
-\item{p}{p-value}
-
-\item{stat}{z-score}
+A data frame, one row per tested provider (row names = provider
+IDs), with columns \code{flag} (factor: 1 = higher than expected, -1 = lower,
+0 = as expected), \code{p}, \code{stat}, and \code{se.gamma} for the Wald tests. The
+attribute \code{"provider size"} holds the number of rows per provider.
 }
 \description{
-Conduct hypothesis testing for identifying outlying providers
+Tests \eqn{H_0: \gamma_i = \gamma_0} for every provider (or a subset) and
+flags providers that are significantly higher or lower than expected.
 }
 \details{
-By default, the function uses the \code{"exact.poisbinom"} method.
-The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
-For the score test, consider that when the number of tested providers is large,
-refitting the models to get the restricted MLEs will take a long time.
-Therefore, we use unrestricted MLEs to replace the restricted MLEs during the testing procedure by default.
-However, the user can specify 'score_modified = FALSE' to perform a standard score test.
-}
-\examples{
-data(data_FE)
-data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-fit_fe <- logis_fe(data.prep)
-test_fe(fit_fe, test = "score", parm = c(1:3))
+The Wald tests are unreliable for providers whose effect is at
+the bound (no or all events).
 
+The patient-clustered tests work with the row residuals
+\eqn{r_j = Y_j - N_j p_j} and variances \eqn{v_j = N_j p_j (1 - p_j)},
+at the fitted \eqn{\hat p_j} for the Wald tests and at
+\eqn{p_j = expit(\gamma_0 + Z_j^T\hat\beta)} for the score tests. With
+\eqn{U_i = \sum_{j \in i} r_j} over provider \eqn{i}'s rows:
+\itemize{
+\item \code{"robust_wald"}: \eqn{SE = I_{\gamma\gamma}^{-1}\sqrt{V_i}} with
+\eqn{V_i = \sum_{k \in i} (\sum_{j \in k} r_j)^2}, summing residuals
+within patient \eqn{k};
+\item \code{"robust_score"}: \eqn{z = U_i / \sqrt{V_i}};
+\item \code{"stabilized_wald"} and \code{"stabilized_score"} replace \eqn{V_i} by
+\eqn{\sum_{k \in i} a_k^T \hat R a_k}, where \eqn{a_k} holds
+\eqn{\sqrt{v_j}} for patient \eqn{k}'s rows and \eqn{\hat R} is one
+matrix pooled over all patients of all providers: entry \eqn{(s, t)}
+averages \eqn{e_s e_t}, \eqn{e_j = r_j / \sqrt{v_j}}, over the patients
+with at least \eqn{\max(s, t)} rows.
+}
+\eqn{I_{\gamma\gamma}} is the provider's own information
+\eqn{\sum_j v_j}. The stabilized tests take a patient's rows in their order
+in the data: sort by time within patient before \code{\link[=fe_data_prep]{fe_data_prep()}} (which
+keeps that order). All providers enter \eqn{\hat R}; \code{parm} only selects
+the output. With \eqn{N = 1} every formula is the binary version.
 }
 \references{
-\itemize{
-\item Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and inference for profiling health care providers.
-\emph{Statistics in Medicine}, \strong{41(15)}: 2840-2853.
-}
+Wu W, Yang Y, Kang J, He K. (2022) Improving large-scale estimation and
+inference for profiling health care providers. \emph{Statistics in
+Medicine}, 41(15): 2840-2853.
 }

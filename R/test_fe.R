@@ -1,209 +1,234 @@
-#=== HYPOTHESIS TESTS FUNCTION =================================
-#' Conduct hypothesis testing for identifying outlying providers
+#' Hypothesis tests for provider effects
 #'
-#' @param fit an object as output of \code{logis_fe} function.
+#' Tests \eqn{H_0: \gamma_i = \gamma_0} for every provider (or a subset) and
+#' flags providers that are significantly higher or lower than expected.
 #'
-#' @param parm specify a subset of which providers are to be given confidence intervals. All providers are included by default.
-#'
-#' @param level confidence level used for constructing confidence intervals. Defaulting to 0.95.
-#'
-#' @param test a character string specifying the type of testing method to be conducted. Defaulting to "exact.poisbinom".
+#' @param fit a model fitted by [logis_fe()].
+#' @param parm optional subset of providers (same class as the provider IDs).
+#' @param level confidence level; the significance level is `1 - level`.
+#'   Default 0.95.
+#' @param test the test:
 #'   \itemize{
-#'   \item"exact.poisbinom": two-sided exact test based on Poisson-binomial distribution of \eqn{O_i|Z_i}
-#'   \item"exact.bootstrap": two-sided exact test based on bootstrap procedure
-#'   \item"wald": wald test
-#'   \item"score": score test
+#'   \item `"exact.poisbinom"` (default): exact test using the Poisson-binomial
+#'     distribution of the provider's total events under the null (each row
+#'     contributes `N` Bernoulli trials);
+#'   \item `"exact.bootstrap"`: the same exact test by simulation (`n` draws);
+#'   \item `"wald"`: model-based Wald test;
+#'   \item `"robust_wald"`: Wald test with a patient-clustered sandwich
+#'     standard error (requires `PatientID` in [fe_data_prep()]);
+#'   \item `"stabilized_wald"`: Wald test with the stabilized sandwich
+#'     standard error (requires `PatientID`; see Details);
+#'   \item `"score"`: score test with \eqn{\hat\beta} held fixed;
+#'   \item `"robust_score"`: score test with a patient-clustered variance
+#'     (requires `PatientID`);
+#'   \item `"stabilized_score"`: score test with the stabilized variance
+#'     (requires `PatientID`).
 #'   }
+#' @param null the null value \eqn{\gamma_0}: `"median"` (default) or a number.
+#' @param n number of simulated draws for `"exact.bootstrap"`. Default 10,000.
+#' @param threads number of OpenMP threads (`"wald"`).
+#' @param alternative `"two.sided"` (default), `"greater"` or `"less"`.
+#' @param ... unused. The standard score test of version 0.1.0
+#'   (`score_modified = FALSE`) was removed.
 #'
-#' @param score_modified a logical indicating whether to use the modified score test which ignore the randomness of covariate coefficient if "test = score". Defaulting to TRUE.
+#' @details The Wald tests are unreliable for providers whose effect is at
+#' the bound (no or all events).
 #'
-#' @param null a character string or real number specifying null hypotheses of fixed provider effects.
+#' The patient-clustered tests work with the row residuals
+#' \eqn{r_j = Y_j - N_j p_j} and variances \eqn{v_j = N_j p_j (1 - p_j)},
+#' at the fitted \eqn{\hat p_j} for the Wald tests and at
+#' \eqn{p_j = expit(\gamma_0 + Z_j^T\hat\beta)} for the score tests. With
+#' \eqn{U_i = \sum_{j \in i} r_j} over provider \eqn{i}'s rows:
+#' \itemize{
+#' \item `"robust_wald"`: \eqn{SE = I_{\gamma\gamma}^{-1}\sqrt{V_i}} with
+#'   \eqn{V_i = \sum_{k \in i} (\sum_{j \in k} r_j)^2}, summing residuals
+#'   within patient \eqn{k};
+#' \item `"robust_score"`: \eqn{z = U_i / \sqrt{V_i}};
+#' \item `"stabilized_wald"` and `"stabilized_score"` replace \eqn{V_i} by
+#'   \eqn{\sum_{k \in i} a_k^T \hat R a_k}, where \eqn{a_k} holds
+#'   \eqn{\sqrt{v_j}} for patient \eqn{k}'s rows and \eqn{\hat R} is one
+#'   matrix pooled over all patients of all providers: entry \eqn{(s, t)}
+#'   averages \eqn{e_s e_t}, \eqn{e_j = r_j / \sqrt{v_j}}, over the patients
+#'   with at least \eqn{\max(s, t)} rows.
+#' }
+#' \eqn{I_{\gamma\gamma}} is the provider's own information
+#' \eqn{\sum_j v_j}. The stabilized tests take a patient's rows in their order
+#' in the data: sort by time within patient before [fe_data_prep()] (which
+#' keeps that order). All providers enter \eqn{\hat R}; `parm` only selects
+#' the output. With \eqn{N = 1} every formula is the binary version.
 #'
-#' @param n resample size for bootstrapping. Defaulting to 10,000.
-#'
-#' @param threads an integer specifying the number of threads to use. Defaulting to 1.
-#'
-#' @param ...
-#'
-#'
-#'
-#' @details
-#' By default, the function uses the `"exact.poisbinom"` method.
-#' The wald test is invalid for extreme providers (i.e. when provider effect goes to infinity).
-#' For the score test, consider that when the number of tested providers is large,
-#' refitting the models to get the restricted MLEs will take a long time.
-#' Therefore, we use unrestricted MLEs to replace the restricted MLEs during the testing procedure by default.
-#' However, the user can specify 'score_modified = FALSE' to perform a standard score test.
-#'
-#'
-#'
-#' @return a dataframe containing:
-#'
-#' \item{flag}{a vector of flagging indicator. "1" means statistically higher than expected,
-#' and "-1" means statistically lower than expected}
-#'
-#' \item{p}{p-value}
-#'
-#' \item{stat}{z-score}
-#'
-#'
-#'
-#' @examples
-#' data(data_FE)
-#' data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-#' fit_fe <- logis_fe(data.prep)
-#' test_fe(fit_fe, test = "score", parm = c(1:3))
-#'
-#' @importFrom stats plogis qnorm pnorm rbinom
-#' @importFrom poibin ppoibin
-#'
+#' @return A data frame, one row per tested provider (row names = provider
+#' IDs), with columns `flag` (factor: 1 = higher than expected, -1 = lower,
+#' 0 = as expected), `p`, `stat`, and `se.gamma` for the Wald tests. The
+#' attribute `"provider size"` holds the number of rows per provider.
 #'
 #' @references
-#' \itemize{
-#' \item Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and inference for profiling health care providers.
-#' \emph{Statistics in Medicine}, \strong{41(15)}: 2840-2853.
-#' }
+#' Wu W, Yang Y, Kang J, He K. (2022) Improving large-scale estimation and
+#' inference for profiling health care providers. \emph{Statistics in
+#' Medicine}, 41(15): 2840-2853.
 #'
 #' @export
-
-test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", score_modified = TRUE,
-                    null = "median", n = 10000, threads = 1, ...) {
-  if (missing(fit)) stop ("Argument 'fit is required!", call.=F)
-  if (!class(fit) %in% c("logis_fe")) stop("Object fit is not of the classes 'logis_fe'!", call.=F)
-  if (!(test %in% c("exact.poisbinom", "exact.bootstrap", "score", "wald")))
-    stop("Argument 'test' NOT as required!",call.=F)
+test_fe <- function(fit, parm, level = 0.95, test = "exact.poisbinom", null = "median", n = 10000,
+                    threads = 1, alternative = "two.sided", ...) {
+  if (missing(fit)) stop("Argument 'fit' is required!", call. = FALSE)
+  check_fit(fit)
+  if (isFALSE(list(...)$score_modified)) # would otherwise vanish into `...`
+    stop("The standard score test (score_modified = FALSE) was removed in pprofR 0.2.0; ",
+         "test = 'score' keeps beta fixed.", call. = FALSE)
+  clustered <- c("robust_wald", "stabilized_wald", "robust_score", "stabilized_score")
+  if (!(test %in% c("exact.poisbinom", "exact.bootstrap", "score", "wald", clustered)))
+    stop("Argument 'test' NOT as required!", call. = FALSE)
+  if (test %in% clustered && is.null(fit$char_list$PatientID.char))
+    stop(sprintf("Argument 'test' = '%s' requires 'PatientID' in the data!", test), call. = FALSE)
+  alternative <- match_alternative(alternative)
   alpha <- 1 - level
 
+  N.char <- fit$char_list$N.char
   Y.char <- fit$char_list$Y.char
   Z.char <- fit$char_list$Z.char
   prov.char <- fit$char_list$prov.char
-  data <- fit$data_include[, c(Y.char, Z.char, prov.char)] #already sorted by provider ID
+  data <- fit$data_include
+  N <- trials_of(data, N.char)
+  prov <- data[, prov.char]
+  n.prov <- sapply(split(data[, Y.char], prov), length)
+  prov_levels <- names(n.prov)
 
-  gamma <- fit$df.prov$gamma_est #not use the potential Inf of gamma here
+  gamma <- fit$df.prov$gamma_est
   beta <- fit$beta
-  gamma.null <- ifelse(null=="median", median(gamma),
-                       ifelse(is.numeric(null), null[1],
-                              stop("Argument 'null' NOT as required!",call.=F)))
+  gamma.null <- gamma_null_value(null, gamma)
+  indices <- provider_indices(if (missing(parm)) NULL else parm, prov, prov_levels)
+  selected <- prov_levels[indices]
 
+  if (test %in% c("exact.poisbinom", "exact.bootstrap", "score")) {
+    # tests evaluated provider by provider under the null
+    keep <- as.character(prov) %in% selected
+    Z_null <- unname(as.matrix(data[keep, Z.char]))
+    probs <- as.numeric(stats::plogis(gamma.null + Z_null %*% beta))
+    obs_row <- data[keep, Y.char]
+    N_row <- N[keep]
+    grp <- factor(as.character(prov[keep]), levels = selected)
 
-  if (!missing(parm)) {
-    if (is.numeric(parm)) {  #avoid "integer" class
-      parm <- as.numeric(parm)
-    }
-    if (class(parm) == class(data[, prov.char]) & !(test == "wald" | (test == "score" & !score_modified))) {
-      data <- data[data[, prov.char] %in% parm, ]
-    } else if (class(parm) == class(data[, prov.char]) & (test == "wald" | (test == "score" & !score_modified))) {
-      indices <- which(unique(data[, prov.char]) %in% parm)
+    if (test == "score") {
+      z.score <- sapply(split(obs_row - N_row * probs, grp), sum) /
+        sqrt(sapply(split(N_row * probs * (1 - probs), grp), sum))
+      out <- z_test_output(z.score, alpha, alternative)
+      res <- data.frame(flag = factor(out$flag), p = out$p, stat = z.score, row.names = selected)
     } else {
-      stop("Argument 'parm' includes invalid elements!")
+      if (test == "exact.bootstrap" && (n <= 0 | as.integer(n) != n))
+        stop("Argument 'n' NOT a positive integer ! ", call. = FALSE)
+      one_provider <- function(idx) {
+        pr <- probs[idx]
+        nt <- N_row[idx]
+        obs <- sum(obs_row[idx])
+        if (test == "exact.poisbinom") {
+          pr_trials <- if (all(nt == 1)) pr else rep(pr, nt) # each row = N Bernoulli trials
+          exact_poisbinom(obs, pr_trials, alpha, alternative)
+        } else {
+          exact_bootstrap(obs, pr, nt, n, alpha, alternative)
+        }
+      }
+      results <- sapply(split(seq_along(probs), grp), one_provider)
+      res <- data.frame(flag = factor(results[1, ]), p = results[2, ], stat = results[3, ],
+                        row.names = selected)
     }
+    attr(res, "provider size") <- n.prov[indices]
+    return(res)
   }
 
-  if (test=="exact.bootstrap") { #should consistent to exact.poisbinom method
-    if (n <= 0 | as.integer(n) != n) stop("Argument 'n' NOT a positive integer ! ",call.=F)
-    exact.bootstrap <- function(df, n) {
-      probs <- plogis(gamma.null + unname(as.matrix(df[, Z.char])) %*% beta)
-      obs <- sum(df[,Y.char])
-      sums <- colSums(matrix(rbinom(n=length(probs)*n, size=1, prob=rep(probs,times=n)), ncol=n))
-      p <- (sum(sums>obs)+ 0.5*sum(sums==obs))/n
-      z.score <- qnorm(p, lower=F)
-      flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
-      p.val <- 2 * min(p, 1-p)
-      return(c(flag, p.val, z.score))
-    }
-    results <- sapply(by(data, data[,prov.char],identity),
-                      FUN=function(x) exact.bootstrap(x, n))
-    return(data.frame(flag=factor(results[1,]),
-                      p=results[2,],
-                      stat=results[3,],
-                      row.names=unique(data[, prov.char])))
-  } else if (test == "score") {
-    if (score_modified == FALSE) {  #standard score test
-      n.prov <- sapply(split(data[, Y.char], data[, prov.char]), length)
-      m <- length(n.prov)
-      if (missing(parm)) {
-        indices <- 1:m
-      }
-      z.score <- Modified_score(data[,Y.char], as.matrix(data[,Z.char]), n.prov, gamma, beta,
-                                gamma.null, m, indices - 1, threads)  #In cpp, indices starts from 0
-      p <- pnorm(z.score, lower=F)
-      flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
-      p.val <- 2 * pmin(p, 1-p)
-      return(data.frame(flag=factor(flag),
-                        p=p.val,
-                        stat=z.score,
-                        row.names = unique(data[, prov.char])[indices]))
-    } else {  #modified score test
-      probs <- plogis(gamma.null + unname(as.matrix(data[, Z.char])) %*% beta)
-      z.score <- sapply(split(data[,Y.char]-probs,data[,prov.char]),sum) /
-        sqrt(sapply(split(probs*(1-probs),data[,prov.char]),sum))
-      p <- pnorm(z.score, lower=F)
-      flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
-      p.val <- 2 * pmin(p, 1-p)
-      return(data.frame(flag=factor(flag),
-                        p=p.val,
-                        stat=z.score,
-                        row.names=unique(data[, prov.char])))
-    }
-  } else if (test=="exact.poisbinom") {
-    exact.poisbinom <- function(df) {
-      probs <- plogis(gamma.null + unname(as.matrix(df[, Z.char])) %*% beta)
-      obs <- sum(df[,Y.char])
-      p <- 1 - poibin::ppoibin(obs, probs) + 0.5*poibin::dpoibin(obs, probs)  #"ppoibin": probability of "#event <= obs"
-      z.score <- qnorm(p, lower=F)
-      flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
-      p.val <- 2 * min(p, 1-p)
-      return(c(flag, p.val, z.score))
-    }
-    results <- sapply(by(data, data[,prov.char],identity),
-                      FUN=function(x) exact.poisbinom(x))
-    return(data.frame(flag=factor(results[1,]),
-                      p=results[2,],
-                      stat=results[3,],
-                      row.names=unique(data[, prov.char])))
-  } else if (test=="wald") { # invalid in presence of outlying providers
-    if(!missing(parm)){
-      if (sum(!is.finite(gamma[indices])) != 0){
-        stop("wald test cannot be performed on providers with zero or all events!!")
-      }
+  if (test %in% c("stabilized_wald", "robust_score", "stabilized_score")) {
+    # every provider enters the stabilized pooling; parm only selects the output
+    m <- length(prov_levels)
+    prov_row <- provider_codes(prov, prov_levels)
+    cl <- cluster_codes(prov, data[, fit$char_list$PatientID.char])
+    prov_cl <- prov_row[cl$first]
+    p <- if (test == "stabilized_wald") fit$pred else
+      as.numeric(stats::plogis(gamma.null + fit$linear_pred)) # under the null
+    residual <- data[, Y.char] - N * p
+    if (test == "robust_score") {
+      s <- cluster_sums(residual, cl$code, prov_row, prov_cl, m)
+      stat <- s$U[indices] / sqrt(s$meat[indices])
     } else {
-      if (sum(!is.finite(gamma)) != 0){
-        stop("wald test cannot be performed on providers with zero or all events!!")
+      rows <- max(tabulate(cl$code))
+      if (rows > 5000)
+        stop("The stabilized tests pool a matrix over the rows of a patient; the largest patient has ",
+             rows, " rows.", call. = FALSE)
+      meat <- stabilized_meat(residual, N * p * (1 - p), cl$code, prov_cl, m)[indices]
+      if (test == "stabilized_score") {
+        stat <- cluster_sums(residual, cl$code, prov_row, prov_cl, m)$U[indices] / sqrt(meat)
+      } else {
+        se.gamma <- robust_wald_gamma(N, as.matrix(data[, Z.char]), fit$pred, n.prov, indices)
+        se.gamma <- sqrt(se.gamma^4 * meat)
+        stat <- (gamma[indices] - gamma.null) / se.gamma
       }
     }
-
-    gamma.obs <- rep(gamma, sapply(split(data[,Y.char],data[,prov.char]),length)) #find gamma-hat
-    probs <- as.numeric(plogis(gamma.obs+as.matrix(data[,Z.char])%*%beta))
-    info.gamma.inv <- 1/sapply(split(probs*(1-probs), data[,prov.char]),sum) #I_11^-1
-    info.betagamma <- sapply(by(probs*(1-probs)*as.matrix(data[,Z.char]),data[,prov.char],identity),colSums) #I_21
-    info.beta <- t(as.matrix(data[,Z.char]))%*%(probs*(1-probs)*as.matrix(data[,Z.char]))
-    schur.inv <- solve(info.beta-info.betagamma%*%(info.gamma.inv*t(info.betagamma))) # inv of Schur complement; S^-1
-    if (missing(parm)) {
-      mat.tmp <- info.gamma.inv*t(info.betagamma) #J_1^T
-      names <- unique(data[, prov.char])
+    stat[!is.finite(stat)] <- NA
+    out <- z_test_output(stat, alpha, alternative)
+    res <- if (test == "stabilized_wald") {
+      data.frame(flag = factor(out$flag), se.gamma = se.gamma, p = out$p, stat = stat, row.names = selected)
     } else {
-      mat.tmp <- info.gamma.inv[indices]*t(info.betagamma[,indices])
-      info.gamma.inv <- info.gamma.inv[indices]
-      gamma <- gamma[indices]
-      names <- unique(data[, prov.char])[indices]
+      data.frame(flag = factor(out$flag), p = out$p, stat = stat, row.names = selected)
     }
-    se.gamma <- sqrt(info.gamma.inv+apply(mat.tmp, 1, FUN=function(x) t(matrix(x))%*%schur.inv%*%matrix(x))) #only diagonal elements of (1,1) block of I^-1(\theta)
-    stat <- (gamma-gamma.null)/se.gamma
-    p <- pnorm(stat, lower=F)
-    flag <- ifelse(p<alpha/2, 1, ifelse(p<=1-alpha/2, 0, -1))
-    p.val <- 2 * pmin(p, 1-p)
-    return(data.frame(flag=factor(flag),
-                      p=p.val,
-                      stat=stat,
-                      row.names=names))
+    attr(res, "provider size") <- n.prov[indices]
+    return(res)
   }
+
+  if (test == "wald") {
+    se.gamma <- wald_gamma(N, as.matrix(data[, Z.char]), fit$pred, n.prov, indices, threads)
+  } else { # robust_wald
+    residual <- data[, Y.char] - N * fit$pred # O - E at the row level
+    meat <- robust_gamma_meat(residual, prov, data[, fit$char_list$PatientID.char], prov_levels)
+    se.gamma <- robust_wald_gamma(N, as.matrix(data[, Z.char]), fit$pred, n.prov, indices)
+    se.gamma <- sqrt(se.gamma^4 * meat[indices])
+  }
+  stat <- (gamma[indices] - gamma.null) / se.gamma
+  out <- z_test_output(stat, alpha, alternative)
+  res <- data.frame(flag = factor(out$flag), se.gamma = se.gamma, p = out$p, stat = stat,
+                    row.names = selected)
+  attr(res, "provider size") <- n.prov[indices]
+  res
 }
 
+# Exact test for one provider: `probs` holds one success probability per
+# Bernoulli trial. Returns c(flag, p-value, z-score).
+exact_poisbinom <- function(obs, probs, alpha, alternative) {
+  if (alternative == "two.sided") {
+    p <- 1 - poibin::ppoibin(obs, probs) + 0.5 * poibin::dpoibin(obs, probs) # ppoibin: P(#events <= obs)
+    z.score <- stats::qnorm(p, lower.tail = FALSE)
+    flag <- flag_two_sided(p, alpha)
+    p.val <- 2 * min(p, 1 - p)
+  } else if (alternative == "greater") {
+    p <- 1 - poibin::ppoibin(obs - 1, probs)
+    z.score <- stats::qnorm(p, lower.tail = FALSE)
+    p.val <- p
+    flag <- ifelse(p < alpha, 1, 0)
+  } else {
+    p <- poibin::ppoibin(obs, probs)
+    z.score <- stats::qnorm(p, lower.tail = TRUE)
+    p.val <- p
+    flag <- ifelse(p < alpha, -1, 0)
+  }
+  c(flag, p.val, z.score)
+}
 
-
-
-
-
-
-
-
+# Simulation version of the exact test for one provider.
+exact_bootstrap <- function(obs, probs, trials, n, alpha, alternative) {
+  size <- if (all(trials == 1)) 1 else rep(trials, times = n)
+  sums <- colSums(matrix(stats::rbinom(n = length(probs) * n, size = size, prob = rep(probs, times = n)), ncol = n))
+  if (alternative == "two.sided") {
+    p <- (sum(sums > obs) + 0.5 * sum(sums == obs)) / n
+    z.score <- stats::qnorm(p, lower.tail = FALSE)
+    p.val <- 2 * min(p, 1 - p)
+    flag <- flag_two_sided(p, alpha)
+  } else if (alternative == "greater") {
+    p <- sum(sums >= obs) / n
+    z.score <- stats::qnorm(p, lower.tail = FALSE)
+    p.val <- p
+    flag <- ifelse(p < alpha, 1, 0)
+  } else {
+    p <- sum(sums <= obs) / n
+    z.score <- stats::qnorm(p, lower.tail = TRUE)
+    p.val <- p
+    flag <- ifelse(p < alpha, -1, 0)
+  }
+  c(flag, p.val, z.score)
+}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/logis_fe.R
 \name{logis_fe}
 \alias{logis_fe}
-\title{Main function for fitting fixed effects model}
+\title{Fit the fixed provider effects logistic model}
 \usage{
 logis_fe(
   data.prep,
@@ -14,93 +14,74 @@ logis_fe(
   Rcpp = TRUE,
   threads = 1,
   AUC = FALSE,
-  message = FALSE
+  message = FALSE,
+  stop = "beta"
 )
 }
 \arguments{
-\item{data.prep}{an object from the \code{fe_data_prep()} function.}
+\item{data.prep}{an object from \code{\link[=fe_data_prep]{fe_data_prep()}}.}
 
-\item{algorithm}{a string specifying the algorithm to be used. Defaulting to "SerBIN".
-\itemize{
-\item "SerBIN": using the Serial blockwise inversion Newton algorithm to fit the model (See \href{https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387}{Wu et al. (2022)}).
-\item "BAN": using the block ascent Newton algorithm to fit the model (See \href{https://link.springer.com/article/10.1007/s10985-013-9264-6}{He et al. (2013)}).
-}}
+\item{algorithm}{\code{"SerBIN"} (default; Wu et al. 2022) or \code{"BAN"} (He et al. 2013).}
 
-\item{max.iter}{maximum number of iterations. Defaulting to 10,000.}
+\item{max.iter}{maximum number of iterations. Default 10,000.}
 
-\item{tol}{a small positive number specifying stopping criterion of Newton-Raphson algorithm. Defaulting to 1e-5.}
+\item{tol}{convergence tolerance. Default 1e-5. The KECC measures use
+1e-5 (SFR, SRR), 1e-10 (AOH) and 1e-15 (PPPW).}
 
-\item{bound}{a positive number to avoid inflation of provider effect. Defaulting to 10.}
+\item{bound}{provider effects are kept within \verb{median(gamma) +/- bound}
+during the iterations. Default 10.}
 
-\item{backtrack}{a boolean indicating whether backtracking line search is implemented. Defaulting to FALSE.}
+\item{backtrack}{a logical; use backtracking line search. Default \code{TRUE}.}
 
-\item{Rcpp}{a Boolean indicating whether the Rcpp function is used if "Rcpp = T". Defaulting to TRUE.}
+\item{Rcpp}{kept for backward compatibility; the fit always uses the
+compiled code.}
 
-\item{threads}{a positive integer specifying the number of threads to be used. Defaulting to 1.}
+\item{threads}{number of OpenMP threads for the information matrix
+(SerBIN only). Default 1.}
 
-\item{AUC}{a Boolean indicating whether report AUC. Defaulting to FALSE.}
+\item{AUC}{a logical; also report the area under the ROC curve (binary
+outcomes only). Default \code{FALSE}.}
 
-\item{message}{a Boolean indicating whether track the fitting process. Defaulting to TRUE.}
+\item{message}{a logical; print the iteration history. Default \code{FALSE}.}
 
-\item{...}{}
+\item{stop}{stopping rule: \code{"beta"} (default; infinity norm of the change
+in beta), \code{"relch"} (relative change in log-likelihood), \code{"ratch"}
+(change relative to the total change since the start), \code{"all"} (all
+three below \code{tol}) or \code{"or"} (any of the three below \code{tol}).}
 }
 \value{
-An object with S3 class \code{logis_fe}.
-
-\item{beta}{a vector of fixed effects estimates of covariates}
-
-\item{gamma}{a vector of estimates of provider effects}
-
-\item{linear_pred}{a vector of linear predictors}
-
-\item{pred}{a vector of predicted probabilities}
-
-\item{neg2Loglkd}{minus two times log likelihood}
-
-\item{AIC}{Akaike info criterion}
-
-\item{BIC}{Bayesian info criterion}
-
-\item{AUC}{area under the ROC curve}
+An object of class \code{logis_fe}:
+\item{beta}{covariate coefficients (matrix with one column).}
+\item{gamma}{provider effects (matrix with one column, rows named by provider).}
+\item{linear_pred}{\eqn{Z\beta} for every included row.}
+\item{pred}{fitted probabilities \eqn{p_{ij}}.}
+\item{neg2Loglkd, AIC, BIC}{fit statistics (binomial likelihood without the
+constant \eqn{\log\binom{N}{Y}}).}
+\item{obs, prov}{outcome and provider of every included row.}
+\item{df.prov}{provider-level observed events and \eqn{\hat\gamma}.}
+\item{char_list}{column names from \code{data.prep}.}
+\item{data_include}{the rows used for fitting.}
+\item{control}{the settings used for the fit.}
+\item{AUC}{if requested.}
 }
 \description{
-Main function for fitting fixed effects model
+Fits \eqn{logit(p_{ij}) = \gamma_i + Z_{ij}^T\beta} with a binary or
+binomial outcome (\eqn{Y_{ij} \sim Bin(N_{ij}, p_{ij})}) by the Serial
+blockwise inversion Newton (SerBIN) or block ascent Newton (BAN)
+algorithm.
 }
 \details{
-The default algorithm is based on Serial blockwise inversion Newton (SerBIN) proposed by
-\href{https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387}{Wu et al. (2022)},
-but users can also choose to use the block ascent Newton (BAN) algorithm proposed by
-\href{https://link.springer.com/article/10.1007/s10985-013-9264-6}{He et al. (2013)} to fit the model.
-Both methodologies build upon the Newton-Raphson method, yet SerBIN simultaneously updates both the provider effect and covariate coefficient.
-This concurrent update necessitates the inversion of the complete information matrix at each iteration.
-In contrast, BAN adopts a two-layer updating approach, where the covariate coefficient is sequentially fixed to update the provider effect,
-followed by fixing the provider effect to update the covariate coefficient.
-
-We suggest using the default \code{"SerBIN"} option as it typically converges much faster for most datasets.
-However, in rare cases where the SerBIN algorithm encounters second-order derivative irreversibility leading to an error,
-users can consider using the \code{"BAN"} option as an alternative.
-
-For a deeper understanding, please consult the original article for detailed insights.
-}
-\examples{
-data(data_FE)
-data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-fit_fe <- logis_fe(data.prep)
-
+SerBIN updates provider effects and covariate coefficients jointly
+using the block structure of the information matrix; BAN alternates between
+the two blocks. SerBIN is recommended; BAN is a fallback when the SerBIN
+information matrix is numerically singular.
 }
 \references{
-\itemize{
-\item Wu, W, Yang, Y, Kang, J, He, K. (2022) Improving large-scale estimation and inference for profiling health care providers.
-\emph{Statistics in Medicine}, \strong{41(15)}: 2840-2853.
+He K, Kalbfleisch J, Li Y, et al. (2013) Evaluating hospital readmission
+rates in dialysis facilities; adjusting for hospital effects. \emph{Lifetime
+Data Analysis}, 19: 490-512.
 
-\item He K, Kalbfleisch, J, Li, Y, and et al. (2013) Evaluating hospital readmission rates in dialysis providers; adjusting for hospital effects.
-\emph{Lifetime Data Analysis}, \strong{19}: 490-512.
+Wu W, Yang Y, Kang J, He K. (2022) Improving large-scale estimation and
+inference for profiling health care providers. \emph{Statistics in
+Medicine}, 41(15): 2840-2853.
 }
-}
-\keyword{(CENR)}
-\keyword{Algorithm,}
-\keyword{Cost-Efficient}
-\keyword{Effects}
-\keyword{Fixed}
-\keyword{Newton-Raphson}
-\keyword{Provider}

@@ -1,62 +1,42 @@
-//#define ARMA_NO_DEBUG
-#define STRICT_R_HEADERS // needed on Windows, not on macOS
-#include <RcppParallel.h>
-// [[Rcpp::depends(RcppParallel)]]
+// Unified C++ engine for the fixed provider effects logistic model.
+//
+// Every routine takes the number of trials N (binomial outcome). With N = 1
+// each expression reduces exactly (multiplication by 1.0 is exact) to the
+// binary code previously copied into the SFR / PPPW / SRR measure folders.
+//
+// Armadillo's internal OpenMP is switched off so that sums inside Armadillo
+// expressions do not depend on the number of cores; the explicit
+// "#pragma omp" loops below remain parallel.
+#define STRICT_R_HEADERS
+#define ARMA_DONT_USE_OPENMP
 #include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
 #include <cmath>
-#include <omp.h>
-#include <iostream>
+#include <iomanip>
+#include <string>
+#include "pprofR_omp.h"
 
-// [[Rcpp::plugins(cpp11)]]
-// [[Rcpp::plugins(openmp)]]
-using namespace RcppParallel;
+// [[Rcpp::depends(RcppArmadillo)]]
+
 using namespace Rcpp;
-using namespace std;
 using namespace arma;
 
-//` @importFrom RcppParallel RcppParallelLibs
-
-arma::vec rep(arma::vec &x, arma::vec &each) {
+// Repeat x[i] each[i] times (provider-level value -> observation level).
+arma::vec rep_vec(const arma::vec &x, const arma::vec &each) {
   arma::vec x_rep(sum(each));
   int ind = 0, m = x.n_elem;
   for (int i = 0; i < m; i++) {
-    x_rep.subvec(ind,ind+each(i)-1) = x(i) * ones(each(i));
+    x_rep.subvec(ind, ind + each(i) - 1) = x(i) * ones(each(i));
     ind += each(i);
   }
   return x_rep;
 }
 
-struct Info_beta : public Worker {
-  const arma::mat input1;
-  const arma::vec input2;
-  arma::mat output;
-
-  Info_beta(const arma::mat &Z, const arma::vec &pq, arma::mat matoutput) :
-    input1(Z), input2(pq), output(matoutput) {}
-
-  void operator()(std::size_t begin, std::size_t end) {
-    int p = input1.n_cols;
-    for (unsigned int i = begin; i < end; i++) {
-      div_t divresult = div(int(i), p);
-      output(divresult.quot, divresult.rem) = dot(input1.col(divresult.quot), input1.col(divresult.rem)%input2);
-    }
-  }
-};
-
-arma::mat info_beta_tbb(const arma::mat &Z, const arma::vec &pq) {
-  arma::mat output(Z.n_cols, Z.n_cols);
-  Info_beta info(Z, pq, output);
-  parallelFor(0, Z.n_cols*Z.n_cols, info);
-  return info.output;
-}
-
 void ind2uppsub(unsigned int index, unsigned int dim, unsigned int &row, unsigned int &col) {
-  row = 0, col = dim-1;
-  unsigned int n = dim*(dim-1)/2 - (dim-row)*(dim-row-1)/2 + col;
+  row = 0, col = dim - 1;
+  unsigned int n = dim * (dim - 1) / 2 - (dim - row) * (dim - row - 1) / 2 + col;
   while (index > n) {
     ++row;
-    n = dim*(dim-1)/2 - (dim-row)*(dim-row-1)/2 + col;
+    n = dim * (dim - 1) / 2 - (dim - row) * (dim - row - 1) / 2 + col;
   }
   while (index < n) {
     --col;
@@ -69,67 +49,85 @@ arma::mat info_beta_omp(const arma::mat &Z, const arma::vec &pq, const int &thre
   unsigned int p = Z.n_cols;
   unsigned int loops = p * (1 + p) / 2;
   arma::mat output(p, p);
-  #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
   for (unsigned int i = 0; i < loops; i++) {
     unsigned int r, c;
     ind2uppsub(i, p, r, c);
-    output(r,c) = dot(Z.col(r), Z.col(c)%pq);
-    output(c,r) = output(r,c);
+    output(r, c) = dot(Z.col(r), Z.col(c) % pq);
+    output(c, r) = output(r, c);
   }
-  return(output);
+  return output;
 }
 
-double Loglkd(const arma::vec &N, const arma::vec &Y, const arma::vec &Z_beta, const arma::vec &gamma_obs) {
-  return sum((gamma_obs+Z_beta) % Y - N % log(1+exp(gamma_obs+Z_beta)));
+// Binomial log-likelihood without the log(choose(N, Y)) constant.
+double Loglkd(const arma::vec &N, const arma::vec &Y, const arma::vec &Z_beta,
+              const arma::vec &gamma_obs) {
+  return sum((gamma_obs + Z_beta) % Y - N % log(1 + exp(gamma_obs + Z_beta)));
 }
 
 double logist(double x) {
-    return 1.0 / (1.0 + exp(-x));
+  return 1.0 / (1.0 + std::exp(-x));
 }
 
-double Exp_direct(double gamma, const arma::vec& Z_beta) {
-    double sum = 0.0;
-
-    #pragma omp parallel for reduction(+:sum)
-    for (unsigned int i = 0; i < Z_beta.n_elem; ++i) {
-        sum += logist(gamma + Z_beta[i]);
-    }
-
-    return sum;
+// Convergence criterion for the stopping rules ported from pprof.
+// "beta" is the rule the measure code has always used.
+double stop_crit(const std::string &stop, double crit_beta, double d_loglkd,
+                 double loglkd, double loglkd_init) {
+  double crit_relch = std::abs(d_loglkd / (d_loglkd + loglkd));
+  double crit_ratch = std::abs(d_loglkd / (d_loglkd + loglkd - loglkd_init));
+  if (stop == "relch") return crit_relch;
+  if (stop == "ratch") return crit_ratch;
+  if (stop == "all") return std::max(crit_beta, std::max(crit_relch, crit_ratch));
+  if (stop == "or") return std::min(crit_beta, std::min(crit_relch, crit_ratch));
+  return crit_beta;
 }
 
-double p_binomial(double &eta) {
-  return(1/(1+exp(-eta)));
+void print_crit(const std::string &stop, int iter, double crit, bool newline) {
+  if (stop == "beta") {
+    Rcout << "Iter " << iter << ": Inf norm of running diff in est reg parm is "
+          << std::scientific << std::setprecision(3) << crit << ";";
+  } else if (stop == "relch") {
+    Rcout << "Iter " << iter << ": Relative change in est log likelihood is "
+          << std::scientific << std::setprecision(3) << crit << ";";
+  } else if (stop == "ratch") {
+    Rcout << "Iter " << iter << ": Adjusted relative change in est log likelihood is "
+          << std::scientific << std::setprecision(3) << crit << ";";
+  } else if (stop == "all") {
+    Rcout << "Iter " << iter << ": Maximum criterion across all checks is "
+          << std::scientific << std::setprecision(3) << crit << ";";
+  } else {
+    Rcout << "Iter " << iter << ": Minimum criterion across all checks is "
+          << std::scientific << std::setprecision(3) << crit << ";";
+  }
+  if (newline) Rcout << std::endl;
 }
 
+// ---------------------------------------------------------------------------
+// Model fitting
+// ---------------------------------------------------------------------------
 
-// [[Rcpp::export]]
-arma::vec computeDirectExp(const arma::vec& gamma_prov, const arma::vec& Z_beta, const int &threads) {
-    omp_set_num_threads(threads);
-    arma::vec results(gamma_prov.n_elem);
-
-    #pragma omp parallel for schedule(static)
-    for (unsigned int i = 0; i < gamma_prov.n_elem; ++i) {
-        results[i] = Exp_direct(gamma_prov[i], Z_beta);
-    }
-    return results;
-}
-
+// Block ascent Newton (BAN).
 // [[Rcpp::export]]
 List logis_fe_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamma,
-                   arma::vec beta, bool backtrack = true, int max_iter=10000, double bound=10.0,
-                   double tol=1e-5, bool message = false) {
+                   arma::vec beta, bool backtrack = true, int max_iter = 10000, double bound = 10.0,
+                   double tol = 1e-5, bool message = false, std::string stop = "beta") {
 
   int iter = 0, n = Z.n_rows, m = n_prov.n_elem, ind;
   double v;
   arma::vec gamma_obs(n);
   double crit = 100.0;
-
-  if (message == true) {
-    cout << "Implementing BAN algorithm (Rcpp) for fixed provider effects model ..." << endl;
+  bool need_lkd = (stop != "beta");
+  double loglkd_init = 0.0, loglkd_old = 0.0;
+  if (need_lkd) {
+    gamma_obs = rep_vec(gamma, n_prov);
+    loglkd_init = Loglkd(N, Y, Z * beta, gamma_obs);
   }
 
-  double s = 0.01, t = 0.6; //only used for "backtrack = true"
+  if (message == true) {
+    Rcout << "Implementing BAN algorithm (Rcpp) for fixed provider effects model ..." << std::endl;
+  }
+
+  double s = 0.01, t = 0.6; // only used for "backtrack = true"
   double lambda, d_loglkd, loglkd;
   arma::vec gamma_obs_tmp(n), gamma_tmp(m), beta_tmp(Z.n_cols);
 
@@ -139,84 +137,98 @@ List logis_fe_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_prov, 
     }
     iter++;
     // provider effect update
-    gamma_obs = rep(gamma, n_prov);
+    gamma_obs = rep_vec(gamma, n_prov);
     arma::vec Z_beta = Z * beta;
-    arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
-    arma::vec Yp = Y - N % p, pq = N % p % (1-p);
+    if (need_lkd) loglkd_old = Loglkd(N, Y, Z_beta, gamma_obs);
+    arma::vec p = 1 / (1 + exp(-gamma_obs - Z_beta));
+    arma::vec Yp = Y - N % p, pq = N % p % (1 - p);
     if (any(pq == 0)) {
       pq.replace(0, 1e-20);
     }
     ind = 0;
     arma::vec score_gamma(m), d_gamma(m);
     for (int i = 0; i < m; i++) {
-      score_gamma(i) = sum(Yp(span(ind,ind+n_prov(i)-1)));
-      d_gamma(i) = score_gamma(i) / sum(pq(span(ind,ind+n_prov(i)-1)));
+      score_gamma(i) = sum(Yp(span(ind, ind + n_prov(i) - 1)));
+      d_gamma(i) = score_gamma(i) / sum(pq(span(ind, ind + n_prov(i) - 1)));
       ind += n_prov(i);
     }
     v = 1.0; // initialize step size
-    if (backtrack == true){
+    if (backtrack == true) {
       loglkd = Loglkd(N, Y, Z_beta, gamma_obs);
       gamma_tmp = gamma + v * d_gamma;
-      gamma_obs_tmp = rep(gamma_tmp, n_prov);
+      gamma_obs_tmp = rep_vec(gamma_tmp, n_prov);
       d_loglkd = Loglkd(N, Y, Z_beta, gamma_obs_tmp) - loglkd;
       lambda = dot(score_gamma, d_gamma);
-      while (d_loglkd < s*v*lambda) {
-        v = t*v;
+      while (d_loglkd < s * v * lambda) {
+        v = t * v;
         gamma_tmp = gamma + v * d_gamma;
-        gamma_obs_tmp = rep(gamma_tmp, n_prov);
+        gamma_obs_tmp = rep_vec(gamma_tmp, n_prov);
         d_loglkd = Loglkd(N, Y, Z_beta, gamma_obs_tmp) - loglkd;
       }
     }
     gamma += v * d_gamma;
-    gamma = clamp(gamma, median(gamma)-bound, median(gamma)+bound);
-    gamma_obs = rep(gamma, n_prov);
+    gamma = clamp(gamma, median(gamma) - bound, median(gamma) + bound);
+    gamma_obs = rep_vec(gamma, n_prov);
 
     // regression parameter update
-    p = 1/(1+exp(-gamma_obs-Z_beta)); // update p
-    pq = N % p % (1-p);
+    p = 1 / (1 + exp(-gamma_obs - Z_beta));
+    pq = N % p % (1 - p);
     arma::vec score_beta = Z.t() * (Y - N % p);
-    arma::mat info_beta = Z.t() * (Z.each_col()%pq); // serial
-    arma::vec d_beta = solve(info_beta, score_beta, solve_opts::fast+solve_opts::likely_sympd);
+    arma::mat info_beta = Z.t() * (Z.each_col() % pq);
+    arma::vec d_beta = solve(info_beta, score_beta, solve_opts::fast + solve_opts::likely_sympd);
     v = 1.0; // initialize step size
-    if (backtrack == true){
+    if (backtrack == true) {
       loglkd = Loglkd(N, Y, Z_beta, gamma_obs);
       beta_tmp = beta + v * d_beta;
-      d_loglkd = Loglkd(N, Y, Z*beta_tmp, gamma_obs) - loglkd;
+      d_loglkd = Loglkd(N, Y, Z * beta_tmp, gamma_obs) - loglkd;
       lambda = dot(score_beta, d_beta);
-      while (d_loglkd < s*v*lambda) {
+      while (d_loglkd < s * v * lambda) {
         v = t * v;
         beta_tmp = beta + v * d_beta;
-        d_loglkd = Loglkd(N, Y, Z*beta_tmp, gamma_obs) - loglkd;
+        d_loglkd = Loglkd(N, Y, Z * beta_tmp, gamma_obs) - loglkd;
       }
     }
     beta += v * d_beta;
-    crit = norm(v*d_beta, "inf");
+    double crit_beta = norm(v * d_beta, "inf");
+    if (need_lkd) {
+      double d_lkd = Loglkd(N, Y, Z * beta, gamma_obs) - loglkd_old;
+      crit = stop_crit(stop, crit_beta, d_lkd, loglkd_old, loglkd_init);
+    } else {
+      crit = crit_beta;
+    }
     if (message == true) {
-      cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << setprecision(3) << scientific << crit << ";" << endl;
+      print_crit(stop, iter, crit, true);
     }
   }
   if (message == true) {
-    cout << "BAN algorithm (Rcpp) converged after " << iter << " iterations!" << endl;
+    Rcout << "BAN algorithm (Rcpp) converged after " << iter << " iterations!" << std::endl;
   }
-  List ret = List::create(_["gamma"]=gamma, _["beta"]=beta);
+  List ret = List::create(_["gamma"] = gamma, _["beta"] = beta, _["iter"] = iter);
   return ret;
 }
 
+// Serial blockwise inversion Newton (SerBIN).
 // [[Rcpp::export]]
 List logis_BIN_fe_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_prov,
-                       arma::vec gamma, arma::vec beta, int threads=1, double tol=1e-8,
-                       int max_iter=10000, double bound=10.0, bool message = true,
-                       bool backtrack = true) {
+                       arma::vec gamma, arma::vec beta, int threads = 1, double tol = 1e-8,
+                       int max_iter = 10000, double bound = 10.0, bool message = true,
+                       bool backtrack = true, std::string stop = "beta") {
 
   int iter = 0, n = Z.n_rows, m = n_prov.n_elem, ind;
   double v;
   arma::vec gamma_obs(n);
   double crit = 100.0;
+  bool need_lkd = (stop != "beta");
+  double loglkd_init = 0.0, loglkd_cur = 0.0;
+  if (need_lkd) {
+    gamma_obs = rep_vec(gamma, n_prov);
+    loglkd_init = Loglkd(N, Y, Z * beta, gamma_obs);
+  }
   if (message == true) {
-    cout << "Implementing SerBIN algorithm (Rcpp) for fixed provider effects model ..." << endl;
+    Rcout << "Implementing SerBIN algorithm (Rcpp) for fixed provider effects model ..." << std::endl;
   }
 
-  double s = 0.01, t = 0.6; //only used for "backtrack = true"
+  double s = 0.01, t = 0.6; // only used for "backtrack = true"
   double lambda, d_loglkd, loglkd;
   arma::vec gamma_obs_tmp(n), gamma_tmp(m), beta_tmp(Z.n_cols);
 
@@ -225,188 +237,458 @@ List logis_BIN_fe_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_pr
       break;
     }
     iter++;
-    gamma_obs = rep(gamma, n_prov);
+    gamma_obs = rep_vec(gamma, n_prov);
     arma::vec Z_beta = Z * beta;
-    arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));
-    arma::vec Yp = Y - N % p, pq = N % p % (1-p);
+    if (need_lkd) loglkd_cur = Loglkd(N, Y, Z_beta, gamma_obs);
+    arma::vec p = 1 / (1 + exp(-gamma_obs - Z_beta));
+    arma::vec Yp = Y - N % p, pq = N % p % (1 - p);
     if (any(pq == 0)) {
       pq.replace(0, 1e-20);
     }
     arma::vec score_gamma(m), info_gamma_inv(m);
-    arma::mat info_betagamma(Z.n_cols,m);
+    arma::mat info_betagamma(Z.n_cols, m);
     ind = 0;
     for (int i = 0; i < m; i++) {
-      score_gamma(i) = sum(Yp(span(ind,ind+n_prov(i)-1)));
-      info_gamma_inv(i) = 1 / sum(pq(span(ind,ind+n_prov(i)-1)));
-      info_betagamma.col(i) = sum(Z.rows(ind,ind+n_prov(i)-1).each_col() % pq.subvec(ind,ind+n_prov(i)-1)).t();
+      score_gamma(i) = sum(Yp(span(ind, ind + n_prov(i) - 1)));
+      info_gamma_inv(i) = 1 / sum(pq(span(ind, ind + n_prov(i) - 1)));
+      info_betagamma.col(i) = sum(Z.rows(ind, ind + n_prov(i) - 1).each_col() % pq.subvec(ind, ind + n_prov(i) - 1)).t();
       ind += n_prov(i);
     }
     arma::vec score_beta = Z.t() * Yp;
     arma::mat info_beta(Z.n_cols, Z.n_cols);
-    if (threads > 1) { // parallel
-      info_beta = info_beta_omp(Z, pq, threads); // omp
-      // info_beta = info_beta_tbb(Z, pq); // tbb
-    } else if (threads == 1) { // serial
-      info_beta = Z.t() * (Z.each_col()%pq);
+    if (threads > 1) {
+      info_beta = info_beta_omp(Z, pq, threads);
+    } else {
+      info_beta = Z.t() * (Z.each_col() % pq);
     }
-    arma::mat mat_tmp1 = trans(info_betagamma.each_row()%info_gamma_inv.t());
-    arma::mat schur_inv = inv_sympd(info_beta-mat_tmp1.t()*info_betagamma.t());
-    arma::mat mat_tmp2 = mat_tmp1*schur_inv;
-    arma::vec d_gamma = info_gamma_inv%score_gamma + mat_tmp2*(mat_tmp1.t()*score_gamma-score_beta);
-    arma::vec d_beta = schur_inv*score_beta - mat_tmp2.t()*score_gamma;
+    arma::mat mat_tmp1 = info_betagamma.each_row() % info_gamma_inv.t();                 // p*m matrix (J_1)
+    arma::mat schur_system = info_beta - mat_tmp1 * info_betagamma.t();                  // p*p matrix (S)
+    arma::mat mat_tmp2 = arma::solve(schur_system, mat_tmp1, solve_opts::likely_sympd);  // p*m matrix (J_2)
+    arma::vec d_gamma = info_gamma_inv % score_gamma + mat_tmp2.t() * (mat_tmp1 * score_gamma - score_beta);
+    arma::vec schur_system_solve = arma::solve(schur_system, score_beta, solve_opts::likely_sympd);
+    arma::vec d_beta = schur_system_solve - mat_tmp2 * score_gamma;
 
     v = 1.0; // initialize step size
-    if (backtrack == true){
+    if (backtrack == true) {
       loglkd = Loglkd(N, Y, Z_beta, gamma_obs);
       gamma_tmp = gamma + v * d_gamma;
-      gamma_obs_tmp = rep(gamma_tmp, n_prov);
-      arma::vec Z_beta_tmp = Z * (beta+v*d_beta);
+      gamma_obs_tmp = rep_vec(gamma_tmp, n_prov);
+      arma::vec Z_beta_tmp = Z * (beta + v * d_beta);
       lambda = dot(score_gamma, d_gamma) + dot(score_beta, d_beta);
       d_loglkd = Loglkd(N, Y, Z_beta_tmp, gamma_obs_tmp) - loglkd;
-      while (d_loglkd < s*v*lambda) {
-        v = t*v;
+      while (d_loglkd < s * v * lambda) {
+        v = t * v;
         gamma_tmp = gamma + v * d_gamma;
-        gamma_obs_tmp = rep(gamma_tmp, n_prov);
-        Z_beta_tmp = Z * (beta+v*d_beta);
+        gamma_obs_tmp = rep_vec(gamma_tmp, n_prov);
+        Z_beta_tmp = Z * (beta + v * d_beta);
         d_loglkd = Loglkd(N, Y, Z_beta_tmp, gamma_obs_tmp) - loglkd;
       }
     }
     gamma += v * d_gamma;
-    gamma = clamp(gamma, median(gamma)-bound, median(gamma)+bound);
+    gamma = clamp(gamma, median(gamma) - bound, median(gamma) + bound);
     beta += v * d_beta;
-    crit = norm(v*d_beta, "inf");
+    double crit_beta = norm(v * d_beta, "inf");
+    if (need_lkd) {
+      double d_lkd = Loglkd(N, Y, Z * beta, rep_vec(gamma, n_prov)) - loglkd_cur;
+      crit = stop_crit(stop, crit_beta, d_lkd, loglkd_cur, loglkd_init);
+    } else {
+      crit = crit_beta;
+    }
 
     if (message == true) {
-      cout << "Iter " << iter << ": Inf norm of running diff in est reg parm is " << scientific << setprecision(3) << crit << ";";
+      print_crit(stop, iter, crit, false);
     }
   }
   if (message == true) {
-    cout << "serBIN (Rcpp) algorithm converged after " << iter << " iterations!" << endl;
+    Rcout << "serBIN (Rcpp) algorithm converged after " << iter << " iterations!" << std::endl;
   }
-  List ret = List::create(_["gamma"]=gamma, _["beta"]=beta);
+  List ret = List::create(_["gamma"] = gamma, _["beta"] = beta, _["iter"] = iter);
   return ret;
 }
 
-
+// Model-based (inverse information) variance of beta and gamma.
 // [[Rcpp::export]]
-List wald_covar(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec &gamma, arma::vec &beta, arma::uvec &indices, double null, double alpha) {
-
-  indices -= 1; // switch to C indexing
-  arma::vec gamma_obs = rep(gamma, n_prov);
+List logis_fe_var(arma::vec &N, arma::mat &Z, arma::vec &n_prov, arma::vec &gamma, arma::vec &beta) {
+  arma::vec gamma_obs = rep_vec(gamma, n_prov);
   int m = n_prov.n_elem;
-  arma::vec p = 1 / (1 + exp(-gamma_obs-Z*beta));
-  p = clamp(p, 1e-10, 1-1e-10);
+  arma::vec p = 1 / (1 + exp(-gamma_obs - Z * beta));
+  p = clamp(p, 1e-10, 1 - 1e-10);
+  arma::vec pq = N % p % (1 - p);
   int ind = 0;
   arma::vec info_gamma_inv(m);
-  arma::mat info_betagamma(Z.n_cols,m);
+  arma::mat info_betagamma(Z.n_cols, m);
   for (int i = 0; i < m; i++) {
-    info_gamma_inv(i) = 1 / dot(p.subvec(ind,ind+n_prov(i)-1),1-p.subvec(ind,ind+n_prov(i)-1));
-    info_betagamma.col(i) =
-      sum(Z.rows(ind,ind+n_prov(i)-1).each_col()%(p.subvec(ind,ind+n_prov(i)-1)%(1-p.subvec(ind,ind+n_prov(i)-1)))).t();
+    info_gamma_inv(i) = 1 / sum(pq.subvec(ind, ind + n_prov(i) - 1));
+    info_betagamma.col(i) = sum(Z.rows(ind, ind + n_prov(i) - 1).each_col() % pq.subvec(ind, ind + n_prov(i) - 1)).t();
     ind += n_prov(i);
   }
-  arma::mat info_beta = Z.t()*(Z.each_col()%(p%(1-p)));
-  arma::mat info_beta_inv = inv_sympd(info_beta-(info_betagamma.each_row()%info_gamma_inv.t())*info_betagamma.t());
-  arma::vec se_beta = sqrt(info_beta_inv.diag());
-  arma::vec stat = (beta(indices)-null)/se_beta(indices);
-  arma::vec p_lower = normcdf(stat);
+  arma::mat info_beta = Z.t() * (Z.each_col() % pq);
+  arma::mat info_beta_inv = inv_sympd(info_beta - (info_betagamma.each_row() % info_gamma_inv.t()) * info_betagamma.t());
+  arma::vec var_gamma(m);
+  for (int i = 0; i < m; i++) {
+    arma::vec mat_tmp = info_gamma_inv(i) * info_betagamma.col(i); // J_1^T
+    var_gamma(i) = info_gamma_inv(i) + as_scalar(mat_tmp.t() * info_beta_inv * mat_tmp);
+  }
   List ret;
-  ret["stat"] = stat;
-  ret["p"] = 2*min(p_lower,1-p_lower);
-  ret["se.beta"] = 1*se_beta(indices);
-  ret["beta.lower"] = beta(indices) - R::qnorm5(1-alpha/2,0,1,true,false)*se_beta(indices);
-  ret["beta.upper"] = beta(indices) + R::qnorm5(1-alpha/2,0,1,true,false)*se_beta(indices);
+  ret["var.beta"] = info_beta_inv;
+  ret["se.beta"] = sqrt(info_beta_inv.diag());
+  ret["var.gamma"] = var_gamma;
+  ret["se.gamma"] = sqrt(var_gamma);
   return ret;
 }
 
+// ---------------------------------------------------------------------------
+// Provider-effect (gamma) tests
+// ---------------------------------------------------------------------------
 
-
-
+// Model-based Wald standard errors of selected provider effects.
+// parm_indices are 1-based.
 // [[Rcpp::export]]
-arma::vec Modified_score(arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec gamma, arma::vec beta,
-                         double gamma_null, int m, arma::vec parm, int threads = 4) {
-
-
-  arma::vec gamma_obs = rep(gamma, n_prov);
-  arma::vec Z_beta = Z * beta; // commom term
-
-  arma::vec p = 1 / (1 + exp(-gamma_obs-Z_beta));  // p under full model
-  arma::vec pq = p % (1-p);  // pq under full model
+arma::vec wald_gamma(arma::vec &N, arma::mat &Z, arma::vec &p, arma::vec &n_prov,
+                     arma::vec &parm_indices, int threads = 1) {
+  int m = n_prov.n_elem, ind = 0;
+  arma::vec pq = N % p % (1 - p);
   if (any(pq == 0)) {
     pq.replace(0, 1e-20);
   }
 
-  arma::vec p_null = 1 / (1 + exp(-gamma_null-Z_beta)); // p under null model
-  arma::vec pq_null = p_null % (1-p_null);  // pq under null model
-  if (any(pq_null == 0)) {
-    pq_null.replace(0, 1e-20);
-  }
-  arma::vec Yp = Y - p_null;    //restricted (only new subvectors later)
-
-  arma::vec score_null(m), info_gamma_full_inv(m);  //U_0 under null model for each gamma
-  arma::mat info_betagamma_full(Z.n_cols,m);
-  arma::ivec indices(m + 1);  // Store indices of each ind location
-  int ind = 0;
+  arma::vec info_gamma_inv(m);
+  arma::mat info_betagamma(Z.n_cols, m);
+  arma::mat info_beta(Z.n_cols, Z.n_cols);
 
   for (int i = 0; i < m; i++) {
-    indices(i) = ind;  // Store the current start index
-    score_null(i) = sum(Yp.subvec(ind, ind + n_prov(i) - 1));
-    info_gamma_full_inv(i) = 1/sum(pq.subvec(ind, ind + n_prov(i) - 1));
-    info_betagamma_full.col(i) =
-      sum(Z.rows(ind,ind+n_prov(i)-1).each_col()%(p.subvec(ind,ind+n_prov(i)-1)%(1-p.subvec(ind,ind+n_prov(i)-1)))).t();
-    ind += n_prov(i);  // Update the index for the next iteration
+    info_gamma_inv(i) = 1 / sum(pq(span(ind, ind + n_prov(i) - 1)));
+    info_betagamma.col(i) = sum(Z.rows(ind, ind + n_prov(i) - 1).each_col() % pq.subvec(ind, ind + n_prov(i) - 1)).t();
+    ind += n_prov(i);
   }
-  indices(m) = ind;
+  if (threads > 1) {
+    info_beta = info_beta_omp(Z, pq, threads);
+  } else {
+    info_beta = Z.t() * (Z.each_col() % pq);
+  }
 
-  // modify the information matrix under null model
-  // Initialize z_score vector with NaN
-  arma::vec z_score = arma::vec(m).fill(arma::datum::nan);
+  arma::mat J1 = info_betagamma.each_row() % info_gamma_inv.t(); // p*m matrix (J_1)
+  arma::mat schur_system = info_beta - J1 * info_betagamma.t();  // p*p matrix (S)
 
-  omp_set_num_threads(threads);
-  double temp_score, info_alpha, V0S;
-  arma::vec info_betaalpha, info_gamma_inv, pq_new;
-  arma::mat info_betagamma, info_beta, mat_tmp1, B11;
+  arma::uvec col_indices = arma::conv_to<arma::uvec>::from(parm_indices) - 1;
+  arma::mat selected_J1 = J1.cols(col_indices);
+  arma::vec selected_info_gamma_inv = info_gamma_inv(col_indices);
 
-  #pragma omp parallel for schedule(static) private(temp_score, info_alpha, info_betaalpha, info_gamma_inv, info_betagamma, info_beta, pq_new, mat_tmp1, B11, V0S)
-  for (int i = 0; i < m; i++) { //calculate each provider
-    // Only calculate if i is in parm
-    if(arma::any(parm == i)){
-      temp_score = score_null(i);
-      info_alpha = sum(pq_null.subvec(indices(i), indices(i + 1) - 1));
-      info_betaalpha = sum(Z.rows(indices(i), indices(i + 1) - 1).each_col()%(p_null.subvec(indices(i), indices(i + 1) - 1)%(1-p_null.subvec(indices(i), indices(i + 1) - 1)))).t();
+  int n_parm = col_indices.n_elem;
+  arma::vec se_gamma(n_parm);
+  for (int i = 0; i < n_parm; i++) {
+    arma::vec J1_i = selected_J1.col(i);
+    arma::vec J2_i = arma::solve(schur_system, J1_i, solve_opts::likely_sympd);
+    se_gamma(i) = sqrt(selected_info_gamma_inv(i) + dot(J1_i, J2_i));
+  }
+  return se_gamma;
+}
 
-      if (i == 0) {
-        // If i is 0, skip the first element
-        info_gamma_inv = info_gamma_full_inv.subvec(1, m - 1);
-        info_betagamma = info_betagamma_full.cols(1, m - 1);
-      } else if (i == m - 1) {
-        // If i is the last element, take all elements up to the second to last
-        info_gamma_inv = info_gamma_full_inv.subvec(0, m - 2);
-        info_betagamma = info_betagamma_full.cols(0, m - 2);
-      } else {
-        // Otherwise, exclude the i-th element
-        info_gamma_inv = arma::join_cols(
-          info_gamma_full_inv.subvec(0, i - 1),
-          info_gamma_full_inv.subvec(i + 1, m - 1));
-        info_betagamma = arma::join_rows(
-          info_betagamma_full.cols(0, i - 1),
-          info_betagamma_full.cols(i + 1, m - 1));
+// Bread of the patient-clustered sandwich for selected provider effects:
+// returns sqrt(I_gamma^-1). The R side multiplies se^4 by the meat.
+// [[Rcpp::export]]
+arma::vec robust_wald_gamma(arma::vec &N, arma::mat &Z, arma::vec &p, arma::vec &n_prov,
+                            arma::vec &parm_indices) {
+  int m = n_prov.n_elem, ind = 0;
+  arma::vec pq = N % p % (1 - p);
+  if (any(pq == 0)) {
+    pq.replace(0, 1e-20);
+  }
+
+  arma::vec info_gamma_inv(m);
+  for (int i = 0; i < m; i++) {
+    info_gamma_inv(i) = 1 / sum(pq(span(ind, ind + n_prov(i) - 1)));
+    ind += n_prov(i);
+  }
+
+  arma::uvec col_indices = arma::conv_to<arma::uvec>::from(parm_indices) - 1;
+  arma::vec selected_info_gamma_inv = info_gamma_inv(col_indices);
+
+  int n_parm = col_indices.n_elem;
+  arma::vec se_gamma(n_parm);
+  for (int i = 0; i < n_parm; i++) {
+    se_gamma(i) = sqrt(selected_info_gamma_inv(i));
+  }
+  return se_gamma;
+}
+
+// ---------------------------------------------------------------------------
+// Covariate (beta) tests
+// ---------------------------------------------------------------------------
+
+// Model-based Wald test for selected covariates; indices are 1-based.
+// [[Rcpp::export]]
+List wald_covar(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec &gamma,
+                arma::vec &beta, arma::uvec &indices, double null, double alpha) {
+
+  indices -= 1; // switch to C indexing
+  arma::vec gamma_obs = rep_vec(gamma, n_prov);
+  int m = n_prov.n_elem;
+  arma::vec p = 1 / (1 + exp(-gamma_obs - Z * beta));
+  p = clamp(p, 1e-10, 1 - 1e-10);
+  int ind = 0;
+  arma::vec info_gamma_inv(m);
+  arma::mat info_betagamma(Z.n_cols, m);
+  for (int i = 0; i < m; i++) {
+    info_gamma_inv(i) = 1 / dot(N.subvec(ind, ind + n_prov(i) - 1) % p.subvec(ind, ind + n_prov(i) - 1), 1 - p.subvec(ind, ind + n_prov(i) - 1));
+    info_betagamma.col(i) =
+      sum(Z.rows(ind, ind + n_prov(i) - 1).each_col() % (N.subvec(ind, ind + n_prov(i) - 1) % p.subvec(ind, ind + n_prov(i) - 1) % (1 - p.subvec(ind, ind + n_prov(i) - 1)))).t();
+    ind += n_prov(i);
+  }
+  arma::mat info_beta = Z.t() * (Z.each_col() % (N % p % (1 - p)));
+  arma::mat info_beta_inv = inv_sympd(info_beta - (info_betagamma.each_row() % info_gamma_inv.t()) * info_betagamma.t());
+  arma::vec se_beta = sqrt(info_beta_inv.diag());
+  arma::vec stat = (beta(indices) - null) / se_beta(indices);
+  arma::vec p_lower = normcdf(stat);
+  List ret;
+  ret["stat"] = stat;
+  ret["p"] = 2 * min(p_lower, 1 - p_lower);
+  ret["se.beta"] = 1 * se_beta(indices);
+  ret["beta.lower"] = beta(indices) - R::qnorm5(1 - alpha / 2, 0, 1, true, false) * se_beta(indices);
+  ret["beta.upper"] = beta(indices) + R::qnorm5(1 - alpha / 2, 0, 1, true, false) * se_beta(indices);
+  return ret;
+}
+
+// Patient-clustered sandwich (robust Wald) test for selected covariates.
+// A0: provider-level sum of squared patient score sums (gamma block);
+// A1_t: provider x covariate cross terms; A2: covariate block of the meat.
+// [[Rcpp::export]]
+List robust_wald_covar(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_prov, arma::vec &gamma,
+                       arma::vec &beta, arma::uvec &indices, double null_value, double alpha,
+                       arma::vec &A0, arma::mat &A1_t, arma::mat &A2) {
+
+  indices -= 1;
+  arma::vec gamma_obs = rep_vec(gamma, n_prov);
+  int m = n_prov.n_elem;
+  arma::vec p = 1 / (1 + exp(-gamma_obs - Z * beta));
+  p = clamp(p, 1e-10, 1 - 1e-10);
+  int ind = 0;
+  arma::vec info_gamma_inv(m);
+  arma::mat info_betagamma(Z.n_cols, m);
+  for (int i = 0; i < m; i++) {
+    info_gamma_inv(i) = 1 / dot(N.subvec(ind, ind + n_prov(i) - 1) % p.subvec(ind, ind + n_prov(i) - 1), 1 - p.subvec(ind, ind + n_prov(i) - 1));
+    info_betagamma.col(i) =
+      sum(Z.rows(ind, ind + n_prov(i) - 1).each_col() % (N.subvec(ind, ind + n_prov(i) - 1) % p.subvec(ind, ind + n_prov(i) - 1) % (1 - p.subvec(ind, ind + n_prov(i) - 1)))).t();
+    ind += n_prov(i);
+  }
+  arma::mat info_beta = Z.t() * (Z.each_col() % (N % p % (1 - p)));
+  arma::mat mat_tmp1 = info_betagamma.each_row() % info_gamma_inv.t();                 // p*m matrix (J_1)
+  arma::mat schur_system = info_beta - mat_tmp1 * info_betagamma.t();                  // p*p matrix (S)
+  arma::mat mat_tmp2 = arma::solve(schur_system, mat_tmp1, solve_opts::likely_sympd);  // p*m matrix (J_2; -B2)
+  arma::mat schur_system_inv;                                                          // p*p matrix (S^-1; B3)
+  bool success = arma::inv(schur_system_inv, schur_system);
+  if (!success) {
+    double eps = 1e-8 * arma::trace(schur_system) / schur_system.n_rows;
+    schur_system_inv = arma::pinv(schur_system + eps * arma::eye(schur_system.n_rows, schur_system.n_cols));
+  }
+  arma::mat mat_tmp2_t = mat_tmp2.t();
+  arma::mat var_beta = mat_tmp2 * (mat_tmp2_t.each_col() % A0) -  // B2 A0 B2
+    2 * mat_tmp2 * A1_t * schur_system_inv +                        // 2 * (B2 A1^T B3)
+    schur_system_inv * A2 * schur_system_inv;                       // B3 A2 B3
+
+  arma::vec se_beta = sqrt(var_beta.diag());
+  arma::vec stat = (beta(indices) - null_value) / se_beta(indices);
+  arma::vec p_lower = normcdf(stat);
+
+  List ret;
+  ret["stat"] = stat;
+  ret["p"] = 2 * min(p_lower, 1 - p_lower);
+  ret["se.beta"] = 1 * se_beta(indices);
+  ret["beta.lower"] = beta(indices) - R::qnorm5(1 - alpha / 2, 0, 1, true, false) * se_beta(indices);
+  ret["beta.upper"] = beta(indices) + R::qnorm5(1 - alpha / 2, 0, 1, true, false) * se_beta(indices);
+  return ret;
+}
+
+// Sum of outer products of the rows of X (covariate block of the meat).
+// [[Rcpp::export]]
+arma::mat compute_A2(const arma::mat &X_matrix) {
+  arma::mat A2 = arma::zeros<arma::mat>(X_matrix.n_cols, X_matrix.n_cols);
+  for (unsigned int i = 0; i < X_matrix.n_rows; ++i) {
+    arma::rowvec Xi = X_matrix.row(i);
+    A2 += Xi.t() * Xi;
+  }
+  return A2;
+}
+
+// ---------------------------------------------------------------------------
+// Standardized measures
+// ---------------------------------------------------------------------------
+
+// For every provider effect gamma_j, sums over a standard population:
+//   column 1: sum_i w_i * expit(gamma_j + Z_beta_i)
+//   column 2: sum_i w_i * expit(.) * (1 - expit(.))   (delta-method SE numerator)
+// w = 1 gives the binary direct standardization used by SFR / PPPW;
+// w = number of trials gives the binomial (AOH) version.
+//
+// Two exact rearrangements keep this O(m x distinct(Z_beta)) and free of
+// exp() in the inner loop:
+//   * rows sharing a linear predictor are merged, their weights summed
+//     (categorical covariates leave few distinct values);
+//   * expit(g + e) = 1 / (1 + t) with t = exp(-g) * exp(-e), and
+//     expit * (1 - expit) = t / (1 + t)^2, so each exponential is taken once
+//     per provider and once per distinct row.
+// Only the rounding differs from summing logist(g + e) row by row.
+// [[Rcpp::export]]
+arma::mat computeDirectExp(const arma::vec &gamma_prov, const arma::vec &Z_beta,
+                           const arma::vec &w, const int threads = 1) {
+  const int m = gamma_prov.n_elem;
+  const arma::uword n = Z_beta.n_elem;
+  arma::mat results(m, 2, arma::fill::zeros);
+  if (m == 0 || n == 0) return results;
+
+  // distinct linear predictors and their total weight
+  std::vector<double> eta, wt;
+  if (Z_beta.has_nan()) { // no ordering possible: keep the rows as they are
+    eta.assign(Z_beta.begin(), Z_beta.end());
+    wt.assign(w.begin(), w.end());
+  } else {
+    arma::uvec ord = arma::stable_sort_index(Z_beta); // ties keep row order
+    double cur = Z_beta(ord(0));
+    long double acc = 0.0L;
+    for (arma::uword k = 0; k < n; ++k) {
+      const double e = Z_beta(ord(k));
+      if (e != cur) {
+        eta.push_back(cur);
+        wt.push_back((double) acc);
+        cur = e;
+        acc = 0.0L;
       }
-
-      //calculate I_beta under null model
-      pq_new = pq;
-      pq_new.subvec(indices(i), indices(i + 1) - 1) = pq_null.subvec(indices(i), indices(i + 1) - 1);
-      info_beta = Z.t() * (Z.each_col()%pq_new);
-
-      mat_tmp1 = info_betagamma.each_row() % info_gamma_inv.t();
-      B11 = inv_sympd(info_beta - mat_tmp1 * info_betagamma.t());
-
-      V0S = info_alpha - arma::as_scalar(info_betaalpha.t() * B11 * info_betaalpha);
-      z_score(i) = temp_score / sqrt(V0S);
+      acc += w(ord(k));
     }
-  };
+    eta.push_back(cur);
+    wt.push_back((double) acc);
+  }
+  const std::size_t u = eta.size();
+  std::vector<double> a(u);
+  double a_max = 0.0;
+  bool a_nan = false;
+  for (std::size_t i = 0; i < u; ++i) {
+    a[i] = std::exp(-eta[i]);
+    if (std::isnan(a[i])) a_nan = true;
+    else if (a[i] > a_max) a_max = a[i];
+  }
+  if (a_nan) a_max = arma::datum::nan; // sends every provider to the direct loop
 
-  // Remove NaN values (skipped) from z_score
-  z_score = z_score.elem(arma::find_finite(z_score));
-  return z_score;
+  // long double accumulators: for a rate close to 1, 1 - rate would otherwise
+  // be lost to the rounding of a large sum
+  omp_set_num_threads(threads);
+#pragma omp parallel for schedule(static)
+  for (int j = 0; j < m; ++j) {
+    const double g = gamma_prov[j];
+    const double b = std::exp(-g);
+    long double sum1 = 0.0L;
+    long double sum2 = 0.0L;
+    if (std::isfinite(b * a_max)) {
+      for (std::size_t i = 0; i < u; ++i) {
+        const double t = b * a[i];
+        const double d = 1.0 / (1.0 + t);
+        sum1 += wt[i] * d;
+        sum2 += wt[i] * (t * d * d);
+      }
+    } else { // extreme or non-finite values: evaluate directly
+      for (std::size_t i = 0; i < u; ++i) {
+        const double r = logist(g + eta[i]);
+        sum1 += wt[i] * r;
+        sum2 += wt[i] * ((1.0 - r) * r);
+      }
+    }
+    results(j, 0) = (double) sum1;
+    results(j, 1) = (double) sum2;
+  }
+  return results;
+}
+
+// ---------------------------------------------------------------------------
+// Patient-clustered sums for the robust and stabilized tests
+// ---------------------------------------------------------------------------
+// cluster: 1-based (provider, patient) code of each row, numbered in order of
+// first appearance; prov_row: 1-based provider of each row; cluster_prov:
+// 1-based provider of each cluster. Sums use long double accumulators in row
+// order, i.e. exactly what base R's sum() does on the same groups.
+
+// Per provider: U = sum of r over its rows, and
+// meat = sum over its patients of (patient sum of r)^2.
+// [[Rcpp::export]]
+List cluster_sums(const arma::vec &r, const arma::uvec &cluster, const arma::uvec &prov_row,
+                  const arma::uvec &cluster_prov, const int m) {
+  const arma::uword n = r.n_elem, K = cluster_prov.n_elem;
+  std::vector<long double> csum(K, 0.0L), U(m, 0.0L), meat(m, 0.0L);
+  for (arma::uword i = 0; i < n; ++i) {
+    csum[cluster(i) - 1] += r(i);
+    U[prov_row(i) - 1] += r(i);
+  }
+  for (arma::uword c = 0; c < K; ++c) {
+    const double s = (double) csum[c];
+    meat[cluster_prov(c) - 1] += s * s;
+  }
+  arma::vec U_out(m), meat_out(m);
+  for (int j = 0; j < m; ++j) {
+    U_out(j) = (double) U[j];
+    meat_out(j) = (double) meat[j];
+  }
+  return List::create(Named("U") = U_out, Named("meat") = meat_out);
+}
+
+// Stabilized variance of the provider score (Feiyang's stable_wald_tmp):
+// residuals standardized by their own sd, e = r / sqrt(v), give one pooled
+// matrix over the positions of a patient's rows (1st, 2nd, ... in data
+// order), R[k, l] = sum_patients e_k e_l / #{patients with > max(k, l) rows};
+// each patient's variance is then a' R a with a = sqrt(v), summed per
+// provider. Rows with v = 0 drop out.
+// [[Rcpp::export]]
+arma::vec stabilized_meat(const arma::vec &r, const arma::vec &v, const arma::uvec &cluster,
+                          const arma::uvec &cluster_prov, const int m) {
+  const arma::uword n = r.n_elem, K = cluster_prov.n_elem;
+
+  // rows of every patient, in data order (counting sort on the cluster code)
+  arma::uvec start(K + 1, arma::fill::zeros);
+  for (arma::uword i = 0; i < n; ++i) start(cluster(i))++;
+  for (arma::uword c = 0; c < K; ++c) start(c + 1) += start(c);
+  arma::uvec rows(n), next = start.head(K);
+  for (arma::uword i = 0; i < n; ++i) rows(next(cluster(i) - 1)++) = i;
+
+  arma::uword dim = 0;
+  for (arma::uword c = 0; c < K; ++c) dim = std::max(dim, start(c + 1) - start(c));
+
+  arma::vec e(n), a(n);
+  for (arma::uword i = 0; i < n; ++i) {
+    if (v(i) > 0) {
+      a(i) = std::sqrt(v(i));
+      e(i) = r(i) / a(i);
+    } else {
+      a(i) = 0.0;
+      e(i) = 0.0;
+    }
+  }
+
+  // pooled matrix, entry (k, l) averaged over patients with > max(k, l) rows
+  arma::mat S(dim, dim, arma::fill::zeros);
+  arma::vec n_ge(dim, arma::fill::zeros);
+  for (arma::uword c = 0; c < K; ++c) {
+    const arma::uword b = start(c), s = start(c + 1) - b;
+    for (arma::uword k = 0; k < s; ++k) {
+      const double ek = e(rows(b + k));
+      for (arma::uword l = 0; l < s; ++l) S(k, l) += ek * e(rows(b + l));
+      n_ge(k) += 1.0;
+    }
+  }
+  for (arma::uword k = 0; k < dim; ++k) {
+    for (arma::uword l = 0; l < dim; ++l) {
+      const double d = n_ge(std::max(k, l));
+      S(k, l) = d > 0 ? S(k, l) / d : 0.0;
+    }
+  }
+
+  arma::vec meat(m, arma::fill::zeros);
+  for (arma::uword c = 0; c < K; ++c) {
+    const arma::uword b = start(c), s = start(c + 1) - b;
+    double W = 0.0;
+    for (arma::uword k = 0; k < s; ++k) {
+      const double ak = a(rows(b + k));
+      if (ak == 0.0) continue;
+      for (arma::uword l = 0; l < s; ++l) W += ak * S(k, l) * a(rows(b + l));
+    }
+    meat(cluster_prov(c) - 1) += W;
+  }
+  return meat;
 }

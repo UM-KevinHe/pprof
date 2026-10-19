@@ -1,36 +1,75 @@
-# ppsrr
+# pprofR
 
-The `ppsrr` software package is designed to implement the SerBIN method proposed by [Wu et al. (2022)](doi:10.1002/sim.9387), specifically tailored to address the computational challenges inherent in large-scale provider data. Additionally, the package is equipped with functions designed to estimate standardized ratios and rates and conduct hypothesis testing.
+Shared modelling, testing and standardized-measure engine for the KECC quality
+measures (AOH, PPPW, SFR, SRR). It replaces the copies of `Fixed_effect.cpp`,
+`fe_data_prep.R`, `logis_fe.R`, `test_fe.R`, `summary_fe_covar.R`,
+`SR_output.R`, `coef.logis_fe.R`, `test_aoh.R`, `summary_aoh_beta.R` and
+`AOH_piehat.cpp` that each measure folder used to carry. Empirical-null
+calibration stays in the measure code.
 
-## Introduction
+## Install
 
-Provider profiling is acknowledged for its utility in monitoring healthcare quality, facilitating inter-provider care coordination, and enhancing medical cost-effectiveness. Existing methods often use generalized linear models with fixed provider effects, especially when profiling dialysis facilities. However, as the number of providers increases, the computational burden becomes challenging. To address this issue, we introduce a serial blockwise inversion Newton (SerBIN) algorithm that capitalizes on the block structure of the information matrix. Additionally, we propose a shared-memory divide-and-conquer algorithm to further enhance computational efficiency.
+Dependencies: `Rcpp`, `RcppArmadillo`, `poibin` (R >= 4.0). A C++17 compiler is
+required. OpenMP is used when available. No `~/.R/Makevars` edits are needed:
+the package sets its own C++ standard and OpenMP flags.
 
-Beyond the computational challenge, the current literature lacks a suitable inferential approach for identifying providers with outlier performance, especially in cases involving small providers with extreme outcomes. Traditional score and Wald tests, relying on large-sample distributions of test statistics, inaccurately approximate small-sample properties in this context. To address this inferential gap, we present an exact test of provider effects using exact finite-sample distributions, with the Poisson-binomial distribution serving as a special case when the outcome is binary. This methodological advancement aims to provide a more accurate and reliable assessment of provider performance, considering both computational and inferential challenges.
+```r
+# from the source tarball (dependencies must already be installed)
+install.packages(c("Rcpp", "RcppArmadillo", "poibin"))
+install.packages("pprofR_0.2.0.tar.gz", repos = NULL, type = "source")
 
-## Installation
-
-* To install the latest development version from GitHub:
+# or, resolving dependencies automatically
+remotes::install_local("pprofR_0.2.0.tar.gz")
 ```
-require("devtools")
-require("remotes")
-remotes::install_github("UM-KevinHe/ppsrr", ref = "main")
-```
 
-## Getting started
+## Functions
 
-See ["Getting Started with ppsrr"](https://um-kevinhe.github.io/ppsrr/articles/ppsrr.html)
+| Step | Function | Notes |
+|---|---|---|
+| Data | `fe_data_prep(N, Y, Z, ProvID, PatientID, cutoff, check, message)` | `N` = number of trials (binomial); omit for binary |
+| Model | `logis_fe(data.prep, algorithm, tol, ...)` | SerBIN (default) or BAN; stopping rules `"beta"` (default), `"relch"`, `"ratch"`, `"all"`, `"or"` |
+| | `coef()`, `vcov()` | S3 methods for `logis_fe` fits |
+| Provider effects (gamma) | `test_fe(fit, test = ...)` | `"exact.poisbinom"`, `"exact.bootstrap"`, `"wald"`, `"robust_wald"`, `"stabilized_wald"`, `"score"`, `"robust_score"`, `"stabilized_score"`; `alternative =` |
+| Covariates (beta) | `summary_fe_covar(fit, test = ...)` | `"wald"`, `"robust_wald"`, `"lr"`, `"score"` |
+| Intervals | `confint(fit, option = "gamma" / "SM", test = ...)` | provider effects, or direct / indirect ratios and rates |
+| Standardized measures | `SR_output(fit, stdz, measure, ...)` | direct / indirect ratio and rate, with the direct-rate SE numerator |
+| | `direct_exp(gamma, Z_beta, N)` | direct standardization over any standard population |
+| Measure-level test | `test_SM(measure, se, ref, transform, location, scale)` | z-test / p / flag / CI; identity or logit scale; null N(location, scale^2) |
+| Checks | `data_check(Y, Z, ProvID)` | missingness, near-zero variance, correlation, VIF |
 
-## Details of the algorithms
+Binary outcomes are the special case `N = 1`; every formula reduces exactly to
+the binary code the measures used before.
 
-See ["Models"](https://um-kevinhe.github.io/ppsrr/articles/Models.html) or [original articles](https://um-kevinhe.github.io/ppsrr/articles/Articles.html)
+## How the measures use it
 
-## Getting Help
+| Measure | Model | gamma test | beta test | Standardized measure | Measure test |
+|---|---|---|---|---|---|
+| SFR | `logis_fe(tol = 1e-5)` | `test_fe("robust_wald")` | – | `SR_output(direct)` | `test_SM(identity)`, then EN |
+| PPPW / aPPPW | `logis_fe(tol = 1e-15)` | `test_fe("robust_wald")` | `summary_fe_covar("robust_wald")` | `SR_output(direct)` (+/-17 providers added) | `test_SM(logit, scale = 1.81 or EN)` |
+| AOH | `logis_fe(N = days at risk, tol = 1e-10)` | `test_fe("robust_wald")` | `summary_fe_covar("robust_wald")` | `direct_exp(N = day weights)` | `test_SM(identity, ref = pie_l)` |
+| SRR | stage 1 `logis_fe(tol = 1e-5)` | (facility FE + hospital RE stages stay in SRR code) | `summary_fe_covar("wald")` | (SRR code) | (SRR code) |
 
-If you encounter any problems or bugs, please contact us at: [ybshao\@umich.edu](mailto:ybshao@umich.edu){.email}, [kevinhe\@umich.edu](mailto:kevinhe@umich.edu){.email}, [Wenbo.Wu\@nyulangone.org](mailto:Wenbo.Wu@nyulangone.org){.email},
-[taoxu\@med.umich.edu](mailto:taoxu@med.umich.edu){.email}
+The convergence tolerance differs by measure. Each measure script passes its
+own value explicitly (PPPW's former copy of `logis_fe` defaulted to 1e-15).
 
-## References
+## Behaviour notes
 
-* [Wu, W., Yang, Y., Kang, J., & He, K. (2022). Improving large‐scale estimation and inference for profiling health care providers. Statistics in Medicine, 41(15), 2840-2853.](https://onlinelibrary.wiley.com/doi/full/10.1002/sim.9387)
-* [He, K., Kalbfleisch, J. D., Li, Y., & Li, Y. (2013). Evaluating hospital readmission rates in dialysis facilities; adjusting for hospital effects. Lifetime Data Analysis, 19, 490-512.](https://link.springer.com/article/10.1007/s10985-013-9264-6)
+- Results do not depend on the number of cores. The former sourced C++ let
+  Armadillo parallelize some internal sums, so its estimates changed slightly
+  with the core count (up to about 1e-10 relative in the AOH validation, where
+  `tol = 1e-10`).
+- Validated against the former code on simulated data (`validation/run_all.R`):
+  every pprofR function agrees within 1e-14, and flags and categories are
+  identical in every measure pipeline. The pipelines agree within 5e-12,
+  except for values that the PPPW measure code itself derives from its +17
+  placeholder providers (a logit of a rate 2e-7 below 1), where the former
+  code's rounding is magnified; see the validation page of the docs.
+- The robust and stabilized tests need `PatientID` in `fe_data_prep()`.
+  Variances cluster on (provider, patient). The stabilized tests pool one
+  within-patient correlation over all patients by row position, so a
+  patient's rows must be in time order: `fe_data_prep()` keeps each
+  patient's rows in their input order, so sort by time within patient first.
+- Direct standardization merges rows with equal linear predictors before
+  summing, so it runs in O(providers x distinct linear predictors).
+- `SR_output()` rates are on the 0-1 scale (pprof uses %), with `N_pop` as
+  the denominator.

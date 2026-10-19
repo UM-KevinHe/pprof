@@ -2,63 +2,66 @@
 % Please edit documentation in R/confint.logis_fe.R
 \name{confint.logis_fe}
 \alias{confint.logis_fe}
-\title{Provide confidence interval for provider effects or standardization ratios/rates}
+\title{Confidence intervals for provider effects and standardized measures}
 \usage{
 \method{confint}{logis_fe}(
-  fit,
+  object,
   parm,
   level = 0.95,
   test = "exact",
-  option = c("gamma", "SR"),
+  option = "SM",
   stdz = "indirect",
-  measure = c("rate", "ratio")
+  null = "median",
+  measure = c("rate", "ratio"),
+  alternative = "two.sided",
+  N_pop,
+  ...
 )
 }
 \arguments{
-\item{fit}{an object as output of \code{logis_fe} function.}
+\item{object}{a model fitted by \code{\link[=logis_fe]{logis_fe()}}.}
 
-\item{parm}{specify a subset of which providers are to be given confidence intervals. All providers are included by default.}
+\item{parm}{optional subset of providers.}
 
-\item{level}{confidence level used for constructing confidence intervals. Defaulting to 0.95.}
+\item{level}{confidence level. Default 0.95.}
 
-\item{test}{a character string specifying the type of testing method. Defaulting to "exact".
-\itemize{
-\item "exact": exact test
-\item "wald": wald test
-\item "score": score test
-}}
+\item{test}{\code{"exact"} (default; inverts the exact Poisson-binomial test),
+\code{"score"} (inverts the modified score test), \code{"wald"} (model-based
+standard error) or \code{"robust_wald"} (patient-clustered standard error).}
 
-\item{option}{the confidence interval for the function's output, whether it is for gamma or standardization ratios/rates.
-\itemize{
-\item "gamma": provider effect
-\item "SR": standardization ratios/rates
-}}
+\item{option}{\code{"SM"} (default) for standardized measures or \code{"gamma"} for
+provider effects.}
 
-\item{stdz}{if option = 'SR', a character string specifying the standardization method. Defaulting to "indirect".
-\itemize{
-\item "indirect": using indirect standardized method
-\item "direct": using direct standardized method
-}}
+\item{stdz}{for \code{option = "SM"}: \code{"indirect"} (default), \code{"direct"}, or both.}
 
-\item{measure}{if option = 'SR', a boolean indicating whether the output measure is "ratio" or "rate". Both "rate" and "ratio" will be provided by default.
-\itemize{
-\item "rate": output the standardized rate. The "rate" has been restricted to 0\% - 100\%.
-\item "ratio":  output the standardized ratio
-}}
+\item{null}{the population norm for indirect standardization.}
 
-\item{...}{}
+\item{measure}{\code{"rate"}, \code{"ratio"} or both (default).}
+
+\item{alternative}{\code{"two.sided"} (default), \code{"greater"} (lower limit only)
+or \code{"less"} (upper limit only). Provider-effect intervals are two-sided.}
+
+\item{N_pop}{denominator of the rates, as in \code{\link[=SR_output]{SR_output()}}.}
+
+\item{...}{unused.}
 }
 \value{
-A dataframe containing the point estimate, and lower and upper bounds of the estimate.
+For \code{option = "gamma"}, a data frame with \code{gamma}, \code{gamma.lower},
+\code{gamma.upper}. For \code{option = "SM"}, a list with the requested
+\code{CI.indirect_ratio}, \code{CI.indirect_rate}, \code{CI.direct_ratio},
+\code{CI.direct_rate} data frames.
 }
 \description{
-Provide confidence interval for provider effects or standardization ratios/rates
+Ported from \code{pprof} and extended to binomial outcomes. Intervals for the
+provider effects are obtained by inverting a test; intervals for the
+standardized ratios / rates map the provider-effect limits through the
+standardization.
 }
-\examples{
-data(data_FE)
-data.prep <- fe_data_prep(Y = data_FE$Y, Z = data_FE$Z, ID = data_FE$ID, message = FALSE)
-fit_fe <- logis_fe(data.prep)
-confint(fit_fe, option = "gamma")
-confint(fit_fe, option = "SR")
-
+\details{
+Providers with no events have no finite lower limit for the
+provider effect and providers with all events have no finite upper limit;
+as in \code{pprof}, their finite limit is one-sided at level \code{1 - level}. The
+exact test works on the individual Bernoulli trials, so it can be slow for
+providers with a very large number of trials; the score or Wald versions
+are then preferable.
 }
