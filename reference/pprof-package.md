@@ -33,6 +33,8 @@ package is specific to one measure.
 
 Useful links:
 
+- <https://um-kevinhe.github.io/pprof>
+
 - <https://github.com/UM-KevinHe/pprof>
 
 - Report bugs at <https://github.com/UM-KevinHe/pprof/issues>

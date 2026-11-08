@@ -66,9 +66,9 @@ grouping variable of the survival measures' empirical null.
 
 ## References
 
-He K, Schaubel DE (2014). Standardized mortality ratio for evaluating
+He K, Schaubel DE (2015). Standardized mortality ratio for evaluating
 center-specific mortality: assessment and alternative. *Statistics in
-Biosciences*, 6(2), 1-19.
+Biosciences*, 7, 296-321.
 
 ## Examples
 

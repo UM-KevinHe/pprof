@@ -89,20 +89,61 @@
 
     
     
-<p>Provider profiling compares the outcomes of health care providers
-(dialysis facilities, hospitals, transplant centres, physician groups)
-after adjusting for the patients they treat. A profiling measure answers
-one question per provider: <em>are this provider’s outcomes better,
-worse or no different from what its patients would have experienced at a
-typical provider?</em> The answer is a flag, and flags carry
-consequences: public reporting, payment, review. So the measure must be
-fair to the provider with sicker patients, honest about how uncertain a
-small provider’s result is, and calibrated so that providers of ordinary
-quality are rarely flagged.</p>
-<p><strong>pprof</strong> builds such measures from components, one per
-analysis step. This page explains the concepts behind each step and runs
-one analysis from data to report. Each step has its own article with the
-details.</p>
+<div class="section level2">
+<h2 id="why-provider-profiling-and-why-it-is-hard">Why provider profiling, and why it is hard<a class="anchor" aria-label="anchor" href="#why-provider-profiling-and-why-it-is-hard"></a>
+</h2>
+<p>Provider profiling identifies the health care providers whose quality
+of care is unusually good or unusually poor. It is a standard instrument
+of accountability in United States health policy: the Centers for
+Medicare and Medicaid Services profiles every Medicare-certified
+dialysis facility, hospital, nursing home, home health agency and
+transplant program in the country. A profiling measure answers one
+question per provider: <em>are this provider’s outcomes better, worse or
+no different from what its patients would have experienced at a typical
+provider?</em> The answer is a flag, and a flag carries consequences. A
+provider can lose its Medicare certification; it can lose part of its
+payment, as dialysis facilities do under the ESRD Quality Incentive
+Program; it can be placed under surveillance and inspected; and it is
+rated in public, where patients and referring clinicians read the
+rating.</p>
+<p>Given these stakes, the procedure that produces a profile must be
+right at each of its three steps, because an error at any step
+misclassifies a provider: it imposes the consequences on a provider that
+has not earned them, or spares one that has.</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Risk adjustment.</strong> Outcomes depend on the patients as
+well as on the care. A provider whose patients are older and sicker
+looks worse than it is, and without adjustment differences in patient
+mix are mistaken for differences in quality. The risk-adjustment model
+separates the two; the provider effects it yields are the input to
+everything after.</li>
+<li>
+<strong>Standardized measures.</strong> After adjustment, each
+provider is held against a national norm on one interpretable scale: the
+ratio or the difference between the outcome under the provider’s care
+and the outcome expected under the norm for the provider’s own
+patients.</li>
+<li>
+<strong>Hypothesis testing.</strong> A departure from the norm can
+arise by chance, and a small provider can depart widely through random
+variation alone. A test decides whether the departure is more than
+chance; only a significant departure becomes a flag.</li>
+</ol>
+<p>Each step requires choices, and the defaults of general-purpose
+regression software fail at exactly the places that matter in profiling,
+silently: thousands of provider effects of wildly unequal size, which a
+pooled model drops (biased) and a random-effects model shrinks (the
+extremes are lost); two standardizations that answer different
+questions; a Wald test that cannot flag a provider whose outcomes are
+all identical; observations repeated within patients, so that the usual
+variance is too small; and a theoretical null that flags large providers
+for residual risk the claims data never measured. The articles on each
+step explain the failure and the choice that avoids it: <a href="models.html">risk-adjustment models</a>, <a href="standardization.html">standardized measures</a>, <a href="testing.html">tests of provider effects</a> and <a href="null.html">reference distributions</a>.</p>
+<p><strong>pprof</strong> builds measures from components, one per
+analysis step, with the choices as arguments. This page explains the
+concepts behind each step and runs one analysis from data to report.</p>
+</div>
 <div class="section level2">
 <h2 id="the-common-framework">The common framework<a class="anchor" aria-label="anchor" href="#the-common-framework"></a>
 </h2>

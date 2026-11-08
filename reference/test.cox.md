@@ -111,9 +111,9 @@ with no events has no Wald statistic.
 
 ## References
 
-He K, Schaubel DE (2014). Standardized mortality ratio for evaluating
+He K, Schaubel DE (2015). Standardized mortality ratio for evaluating
 center-specific mortality: assessment and alternative. *Statistics in
-Biosciences*, 6(2), 1-19.
+Biosciences*, 7, 296-321.
 
 Breslow NE, Day NE (1987). *Statistical Methods in Cancer Research,
 Volume II: The Design and Analysis of Cohort Studies*. IARC.
