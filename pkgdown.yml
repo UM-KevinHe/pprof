@@ -1,0 +1,17 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  data: data.html
+  models: models.html
+  'null': null.html
+  plots: plots.html
+  pprof: pprof.html
+  reliability: reliability.html
+  selection: selection.html
+  standardization: standardization.html
+  testing: testing.html
+last_built: 2026-11-08T16:10Z
+urls:
+  reference: https://um-kevinhe.github.io/pprof/reference
+  article: https://um-kevinhe.github.io/pprof/articles
