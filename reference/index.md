@@ -9,9 +9,11 @@ Prepare and check the data every component reads.
 - [`pp_check()`](https://um-kevinhe.github.io/pprof/reference/pp_check.md)
   : Data checks for a provider model
 
-## Risk-adjustment models
+## Risk adjustment
 
-Fixed, random and correlated random provider effects.
+One model with one effect per provider (fixed, random or correlated
+random), its coefficients, and the selection of risk factors with the
+provider effects unpenalized.
 
 - [`fit_logistic_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_logistic_fe.md)
   : Fit the logistic model with fixed provider effects
@@ -33,6 +35,29 @@ Fixed, random and correlated random provider effects.
 - [`gamma_variance()`](https://um-kevinhe.github.io/pprof/reference/gamma_variance.md)
   : Variance of the provider effects for a Wald test
 
+### Tests of the risk factors
+
+- [`summary(`*`<logistic_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.logistic_fe.md)
+  : Tests of the covariate coefficients of a logistic fixed-effect fit
+- [`summary(`*`<linear_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.linear_fe.md)
+  : Tests of the covariate coefficients of a linear fixed-effect fit
+- [`summary(`*`<logistic_re>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary_mixed.md)
+  [`summary(`*`<linear_re>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary_mixed.md)
+  : Tests of the fixed effects of a random-effect fit
+- [`summary(`*`<cox>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.cox.md)
+  : Tests of the covariate coefficients of a Cox fit
+
+### Variable selection
+
+- [`var_select()`](https://um-kevinhe.github.io/pprof/reference/var_select.md)
+  : Variable selection with unpenalized provider effects
+- [`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md) :
+  Cross-validation of a selection path
+- [`coef(`*`<pp_lasso>`*`)`](https://um-kevinhe.github.io/pprof/reference/coef.pp_lasso.md)
+  [`predict(`*`<pp_lasso>`*`)`](https://um-kevinhe.github.io/pprof/reference/coef.pp_lasso.md)
+  [`selected_covariates()`](https://um-kevinhe.github.io/pprof/reference/coef.pp_lasso.md)
+  : Coefficients and predictions along a selection path
+
 ## Standardized measures
 
 - [`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md)
@@ -49,7 +74,10 @@ Fixed, random and correlated random provider effects.
 - [`direct_expectation()`](https://um-kevinhe.github.io/pprof/reference/direct_expectation.md)
   : Direct standardization over an arbitrary standard population
 
-## Tests of provider effects
+## Testing
+
+One test per provider, intervals, the reference distribution the
+statistics are judged against, and the test of a standardized measure.
 
 - [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md) :
   Tests of the provider effects
@@ -76,19 +104,7 @@ Fixed, random and correlated random provider effects.
 - [`test_measure()`](https://um-kevinhe.github.io/pprof/reference/test_measure.md)
   : Test standardized measures against a reference value
 
-## Tests of covariates
-
-- [`summary(`*`<logistic_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.logistic_fe.md)
-  : Tests of the covariate coefficients of a logistic fixed-effect fit
-- [`summary(`*`<linear_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.linear_fe.md)
-  : Tests of the covariate coefficients of a linear fixed-effect fit
-- [`summary(`*`<logistic_re>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary_mixed.md)
-  [`summary(`*`<linear_re>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary_mixed.md)
-  : Tests of the fixed effects of a random-effect fit
-- [`summary(`*`<cox>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.cox.md)
-  : Tests of the covariate coefficients of a Cox fit
-
-## Reference distributions
+### Reference distributions
 
 Theoretical, fixed and empirical nulls, and calibration of a test with
 one.
@@ -111,19 +127,6 @@ one.
   : Reliability at representative provider sizes
 - [`iur_stratified()`](https://um-kevinhe.github.io/pprof/reference/iur_stratified.md)
   : Reliability within strata of providers
-
-## Variable selection
-
-Penalized covariate selection with unpenalized provider effects.
-
-- [`var_select()`](https://um-kevinhe.github.io/pprof/reference/var_select.md)
-  : Variable selection with unpenalized provider effects
-- [`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md) :
-  Cross-validation of a selection path
-- [`coef(`*`<pp_lasso>`*`)`](https://um-kevinhe.github.io/pprof/reference/coef.pp_lasso.md)
-  [`predict(`*`<pp_lasso>`*`)`](https://um-kevinhe.github.io/pprof/reference/coef.pp_lasso.md)
-  [`selected_covariates()`](https://um-kevinhe.github.io/pprof/reference/coef.pp_lasso.md)
-  : Coefficients and predictions along a selection path
 
 ## Plots
 

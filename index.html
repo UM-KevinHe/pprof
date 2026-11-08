@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,11 +44,17 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/data.html">Data preparation</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Risk adjustment</h6></li>
     <li><a class="dropdown-item" href="articles/models.html">Risk-adjustment models</a></li>
     <li><a class="dropdown-item" href="articles/selection.html">Variable selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="articles/standardization.html">Standardized measures</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Testing</h6></li>
     <li><a class="dropdown-item" href="articles/testing.html">Tests of provider effects</a></li>
     <li><a class="dropdown-item" href="articles/null.html">Reference distributions</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="articles/reliability.html">Reliability</a></li>
     <li><a class="dropdown-item" href="articles/plots.html">Plots</a></li>
   </ul>
@@ -132,10 +138,43 @@
 </h2>
 <p>Every measure in <code>pprof</code> is built on the same linear predictor. For patient <em>j</em> of provider <em>i</em>, observed on occasion <em>k</em> (a patient-month, a discharge, a period at risk),</p>
 <p><span class="math display">\[\eta_{ijk} = \gamma_i + Z_{ijk}^\top \beta ,\]</span></p>
-<p>with the provider effect γ<sub><em>i</em></sub> and the risk factors <em>Z</em><sub><em>ijk</em></sub>. The outcome determines the model through which η acts: a logistic model for a binary or binomial outcome, a linear model for a continuous one, a proportional-hazards model for a time to event. Once the outcome type, the unit of observation, the standardization convention and the reference distribution are fixed, everything else (estimation, variance, testing, flagging) is common machinery. The package is therefore organised by <strong>analysis step</strong>, not by quality measure, and a measure, whatever the outcome it is built on, is assembled from the same components:</p>
-<pre><code>pp_data()  →  fit_*()  →  standardize()  →  test()  →  null_model() / calibrate()  →  plot()
-  data         model       measures          flags       reference distribution       displays</code></pre>
-<p>Each choice above is an argument: the statistic, the variance and the reference distribution of <code><a href="reference/test.html">test()</a></code>, the type and norm of <code><a href="reference/standardize.html">standardize()</a></code>, the grouping and estimator of <code><a href="reference/null_models.html">null_model()</a></code>. Every step is one function with S3 methods for the model classes, so the same <code><a href="reference/test.html">test()</a></code> call works for a logistic, a linear or a Cox fit, a measure can be re-specified along one axis with everything else held fixed, and two measures differ only where they are declared to differ. The measure-specific conventions (eligibility rules, attribution, reporting) stay in the analysis script that calls the package.</p>
+<p>with the provider effect γ<sub><em>i</em></sub> and the risk factors <em>Z</em><sub><em>ijk</em></sub>. The outcome determines the model through which η acts: a logistic model for a binary or binomial outcome, a linear model for a continuous one, a proportional-hazards model for a time to event. Once the outcome type, the unit of observation, the standardization convention and the reference distribution are fixed, everything else (estimation, variance, testing, flagging) is common machinery.</p>
+<p>The package is therefore organised by <strong>analysis step</strong>, not by quality measure. Every step is one function: the class of the fitted model chooses the method behind it, the arguments choose the statistical variant, and a measure, whatever the outcome it is built on, is the chain of these steps:</p>
+<pre><code>pp_data()                 data: declare the outcome, risk factors, provider and patient columns;
+│                         trials for a binomial outcome; time, event and start for a time to event
+│
+├── risk adjustment       one model, one effect per provider
+│   ├── fit_*()                          fixed effects        random effects       correlated random effects
+│   │     binary / binomial outcome      fit_logistic_fe()    fit_logistic_re()    fit_logistic_cre()
+│   │     continuous outcome             fit_linear_fe()      fit_linear_re()      fit_linear_cre()
+│   │     time to event                  fit_cox()            stratified by provider; two-stage with x2
+│   ├── coef()  vcov()  summary()        coefficients, their variances, tests of the risk factors
+│   └── var_select(data, penalty = "lasso" | "group_lasso"),  cv(),  selected_covariates()
+│                                        risk-factor selection with the provider effects unpenalized
+│
+├── standardized measures
+│   ├── standardize(fit, type = "indirect" | "direct")
+│   │                                    one ratio, rate or difference per provider, with observed and expected
+│   └── direct_expectation()             the direct standardization for effects supplied by hand
+│
+├── testing               is a provider different from the reference?
+│   ├── test(fit, statistic, variance, null_model)        one test per provider, flag 1 / 0 / -1
+│   │     logistic   statistic = exact | score | wald | lr    variance = naive | robust | stabilized
+│   │     linear     statistic = wald                         variance = naive | robust
+│   │     cox        statistic = midp | exact | wald          dispersion = none | deviance
+│   ├── null_model("theoretical" | "empirical" | "fixed")   the reference distribution of the statistics
+│   │     calibrate(test, null_model)                       the flags and limits under that reference
+│   ├── confint(fit)                                        intervals for the provider effects
+│   └── test_measure(estimate, se, reference)               the test of a standardized measure
+│
+├── reliability
+│   └── iur("direct" | "bootstrap" | "split_half"),  iur_curve(),  iur_stratified()
+│
+└── plots
+    ├── plot()            caterpillar | funnel | bar of a test; observed against expected of a measure;
+    │                     forest of the coefficients; the fitted null; reliability; selection path and cv
+    └── flag_stability()  the flags under alternative choices</code></pre>
+<p>Each choice is an argument, so the same <code><a href="reference/test.html">test()</a></code> call works for a logistic, a linear or a Cox fit, a measure can be re-specified along one axis with everything else held fixed, and two measures differ only where they are declared to differ. The measure-specific conventions (eligibility rules, attribution, reporting layout) stay in the analysis script that calls the package.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -169,80 +208,9 @@
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/standardize.html">standardize</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>, test <span class="op">=</span> <span class="va">tst</span><span class="op">)</span>                    <span class="co"># observed against expected</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="which-functions-for-which-outcome">Which functions for which outcome<a class="anchor" aria-label="anchor" href="#which-functions-for-which-outcome"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
-</colgroup>
-<thead><tr>
-<th>Outcome</th>
-<th>Example measures</th>
-<th>Model</th>
-<th>Standardized measure</th>
-<th>Tests of the provider effects</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>binary (0/1 per row)</td>
-<td>readmission within 30 days of a discharge; a fistula in use in a patient-month</td>
-<td>
-<code><a href="reference/fit_logistic_fe.html">fit_logistic_fe()</a></code> (SerBIN, Firth), <code><a href="reference/fit_mixed.html">fit_logistic_re()</a></code>, <code><a href="reference/fit_mixed.html">fit_logistic_cre()</a></code>
-</td>
-<td>indirect ratio or rate; direct rate</td>
-<td>exact, score, Wald × naive, robust, stabilized; likelihood ratio</td>
-</tr>
-<tr>
-<td>binomial (events out of <em>n</em> trials per row)</td>
-<td>hospital days out of days at risk in a patient-month</td>
-<td>the logistic fitters with <code>n</code>
-</td>
-<td>as binary</td>
-<td>as binary</td>
-</tr>
-<tr>
-<td>continuous</td>
-<td>a laboratory value, a length of stay</td>
-<td>
-<code><a href="reference/fit_linear_fe.html">fit_linear_fe()</a></code>, <code><a href="reference/fit_mixed.html">fit_linear_re()</a></code>, <code><a href="reference/fit_mixed.html">fit_linear_cre()</a></code>
-</td>
-<td>indirect and direct differences</td>
-<td>score, Wald × naive, robust</td>
-</tr>
-<tr>
-<td>time to event (counting-process rows)</td>
-<td>death; hospital admissions as recurrent events</td>
-<td>
-<code><a href="reference/fit_cox.html">fit_cox()</a></code> (stratified by provider, two-stage)</td>
-<td>observed / expected events, indirect and direct</td>
-<td>mid-p Poisson, exact Poisson, log-ratio Wald</td>
-</tr>
-<tr>
-<td>any of the above, choosing risk factors</td>
-<td>measure development</td>
-<td>
-<code><a href="reference/var_select.html">var_select()</a></code> (lasso, group lasso), <code><a href="reference/cv.html">cv()</a></code>
-</td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<p>Every test result can be calibrated with an empirical null (<code><a href="reference/null_models.html">null_model()</a></code>, <code><a href="reference/calibrate.html">calibrate()</a></code>), and every model’s <code><a href="reference/standardize.html">standardize()</a></code> result can be tested at the measure level with <code><a href="reference/test_measure.html">test_measure()</a></code>. Reliability is <code><a href="reference/iur.html">iur()</a></code>; the flags under alternative choices are collected by <code><a href="reference/flag_stability.html">flag_stability()</a></code>.</p>
-</div>
-<div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
 <p>The site <a href="https://um-kevinhe.github.io/pprof/" class="uri">https://um-kevinhe.github.io/pprof/</a> has a <em>Get started</em> page with the core concepts and one complete analysis, one article per analysis step (data, risk-adjustment models, variable selection, standardized measures, tests, reference distributions, reliability, plots), and the function reference grouped the same way.</p>
-</div>
-<div class="section level2">
-<h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
-</h2>
-<p>The methods are those of the CMS dialysis quality measures developed at the University of Michigan Kidney Epidemiology and Cost Center and the papers behind them. This is version 2.0.0 (development), which supersedes <code>pprof</code> 1.0.3 on CRAN, <code>pprofR</code> and <code>grplasso</code>; <code>NEWS.md</code> records what changed and why. See <code>citation("pprof")</code> and the references in each help page.</p>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>

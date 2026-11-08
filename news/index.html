@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,11 +25,17 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/data.html">Data preparation</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Risk adjustment</h6></li>
     <li><a class="dropdown-item" href="../articles/models.html">Risk-adjustment models</a></li>
     <li><a class="dropdown-item" href="../articles/selection.html">Variable selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/standardization.html">Standardized measures</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Testing</h6></li>
     <li><a class="dropdown-item" href="../articles/testing.html">Tests of provider effects</a></li>
     <li><a class="dropdown-item" href="../articles/null.html">Reference distributions</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/reliability.html">Reliability</a></li>
     <li><a class="dropdown-item" href="../articles/plots.html">Plots</a></li>
   </ul></li>
@@ -57,10 +63,10 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="2.0.0" id="pprof-200-development">pprof 2.0.0 (development)<a class="anchor" aria-label="anchor" href="#pprof-200-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="2.0.1" id="pprof-201">pprof 2.0.1<a class="anchor" aria-label="anchor" href="#pprof-201"></a></h2>
 <p>A rewrite of <code>pprof</code> 1.0.3 that absorbs <code>pprofR</code> 0.2.0 and <code>grplasso</code> 1.0. The package is organised by analysis step, and every function takes a data frame with column names.</p>
 <div class="section level3">
-<h3 id="data-2-0-0">Data<a class="anchor" aria-label="anchor" href="#data-2-0-0"></a></h3>
+<h3 id="data-2-0-1">Data<a class="anchor" aria-label="anchor" href="#data-2-0-1"></a></h3>
 <ul><li>
 <code><a href="../reference/pp_data.html">pp_data()</a></code> replaces <code>fe_data_prep()</code> and the data handling inside the 1.0.3 fitters: one prepared object (rows sorted by provider and patient in the C locale, patient rows kept in input order, provider sizes in patients or rows, <code>cutoff</code> with <code>&gt;=</code>, flags for providers with no or all events).</li>
 <li>
@@ -69,7 +75,7 @@
 <code><a href="../reference/sim_kecc.html">sim_kecc()</a></code> simulates data shaped like the KECC measures (patient-month binary or binomial days outcomes, patient random effect).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="logistic-fixed-effect-model-the-pprofr-engine-under-the-unified-interface-2-0-0">Logistic fixed-effect model (the <code>pprofR</code> engine under the unified interface)<a class="anchor" aria-label="anchor" href="#logistic-fixed-effect-model-the-pprofr-engine-under-the-unified-interface-2-0-0"></a></h3>
+<h3 id="logistic-fixed-effect-model-the-pprofr-engine-under-the-unified-interface-2-0-1">Logistic fixed-effect model (the <code>pprofR</code> engine under the unified interface)<a class="anchor" aria-label="anchor" href="#logistic-fixed-effect-model-the-pprofr-engine-under-the-unified-interface-2-0-1"></a></h3>
 <ul><li>
 <code><a href="../reference/fit_logistic_fe.html">fit_logistic_fe()</a></code> replaces <code>logis_fe()</code>: binary or binomial outcomes, SerBIN or BAN.</li>
 <li>
@@ -82,7 +88,7 @@
 <code><a href="../reference/test_measure.html">test_measure()</a></code> replaces <code>test_SM()</code> and adds the log scale.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="linear-random-effect-and-correlated-random-effect-models-rewritten-from-2-0-0">Linear, random-effect and correlated random-effect models (rewritten from 1.0.3)<a class="anchor" aria-label="anchor" href="#linear-random-effect-and-correlated-random-effect-models-rewritten-from-2-0-0"></a></h3>
+<h3 id="linear-random-effect-and-correlated-random-effect-models-rewritten-from-2-0-1">Linear, random-effect and correlated random-effect models (rewritten from 1.0.3)<a class="anchor" aria-label="anchor" href="#linear-random-effect-and-correlated-random-effect-models-rewritten-from-2-0-1"></a></h3>
 <ul><li>
 <code><a href="../reference/pp_data.html">pp_data()</a></code> detects or takes an <code>outcome</code> type (binary, binomial, continuous); <code><a href="../reference/sim_kecc.html">sim_kecc()</a></code> simulates continuous outcomes.</li>
 <li>
@@ -94,7 +100,7 @@
 <li>The direct standardized difference of the linear models is relative to the population (the row-weighted mean of the effects), as the direct ratio of the logistic models always was; 1.0.3 used the median for the linear model only.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="variable-selection-rewritten-from-grplasso-2-0-0">Variable selection (rewritten from grplasso 1.0)<a class="anchor" aria-label="anchor" href="#variable-selection-rewritten-from-grplasso-2-0-0"></a></h3>
+<h3 id="variable-selection-rewritten-from-grplasso-2-0-1">Variable selection (rewritten from grplasso 1.0)<a class="anchor" aria-label="anchor" href="#variable-selection-rewritten-from-grplasso-2-0-1"></a></h3>
 <ul><li>
 <code><a href="../reference/var_select.html">var_select()</a></code> (lasso or group lasso) replace <code>pp.lasso()</code> and <code>grp.lasso()</code>: the same objective and coordinate-descent paths, now with binomial trials, a deterministic update order (grplasso permuted the coordinates at random inside the C++ code) and without the data race in its OpenMP loop; <code>penalize</code> and <code>group</code> name the covariates instead of positional vectors.</li>
 <li>
@@ -104,25 +110,25 @@
 <li>Discrete-time survival and stratified Cox selection move to the survival components.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="reference-distributions-and-reliability-new-empirical-null-from-the-kecc-production-code-and-pprof_py-2-0-0">Reference distributions and reliability (new; empirical null from the KECC production code and pprof_py)<a class="anchor" aria-label="anchor" href="#reference-distributions-and-reliability-new-empirical-null-from-the-kecc-production-code-and-pprof_py-2-0-0"></a></h3>
+<h3 id="reference-distributions-and-reliability-new-empirical-null-from-the-kecc-production-code-and-pprof_py-2-0-1">Reference distributions and reliability (new; empirical null from the KECC production code and pprof_py)<a class="anchor" aria-label="anchor" href="#reference-distributions-and-reliability-new-empirical-null-from-the-kecc-production-code-and-pprof_py-2-0-1"></a></h3>
 <ul><li>Null models <code><a href="../reference/null_models.html">null_model()</a></code> (theoretical, fixed or empirical): the empirical null is fitted with <code><a href="https://rdrr.io/pkg/MASS/man/rlm.html" class="external-link">MASS::rlm</a></code> within size groups. The default (<code>grouping = "rank"</code>: the providers sorted by size dealt into blocks of <code>ceiling(n / 4)</code>; <code>estimator = "huber"</code> with MASS defaults) is what the production PPPW and SFR code does; <code>grouping = "quantile"</code> with <code>estimator = "bisquare"</code>, <code>maxit = 1000</code>, <code>acc = 1e-8</code> is the production SMR code (and <code>EmpiNull</code>), <code>"quantile"</code> with the Huber default the production SHR code, and <code>grouping = "cut"</code> the <code>Group_EN</code> of the KECC measures paper. MM-estimation, tuning constants, a common mean, a fit mask and small-group handling are the options of pprof_py’s <code>EmpiricalNull</code>.</li>
 <li>
 <code><a href="../reference/calibrate.html">calibrate()</a></code> refers a <code><a href="../reference/test.html">test()</a></code> or <code><a href="../reference/test_measure.html">test_measure()</a></code> result to a null model (adjusted statistics, p-values, flags and inverted limits); every <code><a href="../reference/test.html">test()</a></code> method and <code><a href="../reference/test_measure.html">test_measure()</a></code> take a <code>null_model</code>. <code>critical</code> sets the critical value of the flags and limits; <code>ci_location</code> centres the limits elsewhere than the null mean (<code>0</code> gives limits of the form estimate ± c · null_sd · se).</li>
 <li>Inter-unit reliability translated from pprof_py: <code><a href="../reference/iur.html">iur()</a></code> with the direct, bootstrap and split-half methods, with <code><a href="../reference/iur_curve.html">iur_curve()</a></code> and <code><a href="../reference/iur_stratified.html">iur_stratified()</a></code>.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="still-to-come-in-this-order-2-0-0">Still to come (in this order)<a class="anchor" aria-label="anchor" href="#still-to-come-in-this-order-2-0-0"></a></h3>
+<h3 id="still-to-come-in-this-order-2-0-1">Still to come (in this order)<a class="anchor" aria-label="anchor" href="#still-to-come-in-this-order-2-0-1"></a></h3>
 <ul><li>Cox O/E components, discrete-time survival and stratified Cox selection.</li>
 <li>Plots.</li>
 <li>
 <code><a href="../reference/var_select.html">var_select()</a></code> (lasso or group lasso) on a survival outcome fit <code>grplasso</code>’s <code>Strat.cox()</code> (the Cox model stratified by provider, now with counting-process rows, case weights and offsets) and, with <code>model = "discrete"</code>, <code>pp.DiscSurv()</code> (the discrete-time hazard model with period and provider effects, the provider effects identified by a zero median instead of a reference provider), both with a cyclic update order and without the hard-coded column names; <code><a href="../reference/cv.html">cv()</a></code> cross-validate them on the partial-likelihood deviance per event or the person-period deviance.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="interface-2-0-0">Interface<a class="anchor" aria-label="anchor" href="#interface-2-0-0"></a></h3>
+<h3 id="interface-2-0-1">Interface<a class="anchor" aria-label="anchor" href="#interface-2-0-1"></a></h3>
 <ul><li>One entry point per analysis step, with S3 methods for every model class: <code><a href="../reference/test.html">test()</a></code> (provider effects; was <code>test_providers()</code>), <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> (covariate coefficients; was <code>test_covariates()</code>), <code><a href="../reference/standardize.html">standardize()</a></code>, <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code><a href="../reference/calibrate.html">calibrate()</a></code>, <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>; <code>null_model(kind)</code> for the theoretical, fixed and empirical nulls; <code>iur(method)</code> for the three reliability estimators; <code>var_select(penalty)</code> for the lasso and group-lasso paths with <code><a href="../reference/cv.html">cv()</a></code> on the path. <code><a href="../reference/test.html">test()</a></code> and <code><a href="../reference/test_measure.html">test_measure()</a></code> also accept a null kind by name (<code>null_model = "empirical"</code>).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="plots-ggplot2-2-0-0">Plots (ggplot2)<a class="anchor" aria-label="anchor" href="#plots-ggplot2-2-0-0"></a></h3>
+<h3 id="plots-ggplot2-2-0-1">Plots (ggplot2)<a class="anchor" aria-label="anchor" href="#plots-ggplot2-2-0-1"></a></h3>
 <ul><li>
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods, after pprof_py’s presentation layer and the 1.0.3 plots: a <code><a href="../reference/test.html">test()</a></code> result gives a caterpillar plot, a funnel plot (limits from the same test, on the precision or the expected-count axis, one curve per empirical-null group when calibrated) or the flag shares by provider-size group; a <code><a href="../reference/standardize.html">standardize()</a></code> result the observed-against-expected scatter or an observed-over-expected funnel; a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> result a forest plot of the coefficients; an empirical <code><a href="../reference/null_models.html">null_model()</a></code> the null-calibration panels; an <code><a href="../reference/iur.html">iur()</a></code> result the reliability curve; a <code><a href="../reference/var_select.html">var_select()</a></code> path and its <code><a href="../reference/cv.html">cv()</a></code> the coefficient paths and the cross-validation curve. <code><a href="../reference/flag_stability.html">flag_stability()</a></code> tabulates the flags of several tests (scenarios) and plots them.</li>
 </ul></div>

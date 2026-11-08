@@ -1,6 +1,6 @@
 # Changelog
 
-## pprof 2.0.0 (development)
+## pprof 2.0.1
 
 A rewrite of `pprof` 1.0.3 that absorbs `pprofR` 0.2.0 and `grplasso`
 1.0. The package is organised by analysis step, and every function takes

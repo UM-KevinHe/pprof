@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,11 +25,17 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/data.html">Data preparation</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Risk adjustment</h6></li>
     <li><a class="dropdown-item" href="../articles/models.html">Risk-adjustment models</a></li>
     <li><a class="dropdown-item" href="../articles/selection.html">Variable selection</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/standardization.html">Standardized measures</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Testing</h6></li>
     <li><a class="dropdown-item" href="../articles/testing.html">Tests of provider effects</a></li>
     <li><a class="dropdown-item" href="../articles/null.html">Reference distributions</a></li>
+    <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item" href="../articles/reliability.html">Reliability</a></li>
     <li><a class="dropdown-item" href="../articles/plots.html">Plots</a></li>
   </ul></li>
@@ -79,9 +85,9 @@
         </dt>
         <dd>Data checks for a provider model</dd>
       </dl></div><div class="section level2">
-      <h2 id="risk-adjustment-models">Risk-adjustment models<a class="anchor" aria-label="anchor" href="#risk-adjustment-models"></a></h2>
+      <h2 id="risk-adjustment">Risk adjustment<a class="anchor" aria-label="anchor" href="#risk-adjustment"></a></h2>
 
-      <div class="section-desc"><p>Fixed, random and correlated random provider effects.</p></div>
+      <div class="section-desc"><p>One model with one effect per provider (fixed, random or correlated random), its coefficients, and the selection of risk factors with the provider effects unpenalized.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -144,6 +150,73 @@
         </dt>
         <dd>Variance of the provider effects for a Wald test</dd>
       </dl></div><div class="section level2">
+
+      <h3 id="tests-of-the-risk-factors">Tests of the risk factors<a class="anchor" aria-label="anchor" href="#tests-of-the-risk-factors"></a></h3>
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="summary.logistic_fe.html">summary(<i>&lt;logistic_fe&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Tests of the covariate coefficients of a logistic fixed-effect fit</dd>
+
+        <dt>
+
+          <code><a href="summary.linear_fe.html">summary(<i>&lt;linear_fe&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Tests of the covariate coefficients of a linear fixed-effect fit</dd>
+
+        <dt>
+
+          <code><a href="summary_mixed.html">summary(<i>&lt;logistic_re&gt;</i>)</a></code> <code><a href="summary_mixed.html">summary(<i>&lt;linear_re&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Tests of the fixed effects of a random-effect fit</dd>
+
+        <dt>
+
+          <code><a href="summary.cox.html">summary(<i>&lt;cox&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Tests of the covariate coefficients of a Cox fit</dd>
+      </dl></div><div class="section level2">
+
+      <h3 id="variable-selection">Variable selection<a class="anchor" aria-label="anchor" href="#variable-selection"></a></h3>
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="var_select.html">var_select()</a></code>
+
+        </dt>
+        <dd>Variable selection with unpenalized provider effects</dd>
+
+        <dt>
+
+          <code><a href="cv.html">cv()</a></code>
+
+        </dt>
+        <dd>Cross-validation of a selection path</dd>
+
+        <dt>
+
+          <code><a href="coef.pp_lasso.html">coef(<i>&lt;pp_lasso&gt;</i>)</a></code> <code><a href="coef.pp_lasso.html">predict(<i>&lt;pp_lasso&gt;</i>)</a></code> <code><a href="coef.pp_lasso.html">selected_covariates()</a></code>
+
+        </dt>
+        <dd>Coefficients and predictions along a selection path</dd>
+      </dl></div><div class="section level2">
       <h2 id="standardized-measures">Standardized measures<a class="anchor" aria-label="anchor" href="#standardized-measures"></a></h2>
 
 
@@ -195,9 +268,9 @@
         </dt>
         <dd>Direct standardization over an arbitrary standard population</dd>
       </dl></div><div class="section level2">
-      <h2 id="tests-of-provider-effects">Tests of provider effects<a class="anchor" aria-label="anchor" href="#tests-of-provider-effects"></a></h2>
+      <h2 id="testing">Testing<a class="anchor" aria-label="anchor" href="#testing"></a></h2>
 
-
+      <div class="section-desc"><p>One test per provider, intervals, the reference distribution the statistics are judged against, and the test of a standardized measure.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -274,45 +347,8 @@
         </dt>
         <dd>Test standardized measures against a reference value</dd>
       </dl></div><div class="section level2">
-      <h2 id="tests-of-covariates">Tests of covariates<a class="anchor" aria-label="anchor" href="#tests-of-covariates"></a></h2>
 
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="summary.logistic_fe.html">summary(<i>&lt;logistic_fe&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tests of the covariate coefficients of a logistic fixed-effect fit</dd>
-
-        <dt>
-
-          <code><a href="summary.linear_fe.html">summary(<i>&lt;linear_fe&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tests of the covariate coefficients of a linear fixed-effect fit</dd>
-
-        <dt>
-
-          <code><a href="summary_mixed.html">summary(<i>&lt;logistic_re&gt;</i>)</a></code> <code><a href="summary_mixed.html">summary(<i>&lt;linear_re&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tests of the fixed effects of a random-effect fit</dd>
-
-        <dt>
-
-          <code><a href="summary.cox.html">summary(<i>&lt;cox&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tests of the covariate coefficients of a Cox fit</dd>
-      </dl></div><div class="section level2">
-      <h2 id="reference-distributions">Reference distributions<a class="anchor" aria-label="anchor" href="#reference-distributions"></a></h2>
-
+      <h3 id="reference-distributions">Reference distributions<a class="anchor" aria-label="anchor" href="#reference-distributions"></a></h3>
       <div class="section-desc"><p>Theoretical, fixed and empirical nulls, and calibration of a test with one.</p></div>
 
       <dl></dl></div><div class="section level2">
@@ -377,36 +413,6 @@
 
         </dt>
         <dd>Reliability within strata of providers</dd>
-      </dl></div><div class="section level2">
-      <h2 id="variable-selection">Variable selection<a class="anchor" aria-label="anchor" href="#variable-selection"></a></h2>
-
-      <div class="section-desc"><p>Penalized covariate selection with unpenalized provider effects.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="var_select.html">var_select()</a></code>
-
-        </dt>
-        <dd>Variable selection with unpenalized provider effects</dd>
-
-        <dt>
-
-          <code><a href="cv.html">cv()</a></code>
-
-        </dt>
-        <dd>Cross-validation of a selection path</dd>
-
-        <dt>
-
-          <code><a href="coef.pp_lasso.html">coef(<i>&lt;pp_lasso&gt;</i>)</a></code> <code><a href="coef.pp_lasso.html">predict(<i>&lt;pp_lasso&gt;</i>)</a></code> <code><a href="coef.pp_lasso.html">selected_covariates()</a></code>
-
-        </dt>
-        <dd>Coefficients and predictions along a selection path</dd>
       </dl></div><div class="section level2">
       <h2 id="plots">Plots<a class="anchor" aria-label="anchor" href="#plots"></a></h2>
 
