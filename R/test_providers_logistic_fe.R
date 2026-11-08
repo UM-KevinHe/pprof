@@ -5,7 +5,10 @@
 #' the null value.
 #'
 #' @param fit a model fitted by [fit_logistic_fe()].
-#' @param statistic `"exact"` (default), `"score"` or `"wald"`.
+#' @param statistic `"exact"` (default), `"score"`, `"wald"` or `"lr"` (the
+#'   likelihood-ratio statistic of \eqn{\gamma_i} with every other parameter
+#'   held at its full-model estimate; the penalized likelihood of a Firth
+#'   fit, as in ParaFLR).
 #' @param variance `"naive"` (default; model-based), `"robust"`
 #'   (patient-clustered sandwich) or `"stabilized"` (sandwich with one
 #'   within-patient correlation matrix pooled over all patients). The
@@ -41,7 +44,13 @@
 #'   and \eqn{\hat R} pooled over all patients by row position;
 #' * naive Wald: \eqn{(\hat\gamma_i - \gamma_0)/\sqrt{\mathrm{Var}}} with the
 #'   variance of [gamma_variance()];
-#' * robust and stabilized Wald: standard error \eqn{\sqrt{V_i} / I_i}.
+#' * robust and stabilized Wald: standard error \eqn{\sqrt{V_i} / I_i};
+#' * likelihood ratio: \eqn{-2[\ell^*(\hat\gamma_{(i)}, \hat\beta) -
+#'   \ell^*(\hat\gamma, \hat\beta)]} with \eqn{\hat\gamma_{(i)}} the fitted
+#'   effects except \eqn{\gamma_i = \gamma_0}, and \eqn{\ell^*} the
+#'   (penalized, for a Firth fit) log-likelihood; the other parameters are
+#'   not re-estimated under the null. The statistic reported is the signed
+#'   square root, so that two-sided p-values equal the chi-square tail.
 #'
 #' The stabilized statistics take a patient's rows in their order in the
 #' data, so sort by time within patient before [pp_data()]. A patient with
@@ -50,7 +59,8 @@
 #' @return A data frame of class `pp_test` with one row per tested provider:
 #'   `provider`, `estimate` (\eqn{\hat\gamma_i}), `se` (Wald statistics only),
 #'   `null_value`, `statistic` (a z statistic; for the exact test the normal
-#'   quantile of the mid-p), `p`, `flag` (`1` above the null, `-1` below,
+#'   quantile of the mid-p, for `"lr"` the signed root of the chi-square
+#'   statistic), `p`, `flag` (`1` above the null, `-1` below,
 #'   `0` not different, `NA` not testable) and, for the Wald statistics,
 #'   `lower` and `upper` limits for \eqn{\gamma_i}. Attributes `test` (the
 #'   settings) and `sizes` (rows and patients per provider).
@@ -66,7 +76,7 @@
 #' fit <- fit_logistic_fe(pd)
 #' test_providers(fit, statistic = "score", variance = "robust")
 #' @export
-test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wald"),
+test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
                                        variance = c("naive", "robust", "stabilized"),
                                        null = "median", providers = NULL, level = 0.95,
                                        alternative = c("two.sided", "greater", "less"),
@@ -89,6 +99,10 @@ test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wal
   }
   if (score_type == "restricted" && variance != "naive") {
     stop("The restricted score test is only available with the naive variance.", call. = FALSE)
+  }
+  if (statistic == "lr" && variance != "naive") {
+    stop("The likelihood-ratio statistic has no clustered variance; use variance = \"naive\".",
+         call. = FALSE)
   }
   if (!is.numeric(level) || length(level) != 1 || level <= 0 || level >= 1) {
     stop("`level` must be a number between 0 and 1.", call. = FALSE)
@@ -144,6 +158,12 @@ test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wal
     }
     z[!is.finite(z)] <- NA_real_
     decision <- z_decision(z, level, alternative)
+  } else if (statistic == "lr") {
+    firth <- identical(fit$control$penalty, "firth")
+    lr <- penalized_lr(m$n, m$y, m$z, m$n_prov, gamma, beta, g0, idx, firth)[idx]
+    z <- sign(gamma[idx] - g0) * sqrt(pmax(lr, 0))
+    z[!is.finite(z)] <- NA_real_
+    decision <- z_decision(z, level, alternative)
   } else {
     if (variance == "naive") {
       se_all <- sqrt(gamma_variance(fit, wald_variance))
@@ -173,7 +193,12 @@ test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wal
                     lower = unname(lower), upper = unname(upper), stringsAsFactors = FALSE)
   attr(out, "test") <- list(statistic = statistic, variance = variance,
                             method = switch(statistic, exact = exact_method, score = score_type,
-                                            wald = if (variance == "naive") wald_variance else NA),
+                                            wald = if (variance == "naive") wald_variance else NA,
+                                            lr = if (identical(fit$control$penalty, "firth")) {
+                                              "penalized"
+                                            } else {
+                                              "likelihood"
+                                            }),
                             null = null, null_value = g0, level = level, alternative = alternative)
   attr(out, "sizes") <- data.frame(provider = sel, rows = m$n_prov[idx],
                                    patients = fit$sizes$patients[idx], stringsAsFactors = FALSE)

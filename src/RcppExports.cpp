@@ -238,6 +238,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// penalized_lr
+arma::vec penalized_lr(const arma::vec& N, const arma::vec& Y, const arma::mat& Z, const arma::vec& n_prov, const arma::vec& gamma, const arma::vec& beta, double gamma_null, const arma::uvec& parm_indices, bool firth);
+RcppExport SEXP _pprof_penalized_lr(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP parm_indicesSEXP, SEXP firthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma_null(gamma_nullSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type parm_indices(parm_indicesSEXP);
+    Rcpp::traits::input_parameter< bool >::type firth(firthSEXP);
+    rcpp_result_gen = Rcpp::wrap(penalized_lr(N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices, firth));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lasso_path
 List lasso_path(const arma::vec& N, const arma::vec& Y, const arma::mat& Z, const arma::vec& n_prov, arma::vec gamma, arma::vec beta, const arma::uvec& penalized, const arma::vec& multiplier, const arma::vec& lambda, bool mm, bool backtrack, double bound, double tol, int max_iter, bool active_set, int threads);
 RcppExport SEXP _pprof_lasso_path(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP penalizedSEXP, SEXP multiplierSEXP, SEXP lambdaSEXP, SEXP mmSEXP, SEXP backtrackSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP active_setSEXP, SEXP threadsSEXP) {
@@ -306,6 +325,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pprof_stabilized_meat", (DL_FUNC) &_pprof_stabilized_meat, 5},
     {"_pprof_restricted_score", (DL_FUNC) &_pprof_restricted_score, 8},
     {"_pprof_logis_firth_prov", (DL_FUNC) &_pprof_logis_firth_prov, 12},
+    {"_pprof_penalized_lr", (DL_FUNC) &_pprof_penalized_lr, 9},
     {"_pprof_lasso_path", (DL_FUNC) &_pprof_lasso_path, 16},
     {"_pprof_group_lasso_path", (DL_FUNC) &_pprof_group_lasso_path, 17},
     {NULL, NULL, 0}

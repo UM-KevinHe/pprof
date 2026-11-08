@@ -6,7 +6,7 @@
 \usage{
 \method{test_providers}{logistic_fe}(
   fit,
-  statistic = c("exact", "score", "wald"),
+  statistic = c("exact", "score", "wald", "lr"),
   variance = c("naive", "robust", "stabilized"),
   null = "median",
   providers = NULL,
@@ -22,7 +22,10 @@
 \arguments{
 \item{fit}{a model fitted by \code{\link[=fit_logistic_fe]{fit_logistic_fe()}}.}
 
-\item{statistic}{\code{"exact"} (default), \code{"score"} or \code{"wald"}.}
+\item{statistic}{\code{"exact"} (default), \code{"score"}, \code{"wald"} or \code{"lr"} (the
+likelihood-ratio statistic of \eqn{\gamma_i} with every other parameter
+held at its full-model estimate; the penalized likelihood of a Firth
+fit, as in ParaFLR).}
 
 \item{variance}{\code{"naive"} (default; model-based), \code{"robust"}
 (patient-clustered sandwich) or \code{"stabilized"} (sandwich with one
@@ -59,7 +62,8 @@ under the null; naive variance only).}
 A data frame of class \code{pp_test} with one row per tested provider:
 \code{provider}, \code{estimate} (\eqn{\hat\gamma_i}), \code{se} (Wald statistics only),
 \code{null_value}, \code{statistic} (a z statistic; for the exact test the normal
-quantile of the mid-p), \code{p}, \code{flag} (\code{1} above the null, \code{-1} below,
+quantile of the mid-p, for \code{"lr"} the signed root of the chi-square
+statistic), \code{p}, \code{flag} (\code{1} above the null, \code{-1} below,
 \code{0} not different, \code{NA} not testable) and, for the Wald statistics,
 \code{lower} and \code{upper} limits for \eqn{\gamma_i}. Attributes \code{test} (the
 settings) and \code{sizes} (rows and patients per provider).
@@ -84,7 +88,13 @@ Z_j^\top\hat\beta)} for the score statistics. With
 and \eqn{\hat R} pooled over all patients by row position;
 \item naive Wald: \eqn{(\hat\gamma_i - \gamma_0)/\sqrt{\mathrm{Var}}} with the
 variance of \code{\link[=gamma_variance]{gamma_variance()}};
-\item robust and stabilized Wald: standard error \eqn{\sqrt{V_i} / I_i}.
+\item robust and stabilized Wald: standard error \eqn{\sqrt{V_i} / I_i};
+\item likelihood ratio: \eqn{-2[\ell^*(\hat\gamma_{(i)}, \hat\beta) -
+  \ell^*(\hat\gamma, \hat\beta)]} with \eqn{\hat\gamma_{(i)}} the fitted
+effects except \eqn{\gamma_i = \gamma_0}, and \eqn{\ell^*} the
+(penalized, for a Firth fit) log-likelihood; the other parameters are
+not re-estimated under the null. The statistic reported is the signed
+square root, so that two-sided p-values equal the chi-square tail.
 }
 
 The stabilized statistics take a patient's rows in their order in the

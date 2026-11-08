@@ -41,6 +41,8 @@ frame with column names.
   trials; the object is a `logistic_fe` fit, so every test and standardization applies. The kernel
   follows ParaFLR (UM-KevinHe/hpc-flr): per-provider work on independent threads, with the p x p
   reductions as whole-data matrix products so that the result does not depend on the thread count.
+  `test_providers(statistic = "lr")` adds ParaFLR's likelihood-ratio test of one provider effect
+  with the other parameters fixed (penalized likelihood for a Firth fit).
 * `fit_logistic_re()`, `fit_logistic_cre()`, `fit_linear_re()`, `fit_linear_cre()` replace
   `logis_re()`, `logis_cre()`, `linear_re()`, `linear_cre()` (lme4 wrappers): the random effects
   are `coefficients$alpha`, their conditional variances `post_var`; the CRE decomposition names

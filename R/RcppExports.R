@@ -53,6 +53,10 @@ logis_firth_prov <- function(N, Y, Z, n_prov, gamma, beta, threads, tol, max_ite
     .Call(`_pprof_logis_firth_prov`, N, Y, Z, n_prov, gamma, beta, threads, tol, max_iter, bound, message, stop)
 }
 
+penalized_lr <- function(N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices, firth) {
+    .Call(`_pprof_penalized_lr`, N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices, firth)
+}
+
 lasso_path <- function(N, Y, Z, n_prov, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set, threads) {
     .Call(`_pprof_lasso_path`, N, Y, Z, n_prov, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set, threads)
 }

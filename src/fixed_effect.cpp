@@ -857,3 +857,85 @@ List logis_firth_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_pro
   return List::create(_["gamma"] = gamma, _["beta"] = beta, _["iter"] = iter,
                       _["loglik"] = loglik, _["loglik_pen"] = loglik_pen, _["crit"] = crit);
 }
+
+// ---------------------------------------------------------------------------
+// Likelihood-ratio test of one provider effect with the other parameters fixed
+// ---------------------------------------------------------------------------
+
+// -2 [ l*(gamma with gamma_i = gamma_null, beta) - l*(gamma, beta) ] for the
+// requested providers (1-based `parm_indices`), every other parameter held at
+// its full-model estimate, as test_gamma.single() of ParaFLR
+// (UM-KevinHe/hpc-flr). l* is the Firth-penalized log-likelihood when `firth`
+// is true and the plain log-likelihood otherwise. Under the null only provider
+// i's rows change, so the penalty is updated per provider from the full-model
+// blocks: log det I = sum_j log I_jj + log det S and, under the null of
+// provider i, log det I_(i) = sum_{j != i} log I_jj + log det S_i + log v_i,
+// with S_i the Schur complement of restricted_score() and v_i the efficient
+// information of gamma_i under the null. O(n p^2 + m p^3) in total.
+// [[Rcpp::export]]
+arma::vec penalized_lr(const arma::vec &N, const arma::vec &Y, const arma::mat &Z,
+                       const arma::vec &n_prov, const arma::vec &gamma, const arma::vec &beta,
+                       double gamma_null, const arma::uvec &parm_indices, bool firth) {
+  const int m = n_prov.n_elem;
+  arma::vec gamma_obs = rep_vec(gamma, n_prov);
+  arma::vec Zb = Z * beta;
+  arma::vec eta = gamma_obs + Zb;
+  arma::vec eta0 = gamma_null + Zb;
+  arma::vec ll_row = Y % eta - N % (clamp(eta, 0.0, datum::inf) + log1p(exp(-abs(eta))));
+  arma::vec ll_row0 = Y % eta0 - N % (clamp(eta0, 0.0, datum::inf) + log1p(exp(-abs(eta0))));
+  arma::uvec start(m + 1);
+  int ind = 0;
+  for (int i = 0; i < m; i++) {
+    start(i) = ind;
+    ind += n_prov(i);
+  }
+  start(m) = ind;
+  arma::vec lr(m);
+  lr.fill(arma::datum::nan);
+
+  if (!firth) {
+    for (arma::uword k = 0; k < parm_indices.n_elem; k++) {
+      int i = parm_indices(k) - 1;
+      int a = start(i), b = start(i + 1) - 1;
+      lr(i) = -2 * (sum(ll_row0.subvec(a, b)) - sum(ll_row.subvec(a, b)));
+    }
+    return lr;
+  }
+
+  arma::vec p = clamp(1 / (1 + exp(-eta)), 1e-10, 1 - 1e-10);
+  arma::vec pq = N % p % (1 - p);
+  arma::vec p0 = clamp(1 / (1 + exp(-eta0)), 1e-10, 1 - 1e-10);
+  arma::vec pq0 = N % p0 % (1 - p0);
+  arma::vec info_gamma(m);
+  arma::mat info_bg(Z.n_cols, m);
+  for (int i = 0; i < m; i++) {
+    int a = start(i), b = start(i + 1) - 1;
+    info_gamma(i) = sum(pq.subvec(a, b));
+    info_bg.col(i) = Z.rows(a, b).t() * pq.subvec(a, b);
+  }
+  arma::mat info_beta_full = Z.t() * (Z.each_col() % pq);
+  arma::mat m_full = (info_bg.each_row() / info_gamma.t()) * info_bg.t();
+  double ld_full, sign;
+  log_det(ld_full, sign, info_beta_full - m_full);
+  const double sum_log_ig = sum(log(info_gamma));
+  const double pen_full = 0.5 * (sum_log_ig + ld_full);
+
+  for (arma::uword k = 0; k < parm_indices.n_elem; k++) {
+    int i = parm_indices(k) - 1;
+    int a = start(i), b = start(i + 1) - 1;
+    arma::mat Zi = Z.rows(a, b);
+    arma::vec d = pq0.subvec(a, b) - pq.subvec(a, b);
+    arma::mat S = info_beta_full + Zi.t() * (Zi.each_col() % d) - m_full +
+      info_bg.col(i) * info_bg.col(i).t() / info_gamma(i);
+    double ld_s;
+    log_det(ld_s, sign, S);
+    arma::mat B11;
+    if (!arma::inv_sympd(B11, S)) B11 = arma::pinv(S);
+    double info_alpha = sum(pq0.subvec(a, b));
+    arma::vec info_ba = Zi.t() * pq0.subvec(a, b);
+    double v0 = info_alpha - arma::as_scalar(info_ba.t() * B11 * info_ba);
+    double pen_null = 0.5 * (sum_log_ig - std::log(info_gamma(i)) + ld_s + std::log(v0));
+    lr(i) = -2 * ((sum(ll_row0.subvec(a, b)) + pen_null) - (sum(ll_row.subvec(a, b)) + pen_full));
+  }
+  return lr;
+}
