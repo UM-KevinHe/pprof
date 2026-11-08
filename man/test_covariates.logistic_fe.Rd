@@ -39,6 +39,11 @@ statistic with one degree of freedom for \code{"lr"} and \code{"score"}), \code{
 \description{
 Tests of the covariate coefficients of a logistic fixed-effect fit
 }
+\details{
+The refits use the settings of \code{fit}, including the Firth
+penalty; with the penalty the likelihood ratio compares the penalized
+log-likelihoods.
+}
 \examples{
 d <- sim_kecc(n_providers = 20, seed = 1)
 pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",

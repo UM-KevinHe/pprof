@@ -49,3 +49,15 @@ restricted_score <- function(N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indi
     .Call(`_pprof_restricted_score`, N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices)
 }
 
+logis_firth_prov <- function(N, Y, Z, n_prov, gamma, beta, threads, tol, max_iter, bound, message, stop) {
+    .Call(`_pprof_logis_firth_prov`, N, Y, Z, n_prov, gamma, beta, threads, tol, max_iter, bound, message, stop)
+}
+
+lasso_path <- function(N, Y, Z, n_prov, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set, threads) {
+    .Call(`_pprof_lasso_path`, N, Y, Z, n_prov, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set, threads)
+}
+
+group_lasso_path <- function(N, Y, Z, n_prov, gamma, beta, unpenalized, group_first, group_last, multiplier, lambda, backtrack, bound, tol, max_iter, active_set, threads) {
+    .Call(`_pprof_group_lasso_path`, N, Y, Z, n_prov, gamma, beta, unpenalized, group_first, group_last, multiplier, lambda, backtrack, bound, tol, max_iter, active_set, threads)
+}
+

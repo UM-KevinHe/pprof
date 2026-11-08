@@ -748,3 +748,92 @@ arma::vec restricted_score(const arma::vec &N, const arma::vec &Y, const arma::m
   }
   return z;
 }
+
+// ---------------------------------------------------------------------------
+// Firth-penalized fit
+// ---------------------------------------------------------------------------
+
+// Fixed provider effects logistic model with Firth's penalty
+// 0.5 * log det I(gamma, beta) (Jeffreys prior) and binomial trials N.
+// Each iteration is a joint Newton step on (gamma, beta) through the block
+// structure of the information, with the modified score: row j of provider i
+// contributes Y_j - N_j p_j + h_j (1/2 - p_j), where h_j is its leverage
+// N_j p_j (1 - p_j) x_j' I^{-1} x_j and x_j = (e_i, z_j). The stopping rules
+// read the penalized log-likelihood.
+// [[Rcpp::export]]
+List logis_firth_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_prov,
+                      arma::vec gamma, arma::vec beta, const int &threads, double tol,
+                      int max_iter, double bound, bool message, const std::string &stop) {
+  const int m = n_prov.n_elem;
+  const int p = Z.n_cols;
+  arma::uvec first(m), last(m);
+  int ind = 0;
+  for (int i = 0; i < m; i++) {
+    first(i) = ind;
+    last(i) = ind + n_prov(i) - 1;
+    ind += n_prov(i);
+  }
+  if (message) Rcout << "Fitting the Firth-penalized fixed provider effects model ..." << std::endl;
+  int iter = 0;
+  double crit = 1e9, crit_beta = 0, loglik = 0, loglik_pen = 0, loglik_pen_prev = 0,
+         loglik_pen_init = 0;
+  while (true) {
+    arma::vec gamma_obs = rep_vec(gamma, n_prov);
+    arma::vec z_beta = Z * beta;
+    arma::vec prob = 1 / (1 + exp(-gamma_obs - z_beta));
+    prob = clamp(prob, 1e-10, 1 - 1e-10);
+    arma::vec pq = N % prob % (1 - prob);
+    arma::vec info_gamma(m);
+    arma::mat info_bg(p, m);
+    for (int i = 0; i < m; i++) {
+      info_gamma(i) = sum(pq.subvec(first(i), last(i)));
+      info_bg.col(i) = Z.rows(first(i), last(i)).t() * pq.subvec(first(i), last(i));
+    }
+    arma::mat info_beta = info_beta_omp(Z, pq, threads);
+    arma::mat J = info_bg.each_row() / info_gamma.t();
+    arma::mat S = info_beta - J * info_bg.t();
+    arma::mat S_inv;
+    if (!inv_sympd(S_inv, S)) S_inv = pinv(S);
+    double logdet_s, sign;
+    log_det(logdet_s, sign, S);
+    loglik = Loglkd(N, Y, z_beta, gamma_obs);
+    loglik_pen = loglik + 0.5 * (sum(log(info_gamma)) + logdet_s);
+    if (iter == 0) {
+      loglik_pen_init = loglik_pen;
+    } else {
+      crit = stop_crit(stop, crit_beta, loglik_pen - loglik_pen_prev, loglik_pen_prev,
+                       loglik_pen_init);
+      if (message) print_crit(stop, iter, crit, true);
+      if (crit < tol || iter >= max_iter) break;
+    }
+    loglik_pen_prev = loglik_pen;
+
+    // leverages h_j = pq_j * [ (1/I_ii + J_i' S^-1 J_i) - 2 z_j' S^-1 J_i + z_j' S^-1 z_j ]
+    arma::mat ZS = Z * S_inv;
+    arma::vec quad_z = sum(ZS % Z, 1);
+    arma::vec h(Y.n_elem);
+    for (int i = 0; i < m; i++) {
+      arma::vec sj = S_inv * J.col(i);
+      double a = 1.0 / info_gamma(i) + dot(J.col(i), sj);
+      arma::vec b = Z.rows(first(i), last(i)) * sj;
+      h.subvec(first(i), last(i)) =
+          pq.subvec(first(i), last(i)) % (a - 2 * b + quad_z.subvec(first(i), last(i)));
+    }
+    arma::vec r = Y - N % prob + h % (0.5 - prob);
+    arma::vec u_gamma(m);
+    for (int i = 0; i < m; i++) u_gamma(i) = sum(r.subvec(first(i), last(i)));
+    arma::vec u_beta = Z.t() * r;
+    arma::vec d_beta = S_inv * (u_beta - J * u_gamma);
+    arma::vec d_gamma = u_gamma / info_gamma - J.t() * d_beta;
+    beta += d_beta;
+    gamma += d_gamma;
+    gamma = clamp(gamma, median(gamma) - bound, median(gamma) + bound);
+    crit_beta = norm(d_beta, "inf");
+    iter++;
+  }
+  if (message) {
+    Rcout << "Firth-penalized fit converged after " << iter << " iterations." << std::endl;
+  }
+  return List::create(_["gamma"] = gamma, _["beta"] = beta, _["iter"] = iter,
+                      _["loglik"] = loglik, _["loglik_pen"] = loglik_pen, _["crit"] = crit);
+}

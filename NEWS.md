@@ -28,10 +28,44 @@ frame with column names.
   maps those limits to the ratios and rates; `direct_expectation()` replaces `direct_exp()`.
 * `test_measure()` replaces `test_SM()` and adds the log scale.
 
+## Linear, random-effect and correlated random-effect models (rewritten from 1.0.3)
+
+* `pp_data()` detects or takes an `outcome` type (binary, binomial, continuous); `sim_kecc()`
+  simulates continuous outcomes.
+* `fit_linear_fe()` replaces `linear_fe()`: the within-provider regression instead of a dense
+  block-diagonal centring matrix; `gamma_variance()` offers the case-mix variance
+  (1.0.3's "simplified", exactly `sigma^2 / n_i`) and the "full" one; the provider and covariate
+  tests use the t distribution with `n - m - p` degrees of freedom for every model-based
+  statistic (1.0.3 mixed normal and t references); a patient-clustered robust variance is new.
+* `fit_logistic_fe(penalty = "firth")` replaces `logis_firth()` and extends it to binomial
+  trials; the object is a `logistic_fe` fit, so every test and standardization applies.
+* `fit_logistic_re()`, `fit_logistic_cre()`, `fit_linear_re()`, `fit_linear_cre()` replace
+  `logis_re()`, `logis_cre()`, `linear_re()`, `linear_cre()` (lme4 wrappers): the random effects
+  are `coefficients$alpha`, their conditional variances `post_var`; the CRE decomposition names
+  its columns `<x>_within` and `<x>_between` and defaults to every covariate; the tests of the
+  fixed effects use `2 * pnorm(-|z|)` (1.0.3 computed `2 * (1 - pnorm(z))`, wrong for negative
+  statistics); standardization offers the observed (default) or the predicted numerator.
+* The direct standardized difference of the linear models is relative to the population (the
+  row-weighted mean of the effects), as the direct ratio of the logistic models always was;
+  1.0.3 used the median for the linear model only.
+
+## Variable selection (rewritten from grplasso 1.0)
+
+* `select_lasso()` and `select_group_lasso()` replace `pp.lasso()` and `grp.lasso()`: the same
+  objective and coordinate-descent paths, now with binomial trials, a deterministic update order
+  (grplasso permuted the coordinates at random inside the C++ code) and without the data race
+  in its OpenMP loop; `penalize` and `group` name the covariates instead of positional vectors.
+* `cv_lasso()` and `cv_group_lasso()` replace `cv.pp.lasso()` and `cv.grp.lasso()`: folds are
+  formed within each provider over patients (grplasso stratified rows on the outcome and could
+  leave a provider out of a training set, which crashed its predict method), the deviance is
+  averaged by fold with a fold-based standard error, and both `lambda_min` and `lambda_1se` are
+  reported.
+* `coef()`, `predict()` and `selected_covariates()` work along the path; `predict()` takes a
+  data frame and handles unseen providers explicitly (grplasso indexed the effects by position
+  for numeric identifiers).
+* Discrete-time survival and stratified Cox selection move to the survival components.
+
 ## Still to come (in this order)
 
-* Random, correlated-random and linear models of 1.0.3 with their defects
-  fixed.
-* Variable selection of `grplasso` with its defects fixed.
 * Empirical null, inter-unit reliability, Cox O/E components.
 * Plots.

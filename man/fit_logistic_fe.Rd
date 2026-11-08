@@ -7,6 +7,7 @@
 fit_logistic_fe(
   data,
   algorithm = c("SerBIN", "BAN"),
+  penalty = c("none", "firth"),
   max_iter = 10000,
   tol = 1e-05,
   bound = 10,
@@ -18,10 +19,14 @@ fit_logistic_fe(
 )
 }
 \arguments{
-\item{data}{an object from \code{\link[=pp_data]{pp_data()}}.}
+\item{data}{an object from \code{\link[=pp_data]{pp_data()}} with a binary or binomial outcome.}
 
 \item{algorithm}{\code{"SerBIN"} (default; Wu et al. 2022) or \code{"BAN"} (He et
 al. 2013).}
+
+\item{penalty}{\code{"none"} (default; maximum likelihood) or \code{"firth"}
+(penalized likelihood with Jeffreys' prior, Firth 1993), which keeps the
+effects of providers with no or all events finite.}
 
 \item{max_iter}{maximum number of iterations. Default 10,000.}
 
@@ -30,15 +35,17 @@ al. 2013).}
 \item{bound}{provider effects are kept within \verb{median(gamma) +/- bound}
 during the iterations. Default 10.}
 
-\item{backtrack}{use a backtracking line search. Default \code{TRUE}.}
+\item{backtrack}{use a backtracking line search (not used with the Firth
+penalty). Default \code{TRUE}.}
 
 \item{threads}{number of OpenMP threads for the information matrix
-(SerBIN only). Results do not depend on it.}
+(SerBIN and Firth). Results do not depend on it.}
 
 \item{stop}{stopping rule: \code{"beta"} (default; infinity norm of the change
 in beta), \code{"relch"} (relative change in the log-likelihood), \code{"ratch"}
 (change relative to the total change since the start), \code{"all"} (all
-three below \code{tol}) or \code{"or"} (any of the three below \code{tol}).}
+three below \code{tol}) or \code{"or"} (any of the three below \code{tol}). With the
+Firth penalty the rules read the penalized log-likelihood.}
 
 \item{auc}{also compute the area under the ROC curve (binary outcomes).}
 
@@ -52,6 +59,7 @@ provider) and \code{beta} (covariate coefficients, named by covariate).}
 \item{linear_predictor}{\eqn{Z\hat\beta} of the included rows.}
 \item{loglik, aic, bic}{binomial log-likelihood (without the constant
 \eqn{\log\binom{N}{Y}}) and the information criteria.}
+\item{penalized_loglik}{the penalized log-likelihood (Firth only).}
 \item{auc}{the AUC, when requested (\code{NA} for binomial outcomes).}
 \item{data}{the included rows, as sorted by \code{\link[=pp_data]{pp_data()}}.}
 \item{vars, sizes, cutoff}{from \code{\link[=pp_data]{pp_data()}} (\code{sizes} restricted to the
@@ -64,7 +72,8 @@ included providers).}
 Fits \eqn{\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta} with a
 binary or binomial outcome (\eqn{Y_{ij} \sim \mathrm{Bin}(N_{ij}, p_{ij})})
 by the serial blockwise inversion Newton (SerBIN) or block ascent Newton
-(BAN) algorithm, on the providers that \code{\link[=pp_data]{pp_data()}} marked as included.
+(BAN) algorithm, on the providers that \code{\link[=pp_data]{pp_data()}} marked as included,
+optionally with Firth's penalty.
 }
 \details{
 SerBIN updates provider effects and covariate coefficients
@@ -72,6 +81,15 @@ jointly using the block structure of the information matrix; BAN
 alternates between the two blocks. Providers with no or all events are
 fitted (their effects sit at the bound); the tests treat them as the data
 allow.
+
+With \code{penalty = "firth"} the penalized log-likelihood \eqn{\ell(\gamma,
+\beta) + \frac12 \log\det I(\gamma, \beta)} is maximized by a joint
+Newton step through the same block structure; the modified score adds
+\eqn{h_{ij}(\frac12 - p_{ij})} to each row's residual, with \eqn{h_{ij}}
+the row's leverage \eqn{N_{ij} p_{ij}(1 - p_{ij})\, x_{ij}^\top I^{-1}
+x_{ij}}. The estimates stay finite when a provider has no or all events.
+\code{loglik}, \code{aic} and \code{bic} report the unpenalized log-likelihood at the
+penalized estimate; the penalized value is \code{penalized_loglik}.
 }
 \examples{
 d <- sim_kecc(n_providers = 20, seed = 1)
@@ -80,8 +98,12 @@ pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 fit <- fit_logistic_fe(pd)
 fit
 coef(fit)$beta
+fit_firth <- fit_logistic_fe(pd, penalty = "firth")
 }
 \references{
+Firth D (1993). Bias reduction of maximum likelihood estimates.
+\emph{Biometrika}, 80(1), 27-38.
+
 He K, Kalbfleisch JD, Li Y, Li Y (2013). Evaluating hospital readmission
 rates in dialysis facilities; adjusting for hospital effects. \emph{Lifetime
 Data Analysis}, 19, 490-512.

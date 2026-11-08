@@ -22,4 +22,5 @@
 #' @keywords internal
 #' @useDynLib pprof, .registration = TRUE
 #' @importFrom Rcpp evalCpp
+#' @importFrom stats coef predict
 "_PACKAGE"

@@ -19,10 +19,23 @@ match_alternative <- function(alternative) {
   alternative
 }
 
-# p-value and flag of a z statistic (positive z = above the reference).
-z_decision <- function(z, level, alternative) {
+check_level <- function(level) {
+  if (!is.numeric(level) || length(level) != 1 || level <= 0 || level >= 1) {
+    stop("`level` must be a number between 0 and 1.", call. = FALSE)
+  }
+  invisible(level)
+}
+
+# p-value and flag of a statistic (positive = above the reference) whose
+# reference distribution is standard normal (df = Inf) or t with df degrees
+# of freedom.
+z_decision <- function(z, level, alternative, df = Inf) {
   alpha <- 1 - level
-  p_upper <- stats::pnorm(z, lower.tail = FALSE)
+  p_upper <- if (is.finite(df)) {
+    stats::pt(z, df = df, lower.tail = FALSE)
+  } else {
+    stats::pnorm(z, lower.tail = FALSE)
+  }
   if (alternative == "two.sided") {
     flag <- ifelse(p_upper < alpha / 2, 1L, ifelse(p_upper <= 1 - alpha / 2, 0L, -1L))
     p <- 2 * pmin(p_upper, 1 - p_upper)
@@ -100,7 +113,42 @@ robust_beta_meat <- function(residual, z, prov, patient, levels) {
   list(A0 = a0, A1_t = a1_t, A2 = compute_A2(u_k))
 }
 
-# Normal quantile for a confidence level and alternative.
+# Quantile of the reference distribution (normal or t) for a confidence
+# level and alternative.
+ref_quantile <- function(level, alternative, df = Inf) {
+  prob <- if (alternative == "two.sided") 1 - (1 - level) / 2 else level
+  if (is.finite(df)) stats::qt(prob, df = df) else stats::qnorm(prob)
+}
+
 normal_quantile <- function(level, alternative) {
-  if (alternative == "two.sided") stats::qnorm(1 - (1 - level) / 2) else stats::qnorm(level)
+  ref_quantile(level, alternative, df = Inf)
+}
+
+# Wald limits of estimates with standard errors (one-sided alternatives give
+# one infinite limit).
+wald_limits <- function(estimate, se, level, alternative, df = Inf) {
+  q <- ref_quantile(level, alternative, df)
+  k <- length(estimate)
+  list(lower = if (alternative == "less") rep(-Inf, k) else unname(estimate - q * se),
+       upper = if (alternative == "greater") rep(Inf, k) else unname(estimate + q * se))
+}
+
+# The fixed-column result of every test of provider effects.
+pp_test_frame <- function(provider, estimate, se, null_value, statistic, decision, lower, upper,
+                          test, sizes) {
+  out <- data.frame(provider = provider, estimate = unname(estimate), se = unname(se),
+                    null_value = null_value, statistic = unname(statistic), p = decision$p,
+                    flag = decision$flag, lower = unname(lower), upper = unname(upper),
+                    stringsAsFactors = FALSE)
+  rownames(out) <- NULL
+  attr(out, "test") <- test
+  attr(out, "sizes") <- sizes
+  class(out) <- c("pp_test", "data.frame")
+  out
+}
+
+# Rows, trials, outcome and provider-level means of the included rows of a
+# fit; `code` maps rows to the position of their provider.
+provider_means <- function(x, code, n_prov) {
+  rowsum(x, code, reorder = TRUE) / n_prov
 }

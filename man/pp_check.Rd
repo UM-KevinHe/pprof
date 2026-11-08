@@ -18,8 +18,9 @@ pp_check(
 \arguments{
 \item{data}{a data frame.}
 
-\item{y}{name of the outcome column: 0/1 for a binary outcome, or the
-number of events out of \code{n} trials for a binomial outcome.}
+\item{y}{name of the outcome column: 0/1 for a binary outcome, the number
+of events out of \code{n} trials for a binomial outcome, or any numeric value
+for a continuous outcome.}
 
 \item{x}{names of the covariate columns. Covariates must be numeric; code
 factors as 0/1 columns first.}
@@ -27,7 +28,7 @@ factors as 0/1 columns first.}
 \item{provider}{name of the provider identifier column.}
 
 \item{n}{name of the column with the number of trials per row (binomial
-outcome), or \code{NULL} for a binary outcome (one trial per row).}
+outcome), or \code{NULL}.}
 
 \item{cor_threshold}{warn about pairs of covariates whose absolute
 correlation exceeds this value. Default 0.9.}

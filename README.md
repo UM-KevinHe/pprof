@@ -15,11 +15,12 @@ component; see `NEWS.md` for what exists today.
 | Step | Functions |
 |---|---|
 | Data | `pp_data()`, `pp_check()`, `sim_kecc()` |
-| Models | (next) |
+| Models | `fit_logistic_fe()` (SerBIN/BAN, Firth), `fit_linear_fe()`, `fit_logistic_re()`, `fit_logistic_cre()`, `fit_linear_re()`, `fit_linear_cre()` |
 | Standardization | `standardize()` |
-| Tests | `test_providers()`, `test_covariates()` |
+| Tests | `test_providers()`, `test_covariates()`, `confint()`, `test_measure()` |
 | Reference distributions | (next) |
-| Reliability, selection, plots | (next) |
+| Selection | `select_lasso()`, `select_group_lasso()`, `cv_lasso()`, `cv_group_lasso()` |
+| Reliability, plots | (next) |
 
 ## Installation
 

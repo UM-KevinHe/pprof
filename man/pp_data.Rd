@@ -11,6 +11,7 @@ pp_data(
   provider,
   patient = NULL,
   n = NULL,
+  outcome = c("auto", "binary", "binomial", "continuous"),
   cutoff = 10,
   check = TRUE,
   message = TRUE
@@ -19,8 +20,9 @@ pp_data(
 \arguments{
 \item{data}{a data frame.}
 
-\item{y}{name of the outcome column: 0/1 for a binary outcome, or the
-number of events out of \code{n} trials for a binomial outcome.}
+\item{y}{name of the outcome column: 0/1 for a binary outcome, the number
+of events out of \code{n} trials for a binomial outcome, or any numeric value
+for a continuous outcome.}
 
 \item{x}{names of the covariate columns. Covariates must be numeric; code
 factors as 0/1 columns first.}
@@ -31,7 +33,11 @@ factors as 0/1 columns first.}
 row is an independent unit. Required by the patient-clustered tests.}
 
 \item{n}{name of the column with the number of trials per row (binomial
-outcome), or \code{NULL} for a binary outcome (one trial per row).}
+outcome), or \code{NULL}.}
+
+\item{outcome}{\code{"auto"} (default), \code{"binary"}, \code{"binomial"} or
+\code{"continuous"}. With \code{"auto"} the outcome is binomial when \code{n} is given,
+binary when every value of \code{y} is 0 or 1, and continuous otherwise.}
 
 \item{cutoff}{providers with fewer than \code{cutoff} patients (rows when
 \code{patient} is \code{NULL}) are kept in the data but marked \code{included = FALSE}
@@ -46,8 +52,10 @@ VIF are warnings). Default \code{TRUE}.}
 \value{
 An object of class \code{pp_data}: a list with
 \item{data}{the sorted data frame with the named columns plus the logical
-columns \code{included}, \code{no_events} and \code{all_events}.}
-\item{vars}{the column names \code{y}, \code{x}, \code{provider}, \code{patient}, \code{n}.}
+columns \code{included}, \code{no_events} and \code{all_events} (the last two are
+\code{FALSE} for a continuous outcome).}
+\item{vars}{the column names \code{y}, \code{x}, \code{provider}, \code{patient}, \code{n} and the
+\code{outcome} type.}
 \item{sizes}{one row per provider in the sorted order: \code{provider},
 \code{rows}, \code{patients} (\code{NA} without a patient column), \code{included},
 \code{no_events}, \code{all_events}.}

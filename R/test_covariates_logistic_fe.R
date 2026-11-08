@@ -11,6 +11,10 @@
 #'   allow 0.
 #' @param ... unused.
 #'
+#' @details The refits use the settings of `fit`, including the Firth
+#' penalty; with the penalty the likelihood ratio compares the penalized
+#' log-likelihoods.
+#'
 #' @return A data frame with one row per covariate: `covariate`, `estimate`,
 #'   `se`, `statistic` (a z statistic for the Wald tests, a chi-square
 #'   statistic with one degree of freedom for `"lr"` and `"score"`), `p`,
@@ -58,17 +62,20 @@ test_covariates.logistic_fe <- function(fit, test = c("wald", "robust_wald", "lr
   if (null != 0) stop("`null` must be 0 for the lr and score tests.", call. = FALSE)
   if (length(x) < 2) stop("The lr and score tests need at least two covariates.", call. = FALSE)
   ctrl <- fit$control
+  firth <- identical(ctrl$penalty, "firth")
   refit_without <- function(j) {
     pd <- structure(list(data = fit$data, vars = utils::modifyList(fit$vars, list(x = x[-j])),
                          sizes = fit$sizes, cutoff = fit$cutoff), class = "pp_data")
-    fit_logistic_fe(pd, algorithm = ctrl$algorithm, max_iter = ctrl$max_iter, tol = ctrl$tol,
-                    bound = ctrl$bound, backtrack = ctrl$backtrack, threads = ctrl$threads,
-                    stop = ctrl$stop)
+    fit_logistic_fe(pd, algorithm = ctrl$algorithm,
+                    penalty = if (firth) "firth" else "none", max_iter = ctrl$max_iter,
+                    tol = ctrl$tol, bound = ctrl$bound, backtrack = ctrl$backtrack,
+                    threads = ctrl$threads, stop = ctrl$stop)
   }
+  loglik_of <- function(f) if (firth) f$penalized_loglik else f$loglik
   if (test == "lr") {
     stat <- vapply(ind, function(j) {
       null_fit <- refit_without(j)
-      -2 * (null_fit$loglik - fit$loglik)
+      -2 * (loglik_of(null_fit) - loglik_of(fit))
     }, numeric(1))
   } else {
     code <- provider_codes(m$prov, m$levels)

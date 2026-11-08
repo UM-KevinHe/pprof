@@ -216,6 +216,81 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// logis_firth_prov
+List logis_firth_prov(arma::vec& N, arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, const int& threads, double tol, int max_iter, double bound, bool message, const std::string& stop);
+RcppExport SEXP _pprof_logis_firth_prov(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP stopSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec& >::type N(NSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const int& >::type threads(threadsSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
+    Rcpp::traits::input_parameter< bool >::type message(messageSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type stop(stopSEXP);
+    rcpp_result_gen = Rcpp::wrap(logis_firth_prov(N, Y, Z, n_prov, gamma, beta, threads, tol, max_iter, bound, message, stop));
+    return rcpp_result_gen;
+END_RCPP
+}
+// lasso_path
+List lasso_path(const arma::vec& N, const arma::vec& Y, const arma::mat& Z, const arma::vec& n_prov, arma::vec gamma, arma::vec beta, const arma::uvec& penalized, const arma::vec& multiplier, const arma::vec& lambda, bool mm, bool backtrack, double bound, double tol, int max_iter, bool active_set, int threads);
+RcppExport SEXP _pprof_lasso_path(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP penalizedSEXP, SEXP multiplierSEXP, SEXP lambdaSEXP, SEXP mmSEXP, SEXP backtrackSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP active_setSEXP, SEXP threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type penalized(penalizedSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type multiplier(multiplierSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< bool >::type mm(mmSEXP);
+    Rcpp::traits::input_parameter< bool >::type backtrack(backtrackSEXP);
+    Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< bool >::type active_set(active_setSEXP);
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(lasso_path(N, Y, Z, n_prov, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set, threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// group_lasso_path
+List group_lasso_path(const arma::vec& N, const arma::vec& Y, const arma::mat& Z, const arma::vec& n_prov, arma::vec gamma, arma::vec beta, const arma::uvec& unpenalized, const arma::uvec& group_first, const arma::uvec& group_last, const arma::vec& multiplier, const arma::vec& lambda, bool backtrack, double bound, double tol, int max_iter, bool active_set, int threads);
+RcppExport SEXP _pprof_group_lasso_path(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP unpenalizedSEXP, SEXP group_firstSEXP, SEXP group_lastSEXP, SEXP multiplierSEXP, SEXP lambdaSEXP, SEXP backtrackSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP active_setSEXP, SEXP threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type unpenalized(unpenalizedSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group_first(group_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group_last(group_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type multiplier(multiplierSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< bool >::type backtrack(backtrackSEXP);
+    Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< bool >::type active_set(active_setSEXP);
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(group_lasso_path(N, Y, Z, n_prov, gamma, beta, unpenalized, group_first, group_last, multiplier, lambda, backtrack, bound, tol, max_iter, active_set, threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pprof_logis_fe_prov", (DL_FUNC) &_pprof_logis_fe_prov, 12},
@@ -230,6 +305,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pprof_cluster_sums", (DL_FUNC) &_pprof_cluster_sums, 5},
     {"_pprof_stabilized_meat", (DL_FUNC) &_pprof_stabilized_meat, 5},
     {"_pprof_restricted_score", (DL_FUNC) &_pprof_restricted_score, 8},
+    {"_pprof_logis_firth_prov", (DL_FUNC) &_pprof_logis_firth_prov, 12},
+    {"_pprof_lasso_path", (DL_FUNC) &_pprof_lasso_path, 16},
+    {"_pprof_group_lasso_path", (DL_FUNC) &_pprof_group_lasso_path, 17},
     {NULL, NULL, 0}
 };
 

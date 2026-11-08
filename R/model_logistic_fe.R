@@ -3,22 +3,28 @@
 #' Fits \eqn{\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta} with a
 #' binary or binomial outcome (\eqn{Y_{ij} \sim \mathrm{Bin}(N_{ij}, p_{ij})})
 #' by the serial blockwise inversion Newton (SerBIN) or block ascent Newton
-#' (BAN) algorithm, on the providers that [pp_data()] marked as included.
+#' (BAN) algorithm, on the providers that [pp_data()] marked as included,
+#' optionally with Firth's penalty.
 #'
-#' @param data an object from [pp_data()].
+#' @param data an object from [pp_data()] with a binary or binomial outcome.
 #' @param algorithm `"SerBIN"` (default; Wu et al. 2022) or `"BAN"` (He et
 #'   al. 2013).
+#' @param penalty `"none"` (default; maximum likelihood) or `"firth"`
+#'   (penalized likelihood with Jeffreys' prior, Firth 1993), which keeps the
+#'   effects of providers with no or all events finite.
 #' @param max_iter maximum number of iterations. Default 10,000.
 #' @param tol convergence tolerance. Default 1e-5.
 #' @param bound provider effects are kept within `median(gamma) +/- bound`
 #'   during the iterations. Default 10.
-#' @param backtrack use a backtracking line search. Default `TRUE`.
+#' @param backtrack use a backtracking line search (not used with the Firth
+#'   penalty). Default `TRUE`.
 #' @param threads number of OpenMP threads for the information matrix
-#'   (SerBIN only). Results do not depend on it.
+#'   (SerBIN and Firth). Results do not depend on it.
 #' @param stop stopping rule: `"beta"` (default; infinity norm of the change
 #'   in beta), `"relch"` (relative change in the log-likelihood), `"ratch"`
 #'   (change relative to the total change since the start), `"all"` (all
-#'   three below `tol`) or `"or"` (any of the three below `tol`).
+#'   three below `tol`) or `"or"` (any of the three below `tol`). With the
+#'   Firth penalty the rules read the penalized log-likelihood.
 #' @param auc also compute the area under the ROC curve (binary outcomes).
 #' @param message print the iteration history.
 #'
@@ -28,6 +34,15 @@
 #' fitted (their effects sit at the bound); the tests treat them as the data
 #' allow.
 #'
+#' With `penalty = "firth"` the penalized log-likelihood \eqn{\ell(\gamma,
+#' \beta) + \frac12 \log\det I(\gamma, \beta)} is maximized by a joint
+#' Newton step through the same block structure; the modified score adds
+#' \eqn{h_{ij}(\frac12 - p_{ij})} to each row's residual, with \eqn{h_{ij}}
+#' the row's leverage \eqn{N_{ij} p_{ij}(1 - p_{ij})\, x_{ij}^\top I^{-1}
+#' x_{ij}}. The estimates stay finite when a provider has no or all events.
+#' `loglik`, `aic` and `bic` report the unpenalized log-likelihood at the
+#' penalized estimate; the penalized value is `penalized_loglik`.
+#'
 #' @return An object of class `logistic_fe`:
 #' \item{coefficients}{a list with `gamma` (provider effects, named by
 #'   provider) and `beta` (covariate coefficients, named by covariate).}
@@ -35,6 +50,7 @@
 #' \item{linear_predictor}{\eqn{Z\hat\beta} of the included rows.}
 #' \item{loglik, aic, bic}{binomial log-likelihood (without the constant
 #'   \eqn{\log\binom{N}{Y}}) and the information criteria.}
+#' \item{penalized_loglik}{the penalized log-likelihood (Firth only).}
 #' \item{auc}{the AUC, when requested (`NA` for binomial outcomes).}
 #' \item{data}{the included rows, as sorted by [pp_data()].}
 #' \item{vars, sizes, cutoff}{from [pp_data()] (`sizes` restricted to the
@@ -44,6 +60,9 @@
 #' \item{converged}{whether the stopping rule was met before `max_iter`.}
 #'
 #' @references
+#' Firth D (1993). Bias reduction of maximum likelihood estimates.
+#' *Biometrika*, 80(1), 27-38.
+#'
 #' He K, Kalbfleisch JD, Li Y, Li Y (2013). Evaluating hospital readmission
 #' rates in dialysis facilities; adjusting for hospital effects. *Lifetime
 #' Data Analysis*, 19, 490-512.
@@ -61,13 +80,19 @@
 #' fit <- fit_logistic_fe(pd)
 #' fit
 #' coef(fit)$beta
+#' fit_firth <- fit_logistic_fe(pd, penalty = "firth")
 #' @export
-fit_logistic_fe <- function(data, algorithm = c("SerBIN", "BAN"), max_iter = 10000, tol = 1e-5,
-                            bound = 10, backtrack = TRUE, threads = 1,
-                            stop = c("beta", "relch", "ratch", "all", "or"), auc = FALSE,
-                            message = FALSE) {
+fit_logistic_fe <- function(data, algorithm = c("SerBIN", "BAN"), penalty = c("none", "firth"),
+                            max_iter = 10000, tol = 1e-5, bound = 10, backtrack = TRUE,
+                            threads = 1, stop = c("beta", "relch", "ratch", "all", "or"),
+                            auc = FALSE, message = FALSE) {
   if (!inherits(data, "pp_data")) stop("`data` must come from pp_data().", call. = FALSE)
+  if (outcome_of(data) == "continuous") {
+    stop("The logistic model needs a binary or binomial outcome; see fit_linear_fe().",
+         call. = FALSE)
+  }
   algorithm <- match.arg(algorithm)
+  penalty <- match.arg(penalty)
   stop <- match.arg(stop)
   if (!is.logical(backtrack) || length(backtrack) != 1) {
     stop("`backtrack` must be TRUE or FALSE.", call. = FALSE)
@@ -88,7 +113,9 @@ fit_logistic_fe <- function(data, algorithm = c("SerBIN", "BAN"), max_iter = 100
   y_bar <- sum(y) / sum(n)
   gamma0 <- rep(log(y_bar / (1 - y_bar)), length(levels))
   beta0 <- rep(0, ncol(z))
-  res <- if (algorithm == "SerBIN") {
+  res <- if (penalty == "firth") {
+    logis_firth_prov(n, y, z, n_prov, gamma0, beta0, threads, tol, max_iter, bound, message, stop)
+  } else if (algorithm == "SerBIN") {
     logis_BIN_fe_prov(n, y, z, n_prov, gamma0, beta0, threads, tol, max_iter, bound, message,
                       backtrack, stop)
   } else {
@@ -107,12 +134,14 @@ fit_logistic_fe <- function(data, algorithm = c("SerBIN", "BAN"), max_iter = 100
                         fitted = fitted, linear_predictor = lp,
                         loglik = loglik, aic = -2 * loglik + 2 * k,
                         bic = -2 * loglik + log(nrow(d)) * k,
+                        penalized_loglik = if (penalty == "firth") res$loglik_pen else NULL,
                         data = d, vars = v,
                         sizes = data$sizes[data$sizes$included, , drop = FALSE],
                         cutoff = data$cutoff, rows = n_prov,
-                        control = list(algorithm = algorithm, max_iter = max_iter, tol = tol,
-                                       bound = bound, backtrack = backtrack, threads = threads,
-                                       stop = stop, iterations = res$iter),
+                        control = list(algorithm = algorithm, penalty = penalty,
+                                       max_iter = max_iter, tol = tol, bound = bound,
+                                       backtrack = backtrack, threads = threads, stop = stop,
+                                       iterations = res$iter),
                         converged = res$iter < max_iter),
                    class = "logistic_fe")
   rownames(out$sizes) <- NULL
@@ -148,7 +177,9 @@ auc_binary <- function(y, pred) {
 
 #' @export
 print.logistic_fe <- function(x, ...) {
-  cat("Logistic model with fixed provider effects (", x$control$algorithm, ")\n", sep = "")
+  cat("Logistic model with fixed provider effects (",
+      if (identical(x$control$penalty, "firth")) "Firth penalty" else x$control$algorithm,
+      ")\n", sep = "")
   cat("  ", nrow(x$data), " rows, ", length(x$coefficients$gamma), " providers, ",
       length(x$coefficients$beta), " covariates; ",
       if (is.null(x$vars$n)) "binary outcome" else "binomial outcome", "\n", sep = "")
@@ -187,22 +218,35 @@ vcov.logistic_fe <- function(object, ...) {
 
 #' Variance of the provider effects for a Wald test
 #'
-#' Two model-based variances of \eqn{\hat\gamma_i} are available. The
-#' `"case_mix"` variance is that of \eqn{\hat\gamma_i + \bar x_i^\top\hat\beta},
-#' the provider's log-odds at its own average case mix \eqn{\bar x_i}; it
-#' does not depend on where the covariates are centred and is the default of
-#' [test_providers()]. The `"full"` variance is the \eqn{(\gamma_i,\gamma_i)}
-#' element of the inverse information, \eqn{1/I_{ii} + \bar z_i^\top
-#' \mathrm{Var}(\hat\beta)\bar z_i}; it is the variance of the log-odds at
-#' \eqn{Z = 0} and changes with the origin of the covariates, so it is only
-#' appropriate when the null value is an external constant stated in the
-#' same coding.
+#' Two model-based variances of a fixed provider effect \eqn{\hat\gamma_i}
+#' are available. The `"case_mix"` variance is that of \eqn{\hat\gamma_i +
+#' \bar x_i^\top\hat\beta}, the provider's outcome (log-odds or mean) at its
+#' own average case mix \eqn{\bar x_i}; it does not depend on where the
+#' covariates are centred and is the default of [test_providers()]. The
+#' `"full"` variance is the \eqn{(\gamma_i,\gamma_i)} element of the inverse
+#' information, \eqn{1/I_{ii} + \bar z_i^\top \mathrm{Var}(\hat\beta)\bar
+#' z_i}; it is the variance of the outcome at \eqn{Z = 0} and changes with
+#' the origin of the covariates, so it is only appropriate when the null
+#' value is an external constant stated in the same coding.
 #'
-#' @param fit a model fitted by [fit_logistic_fe()].
+#' For the logistic model \eqn{\bar z_i} is the \eqn{N p (1 - p)}-weighted
+#' mean covariate and the case-mix variance is \eqn{1/I_{ii} + (\bar z_i -
+#' \bar x_i)^\top \mathrm{Var}(\hat\beta) (\bar z_i - \bar x_i)}; for the
+#' linear model \eqn{\bar z_i = \bar x_i} and the case-mix variance is
+#' exactly \eqn{\hat\sigma^2 / n_i}.
+#'
+#' @param fit a model fitted by [fit_logistic_fe()] or [fit_linear_fe()].
 #' @param type `"case_mix"` (default) or `"full"`.
+#' @param ... unused.
 #' @return A named numeric vector, one variance per provider.
 #' @export
-gamma_variance <- function(fit, type = c("case_mix", "full")) {
+gamma_variance <- function(fit, type = c("case_mix", "full"), ...) {
+  UseMethod("gamma_variance")
+}
+
+#' @rdname gamma_variance
+#' @export
+gamma_variance.logistic_fe <- function(fit, type = c("case_mix", "full"), ...) {
   type <- match.arg(type)
   m <- fit_matrices(fit)
   v <- logis_fe_var(m$n, m$z, m$n_prov, fit$coefficients$gamma, fit$coefficients$beta)
@@ -219,7 +263,7 @@ gamma_variance <- function(fit, type = c("case_mix", "full")) {
 
 # The pieces of a fit every test reads: outcome, trials, covariate matrix,
 # provider and patient of the included rows, provider levels and rows per
-# provider (in the order of the coefficients).
+# provider (in the order of the effects).
 fit_matrices <- function(fit) {
   d <- fit$data
   v <- fit$vars
@@ -229,7 +273,7 @@ fit_matrices <- function(fit) {
        n = if (is.null(v$n)) rep(1, nrow(d)) else as.numeric(d[[v$n]]),
        z = z, prov = d[[v$provider]],
        patient = if (is.null(v$patient)) NULL else d[[v$patient]],
-       levels = names(fit$coefficients$gamma), n_prov = fit$rows)
+       levels = fit$sizes$provider, n_prov = fit$rows)
 }
 
 check_fit <- function(fit, class = "logistic_fe") {

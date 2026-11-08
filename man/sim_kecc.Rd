@@ -8,13 +8,14 @@ sim_kecc(
   n_providers = 50,
   provider_size = c(15, 60),
   rows_per_patient = c(1, 6),
-  type = c("binary", "binomial"),
+  type = c("binary", "binomial", "continuous"),
   trials = c(20, 31),
   n_covariates = 3,
   beta = NULL,
   gamma_sd = 0.5,
   patient_sd = 0.5,
   base_rate = 0.25,
+  sigma = 1,
   seed = NULL
 )
 }
@@ -26,8 +27,8 @@ are drawn uniformly between the two values.}
 
 \item{rows_per_patient}{range of the number of rows per patient.}
 
-\item{type}{\code{"binary"} (one trial per row) or \code{"binomial"} (\code{n} trials per
-row).}
+\item{type}{\code{"binary"} (one trial per row), \code{"binomial"} (\code{n} trials per
+row) or \code{"continuous"}.}
 
 \item{trials}{range of the number of trials per row for \code{type = "binomial"}.}
 
@@ -38,26 +39,29 @@ patient-level standard normal, \code{x2} a patient-level 0/1 with probability
 \item{beta}{covariate coefficients; by default \verb{0.5, -0.4, 0.3} recycled.}
 
 \item{gamma_sd}{standard deviation of the provider effects around the
-logit of \code{base_rate}.}
+logit of \code{base_rate} (binary, binomial) or around 0 (continuous).}
 
 \item{patient_sd}{standard deviation of the patient random effect.}
 
 \item{base_rate}{event probability of an average patient at the median
-provider.}
+provider (binary and binomial outcomes).}
+
+\item{sigma}{residual standard deviation of a continuous outcome.}
 
 \item{seed}{optional random seed.}
 }
 \value{
-A data frame with columns \code{provider}, \code{patient}, \code{n} (trials),
-\code{y} (events) and the covariates, one row per observation, in random
-order. The true parameters are kept in \code{attr(, "truth")}: \code{gamma}
-(named by provider), \code{beta}, \code{patient_effect} (named by patient).
+A data frame with columns \code{provider}, \code{patient}, \code{n} (trials; 1
+for binary and continuous outcomes), \code{y} and the covariates, one row per
+observation, in random order. The true parameters are kept in
+\code{attr(, "truth")}: \code{gamma} (named by provider), \code{beta},
+\code{patient_effect} (named by patient).
 }
 \description{
 Patients nested in providers with repeated observations per patient, a
 provider effect, a patient random effect and a few covariates. The outcome
-is binary per row (a patient-month, say) or binomial out of a number of
-trials per row (days at risk, say).
+is binary per row (a patient-month, say), binomial out of a number of
+trials per row (days at risk, say) or continuous.
 }
 \examples{
 d <- sim_kecc(n_providers = 5, seed = 1)
