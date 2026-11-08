@@ -6,12 +6,17 @@
 \usage{
 pp_data(
   data,
-  y,
+  y = NULL,
   x,
   provider,
   patient = NULL,
   n = NULL,
-  outcome = c("auto", "binary", "binomial", "continuous"),
+  time = NULL,
+  event = NULL,
+  start = NULL,
+  weights = NULL,
+  offset = NULL,
+  outcome = c("auto", "binary", "binomial", "continuous", "survival"),
   cutoff = 10,
   check = TRUE,
   message = TRUE
@@ -22,7 +27,8 @@ pp_data(
 
 \item{y}{name of the outcome column: 0/1 for a binary outcome, the number
 of events out of \code{n} trials for a binomial outcome, or any numeric value
-for a continuous outcome.}
+for a continuous outcome. \code{NULL} for a survival outcome, which is given
+by \code{time} and \code{event}.}
 
 \item{x}{names of the covariate columns. Covariates must be numeric; code
 factors as 0/1 columns first.}
@@ -35,13 +41,28 @@ row is an independent unit. Required by the patient-clustered tests.}
 \item{n}{name of the column with the number of trials per row (binomial
 outcome), or \code{NULL}.}
 
-\item{outcome}{\code{"auto"} (default), \code{"binary"}, \code{"binomial"} or
-\code{"continuous"}. With \code{"auto"} the outcome is binomial when \code{n} is given,
-binary when every value of \code{y} is 0 or 1, and continuous otherwise.}
+\item{time, event}{for a survival outcome, the names of the columns with
+the end of each row's at-risk interval and its 0/1 event indicator.}
+
+\item{start}{optional name of the column with the start of the at-risk
+interval (left truncation or counting-process rows); 0 when \code{NULL}.}
+
+\item{weights}{optional name of a column of positive case weights, used by
+\code{\link[=fit_cox]{fit_cox()}}.}
+
+\item{offset}{optional name of a column with a known term of the linear
+predictor, used by \code{\link[=fit_cox]{fit_cox()}}.}
+
+\item{outcome}{\code{"auto"} (default), \code{"binary"}, \code{"binomial"},
+\code{"continuous"} or \code{"survival"}. With \code{"auto"} the outcome is survival
+when \code{time} or \code{event} is given, binomial when \code{n} is given, binary when
+every value of \code{y} is 0 or 1, and continuous otherwise.}
 
 \item{cutoff}{providers with fewer than \code{cutoff} patients (rows when
 \code{patient} is \code{NULL}) are kept in the data but marked \code{included = FALSE}
-and left out of model fitting. Default 10.}
+and left out of model fitting. Default 10. Use 0 to fit every provider,
+as the two-stage survival models of the KECC measures do, and select the
+providers to report at the test stage.}
 
 \item{check}{run \code{\link[=pp_check]{pp_check()}} first (missing values and zero-variance
 covariates are errors; near-zero variance, high correlation and large
@@ -53,9 +74,10 @@ VIF are warnings). Default \code{TRUE}.}
 An object of class \code{pp_data}: a list with
 \item{data}{the sorted data frame with the named columns plus the logical
 columns \code{included}, \code{no_events} and \code{all_events} (the last two are
-\code{FALSE} for a continuous outcome).}
-\item{vars}{the column names \code{y}, \code{x}, \code{provider}, \code{patient}, \code{n} and the
-\code{outcome} type.}
+\code{FALSE} for a continuous outcome, and \code{all_events} for a survival
+outcome).}
+\item{vars}{the column names \code{y}, \code{x}, \code{provider}, \code{patient}, \code{n},
+\code{time}, \code{start}, \code{event}, \code{weights}, \code{offset} and the \code{outcome} type.}
 \item{sizes}{one row per provider in the sorted order: \code{provider},
 \code{rows}, \code{patients} (\code{NA} without a patient column), \code{included},
 \code{no_events}, \code{all_events}.}
@@ -65,9 +87,9 @@ columns \code{included}, \code{no_events} and \code{all_events} (the last two ar
 Checks and arranges the data every model and test in the package reads:
 the outcome, the covariates, the provider identifier and, when the data
 have repeated observations, the patient identifier and the number of
-trials. Rows are sorted by provider and patient, provider sizes are
-counted, and providers below the size \code{cutoff} or with no or all events
-are flagged.
+trials; for a survival outcome the time, event and entry columns. Rows are
+sorted by provider and patient, provider sizes are counted, and providers
+below the size \code{cutoff} or with no or all events are flagged.
 }
 \details{
 Rows are ordered by \code{provider}, then \code{patient}, with
@@ -84,6 +106,12 @@ pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
               patient = "patient", cutoff = 10, message = FALSE)
 pd
 head(pd$sizes)
+
+s <- sim_kecc(n_providers = 20, type = "survival", seed = 1)
+ps <- pp_data(s, x = c("x1", "x2", "x3"), provider = "provider",
+              patient = "patient", time = "stop", start = "start",
+              event = "event", cutoff = 0, message = FALSE)
+ps
 }
 \seealso{
 \code{\link[=pp_check]{pp_check()}}, \code{\link[=sim_kecc]{sim_kecc()}}

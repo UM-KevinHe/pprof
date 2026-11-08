@@ -29,7 +29,8 @@ Imports:
     MASS,
     poibin,
     Rcpp,
-    stats
+    stats,
+    survival
 LinkingTo:
     Rcpp,
     RcppArmadillo
@@ -39,7 +40,6 @@ Suggests:
     lme4,
     rmarkdown,
     statmod,
-    survival,
     testthat (>= 3.0.0)
 SystemRequirements: C++17, GNU make
 Roxygen: list(markdown = TRUE)

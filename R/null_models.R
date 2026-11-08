@@ -366,8 +366,10 @@ adjust_z <- function(z, null) {
 #' @return `x` with the columns `z_adjusted`, `null_mean`, `null_sd` and
 #'   `null_group` added, `p` and `flag` recomputed from the adjusted statistic,
 #'   and `lower`/`upper` recomputed where a standard error is available (for
-#'   [test_measure()] results on the transformed scale, mapped back); the
-#'   settings are recorded in the `test` attribute.
+#'   [test_measure()] results on the transformed scale, mapped back; for the
+#'   log-ratio Wald and mid-p tests of [test_providers.cox()] on the ratio
+#'   scale, the mid-p limits by root finding); the settings are recorded in
+#'   the `test` attribute. The exact Poisson test cannot be calibrated.
 #' @examples
 #' d <- sim_kecc(n_providers = 40, seed = 1)
 #' pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
@@ -387,15 +389,31 @@ calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, c
   if (is.null(alternative)) alternative <- settings$alternative
   check_level(level)
   alternative <- match_alternative(alternative)
+  limits_kind <- if (is.null(settings$limits)) "wald" else settings$limits
+  if (limits_kind == "exact") {
+    stop("The exact Poisson test uses the theoretical null; calibrate a mid-p test instead.",
+         call. = FALSE)
+  }
   p <- null_parameters(null, x$provider)
   z_adj <- (x$statistic - p$mean) / p$sd
   decision <- null_decision(z_adj, level, alternative, critical)
   q <- if (is.null(critical)) normal_quantile(level, alternative) else critical
   se <- x$se
-  lower <- x$estimate - (p$mean + q * p$sd) * se
-  upper <- x$estimate - (p$mean - q * p$sd) * se
-  if (alternative == "greater") upper[!is.na(se)] <- Inf
-  if (alternative == "less") lower[!is.na(se)] <- -Inf
+  if (limits_kind == "midp") {
+    lim <- midp_limits(x$observed, x$expected, p$mean, p$sd, q, alternative)
+    lower <- lim$lower
+    upper <- lim$upper
+  } else {
+    centre <- if (limits_kind == "log_wald") log(x$estimate) else x$estimate
+    lower <- centre - (p$mean + q * p$sd) * se
+    upper <- centre - (p$mean - q * p$sd) * se
+    if (alternative == "greater") upper[!is.na(se)] <- Inf
+    if (alternative == "less") lower[!is.na(se)] <- -Inf
+    if (limits_kind == "log_wald") {
+      lower <- exp(lower)
+      upper <- exp(upper)
+    }
+  }
   attrs <- attributes(x)
   out <- as.data.frame(x)
   out$z_adjusted <- z_adj
@@ -406,8 +424,9 @@ calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, c
   out$flag <- decision$flag
   out$lower <- lower
   out$upper <- upper
-  out <- out[, c("provider", "estimate", "se", "null_value", "statistic", "z_adjusted",
-                 "null_mean", "null_sd", "null_group", "p", "flag", "lower", "upper")]
+  fixed <- c("provider", "estimate", "se", "null_value", "statistic", "z_adjusted", "null_mean",
+             "null_sd", "null_group", "p", "flag", "lower", "upper")
+  out <- out[, c(fixed, setdiff(names(out), fixed))]
   settings$level <- level
   settings$alternative <- alternative
   settings$critical <- critical

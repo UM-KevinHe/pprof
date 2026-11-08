@@ -173,10 +173,7 @@ select_group_lasso <- function(data, group, multiplier = NULL, lambda = NULL, n_
 
 # Included rows of a pp_data object as the matrices the paths read.
 selection_matrices <- function(data) {
-  if (!inherits(data, "pp_data")) stop("`data` must come from pp_data().", call. = FALSE)
-  if (outcome_of(data) == "continuous") {
-    stop("Variable selection needs a binary or binomial outcome.", call. = FALSE)
-  }
+  check_model_data(data, c("binary", "binomial"), "Variable selection")
   v <- data$vars
   d <- data$data[data$data$included, , drop = FALSE]
   if (nrow(d) == 0) stop("No provider reaches the cutoff.", call. = FALSE)

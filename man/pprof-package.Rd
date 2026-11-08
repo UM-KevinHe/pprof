@@ -18,7 +18,8 @@ specific to one measure.
 
 \itemize{
 \item Every function takes a data frame and column names (\code{y}, \code{x},
-\code{provider}, \code{patient}, \code{n}).
+\code{provider}, \code{patient}, \code{n}; \code{time}, \code{start}, \code{event} for survival
+outcomes).
 \item Provider identifiers are handled as character strings and rows are
 sorted by provider, then patient, in the C locale; a patient's rows keep
 their input order, which the stabilized tests rely on.

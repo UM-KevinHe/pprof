@@ -34,7 +34,7 @@
 #' fit
 #' @export
 fit_linear_fe <- function(data) {
-  if (!inherits(data, "pp_data")) stop("`data` must come from pp_data().", call. = FALSE)
+  check_model_data(data, c("continuous", "binary", "binomial"), "The linear model", "fit_cox()")
   v <- data$vars
   d <- data$data[data$data$included, , drop = FALSE]
   if (nrow(d) == 0) stop("No provider reaches the cutoff.", call. = FALSE)

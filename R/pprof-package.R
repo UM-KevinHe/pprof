@@ -10,7 +10,8 @@
 #'
 #' @section Conventions:
 #' * Every function takes a data frame and column names (`y`, `x`,
-#'   `provider`, `patient`, `n`).
+#'   `provider`, `patient`, `n`; `time`, `start`, `event` for survival
+#'   outcomes).
 #' * Provider identifiers are handled as character strings and rows are
 #'   sorted by provider, then patient, in the C locale; a patient's rows keep
 #'   their input order, which the stabilized tests rely on.
@@ -22,5 +23,5 @@
 #' @keywords internal
 #' @useDynLib pprof, .registration = TRUE
 #' @importFrom Rcpp evalCpp
-#' @importFrom stats coef predict
+#' @importFrom stats coef predict vcov
 "_PACKAGE"

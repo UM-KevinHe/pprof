@@ -93,11 +93,8 @@ fit_logistic_fe <- function(data, algorithm = c("SerBIN", "BAN"), penalty = c("n
                             max_iter = 10000, tol = 1e-5, bound = 10, backtrack = TRUE,
                             threads = 1, stop = c("beta", "relch", "ratch", "all", "or"),
                             auc = FALSE, message = FALSE) {
-  if (!inherits(data, "pp_data")) stop("`data` must come from pp_data().", call. = FALSE)
-  if (outcome_of(data) == "continuous") {
-    stop("The logistic model needs a binary or binomial outcome; see fit_linear_fe().",
-         call. = FALSE)
-  }
+  check_model_data(data, c("binary", "binomial"), "The logistic model",
+                   "fit_linear_fe() or fit_cox()")
   algorithm <- match.arg(algorithm)
   penalty <- match.arg(penalty)
   stop <- match.arg(stop)

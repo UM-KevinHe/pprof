@@ -20,7 +20,8 @@ pp_check(
 
 \item{y}{name of the outcome column: 0/1 for a binary outcome, the number
 of events out of \code{n} trials for a binomial outcome, or any numeric value
-for a continuous outcome.}
+for a continuous outcome. \code{NULL} for a survival outcome, which is given
+by \code{time} and \code{event}.}
 
 \item{x}{names of the covariate columns. Covariates must be numeric; code
 factors as 0/1 columns first.}

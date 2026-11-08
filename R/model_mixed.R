@@ -90,14 +90,13 @@ fit_linear_cre <- function(data, decompose = NULL, ...) {
 }
 
 fit_mixed <- function(data, family, decompose, ...) {
-  if (!inherits(data, "pp_data")) stop("`data` must come from pp_data().", call. = FALSE)
+  outcome <- if (family == "binomial") {
+    check_model_data(data, c("binary", "binomial"), "The logistic model", "fit_linear_re()")
+  } else {
+    check_model_data(data, c("continuous", "binary", "binomial"), "The linear model")
+  }
   if (!requireNamespace("lme4", quietly = TRUE)) {
     stop("Package lme4 is needed for the random-effect models.", call. = FALSE)
-  }
-  outcome <- outcome_of(data)
-  if (family == "binomial" && outcome == "continuous") {
-    stop("The logistic model needs a binary or binomial outcome; see fit_linear_re().",
-         call. = FALSE)
   }
   v <- data$vars
   d <- data$data[data$data$included, , drop = FALSE]

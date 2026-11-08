@@ -25,8 +25,10 @@ reference:
   - fit_logistic_fe
   - fit_linear_fe
   - fit_mixed
+  - fit_cox
   - vcov.logistic_fe
   - vcov.linear_fe
+  - vcov.cox
   - gamma_variance
 - title: Standardized measures
   contents:
@@ -34,6 +36,7 @@ reference:
   - standardize.logistic_fe
   - standardize.linear_fe
   - standardize_mixed
+  - standardize.cox
   - direct_expectation
 - title: Tests of provider effects
   contents:
@@ -41,9 +44,11 @@ reference:
   - test_providers.logistic_fe
   - test_providers.linear_fe
   - test_providers_mixed
+  - test_providers.cox
   - confint.logistic_fe
   - confint.linear_fe
   - confint_mixed
+  - confint.cox
   - test_measure
 - title: Tests of covariates
   contents:
@@ -51,6 +56,7 @@ reference:
   - test_covariates.logistic_fe
   - test_covariates.linear_fe
   - test_covariates_mixed
+  - test_covariates.cox
 - title: Reference distributions
   desc: Theoretical, fixed and empirical nulls, and calibration of a test with one.
   contents:

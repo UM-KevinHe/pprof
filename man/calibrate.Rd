@@ -21,8 +21,10 @@ of the normal quantile for \code{level}.}
 \code{x} with the columns \code{z_adjusted}, \code{null_mean}, \code{null_sd} and
 \code{null_group} added, \code{p} and \code{flag} recomputed from the adjusted statistic,
 and \code{lower}/\code{upper} recomputed where a standard error is available (for
-\code{\link[=test_measure]{test_measure()}} results on the transformed scale, mapped back); the
-settings are recorded in the \code{test} attribute.
+\code{\link[=test_measure]{test_measure()}} results on the transformed scale, mapped back; for the
+log-ratio Wald and mid-p tests of \code{\link[=test_providers.cox]{test_providers.cox()}} on the ratio
+scale, the mid-p limits by root finding); the settings are recorded in
+the \code{test} attribute. The exact Poisson test cannot be calibrated.
 }
 \description{
 Refers the statistics of a \code{\link[=test_providers]{test_providers()}} or \code{\link[=test_measure]{test_measure()}} result

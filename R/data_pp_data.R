@@ -3,14 +3,15 @@
 #' Checks and arranges the data every model and test in the package reads:
 #' the outcome, the covariates, the provider identifier and, when the data
 #' have repeated observations, the patient identifier and the number of
-#' trials. Rows are sorted by provider and patient, provider sizes are
-#' counted, and providers below the size `cutoff` or with no or all events
-#' are flagged.
+#' trials; for a survival outcome the time, event and entry columns. Rows are
+#' sorted by provider and patient, provider sizes are counted, and providers
+#' below the size `cutoff` or with no or all events are flagged.
 #'
 #' @param data a data frame.
 #' @param y name of the outcome column: 0/1 for a binary outcome, the number
 #'   of events out of `n` trials for a binomial outcome, or any numeric value
-#'   for a continuous outcome.
+#'   for a continuous outcome. `NULL` for a survival outcome, which is given
+#'   by `time` and `event`.
 #' @param x names of the covariate columns. Covariates must be numeric; code
 #'   factors as 0/1 columns first.
 #' @param provider name of the provider identifier column.
@@ -18,12 +19,23 @@
 #'   row is an independent unit. Required by the patient-clustered tests.
 #' @param n name of the column with the number of trials per row (binomial
 #'   outcome), or `NULL`.
-#' @param outcome `"auto"` (default), `"binary"`, `"binomial"` or
-#'   `"continuous"`. With `"auto"` the outcome is binomial when `n` is given,
-#'   binary when every value of `y` is 0 or 1, and continuous otherwise.
+#' @param time,event for a survival outcome, the names of the columns with
+#'   the end of each row's at-risk interval and its 0/1 event indicator.
+#' @param start optional name of the column with the start of the at-risk
+#'   interval (left truncation or counting-process rows); 0 when `NULL`.
+#' @param weights optional name of a column of positive case weights, used by
+#'   [fit_cox()].
+#' @param offset optional name of a column with a known term of the linear
+#'   predictor, used by [fit_cox()].
+#' @param outcome `"auto"` (default), `"binary"`, `"binomial"`,
+#'   `"continuous"` or `"survival"`. With `"auto"` the outcome is survival
+#'   when `time` or `event` is given, binomial when `n` is given, binary when
+#'   every value of `y` is 0 or 1, and continuous otherwise.
 #' @param cutoff providers with fewer than `cutoff` patients (rows when
 #'   `patient` is `NULL`) are kept in the data but marked `included = FALSE`
-#'   and left out of model fitting. Default 10.
+#'   and left out of model fitting. Default 10. Use 0 to fit every provider,
+#'   as the two-stage survival models of the KECC measures do, and select the
+#'   providers to report at the test stage.
 #' @param check run [pp_check()] first (missing values and zero-variance
 #'   covariates are errors; near-zero variance, high correlation and large
 #'   VIF are warnings). Default `TRUE`.
@@ -40,9 +52,10 @@
 #' @return An object of class `pp_data`: a list with
 #' \item{data}{the sorted data frame with the named columns plus the logical
 #'   columns `included`, `no_events` and `all_events` (the last two are
-#'   `FALSE` for a continuous outcome).}
-#' \item{vars}{the column names `y`, `x`, `provider`, `patient`, `n` and the
-#'   `outcome` type.}
+#'   `FALSE` for a continuous outcome, and `all_events` for a survival
+#'   outcome).}
+#' \item{vars}{the column names `y`, `x`, `provider`, `patient`, `n`,
+#'   `time`, `start`, `event`, `weights`, `offset` and the `outcome` type.}
 #' \item{sizes}{one row per provider in the sorted order: `provider`,
 #'   `rows`, `patients` (`NA` without a patient column), `included`,
 #'   `no_events`, `all_events`.}
@@ -55,23 +68,45 @@
 #'               patient = "patient", cutoff = 10, message = FALSE)
 #' pd
 #' head(pd$sizes)
+#'
+#' s <- sim_kecc(n_providers = 20, type = "survival", seed = 1)
+#' ps <- pp_data(s, x = c("x1", "x2", "x3"), provider = "provider",
+#'               patient = "patient", time = "stop", start = "start",
+#'               event = "event", cutoff = 0, message = FALSE)
+#' ps
 #' @export
-pp_data <- function(data, y, x, provider, patient = NULL, n = NULL,
-                    outcome = c("auto", "binary", "binomial", "continuous"), cutoff = 10,
-                    check = TRUE, message = TRUE) {
+pp_data <- function(data, y = NULL, x, provider, patient = NULL, n = NULL, time = NULL,
+                    event = NULL, start = NULL, weights = NULL, offset = NULL,
+                    outcome = c("auto", "binary", "binomial", "continuous", "survival"),
+                    cutoff = 10, check = TRUE, message = TRUE) {
   if (!is.data.frame(data)) stop("`data` must be a data frame.", call. = FALSE)
   outcome <- match.arg(outcome)
-  one_name(y, "y")
   one_name(provider, "provider")
   if (!is.character(x) || length(x) < 1) {
     stop("`x` must be one or more column names.", call. = FALSE)
   }
-  if (!is.null(patient)) one_name(patient, "patient")
-  if (!is.null(n)) one_name(n, "n")
+  for (arg in c("y", "patient", "n", "time", "event", "start", "weights", "offset")) {
+    value <- get(arg)
+    if (!is.null(value)) one_name(value, arg)
+  }
   if (!is.numeric(cutoff) || length(cutoff) != 1 || cutoff < 0) {
     stop("`cutoff` must be a single non-negative number.", call. = FALSE)
   }
-  cols <- c(y, x, provider, patient, n)
+  if (outcome == "auto" && (!is.null(time) || !is.null(event))) outcome <- "survival"
+  if (outcome == "survival") {
+    if (is.null(time) || is.null(event)) {
+      stop("A survival outcome needs the `time` and `event` columns.", call. = FALSE)
+    }
+    if (!is.null(y) || !is.null(n)) {
+      stop("`y` and `n` are not used with a survival outcome.", call. = FALSE)
+    }
+  } else {
+    if (is.null(y)) stop("Give the outcome column `y`, or `time` and `event`.", call. = FALSE)
+    if (!is.null(time) || !is.null(event) || !is.null(start)) {
+      stop("`time`, `event` and `start` are only used with a survival outcome.", call. = FALSE)
+    }
+  }
+  cols <- c(y, x, provider, patient, n, time, start, event, weights, offset)
   missing_cols <- setdiff(cols, names(data))
   if (length(missing_cols)) {
     stop("Column(s) not in `data`: ", paste(missing_cols, collapse = ", "), call. = FALSE)
@@ -79,40 +114,61 @@ pp_data <- function(data, y, x, provider, patient = NULL, n = NULL,
   if (anyDuplicated(cols)) stop("The same column is named twice.", call. = FALSE)
 
   d <- data[, cols, drop = FALSE]
-  if (!is.numeric(d[[y]])) stop("`y` must be numeric.", call. = FALSE)
   not_numeric <- x[!vapply(d[x], is.numeric, logical(1))]
   if (length(not_numeric)) {
     stop("Covariate(s) not numeric: ", paste(not_numeric, collapse = ", "),
          ". Code factors as 0/1 columns first.", call. = FALSE)
   }
-  if (outcome == "auto") {
-    outcome <- if (!is.null(n)) {
-      "binomial"
-    } else if (all(d[[y]] %in% c(0, 1))) {
-      "binary"
-    } else {
-      "continuous"
+  for (arg in c("weights", "offset")) {
+    value <- get(arg)
+    if (!is.null(value) && !is.numeric(d[[value]])) {
+      stop("`", arg, "` must be numeric.", call. = FALSE)
     }
   }
-  if (outcome == "binomial" && is.null(n)) {
-    stop("A binomial outcome needs the trials column `n`.", call. = FALSE)
+  if (!is.null(weights) && any(d[[weights]] <= 0, na.rm = TRUE)) {
+    stop("`weights` must be positive.", call. = FALSE)
   }
-  if (outcome != "binomial" && !is.null(n)) {
-    stop("`n` is only used with a binomial outcome.", call. = FALSE)
-  }
-  trials <- if (is.null(n)) rep(1, nrow(d)) else d[[n]]
-  if (outcome == "binomial") {
-    if (!is.numeric(trials) || any(trials < 1 | trials != round(trials), na.rm = TRUE)) {
-      stop("`n` must hold positive whole numbers of trials.", call. = FALSE)
+
+  if (outcome == "survival") {
+    check_survival_columns(d, time, event, start)
+    trials <- rep(1, nrow(d))
+  } else {
+    if (!is.numeric(d[[y]])) stop("`y` must be numeric.", call. = FALSE)
+    if (outcome == "auto") {
+      outcome <- if (!is.null(n)) {
+        "binomial"
+      } else if (all(d[[y]] %in% c(0, 1))) {
+        "binary"
+      } else {
+        "continuous"
+      }
+    }
+    if (outcome == "binomial" && is.null(n)) {
+      stop("A binomial outcome needs the trials column `n`.", call. = FALSE)
+    }
+    if (outcome != "binomial" && !is.null(n)) {
+      stop("`n` is only used with a binomial outcome.", call. = FALSE)
+    }
+    trials <- if (is.null(n)) rep(1, nrow(d)) else d[[n]]
+    if (outcome == "binomial") {
+      if (!is.numeric(trials) || any(trials < 1 | trials != round(trials), na.rm = TRUE)) {
+        stop("`n` must hold positive whole numbers of trials.", call. = FALSE)
+      }
+    }
+    if (outcome != "continuous") {
+      if (any(d[[y]] < 0 | d[[y]] > trials | d[[y]] != round(d[[y]]), na.rm = TRUE)) {
+        stop("`y` must hold whole numbers of events between 0 and the number of trials.",
+             call. = FALSE)
+      }
     }
   }
-  if (outcome != "continuous") {
-    if (any(d[[y]] < 0 | d[[y]] > trials | d[[y]] != round(d[[y]]), na.rm = TRUE)) {
-      stop("`y` must hold whole numbers of events between 0 and the number of trials.",
-           call. = FALSE)
+  if (check) {
+    pp_check(d, y = if (outcome == "survival") event else y, x = x, provider = provider, n = n,
+             message = message)
+    for (col in c(time, start, weights, offset)) {
+      if (anyNA(d[[col]])) stop("Missing values in `", col, "`.", call. = FALSE)
     }
   }
-  if (check) pp_check(d, y = y, x = x, provider = provider, n = n, message = message)
 
   d[[provider]] <- as.character(d[[provider]])
   if (!is.null(patient)) d[[patient]] <- as.character(d[[patient]])
@@ -138,6 +194,10 @@ pp_data <- function(data, y, x, provider, patient = NULL, n = NULL,
   included <- size >= cutoff
   if (outcome == "continuous") {
     no_events <- all_events <- rep(FALSE, length(levels))
+  } else if (outcome == "survival") {
+    events <- as.numeric(rowsum(d[[event]], prov_f, reorder = FALSE)[, 1])
+    no_events <- included & events == 0
+    all_events <- rep(FALSE, length(levels))
   } else {
     events <- as.numeric(rowsum(d[[y]], prov_f, reorder = FALSE)[, 1])
     total <- as.numeric(rowsum(trials, prov_f, reorder = FALSE)[, 1])
@@ -154,7 +214,8 @@ pp_data <- function(data, y, x, provider, patient = NULL, n = NULL,
 
   out <- structure(list(data = d,
                         vars = list(y = y, x = x, provider = provider, patient = patient, n = n,
-                                    outcome = outcome),
+                                    time = time, start = start, event = event,
+                                    weights = weights, offset = offset, outcome = outcome),
                         sizes = sizes, cutoff = cutoff),
                    class = "pp_data")
   if (message) print(out)
@@ -168,28 +229,60 @@ one_name <- function(value, what) {
   invisible(TRUE)
 }
 
+# The time, event and start columns of a survival outcome.
+check_survival_columns <- function(d, time, event, start) {
+  if (!is.numeric(d[[time]])) stop("`time` must be numeric.", call. = FALSE)
+  if (!is.numeric(d[[event]]) || !all(d[[event]] %in% c(0, 1, NA))) {
+    stop("`event` must hold 0/1 indicators.", call. = FALSE)
+  }
+  if (is.null(start)) {
+    if (any(d[[time]] <= 0, na.rm = TRUE)) {
+      stop("`time` must be positive (give `start` for rows that begin after time 0).",
+           call. = FALSE)
+    }
+  } else {
+    if (!is.numeric(d[[start]])) stop("`start` must be numeric.", call. = FALSE)
+    if (any(d[[start]] >= d[[time]], na.rm = TRUE)) {
+      stop("`start` must be smaller than `time` in every row.", call. = FALSE)
+    }
+  }
+  invisible(TRUE)
+}
+
 #' @export
 print.pp_data <- function(x, ...) {
   s <- x$sizes
-  unit <- if (is.null(x$vars$patient)) "rows" else "patients"
+  v <- x$vars
+  unit <- if (is.null(v$patient)) "rows" else "patients"
   cat("Prepared data: ", nrow(x$data), " rows, ", nrow(s), " providers",
-      if (!is.null(x$vars$patient)) paste0(", ", sum(s$patients), " patients"), "\n", sep = "")
-  cat("  outcome ", x$vars$y,
-      switch(x$vars$outcome, binary = " (binary)", continuous = " (continuous)",
-             binomial = paste0(" out of ", x$vars$n)),
-      "; ", length(x$vars$x), " covariate", if (length(x$vars$x) != 1) "s", "\n", sep = "")
+      if (!is.null(v$patient)) paste0(", ", sum(s$patients), " patients"), "\n", sep = "")
+  if (v$outcome == "survival") {
+    cat("  survival outcome: time ", v$time, if (!is.null(v$start)) paste0(" from ", v$start),
+        ", event ", v$event, "; ", length(v$x), " covariate", if (length(v$x) != 1) "s",
+        if (!is.null(v$weights)) paste0("; weights ", v$weights),
+        if (!is.null(v$offset)) paste0("; offset ", v$offset), "\n", sep = "")
+  } else {
+    cat("  outcome ", v$y,
+        switch(v$outcome, binary = " (binary)", continuous = " (continuous)",
+               binomial = paste0(" out of ", v$n)),
+        "; ", length(v$x), " covariate", if (length(v$x) != 1) "s", "\n", sep = "")
+  }
   cat("  ", sum(s$included), " providers with at least ", x$cutoff, " ", unit, " included; ",
       sum(!s$included), " excluded\n", sep = "")
   inc <- x$data$included
-  if (x$vars$outcome == "continuous") {
+  if (v$outcome == "continuous") {
     cat("  mean outcome among included rows: ",
-        format(mean(x$data[[x$vars$y]][inc]), digits = 4), "\n", sep = "")
+        format(mean(x$data[[v$y]][inc]), digits = 4), "\n", sep = "")
+  } else if (v$outcome == "survival") {
+    cat("  included providers with no events: ", sum(s$no_events), "\n", sep = "")
+    cat("  events among included rows: ", sum(x$data[[v$event]][inc]), " (",
+        format(100 * mean(x$data[[v$event]][inc]), digits = 3), "% of rows)\n", sep = "")
   } else {
     cat("  included providers with no events: ", sum(s$no_events),
         "; with all events: ", sum(s$all_events), "\n", sep = "")
     trials <- trials_of(x)
     cat("  event rate among included rows: ",
-        format(100 * sum(x$data[[x$vars$y]][inc]) / sum(trials[inc]), digits = 3), "%\n",
+        format(100 * sum(x$data[[v$y]][inc]) / sum(trials[inc]), digits = 3), "%\n",
         sep = "")
   }
   invisible(x)
@@ -206,6 +299,28 @@ outcome_of <- function(x) {
   v <- x$vars
   if (!is.null(v$outcome)) return(v$outcome)
   if (is.null(v$n)) "binary" else "binomial"
+}
+
+# Refuse data a model cannot use: an outcome type outside `outcomes`, or
+# weights and offsets, which only fit_cox() reads.
+check_model_data <- function(data, outcomes, model, hint = NULL) {
+  if (!inherits(data, "pp_data")) stop("`data` must come from pp_data().", call. = FALSE)
+  outcome <- outcome_of(data)
+  if (!outcome %in% outcomes) {
+    wanted <- if (length(outcomes) == 1) {
+      outcomes
+    } else {
+      paste(paste(outcomes[-length(outcomes)], collapse = ", "), "or", outcomes[length(outcomes)])
+    }
+    stop(model, " needs a ", wanted, " outcome, not a ", outcome, " one",
+         if (!is.null(hint)) paste0("; see ", hint), ".", call. = FALSE)
+  }
+  v <- data$vars
+  if (!is.null(v$weights) || !is.null(v$offset)) {
+    stop(model, " does not use the `weights` or `offset` columns of pp_data(); only fit_cox() ",
+         "does.", call. = FALSE)
+  }
+  invisible(outcome)
 }
 
 # A pp_data object restricted to the rows `keep` (logical or integer), as the
@@ -225,8 +340,13 @@ pp_subset <- function(pd, keep) {
     as.integer(tapply(d[[v$patient]], prov_f, function(p) length(unique(p))))
   }
   included <- pd$sizes$included[match(levels, pd$sizes$provider)]
-  if (outcome_of(pd) == "continuous") {
+  outcome <- outcome_of(pd)
+  if (outcome == "continuous") {
     no_events <- all_events <- rep(FALSE, length(levels))
+  } else if (outcome == "survival") {
+    events <- as.numeric(rowsum(d[[v$event]], prov_f, reorder = FALSE)[, 1])
+    no_events <- included & events == 0
+    all_events <- rep(FALSE, length(levels))
   } else {
     trials <- if (is.null(v$n)) rep(1, nrow(d)) else as.numeric(d[[v$n]])
     events <- as.numeric(rowsum(d[[v$y]], prov_f, reorder = FALSE)[, 1])
