@@ -159,23 +159,55 @@ a logistic model for a binary or binomial outcome, a linear model for a
 continuous one, a proportional-hazards model for a time to event. Once the
 outcome type, the unit of observation, the standardization convention and
 the reference distribution are fixed, everything else (estimation,
-variance, testing, flagging) is common machinery. The package is therefore
-organised by **analysis step**, not by quality measure, and a measure,
-whatever the outcome it is built on, is assembled from the same components:
+variance, testing, flagging) is common machinery.
+
+The package is therefore organised by **analysis step**, not by quality
+measure. Every step is one function: the class of the fitted model chooses
+the method behind it, the arguments choose the statistical variant, and a
+measure, whatever the outcome it is built on, is the chain of these steps:
 
 ```
-pp_data()  →  fit_*()  →  standardize()  →  test()  →  null_model() / calibrate()  →  plot()
-  data         model       measures          flags       reference distribution       displays
+pp_data()                 data: declare the outcome, risk factors, provider and patient columns;
+│                         trials for a binomial outcome; time, event and start for a time to event
+│
+├── risk adjustment       one model, one effect per provider
+│   ├── fit_*()                          fixed effects        random effects       correlated random effects
+│   │     binary / binomial outcome      fit_logistic_fe()    fit_logistic_re()    fit_logistic_cre()
+│   │     continuous outcome             fit_linear_fe()      fit_linear_re()      fit_linear_cre()
+│   │     time to event                  fit_cox()            stratified by provider; two-stage with x2
+│   ├── coef()  vcov()  summary()        coefficients, their variances, tests of the risk factors
+│   └── var_select(data, penalty = "lasso" | "group_lasso"),  cv(),  selected_covariates()
+│                                        risk-factor selection with the provider effects unpenalized
+│
+├── standardized measures
+│   ├── standardize(fit, type = "indirect" | "direct")
+│   │                                    one ratio, rate or difference per provider, with observed and expected
+│   └── direct_expectation()             the direct standardization for effects supplied by hand
+│
+├── testing               is a provider different from the reference?
+│   ├── test(fit, statistic, variance, null_model)        one test per provider, flag 1 / 0 / -1
+│   │     logistic   statistic = exact | score | wald | lr    variance = naive | robust | stabilized
+│   │     linear     statistic = wald                         variance = naive | robust
+│   │     cox        statistic = midp | exact | wald          dispersion = none | deviance
+│   ├── null_model("theoretical" | "empirical" | "fixed")   the reference distribution of the statistics
+│   │     calibrate(test, null_model)                       the flags and limits under that reference
+│   ├── confint(fit)                                        intervals for the provider effects
+│   └── test_measure(estimate, se, reference)               the test of a standardized measure
+│
+├── reliability
+│   └── iur("direct" | "bootstrap" | "split_half"),  iur_curve(),  iur_stratified()
+│
+└── plots
+    ├── plot()            caterpillar | funnel | bar of a test; observed against expected of a measure;
+    │                     forest of the coefficients; the fitted null; reliability; selection path and cv
+    └── flag_stability()  the flags under alternative choices
 ```
 
-Each choice above is an argument: the statistic, the variance and the
-reference distribution of `test()`, the type and norm of `standardize()`,
-the grouping and estimator of `null_model()`. Every step is one function
-with S3 methods for the model classes, so the same `test()` call works for a
-logistic, a linear or a Cox fit, a measure can be re-specified along one
-axis with everything else held fixed, and two measures differ only where
-they are declared to differ. The measure-specific conventions (eligibility
-rules, attribution, reporting) stay in the analysis script that calls the
+Each choice is an argument, so the same `test()` call works for a logistic,
+a linear or a Cox fit, a measure can be re-specified along one axis with
+everything else held fixed, and two measures differ only where they are
+declared to differ. The measure-specific conventions (eligibility rules,
+attribution, reporting layout) stay in the analysis script that calls the
 package.
 
 ## Installation
@@ -213,21 +245,6 @@ plot(tst, type = "funnel")                            # funnel plot with the tes
 plot(standardize(fit), test = tst)                    # observed against expected
 ```
 
-## Which functions for which outcome
-
-| Outcome | Example measures | Model | Standardized measure | Tests of the provider effects |
-|---|---|---|---|---|
-| binary (0/1 per row) | readmission within 30 days of a discharge; a fistula in use in a patient-month | `fit_logistic_fe()` (SerBIN, Firth), `fit_logistic_re()`, `fit_logistic_cre()` | indirect ratio or rate; direct rate | exact, score, Wald × naive, robust, stabilized; likelihood ratio |
-| binomial (events out of *n* trials per row) | hospital days out of days at risk in a patient-month | the logistic fitters with `n` | as binary | as binary |
-| continuous | a laboratory value, a length of stay | `fit_linear_fe()`, `fit_linear_re()`, `fit_linear_cre()` | indirect and direct differences | score, Wald × naive, robust |
-| time to event (counting-process rows) | death; hospital admissions as recurrent events | `fit_cox()` (stratified by provider, two-stage) | observed / expected events, indirect and direct | mid-p Poisson, exact Poisson, log-ratio Wald |
-| any of the above, choosing risk factors | measure development | `var_select()` (lasso, group lasso), `cv()` | | |
-
-Every test result can be calibrated with an empirical null (`null_model()`,
-`calibrate()`), and every model's `standardize()` result can be tested at the
-measure level with `test_measure()`. Reliability is `iur()`; the flags under
-alternative choices are collected by `flag_stability()`.
-
 ## Documentation
 
 The site <https://um-kevinhe.github.io/pprof/> has a *Get started* page with
@@ -235,15 +252,6 @@ the core concepts and one complete analysis, one article per analysis step
 (data, risk-adjustment models, variable selection, standardized measures,
 tests, reference distributions, reliability, plots), and the function
 reference grouped the same way.
-
-## Background
-
-The methods are those of the CMS dialysis quality measures developed at
-the University of Michigan Kidney Epidemiology and Cost Center and the
-papers behind them. This is version 2.0.0 (development), which supersedes
-`pprof` 1.0.3 on CRAN, `pprofR` and `grplasso`; `NEWS.md` records what
-changed and why. See `citation("pprof")` and the references in each help
-page.
 
 ## Getting help
 

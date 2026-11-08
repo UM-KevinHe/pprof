@@ -21,16 +21,22 @@ navbar:
       menu:
       - text: Data preparation
         href: articles/data.html
+      - text: -------
+      - text: Risk adjustment
       - text: Risk-adjustment models
         href: articles/models.html
       - text: Variable selection
         href: articles/selection.html
+      - text: -------
       - text: Standardized measures
         href: articles/standardization.html
+      - text: -------
+      - text: Testing
       - text: Tests of provider effects
         href: articles/testing.html
       - text: Reference distributions
         href: articles/null.html
+      - text: -------
       - text: Reliability
         href: articles/reliability.html
       - text: Plots
@@ -41,15 +47,27 @@ articles:
   navbar: ~
   contents:
   - pprof
-- title: By analysis step
+- title: Data
   navbar: ~
   contents:
   - data
+- title: Risk adjustment
+  navbar: ~
+  contents:
   - models
   - selection
+- title: Standardized measures
+  navbar: ~
+  contents:
   - standardization
+- title: Testing
+  navbar: ~
+  contents:
   - testing
   - "null"
+- title: Reliability and plots
+  navbar: ~
+  contents:
   - reliability
   - plots
 
@@ -59,8 +77,8 @@ reference:
   contents:
   - pp_data
   - pp_check
-- title: Risk-adjustment models
-  desc: Fixed, random and correlated random provider effects.
+- title: Risk adjustment
+  desc: One model with one effect per provider (fixed, random or correlated random), its coefficients, and the selection of risk factors with the provider effects unpenalized.
   contents:
   - fit_logistic_fe
   - fit_linear_fe
@@ -70,6 +88,17 @@ reference:
   - vcov.linear_fe
   - vcov.cox
   - gamma_variance
+- subtitle: Tests of the risk factors
+  contents:
+  - summary.logistic_fe
+  - summary.linear_fe
+  - summary_mixed
+  - summary.cox
+- subtitle: Variable selection
+  contents:
+  - var_select
+  - cv
+  - coef.pp_lasso
 - title: Standardized measures
   contents:
   - standardize
@@ -78,7 +107,8 @@ reference:
   - standardize_mixed
   - standardize.cox
   - direct_expectation
-- title: Tests of provider effects
+- title: Testing
+  desc: One test per provider, intervals, the reference distribution the statistics are judged against, and the test of a standardized measure.
   contents:
   - test
   - test.logistic_fe
@@ -90,14 +120,7 @@ reference:
   - confint_mixed
   - confint.cox
   - test_measure
-- title: Tests of covariates
-  contents:
-
-  - summary.logistic_fe
-  - summary.linear_fe
-  - summary_mixed
-  - summary.cox
-- title: Reference distributions
+- subtitle: Reference distributions
   desc: Theoretical, fixed and empirical nulls, and calibration of a test with one.
   contents:
   - null_models
@@ -109,12 +132,6 @@ reference:
   - iur
   - iur_curve
   - iur_stratified
-- title: Variable selection
-  desc: Penalized covariate selection with unpenalized provider effects.
-  contents:
-  - var_select
-  - cv
-  - coef.pp_lasso
 - title: Plots
   desc: Caterpillar, funnel, observed-expected, forest, null-calibration, reliability, selection-path and flag-stability displays.
   contents:
