@@ -133,7 +133,9 @@ a data frame with column names.
   [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md)
   method and
   [`test_measure()`](https://um-kevinhe.github.io/pprof/reference/test_measure.md)
-  take a `null_model`.
+  take a `null_model`. `critical` sets the critical value of the flags
+  and limits; `ci_location` centres the limits elsewhere than the null
+  mean (`0` gives limits of the form estimate ± c · null_sd · se).
 - Inter-unit reliability translated from pprof_py:
   [`iur()`](https://um-kevinhe.github.io/pprof/reference/iur.md) with
   the direct, bootstrap and split-half methods, with

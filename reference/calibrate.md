@@ -13,7 +13,14 @@ exactly when the provider is flagged.
 ## Usage
 
 ``` r
-calibrate(x, null_model, level = NULL, alternative = NULL, critical = NULL)
+calibrate(
+  x,
+  null_model,
+  level = NULL,
+  alternative = NULL,
+  critical = NULL,
+  ci_location = NULL
+)
 ```
 
 ## Arguments
@@ -35,6 +42,15 @@ calibrate(x, null_model, level = NULL, alternative = NULL, critical = NULL)
 
   optional critical value for the flags and limits instead of the normal
   quantile for `level`.
+
+- ci_location:
+
+  location at which the confidence limits are centred: `NULL` (default)
+  uses the null mean, so that a limit excludes the null value exactly
+  when the provider is flagged; a number or one value per provider
+  centres the limits elsewhere, for instance `0` for limits of the form
+  \\\hat\theta \pm c\\ \mathrm{null\\sd}\\ se\\ that ignore the null
+  location.
 
 ## Value
 
