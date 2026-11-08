@@ -1,3 +1,8 @@
+# pprof 2.0.2
+
+* README and site home page shortened to the essentials, with the plots of the
+  Get started analysis (`man/figures/`).
+
 # pprof 2.0.1
 
 A rewrite of `pprof` 1.0.3 that absorbs `pprofR` 0.2.0 and `grplasso` 1.0.
