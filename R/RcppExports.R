@@ -2,46 +2,46 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 logis_fe_prov <- function(N, Y, Z, n_prov, gamma, beta, backtrack = TRUE, max_iter = 10000L, bound = 10.0, tol = 1e-5, message = FALSE, stop = "beta") {
-    .Call(`_pprofR_logis_fe_prov`, N, Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message, stop)
+    .Call(`_pprof_logis_fe_prov`, N, Y, Z, n_prov, gamma, beta, backtrack, max_iter, bound, tol, message, stop)
 }
 
 logis_BIN_fe_prov <- function(N, Y, Z, n_prov, gamma, beta, threads = 1L, tol = 1e-8, max_iter = 10000L, bound = 10.0, message = TRUE, backtrack = TRUE, stop = "beta") {
-    .Call(`_pprofR_logis_BIN_fe_prov`, N, Y, Z, n_prov, gamma, beta, threads, tol, max_iter, bound, message, backtrack, stop)
+    .Call(`_pprof_logis_BIN_fe_prov`, N, Y, Z, n_prov, gamma, beta, threads, tol, max_iter, bound, message, backtrack, stop)
 }
 
 logis_fe_var <- function(N, Z, n_prov, gamma, beta) {
-    .Call(`_pprofR_logis_fe_var`, N, Z, n_prov, gamma, beta)
+    .Call(`_pprof_logis_fe_var`, N, Z, n_prov, gamma, beta)
 }
 
 wald_gamma <- function(N, Z, p, n_prov, parm_indices, threads = 1L) {
-    .Call(`_pprofR_wald_gamma`, N, Z, p, n_prov, parm_indices, threads)
+    .Call(`_pprof_wald_gamma`, N, Z, p, n_prov, parm_indices, threads)
 }
 
 robust_wald_gamma <- function(N, Z, p, n_prov, parm_indices) {
-    .Call(`_pprofR_robust_wald_gamma`, N, Z, p, n_prov, parm_indices)
+    .Call(`_pprof_robust_wald_gamma`, N, Z, p, n_prov, parm_indices)
 }
 
 wald_covar <- function(N, Y, Z, n_prov, gamma, beta, indices, null, alpha) {
-    .Call(`_pprofR_wald_covar`, N, Y, Z, n_prov, gamma, beta, indices, null, alpha)
+    .Call(`_pprof_wald_covar`, N, Y, Z, n_prov, gamma, beta, indices, null, alpha)
 }
 
 robust_wald_covar <- function(N, Y, Z, n_prov, gamma, beta, indices, null_value, alpha, A0, A1_t, A2) {
-    .Call(`_pprofR_robust_wald_covar`, N, Y, Z, n_prov, gamma, beta, indices, null_value, alpha, A0, A1_t, A2)
+    .Call(`_pprof_robust_wald_covar`, N, Y, Z, n_prov, gamma, beta, indices, null_value, alpha, A0, A1_t, A2)
 }
 
 compute_A2 <- function(X_matrix) {
-    .Call(`_pprofR_compute_A2`, X_matrix)
+    .Call(`_pprof_compute_A2`, X_matrix)
 }
 
 computeDirectExp <- function(gamma_prov, Z_beta, w, threads = 1L) {
-    .Call(`_pprofR_computeDirectExp`, gamma_prov, Z_beta, w, threads)
+    .Call(`_pprof_computeDirectExp`, gamma_prov, Z_beta, w, threads)
 }
 
 cluster_sums <- function(r, cluster, prov_row, cluster_prov, m) {
-    .Call(`_pprofR_cluster_sums`, r, cluster, prov_row, cluster_prov, m)
+    .Call(`_pprof_cluster_sums`, r, cluster, prov_row, cluster_prov, m)
 }
 
 stabilized_meat <- function(r, v, cluster, cluster_prov, m) {
-    .Call(`_pprofR_stabilized_meat`, r, v, cluster, cluster_prov, m)
+    .Call(`_pprof_stabilized_meat`, r, v, cluster, cluster_prov, m)
 }
 

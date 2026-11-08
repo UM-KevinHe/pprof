@@ -1,34 +1,43 @@
-Package: pprofR
+Package: pprof
 Type: Package
-Title: Shared Modelling, Testing and Standardized Measures for KECC Quality Measures
-Version: 0.2.0
-Date: 2026-09-24
+Title: Provider Profiling: Risk Adjustment, Standardized Measures, Hypothesis
+    Tests and Reference Distributions
+Version: 2.0.0.9000
+Date: 2026-11-07
 Authors@R: c(
-    person("Yubo", "Shao", email = "ybshao@umich.edu", role = c("aut", "cre")))
-Description: A single shared engine for the fixed provider effects logistic
-    model used by the KECC quality measures (AOH, PPPW, SFR, SRR). Supports
-    binary and binomial outcomes (number of trials 'N', default 1), the
-    SerBIN and BAN Newton-Raphson algorithms, provider-effect tests (exact
-    Poisson-binomial, exact bootstrap, Wald, score, and patient-clustered
-    robust and stabilized Wald and score tests),
-    covariate tests (Wald, robust Wald,
-    likelihood ratio, score), direct and indirect standardized ratios and
-    rates with standard errors, measure-level z-tests and confidence
-    intervals. Derived from the 'pprof' package
-    <https://github.com/UM-KevinHe/pprof>; see Wu et al. (2022)
-    <doi:10.1002/sim.9387>.
+    person("Yubo", "Shao", email = "ybshao@umich.edu", role = c("aut", "cre")),
+    person("Kevin", "He", email = "kevinhe@umich.edu", role = "aut"))
+Description: Components for profiling health care providers, organised by
+    analysis step rather than by quality measure: data preparation and
+    checks, risk-adjustment models with high-dimensional provider effects
+    (fixed, random and correlated random effects; logistic, linear and
+    survival outcomes), direct and indirect standardized measures with their
+    standard errors, hypothesis tests for provider effects (exact, score and
+    Wald statistics with naive, patient-clustered robust and stabilized
+    variances), covariate tests, confidence intervals, theoretical and
+    size-stratified empirical null reference distributions, inter-unit
+    reliability, penalized variable selection with unpenalized provider
+    effects, and plots. Every quality measure is assembled from these
+    components. Supersedes 'pprof' 1.0.3, 'pprofR' and 'grplasso'.
 License: MIT + file LICENSE
 Encoding: UTF-8
+URL: https://github.com/UM-KevinHe/pprof
+BugReports: https://github.com/UM-KevinHe/pprof/issues
 Depends:
-    R (>= 4.0.0)
+    R (>= 4.1.0)
 Imports:
     Rcpp,
-    poibin,
     stats
 LinkingTo:
     Rcpp,
     RcppArmadillo
 Suggests:
+    ggplot2,
+    knitr,
+    lme4,
+    rmarkdown,
+    statmod,
+    survival,
     testthat (>= 3.0.0)
 SystemRequirements: C++17, GNU make
 Roxygen: list(markdown = TRUE)

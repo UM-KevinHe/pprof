@@ -1,23 +1,25 @@
-# pprofR 0.2.0 (2026-09-24)
+# pprof 2.0.0 (development)
 
-* New provider tests in `test_fe()`: `"stabilized_wald"`, `"robust_score"`
-  and `"stabilized_score"` (patient-clustered; need `PatientID`). They follow
-  Feiyang's `robust_tests.R`, extended to binomial outcomes, and reproduce it
-  (binary) and the DASH `aoh_tests_en.R` (binomial) to 1e-15.
-* Direct standardization (`SR_output(stdz = "direct")`, `direct_exp()`,
-  `confint()`) merges rows sharing a linear predictor, avoids `exp()` in its
-  inner loop and sums in long double: about 15 times faster with continuous
-  covariates (199 s to 13 s on 2.6 million rows and 3000 providers), far
-  more with categorical ones, and more accurate. Results change only by
-  rounding (at most 3e-12 relative in the checks). For a rate within about
-  1e-7 of 0 or 1, the former sums could be off by about 1e-7 relative in
-  1 - rate; the long double sums reach double precision.
-* Removed the standard score test (`test_fe(score_modified = FALSE)`), which
-  no measure used. `test = "score"` (beta held fixed) is unchanged; passing
-  `score_modified = FALSE` is now an error.
-* The patient-level sums of the robust Wald test run in C++ in the same order
-  and precision as before: results are unchanged bit for bit.
+A rewrite of `pprof` 1.0.3 that absorbs `pprofR` 0.2.0 and `grplasso` 1.0.
+The package is organised by analysis step, and every function takes a data
+frame with column names.
 
-# pprofR 0.1.0 (2026-09-23)
+## Data
 
-* First release: shared engine for the AOH, PPPW, SFR and SRR measures.
+* `pp_data()` replaces `fe_data_prep()` and the data handling inside the
+  1.0.3 fitters: one prepared object (rows sorted by provider and patient in
+  the C locale, patient rows kept in input order, provider sizes in patients
+  or rows, `cutoff` with `>=`, flags for providers with no or all events).
+* `pp_check()` replaces `data_check()`: no `caret` or `olsrr`, thresholds as
+  arguments, metrics returned.
+* `sim_kecc()` simulates data shaped like the KECC measures (patient-month
+  binary or binomial days outcomes, patient random effect).
+
+## Still to come (in this order)
+
+* The logistic fixed-effect engine of `pprofR` under the unified interface.
+* Random, correlated-random and linear models of 1.0.3 with their defects
+  fixed.
+* Variable selection of `grplasso` with its defects fixed.
+* Empirical null, inter-unit reliability, Cox O/E components.
+* Plots.

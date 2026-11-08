@@ -1,0 +1,34 @@
+url: https://um-kevinhe.github.io/pprof/
+template:
+  bootstrap: 5
+  light-switch: true
+  math-rendering: mathjax
+  bslib:
+    base_font: {google: "Source Sans 3"}
+    heading_font: {google: "Source Serif 4"}
+    code_font: {google: "JetBrains Mono"}
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, lightswitch, github]
+
+reference:
+- title: Data
+  desc: Prepare and check the data every component reads.
+  contents:
+  - pp_data
+  - pp_check
+- title: Standardized measures
+  contents:
+  - standardize
+- title: Tests
+  contents:
+  - test_providers
+  - test_covariates
+- title: Simulation
+  contents:
+  - sim_kecc
+- title: Package
+  contents:
+  - pprof-package

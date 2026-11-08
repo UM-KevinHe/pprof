@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // logis_fe_prov
 List logis_fe_prov(arma::vec& N, arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, bool backtrack, int max_iter, double bound, double tol, bool message, std::string stop);
-RcppExport SEXP _pprofR_logis_fe_prov(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP, SEXP stopSEXP) {
+RcppExport SEXP _pprof_logis_fe_prov(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP, SEXP stopSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -35,7 +35,7 @@ END_RCPP
 }
 // logis_BIN_fe_prov
 List logis_BIN_fe_prov(arma::vec& N, arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, int threads, double tol, int max_iter, double bound, bool message, bool backtrack, std::string stop);
-RcppExport SEXP _pprofR_logis_BIN_fe_prov(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP, SEXP stopSEXP) {
+RcppExport SEXP _pprof_logis_BIN_fe_prov(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP threadsSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP messageSEXP, SEXP backtrackSEXP, SEXP stopSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -58,7 +58,7 @@ END_RCPP
 }
 // logis_fe_var
 List logis_fe_var(arma::vec& N, arma::mat& Z, arma::vec& n_prov, arma::vec& gamma, arma::vec& beta);
-RcppExport SEXP _pprofR_logis_fe_var(SEXP NSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP) {
+RcppExport SEXP _pprof_logis_fe_var(SEXP NSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -73,7 +73,7 @@ END_RCPP
 }
 // wald_gamma
 arma::vec wald_gamma(arma::vec& N, arma::mat& Z, arma::vec& p, arma::vec& n_prov, arma::vec& parm_indices, int threads);
-RcppExport SEXP _pprofR_wald_gamma(SEXP NSEXP, SEXP ZSEXP, SEXP pSEXP, SEXP n_provSEXP, SEXP parm_indicesSEXP, SEXP threadsSEXP) {
+RcppExport SEXP _pprof_wald_gamma(SEXP NSEXP, SEXP ZSEXP, SEXP pSEXP, SEXP n_provSEXP, SEXP parm_indicesSEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -89,7 +89,7 @@ END_RCPP
 }
 // robust_wald_gamma
 arma::vec robust_wald_gamma(arma::vec& N, arma::mat& Z, arma::vec& p, arma::vec& n_prov, arma::vec& parm_indices);
-RcppExport SEXP _pprofR_robust_wald_gamma(SEXP NSEXP, SEXP ZSEXP, SEXP pSEXP, SEXP n_provSEXP, SEXP parm_indicesSEXP) {
+RcppExport SEXP _pprof_robust_wald_gamma(SEXP NSEXP, SEXP ZSEXP, SEXP pSEXP, SEXP n_provSEXP, SEXP parm_indicesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -104,7 +104,7 @@ END_RCPP
 }
 // wald_covar
 List wald_covar(arma::vec& N, arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec& gamma, arma::vec& beta, arma::uvec& indices, double null, double alpha);
-RcppExport SEXP _pprofR_wald_covar(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP nullSEXP, SEXP alphaSEXP) {
+RcppExport SEXP _pprof_wald_covar(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP nullSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -123,7 +123,7 @@ END_RCPP
 }
 // robust_wald_covar
 List robust_wald_covar(arma::vec& N, arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec& gamma, arma::vec& beta, arma::uvec& indices, double null_value, double alpha, arma::vec& A0, arma::mat& A1_t, arma::mat& A2);
-RcppExport SEXP _pprofR_robust_wald_covar(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP null_valueSEXP, SEXP alphaSEXP, SEXP A0SEXP, SEXP A1_tSEXP, SEXP A2SEXP) {
+RcppExport SEXP _pprof_robust_wald_covar(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP indicesSEXP, SEXP null_valueSEXP, SEXP alphaSEXP, SEXP A0SEXP, SEXP A1_tSEXP, SEXP A2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -145,7 +145,7 @@ END_RCPP
 }
 // compute_A2
 arma::mat compute_A2(const arma::mat& X_matrix);
-RcppExport SEXP _pprofR_compute_A2(SEXP X_matrixSEXP) {
+RcppExport SEXP _pprof_compute_A2(SEXP X_matrixSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -156,7 +156,7 @@ END_RCPP
 }
 // computeDirectExp
 arma::mat computeDirectExp(const arma::vec& gamma_prov, const arma::vec& Z_beta, const arma::vec& w, const int threads);
-RcppExport SEXP _pprofR_computeDirectExp(SEXP gamma_provSEXP, SEXP Z_betaSEXP, SEXP wSEXP, SEXP threadsSEXP) {
+RcppExport SEXP _pprof_computeDirectExp(SEXP gamma_provSEXP, SEXP Z_betaSEXP, SEXP wSEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -170,7 +170,7 @@ END_RCPP
 }
 // cluster_sums
 List cluster_sums(const arma::vec& r, const arma::uvec& cluster, const arma::uvec& prov_row, const arma::uvec& cluster_prov, const int m);
-RcppExport SEXP _pprofR_cluster_sums(SEXP rSEXP, SEXP clusterSEXP, SEXP prov_rowSEXP, SEXP cluster_provSEXP, SEXP mSEXP) {
+RcppExport SEXP _pprof_cluster_sums(SEXP rSEXP, SEXP clusterSEXP, SEXP prov_rowSEXP, SEXP cluster_provSEXP, SEXP mSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -185,7 +185,7 @@ END_RCPP
 }
 // stabilized_meat
 arma::vec stabilized_meat(const arma::vec& r, const arma::vec& v, const arma::uvec& cluster, const arma::uvec& cluster_prov, const int m);
-RcppExport SEXP _pprofR_stabilized_meat(SEXP rSEXP, SEXP vSEXP, SEXP clusterSEXP, SEXP cluster_provSEXP, SEXP mSEXP) {
+RcppExport SEXP _pprof_stabilized_meat(SEXP rSEXP, SEXP vSEXP, SEXP clusterSEXP, SEXP cluster_provSEXP, SEXP mSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -200,21 +200,21 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pprofR_logis_fe_prov", (DL_FUNC) &_pprofR_logis_fe_prov, 12},
-    {"_pprofR_logis_BIN_fe_prov", (DL_FUNC) &_pprofR_logis_BIN_fe_prov, 13},
-    {"_pprofR_logis_fe_var", (DL_FUNC) &_pprofR_logis_fe_var, 5},
-    {"_pprofR_wald_gamma", (DL_FUNC) &_pprofR_wald_gamma, 6},
-    {"_pprofR_robust_wald_gamma", (DL_FUNC) &_pprofR_robust_wald_gamma, 5},
-    {"_pprofR_wald_covar", (DL_FUNC) &_pprofR_wald_covar, 9},
-    {"_pprofR_robust_wald_covar", (DL_FUNC) &_pprofR_robust_wald_covar, 12},
-    {"_pprofR_compute_A2", (DL_FUNC) &_pprofR_compute_A2, 1},
-    {"_pprofR_computeDirectExp", (DL_FUNC) &_pprofR_computeDirectExp, 4},
-    {"_pprofR_cluster_sums", (DL_FUNC) &_pprofR_cluster_sums, 5},
-    {"_pprofR_stabilized_meat", (DL_FUNC) &_pprofR_stabilized_meat, 5},
+    {"_pprof_logis_fe_prov", (DL_FUNC) &_pprof_logis_fe_prov, 12},
+    {"_pprof_logis_BIN_fe_prov", (DL_FUNC) &_pprof_logis_BIN_fe_prov, 13},
+    {"_pprof_logis_fe_var", (DL_FUNC) &_pprof_logis_fe_var, 5},
+    {"_pprof_wald_gamma", (DL_FUNC) &_pprof_wald_gamma, 6},
+    {"_pprof_robust_wald_gamma", (DL_FUNC) &_pprof_robust_wald_gamma, 5},
+    {"_pprof_wald_covar", (DL_FUNC) &_pprof_wald_covar, 9},
+    {"_pprof_robust_wald_covar", (DL_FUNC) &_pprof_robust_wald_covar, 12},
+    {"_pprof_compute_A2", (DL_FUNC) &_pprof_compute_A2, 1},
+    {"_pprof_computeDirectExp", (DL_FUNC) &_pprof_computeDirectExp, 4},
+    {"_pprof_cluster_sums", (DL_FUNC) &_pprof_cluster_sums, 5},
+    {"_pprof_stabilized_meat", (DL_FUNC) &_pprof_stabilized_meat, 5},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_pprofR(DllInfo *dll) {
+RcppExport void R_init_pprof(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

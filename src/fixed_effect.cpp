@@ -13,7 +13,7 @@
 #include <cmath>
 #include <iomanip>
 #include <string>
-#include "pprofR_omp.h"
+#include "pprof_omp.h"
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
