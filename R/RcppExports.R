@@ -45,3 +45,7 @@ stabilized_meat <- function(r, v, cluster, cluster_prov, m) {
     .Call(`_pprof_stabilized_meat`, r, v, cluster, cluster_prov, m)
 }
 
+restricted_score <- function(N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices) {
+    .Call(`_pprof_restricted_score`, N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices)
+}
+

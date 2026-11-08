@@ -15,9 +15,21 @@ frame with column names.
 * `sim_kecc()` simulates data shaped like the KECC measures (patient-month
   binary or binomial days outcomes, patient random effect).
 
+## Logistic fixed-effect model (the `pprofR` engine under the unified interface)
+
+* `fit_logistic_fe()` replaces `logis_fe()`: binary or binomial outcomes, SerBIN or BAN.
+* `test_providers()` replaces `test_fe()`: `statistic` (exact, score, Wald) x `variance` (naive,
+  robust, stabilized) with one fixed set of output columns; the naive Wald statistic uses the
+  case-mix variance (`gamma_variance()`), which does not depend on the covariate origin; the
+  restricted score test of 1.0.3 is back as `score_type = "restricted"`.
+* `test_covariates()` replaces `summary_fe_covar()`; the likelihood-ratio refit respects the fit's
+  own `bound`.
+* `confint()` gives intervals for the provider effects; `standardize()` replaces `SR_output()` and
+  maps those limits to the ratios and rates; `direct_expectation()` replaces `direct_exp()`.
+* `test_measure()` replaces `test_SM()` and adds the log scale.
+
 ## Still to come (in this order)
 
-* The logistic fixed-effect engine of `pprofR` under the unified interface.
 * Random, correlated-random and linear models of 1.0.3 with their defects
   fixed.
 * Variable selection of `grplasso` with its defects fixed.

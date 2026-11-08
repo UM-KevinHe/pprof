@@ -692,3 +692,59 @@ arma::vec stabilized_meat(const arma::vec &r, const arma::vec &v, const arma::uv
   }
   return meat;
 }
+
+// ---------------------------------------------------------------------------
+// Restricted score test of H0: gamma_i = gamma_null for the requested providers
+// (1-based `parm_indices`): the score of gamma_i at the null divided by the
+// square root of its efficient information with every other parameter at its
+// full-model estimate. The `Modified_score` of pprof 1.0.3 (score_modified =
+// FALSE) extended to binomial trials. Only provider i's rows differ between the
+// full and the null information, so the p x p system is updated per provider
+// instead of rebuilt: O(n p^2) in total.
+// [[Rcpp::export]]
+arma::vec restricted_score(const arma::vec &N, const arma::vec &Y, const arma::mat &Z,
+                           const arma::vec &n_prov, const arma::vec &gamma, const arma::vec &beta,
+                           double gamma_null, const arma::uvec &parm_indices) {
+  const int m = n_prov.n_elem;
+  arma::vec gamma_obs = rep_vec(gamma, n_prov);
+  arma::vec Zb = Z * beta;
+  arma::vec p = 1 / (1 + exp(-gamma_obs - Zb));
+  arma::vec pq = N % p % (1 - p);
+  pq.replace(0, 1e-20);
+  arma::vec p0 = 1 / (1 + exp(-gamma_null - Zb));
+  arma::vec pq0 = N % p0 % (1 - p0);
+  arma::vec r0 = Y - N % p0;
+
+  arma::vec info_gamma_inv(m);
+  arma::mat info_bg(Z.n_cols, m);
+  arma::uvec start(m + 1);
+  int ind = 0;
+  for (int i = 0; i < m; i++) {
+    start(i) = ind;
+    int last = ind + n_prov(i) - 1;
+    info_gamma_inv(i) = 1 / sum(pq.subvec(ind, last));
+    info_bg.col(i) = Z.rows(ind, last).t() * pq.subvec(ind, last);
+    ind += n_prov(i);
+  }
+  start(m) = ind;
+  arma::mat info_beta_full = Z.t() * (Z.each_col() % pq);
+  arma::mat m_full = (info_bg.each_row() % info_gamma_inv.t()) * info_bg.t();
+
+  arma::vec z(m);
+  z.fill(arma::datum::nan);
+  for (arma::uword k = 0; k < parm_indices.n_elem; k++) {
+    int i = parm_indices(k) - 1;
+    int a = start(i), b = start(i + 1) - 1;
+    arma::mat Zi = Z.rows(a, b);
+    arma::vec d = pq0.subvec(a, b) - pq.subvec(a, b);
+    arma::mat S = info_beta_full + Zi.t() * (Zi.each_col() % d) - m_full +
+      info_bg.col(i) * info_bg.col(i).t() * info_gamma_inv(i);
+    arma::mat B11;
+    if (!arma::inv_sympd(B11, S)) B11 = arma::pinv(S);
+    double info_alpha = sum(pq0.subvec(a, b));
+    arma::vec info_ba = Zi.t() * pq0.subvec(a, b);
+    double v0 = info_alpha - arma::as_scalar(info_ba.t() * B11 * info_ba);
+    z(i) = sum(r0.subvec(a, b)) / sqrt(v0);
+  }
+  return z;
+}

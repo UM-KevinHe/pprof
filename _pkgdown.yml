@@ -19,13 +19,26 @@ reference:
   contents:
   - pp_data
   - pp_check
+- title: Risk-adjustment models
+  contents:
+  - fit_logistic_fe
+  - vcov.logistic_fe
+  - gamma_variance
 - title: Standardized measures
   contents:
   - standardize
-- title: Tests
+  - standardize.logistic_fe
+  - direct_expectation
+- title: Tests of provider effects
   contents:
   - test_providers
+  - test_providers.logistic_fe
+  - confint.logistic_fe
+  - test_measure
+- title: Tests of covariates
+  contents:
   - test_covariates
+  - test_covariates.logistic_fe
 - title: Simulation
   contents:
   - sim_kecc

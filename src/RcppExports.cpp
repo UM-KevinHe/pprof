@@ -198,6 +198,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// restricted_score
+arma::vec restricted_score(const arma::vec& N, const arma::vec& Y, const arma::mat& Z, const arma::vec& n_prov, const arma::vec& gamma, const arma::vec& beta, double gamma_null, const arma::uvec& parm_indices);
+RcppExport SEXP _pprof_restricted_score(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP parm_indicesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type N(NSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< double >::type gamma_null(gamma_nullSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type parm_indices(parm_indicesSEXP);
+    rcpp_result_gen = Rcpp::wrap(restricted_score(N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pprof_logis_fe_prov", (DL_FUNC) &_pprof_logis_fe_prov, 12},
@@ -211,6 +229,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pprof_computeDirectExp", (DL_FUNC) &_pprof_computeDirectExp, 4},
     {"_pprof_cluster_sums", (DL_FUNC) &_pprof_cluster_sums, 5},
     {"_pprof_stabilized_meat", (DL_FUNC) &_pprof_stabilized_meat, 5},
+    {"_pprof_restricted_score", (DL_FUNC) &_pprof_restricted_score, 8},
     {NULL, NULL, 0}
 };
 

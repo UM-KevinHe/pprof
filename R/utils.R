@@ -39,6 +39,11 @@ z_decision <- function(z, level, alternative) {
   list(flag = flag, p = p)
 }
 
+# Flag from an upper-tail probability (exact tests): 1 above, -1 below, 0 otherwise.
+flag_two_sided <- function(p_upper, alpha) {
+  ifelse(p_upper < alpha / 2, 1L, ifelse(p_upper <= 1 - alpha / 2, 0L, -1L))
+}
+
 # Integer codes 1..K for (provider, patient) clusters in order of first
 # appearance, and the first row of each cluster. The pair is encoded as one
 # number, exact below 2^53.
@@ -65,4 +70,37 @@ provider_positions <- function(providers, levels) {
     stop("Unknown provider(s): ", paste(providers[is.na(pos)], collapse = ", "), call. = FALSE)
   }
   pos
+}
+
+# Provider-level "meat" of the patient-clustered sandwich for gamma: for each
+# provider (in the order `levels`) the sum over its patients of (patient sum of
+# residuals)^2. cluster_sums() adds in row order with long double accumulators.
+robust_gamma_meat <- function(residual, prov, patient, levels) {
+  cl <- cluster_codes(prov, patient)
+  prov_row <- provider_codes(prov, levels)
+  meat <- cluster_sums(residual, cl$code, prov_row, prov_row[cl$first], length(levels))$meat
+  stats::setNames(meat, levels)
+}
+
+# The three blocks of the sandwich "meat" for beta (see robust_wald_covar):
+#   A0   : per provider, sum over patients of r_k^2          (length m)
+#   A1_t : per provider, sum over patients of r_k * U_k      (m x p)
+#   A2   : sum over patients of U_k U_k^T                    (p x p)
+# where r_k and U_k are the patient-level sums of the residual and of
+# Z * residual. Providers follow `levels`.
+robust_beta_meat <- function(residual, z, prov, patient, levels) {
+  cl <- cluster_codes(prov, patient)
+  prov_cl <- provider_codes(prov[cl$first], levels)
+  r_k <- as.numeric(rowsum(residual, cl$code, reorder = FALSE))
+  u_k <- rowsum(z * residual, cl$code, reorder = FALSE)
+  a0 <- as.numeric(rowsum(r_k^2, prov_cl, reorder = TRUE))
+  a1_t <- rowsum(r_k * u_k, prov_cl, reorder = TRUE)
+  dimnames(a1_t) <- NULL
+  dimnames(u_k) <- NULL
+  list(A0 = a0, A1_t = a1_t, A2 = compute_A2(u_k))
+}
+
+# Normal quantile for a confidence level and alternative.
+normal_quantile <- function(level, alternative) {
+  if (alternative == "two.sided") stats::qnorm(1 - (1 - level) / 2) else stats::qnorm(level)
 }
