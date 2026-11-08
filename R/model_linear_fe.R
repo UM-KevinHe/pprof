@@ -24,7 +24,7 @@
 #'   \eqn{\tilde Z} the within-centred covariates.}
 #' \item{data, vars, sizes, cutoff, rows}{as in [fit_logistic_fe()].}
 #'
-#' @seealso [test_providers.linear_fe()], [test_covariates.linear_fe()],
+#' @seealso [test.linear_fe()], [summary.linear_fe()],
 #'   [standardize.linear_fe()], [confint.linear_fe()], [gamma_variance()]
 #' @examples
 #' d <- sim_kecc(n_providers = 20, type = "continuous", seed = 1)

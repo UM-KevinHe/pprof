@@ -68,7 +68,7 @@ standardize.cox <- function(fit, type = c("indirect", "direct"), providers = NUL
   }
   rownames(out) <- NULL
   attr(out, "type") <- type
-  out
+  as_pp_measure(out)
 }
 
 # The columns of a cox fit as vectors: at-risk interval, event, weights,

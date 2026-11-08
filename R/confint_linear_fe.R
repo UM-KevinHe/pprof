@@ -28,7 +28,7 @@ confint.linear_fe <- function(object, parm = NULL, level = 0.95, type = c("wald"
   type <- match.arg(type)
   wald_variance <- match.arg(wald_variance)
   alternative <- match.arg(alternative)
-  res <- test_providers(object, variance = if (type == "wald") "naive" else "robust",
+  res <- test(object, variance = if (type == "wald") "naive" else "robust",
                         providers = parm, level = level, alternative = alternative,
                         wald_variance = wald_variance)
   data.frame(provider = res$provider, estimate = res$estimate, lower = res$lower,

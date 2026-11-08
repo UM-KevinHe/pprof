@@ -7,7 +7,7 @@
 iur_curve(x, sizes = NULL, n_quantiles = 10)
 }
 \arguments{
-\item{x}{a \code{pp_iur} object from \code{\link[=iur_direct]{iur_direct()}} or \code{\link[=iur_bootstrap]{iur_bootstrap()}}.}
+\item{x}{a \code{pp_iur} object from \code{\link[=iur]{iur()}}.}
 
 \item{sizes}{sizes to group; default the providers' sizes.}
 
@@ -23,7 +23,7 @@ n)} at the smallest size, the mean size of each quantile group of sizes
 and the largest size.
 }
 \examples{
-r <- iur_direct(estimate = c(0.2, 0.3, 0.25, 0.4), se = c(0.05, 0.04, 0.06, 0.03),
+r <- iur("direct", estimate = c(0.2, 0.3, 0.25, 0.4), se = c(0.05, 0.04, 0.06, 0.03),
                 size = c(40, 60, 30, 90))
 iur_curve(r, n_quantiles = 2)
 }

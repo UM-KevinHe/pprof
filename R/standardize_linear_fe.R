@@ -9,7 +9,7 @@
 #'   `"median"` (default), `"mean"` (weighted by rows) or a number.
 #' @param providers optional subset of provider identifiers.
 #' @param gamma_se optional standard errors of the provider effects, named by
-#'   provider (for instance the `se` column of a [test_providers()] result);
+#'   provider (for instance the `se` column of a [test()] result);
 #'   with them `se_difference` is returned.
 #' @param level if given, confidence limits of the difference are added,
 #'   mapped from Wald limits of \eqn{\gamma_i}.
@@ -93,5 +93,5 @@ standardize.linear_fe <- function(fit, type = c("indirect", "direct"), null = "m
   attr(out, "type") <- type
   attr(out, "null_value") <- g0
   attr(out, "level") <- level
-  out
+  as_pp_measure(out)
 }

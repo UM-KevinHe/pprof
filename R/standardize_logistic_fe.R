@@ -14,7 +14,7 @@
 #'   rows.
 #' @param providers optional subset of provider identifiers.
 #' @param gamma_se optional standard errors of the provider effects, named by
-#'   provider (for instance the `se` column of a Wald [test_providers()]
+#'   provider (for instance the `se` column of a Wald [test()]
 #'   result); with them the direct rate's standard error
 #'   \eqn{\mathrm{numer\_se}/n_{pop} \times se(\hat\gamma_i)} is returned.
 #' @param level if given, confidence limits of the ratio and the rate are
@@ -150,7 +150,7 @@ standardize.logistic_fe <- function(fit, type = c("indirect", "direct"), null = 
   attr(out, "n_pop") <- n_pop
   attr(out, "population_rate") <- population_rate
   attr(out, "level") <- level
-  out
+  as_pp_measure(out)
 }
 
 #' Direct standardization over an arbitrary standard population

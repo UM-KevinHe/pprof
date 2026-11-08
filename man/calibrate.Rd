@@ -10,7 +10,7 @@ calibrate(x, null_model, level = NULL, alternative = NULL, critical = NULL)
 \item{x}{a test result.}
 
 \item{null_model}{a \code{pp_null} object, or a function of \code{x} returning one
-(for instance \code{function(t) null_empirical(t, n_groups = 4)}).}
+(for instance \code{function(t) null_model("empirical", t, n_groups = 4)}).}
 
 \item{level, alternative}{default to the settings of \code{x}.}
 
@@ -22,12 +22,12 @@ of the normal quantile for \code{level}.}
 \code{null_group} added, \code{p} and \code{flag} recomputed from the adjusted statistic,
 and \code{lower}/\code{upper} recomputed where a standard error is available (for
 \code{\link[=test_measure]{test_measure()}} results on the transformed scale, mapped back; for the
-log-ratio Wald and mid-p tests of \code{\link[=test_providers.cox]{test_providers.cox()}} on the ratio
+log-ratio Wald and mid-p tests of \code{\link[=test.cox]{test.cox()}} on the ratio
 scale, the mid-p limits by root finding); the settings are recorded in
 the \code{test} attribute. The exact Poisson test cannot be calibrated.
 }
 \description{
-Refers the statistics of a \code{\link[=test_providers]{test_providers()}} or \code{\link[=test_measure]{test_measure()}} result
+Refers the statistics of a \code{\link[=test]{test()}} or \code{\link[=test_measure]{test_measure()}} result
 to a null model: the adjusted statistic \eqn{(z - \mathrm{null\_mean}) /
 \mathrm{null\_sd}} replaces the standard normal in the p-values and
 flags, and the confidence limits are those of the inverted calibrated test,
@@ -39,6 +39,6 @@ flagged.
 d <- sim_kecc(n_providers = 40, seed = 1)
 pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
               patient = "patient", message = FALSE)
-tst <- test_providers(fit_logistic_fe(pd), statistic = "wald", variance = "robust")
-calibrate(tst, null_fixed(sd = 1.5))
+tst <- test(fit_logistic_fe(pd), statistic = "wald", variance = "robust")
+calibrate(tst, null_model("fixed", sd = 1.5))
 }

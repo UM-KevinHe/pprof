@@ -3,7 +3,7 @@
 #' Components for profiling health care providers, organised by analysis
 #' step: data preparation ([pp_data()], [pp_check()]), risk-adjustment
 #' models, standardized measures ([standardize()]), tests of provider effects
-#' ([test_providers()]) and covariates ([test_covariates()]), reference
+#' ([test()]) and covariates ([summary()]), reference
 #' distributions, reliability, variable selection and plots. Every quality
 #' measure is assembled from these components; nothing in the package is
 #' specific to one measure.
@@ -24,4 +24,5 @@
 #' @useDynLib pprof, .registration = TRUE
 #' @importFrom Rcpp evalCpp
 #' @importFrom stats coef predict vcov
+#' @importFrom rlang .data
 "_PACKAGE"

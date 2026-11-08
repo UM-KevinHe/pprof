@@ -1,6 +1,6 @@
 #' Tests of the covariate coefficients of a logistic fixed-effect fit
 #'
-#' @param fit a model fitted by [fit_logistic_fe()].
+#' @param object a model fitted by [fit_logistic_fe()].
 #' @param test `"wald"` (default; model-based), `"robust_wald"`
 #'   (patient-clustered sandwich; needs a patient column), `"lr"` (likelihood
 #'   ratio; refits the model without the covariate) or `"score"` (refits the
@@ -11,7 +11,7 @@
 #'   allow 0.
 #' @param ... unused.
 #'
-#' @details The refits use the settings of `fit`, including the Firth
+#' @details The refits use the settings of `object`, including the Firth
 #' penalty; with the penalty the likelihood ratio compares the penalized
 #' log-likelihoods.
 #'
@@ -23,21 +23,21 @@
 #' d <- sim_kecc(n_providers = 20, seed = 1)
 #' pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 #'               patient = "patient", message = FALSE)
-#' fit <- fit_logistic_fe(pd)
-#' test_covariates(fit, test = "robust_wald")
+#' object <- fit_logistic_fe(pd)
+#' summary(object, test = "robust_wald")
 #' @export
-test_covariates.logistic_fe <- function(fit, test = c("wald", "robust_wald", "lr", "score"),
+summary.logistic_fe <- function(object, test = c("wald", "robust_wald", "lr", "score"),
                                         covariates = NULL, level = 0.95, null = 0, ...) {
-  check_fit(fit)
+  check_fit(object)
   test <- match.arg(test)
-  x <- fit$vars$x
+  x <- object$vars$x
   ind <- if (is.null(covariates)) seq_along(x) else match(covariates, x)
   if (anyNA(ind)) {
     stop("Unknown covariate(s): ", paste(covariates[is.na(ind)], collapse = ", "), call. = FALSE)
   }
-  m <- fit_matrices(fit)
-  gamma <- fit$coefficients$gamma
-  beta <- fit$coefficients$beta
+  m <- fit_matrices(object)
+  gamma <- object$coefficients$gamma
+  beta <- object$coefficients$beta
   alpha <- 1 - level
 
   if (test %in% c("wald", "robust_wald")) {
@@ -47,25 +47,25 @@ test_covariates.logistic_fe <- function(fit, test = c("wald", "robust_wald", "lr
       if (is.null(m$patient)) {
         stop("test = \"robust_wald\" needs a patient column in pp_data().", call. = FALSE)
       }
-      residual <- m$y - m$n * fit$fitted
+      residual <- m$y - m$n * object$fitted
       meat <- robust_beta_meat(residual, m$z, m$prov, m$patient, m$levels)
       res <- robust_wald_covar(m$n, m$y, m$z, m$n_prov, gamma, beta, ind, null, alpha,
                                meat$A0, meat$A1_t, meat$A2)
     }
-    return(data.frame(covariate = x[ind], estimate = unname(beta[ind]),
+    return(pp_summary(data.frame(covariate = x[ind], estimate = unname(beta[ind]),
                       se = as.numeric(res$se.beta),
                       statistic = as.numeric(res$stat), p = as.numeric(res$p),
                       lower = as.numeric(res$beta.lower), upper = as.numeric(res$beta.upper),
-                      stringsAsFactors = FALSE))
+                      stringsAsFactors = FALSE)))
   }
 
   if (null != 0) stop("`null` must be 0 for the lr and score tests.", call. = FALSE)
   if (length(x) < 2) stop("The lr and score tests need at least two covariates.", call. = FALSE)
-  ctrl <- fit$control
+  ctrl <- object$control
   firth <- identical(ctrl$penalty, "firth")
   refit_without <- function(j) {
-    pd <- structure(list(data = fit$data, vars = utils::modifyList(fit$vars, list(x = x[-j])),
-                         sizes = fit$sizes, cutoff = fit$cutoff), class = "pp_data")
+    pd <- structure(list(data = object$data, vars = utils::modifyList(object$vars, list(x = x[-j])),
+                         sizes = object$sizes, cutoff = object$cutoff), class = "pp_data")
     fit_logistic_fe(pd, algorithm = ctrl$algorithm,
                     penalty = if (firth) "firth" else "none", max_iter = ctrl$max_iter,
                     tol = ctrl$tol, bound = ctrl$bound, backtrack = ctrl$backtrack,
@@ -75,7 +75,7 @@ test_covariates.logistic_fe <- function(fit, test = c("wald", "robust_wald", "lr
   if (test == "lr") {
     stat <- vapply(ind, function(j) {
       null_fit <- refit_without(j)
-      -2 * (loglik_of(null_fit) - loglik_of(fit))
+      -2 * (loglik_of(null_fit) - loglik_of(object))
     }, numeric(1))
   } else {
     code <- provider_codes(m$prov, m$levels)
@@ -104,7 +104,8 @@ test_covariates.logistic_fe <- function(fit, test = c("wald", "robust_wald", "lr
       score_add^2 / info_add
     }, numeric(1))
   }
-  data.frame(covariate = x[ind], estimate = unname(beta[ind]), se = NA_real_, statistic = stat,
+  pp_summary(data.frame(covariate = x[ind], estimate = unname(beta[ind]), se = NA_real_,
+                        statistic = stat,
              p = stats::pchisq(stat, 1, lower.tail = FALSE), lower = NA_real_, upper = NA_real_,
-             stringsAsFactors = FALSE)
+             stringsAsFactors = FALSE))
 }

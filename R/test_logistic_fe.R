@@ -31,7 +31,7 @@
 #' @param n_resample number of draws for `exact_method = "bootstrap"`.
 #' @param null_model optional null model: a `pp_null` object or a function
 #'   of the result returning one, for instance
-#'   `function(t) null_empirical(t, n_groups = 4)`; the result is then passed
+#'   `function(t) null_model("empirical", t, n_groups = 4)`; the result is then passed
 #'   through [calibrate()].
 #' @param ... unused.
 #'
@@ -78,9 +78,9 @@
 #' pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 #'               patient = "patient", message = FALSE)
 #' fit <- fit_logistic_fe(pd)
-#' test_providers(fit, statistic = "score", variance = "robust")
+#' test(fit, statistic = "score", variance = "robust")
 #' @export
-test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
+test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
                                        variance = c("naive", "robust", "stabilized"),
                                        null = "median", providers = NULL, level = 0.95,
                                        alternative = c("two.sided", "greater", "less"),

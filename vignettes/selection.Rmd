@@ -1,0 +1,148 @@
+---
+title: "Variable selection"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5,
+                      dpi = 96)
+```
+
+A measure carries a risk-adjustment set of tens to hundreds of candidate
+variables. Which of them the model should keep is a selection problem,
+and it has one feature that ordinary penalized regression does not handle:
+the provider effects must stay in the model, unpenalized, while the risk
+factors are selected. Selecting on a pooled model (without provider
+effects) inflates the false discoveries, because the omitted provider
+effect acts as a confounder shared by every risk factor correlated with
+it.
+
+`var_select()` fits the lasso or group-lasso path of the fixed-effect
+model with the provider effects kept, for binary, binomial and survival
+outcomes; `cv()` chooses the penalty by cross-validation.
+
+## The objective
+
+$$-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
+\qquad\text{or}\qquad
+-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_g m_g \|\beta_g\|_2 ,$$
+
+with the provider effects $\gamma$ never penalized. The path is solved by
+coordinate descent on standardized covariates (each group orthonormalized)
+with one Newton step on the provider effects per cycle, warm starts along
+a decreasing sequence of $\lambda$ and an active-set strategy, so that the
+provider effects are updated in closed form from their own records and
+never form indicator columns (the multi-layer algorithm of the KECC
+measures paper; `grplasso`'s `pp.lasso` and `grp.lasso`).
+
+## A lasso path
+
+```{r}
+library(pprof)
+d <- sim_kecc(n_providers = 60, n_covariates = 8, beta = c(0.6, -0.5, 0.4, 0, 0, 0, 0, 0),
+              seed = 4)
+pd <- pp_data(d, y = "y", x = paste0("x", 1:8), provider = "provider", patient = "patient",
+              message = FALSE)
+path <- var_select(pd, n_lambda = 30)
+path
+plot(path)
+```
+
+* `penalize`: the covariates that carry a penalty (default all); the
+  others, a committee's mandatory adjusters say, enter unpenalized.
+* `multiplier`: per-covariate (or per-group) penalty multipliers.
+* `lambda`, `n_lambda`, `lambda_min_ratio`: the penalty sequence; by
+  default 100 values from the smallest $\lambda$ with every penalized
+  coefficient zero down to $10^{-4}$ times it.
+
+The coefficients at any penalty, and the selected set:
+
+```{r}
+coef(path, lambda = path$lambda[12])$beta
+selected_covariates(path, which = c(8, 15, 30))
+```
+
+## Group lasso
+
+A categorical risk factor coded as several 0/1 columns should enter or
+leave the model as a whole. Give each covariate a group label (0 for an
+unpenalized covariate); the penalty on a group is $\sqrt{\text{size}}$
+times the group norm by default.
+
+```{r}
+grp <- var_select(pd, penalty = "group_lasso", group = c(1, 1, 2, 2, 3, 3, 0, 4), n_lambda = 30)
+grp
+selected_covariates(grp, which = 15)
+```
+
+## Choosing the penalty: cross-validation
+
+`cv()` refits the path on every training fold and scores the held-out
+rows by the binomial deviance (the partial-likelihood deviance per event
+for the Cox model, the person-period deviance for the discrete-time
+model). Folds are formed **within every provider** over its patients, so
+that each provider is present in every training set; a provider held out
+entirely is predicted with the median provider effect.
+
+```{r}
+cvp <- cv(path, n_folds = 5, seed = 1)
+cvp
+plot(cvp)
+cvp$selected_min
+cvp$selected_1se
+```
+
+`lambda_min` is the penalty with the smallest cross-validated deviance,
+`lambda_1se` the largest penalty within one standard error of it (fewer
+variables). For selecting risk adjusters, the measure development work of
+the KECC measures uses `lambda_min` and then refits the fixed-effect model
+on the selected set:
+
+```{r}
+pd_sel <- pp_data(d, y = "y", x = cvp$selected_min, provider = "provider",
+                  patient = "patient", message = FALSE)
+summary(fit_logistic_fe(pd_sel))
+```
+
+## Survival outcomes
+
+On a survival `pp_data()` object the same calls fit:
+
+* `model = "cox"` (default): the Cox model stratified by provider (its
+  baselines absorb the provider effects), with counting-process rows,
+  weights and offsets as in `fit_cox()`; the cross-validation loss is the
+  partial-likelihood deviance of the held-out rows within their own strata.
+* `model = "discrete"`: the discrete-time hazard model
+  $\mathrm{logit}\, h_{jk} = \alpha_k + \gamma_i + Z_j^\top\beta$, with
+  the periods the distinct event times, one row per subject (no `start`),
+  unpenalized period and provider effects and the lasso on $\beta$. The
+  likelihood is computed without expanding the data into person-periods.
+  The provider effects are identified by a zero median.
+
+```{r}
+s <- sim_kecc(n_providers = 40, rows_per_patient = c(1, 1), type = "survival",
+              n_covariates = 6, beta = c(0.6, -0.5, 0.4, 0, 0, 0), seed = 41)
+ps <- pp_data(s, x = paste0("x", 1:6), provider = "provider", patient = "patient",
+              time = "stop", event = "event", cutoff = 0, message = FALSE)
+cox_path <- var_select(ps, n_lambda = 20)
+selected_covariates(cox_path, which = 20)
+s$stop <- ceiling(s$stop * 12) / 12   # monthly periods
+psm <- pp_data(s, x = paste0("x", 1:6), provider = "provider", patient = "patient",
+               time = "stop", event = "event", cutoff = 0, message = FALSE)
+disc <- var_select(psm, model = "discrete", n_lambda = 20)
+disc
+```
+
+At the smallest penalty of a long path the coefficients approach those of
+the unpenalized model: `survival::coxph()` with `strata(provider)` for the
+Cox model, a logistic regression on the expanded person-period data with
+period and provider indicators for the discrete-time model.
+
+## References
+
+Breheny P, Huang J (2015). Group descent algorithms for nonconvex
+penalized linear and logistic regression models with grouped predictors.
+*Statistics and Computing*, 25, 173-187.
+
+Friedman J, Hastie T, Tibshirani R (2010). Regularization paths for
+generalized linear models via coordinate descent. *Journal of Statistical
+Software*, 33(1), 1-22.

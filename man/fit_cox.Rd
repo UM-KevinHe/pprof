@@ -59,11 +59,11 @@ provider effects.
 \details{
 Rows with \code{included = FALSE} are left out; set \code{cutoff = 0} in
 \code{\link[=pp_data]{pp_data()}} to fit every provider, as the measures do, and choose the
-providers to report in \code{\link[=test_providers]{test_providers()}}.
+providers to report in \code{\link[=test]{test()}}.
 
 When \code{data} has a patient column it is passed as \code{cluster} to
 \code{\link[survival:coxph]{survival::coxph()}}, so that the robust (patient-clustered) covariance is
-available from \code{\link[=vcov.cox]{vcov.cox()}} and \code{\link[=test_covariates]{test_covariates()}}.
+available from \code{\link[=vcov.cox]{vcov.cox()}} and \code{\link[=summary]{summary()}}.
 
 The expected number of events of every row is
 \eqn{E_i = \exp(\eta_i)\,[\Lambda_0(t_i) - \Lambda_0(s_i)]} with
@@ -93,6 +93,6 @@ marginal models for clustered recurrent event data. \emph{Biometrics}, 68(2),
 637-647.
 }
 \seealso{
-\code{\link[=standardize.cox]{standardize.cox()}}, \code{\link[=test_providers.cox]{test_providers.cox()}},
-\code{\link[=test_covariates.cox]{test_covariates.cox()}}
+\code{\link[=standardize.cox]{standardize.cox()}}, \code{\link[=test.cox]{test.cox()}},
+\code{\link[=summary.cox]{summary.cox()}}
 }

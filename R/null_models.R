@@ -7,13 +7,14 @@
 #' the caller (for instance a known scale inflation), and the empirical null
 #' estimated robustly from the statistics themselves, overall or within
 #' groups of providers of similar size. Any of them can be handed to
-#' [calibrate()], [test_providers()] or [test_measure()].
+#' [calibrate()], [test()] or [test_measure()].
 #'
+#' @param kind `"empirical"` (default), `"theoretical"` or `"fixed"`.
 #' @param mean,sd mean and standard deviation of a fixed null.
-#' @param z the provider statistics: a numeric vector, optionally named by
-#'   provider, or a test result from [test_providers()] or [test_measure()],
-#'   whose statistic, provider identifiers and (for [test_providers()])
-#'   sizes are used.
+#' @param z for the empirical null, the provider statistics: a numeric
+#'   vector, optionally named by provider, or a test result from [test()] or
+#'   [test_measure()], whose statistic, provider identifiers and (for
+#'   [test()]) sizes are used.
 #' @param size one size per provider used to form the groups (patients, say);
 #'   taken from a test result when `z` is one. Ignored when `groups` is given.
 #' @param groups explicit group label per provider; missing labels get no
@@ -68,8 +69,8 @@
 #' pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 #'               patient = "patient", message = FALSE)
 #' fit <- fit_logistic_fe(pd)
-#' tst <- test_providers(fit, statistic = "score", variance = "robust")
-#' nul <- null_empirical(tst, n_groups = 2)
+#' tst <- test(fit, statistic = "score", variance = "robust")
+#' nul <- null_model("empirical", tst, n_groups = 2)
 #' nul
 #' head(calibrate(tst, nul))
 #' @name null_models
@@ -77,12 +78,25 @@ NULL
 
 #' @rdname null_models
 #' @export
+null_model <- function(kind = c("empirical", "theoretical", "fixed"), z = NULL, size = NULL,
+                       groups = NULL, n_groups = 4, grouping = c("rank", "quantile", "cut"),
+                       estimator = c("huber", "bisquare", "mm"), tuning = NULL, maxit = 20,
+                       acc = 1e-4, common_mean = NULL, fit_mask = NULL, min_group_size = 3,
+                       small_group = c("error", "theoretical"), mean = 0, sd = 1) {
+  kind <- match.arg(kind)
+  if (kind == "theoretical") return(null_theoretical())
+  if (kind == "fixed") return(null_fixed(mean, sd))
+  if (is.null(z)) stop("The empirical null needs the statistics `z`.", call. = FALSE)
+  null_empirical(z, size = size, groups = groups, n_groups = n_groups, grouping = grouping,
+                 estimator = estimator, tuning = tuning, maxit = maxit, acc = acc,
+                 common_mean = common_mean, fit_mask = fit_mask,
+                 min_group_size = min_group_size, small_group = small_group)
+}
+
 null_theoretical <- function() {
   new_pp_null("theoretical", mean = 0, sd = 1, group = NA_integer_)
 }
 
-#' @rdname null_models
-#' @export
 null_fixed <- function(mean = 0, sd = 1) {
   if (!is.numeric(mean) || !is.numeric(sd) || length(mean) != 1 || length(sd) != 1 ||
         !is.finite(mean) || !is.finite(sd) || sd <= 0) {
@@ -91,8 +105,6 @@ null_fixed <- function(mean = 0, sd = 1) {
   new_pp_null("fixed", mean = mean, sd = sd, group = NA_integer_)
 }
 
-#' @rdname null_models
-#' @export
 null_empirical <- function(z, size = NULL, groups = NULL, n_groups = 4,
                            grouping = c("rank", "quantile", "cut"),
                            estimator = c("huber", "bisquare", "mm"), tuning = NULL, maxit = 20,
@@ -197,12 +209,13 @@ null_empirical <- function(z, size = NULL, groups = NULL, n_groups = 4,
               settings = list(n_groups = if (is.null(groups)) n_groups else NA,
                               grouping = if (is.null(groups)) grouping else "given",
                               estimator = estimator, tuning = tuning, maxit = maxit, acc = acc,
-                              common_mean = common_mean, min_group_size = min_group_size))
+                              common_mean = common_mean, min_group_size = min_group_size),
+              z = stats::setNames(stat, providers))
 }
 
-new_pp_null <- function(kind, mean, sd, group, diagnostics = NULL, settings = list()) {
+new_pp_null <- function(kind, mean, sd, group, diagnostics = NULL, settings = list(), z = NULL) {
   structure(list(kind = kind, mean = mean, sd = sd, group = group, diagnostics = diagnostics,
-                 settings = settings),
+                 settings = settings, z = z),
             class = "pp_null")
 }
 
@@ -231,7 +244,7 @@ statistics_of <- function(z) {
 #'
 #' @param size one size per provider.
 #' @param n_groups number of groups.
-#' @param grouping `"rank"`, `"quantile"` or `"cut"`, see [null_empirical()].
+#' @param grouping `"rank"`, `"quantile"` or `"cut"`, see [null_model()].
 #' @return Integer group labels `1, ..., n_groups`.
 #' @examples
 #' assign_groups(c(5, 50, 12, 30, 8, 100), n_groups = 3)
@@ -308,6 +321,9 @@ null_parameters <- function(null, providers = NULL, n = length(providers)) {
 
 # A null model from a pp_null object or a function of the test result.
 resolve_null <- function(null_model, x) {
+  if (is.character(null_model) && length(null_model) == 1) {
+    null_model <- pprof::null_model(null_model, z = x)
+  }
   if (is.function(null_model)) null_model <- null_model(x)
   if (!inherits(null_model, "pp_null")) {
     stop("`null_model` must be a pp_null object or a function returning one.", call. = FALSE)
@@ -339,7 +355,7 @@ print.pp_null <- function(x, digits = 4, ...) {
 #' @param null a `pp_null` object.
 #' @return \eqn{(z - \mathrm{null\_mean}) / \mathrm{null\_sd}}.
 #' @examples
-#' adjust_z(c(a = 2, b = -1), null_fixed(sd = 1.5))
+#' adjust_z(c(a = 2, b = -1), null_model("fixed", sd = 1.5))
 #' @export
 adjust_z <- function(z, null) {
   p <- null_parameters(null, names(z), length(z))
@@ -348,7 +364,7 @@ adjust_z <- function(z, null) {
 
 #' Calibrate a test result with a null model
 #'
-#' Refers the statistics of a [test_providers()] or [test_measure()] result
+#' Refers the statistics of a [test()] or [test_measure()] result
 #' to a null model: the adjusted statistic \eqn{(z - \mathrm{null\_mean}) /
 #' \mathrm{null\_sd}} replaces the standard normal in the p-values and
 #' flags, and the confidence limits are those of the inverted calibrated test,
@@ -358,7 +374,7 @@ adjust_z <- function(z, null) {
 #'
 #' @param x a test result.
 #' @param null_model a `pp_null` object, or a function of `x` returning one
-#'   (for instance `function(t) null_empirical(t, n_groups = 4)`).
+#'   (for instance `function(t) null_model("empirical", t, n_groups = 4)`).
 #' @param level,alternative default to the settings of `x`.
 #' @param critical optional critical value for the flags and limits instead
 #'   of the normal quantile for `level`.
@@ -367,15 +383,15 @@ adjust_z <- function(z, null) {
 #'   `null_group` added, `p` and `flag` recomputed from the adjusted statistic,
 #'   and `lower`/`upper` recomputed where a standard error is available (for
 #'   [test_measure()] results on the transformed scale, mapped back; for the
-#'   log-ratio Wald and mid-p tests of [test_providers.cox()] on the ratio
+#'   log-ratio Wald and mid-p tests of [test.cox()] on the ratio
 #'   scale, the mid-p limits by root finding); the settings are recorded in
 #'   the `test` attribute. The exact Poisson test cannot be calibrated.
 #' @examples
 #' d <- sim_kecc(n_providers = 40, seed = 1)
 #' pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 #'               patient = "patient", message = FALSE)
-#' tst <- test_providers(fit_logistic_fe(pd), statistic = "wald", variance = "robust")
-#' calibrate(tst, null_fixed(sd = 1.5))
+#' tst <- test(fit_logistic_fe(pd), statistic = "wald", variance = "robust")
+#' calibrate(tst, null_model("fixed", sd = 1.5))
 #' @export
 calibrate <- function(x, null_model, level = NULL, alternative = NULL, critical = NULL) {
   UseMethod("calibrate")

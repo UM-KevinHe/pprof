@@ -1,0 +1,130 @@
+---
+title: "Data preparation"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+Every component of the package reads one prepared object, made once by
+`pp_data()` from a data frame and the names of its columns. This page
+explains what the object records and the decisions it embodies.
+
+## The unit of observation
+
+A row of the data is one **observation**: whatever the measure counts
+outcomes on.
+
+| Unit | Example | Outcome per row |
+|---|---|---|
+| patient-month | one row per patient per calendar month | 0/1 (an event in the month), or a count of days out of the days at risk |
+| index discharge | one row per hospital discharge | 0/1 (readmitted within 30 days) |
+| patient-record | one row per patient per provider per year | a time at risk and an event indicator |
+| patient | one row per patient | a continuous value |
+
+A patient usually contributes several rows, and those rows are **not
+independent**: a patient sicker than the risk factors say is sicker in
+every month. `pp_data()` therefore takes the patient identifier as well as
+the provider identifier. The patient column is what the patient-clustered
+(robust and stabilized) tests need; without it only the naive tests are
+available.
+
+## Declaring the columns
+
+```{r}
+library(pprof)
+d <- sim_kecc(n_providers = 30, seed = 1)
+str(d)
+pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
+              patient = "patient", cutoff = 10)
+```
+
+* `y`: the outcome. Binary (0/1), binomial (the number of events out of the
+  `n` trials of the row, for instance hospital days out of days at risk) or
+  continuous; `outcome = "auto"` tells them apart, and `outcome` can be
+  given explicitly.
+* `x`: the risk factors, numeric. Code a factor as 0/1 columns first (the
+  package does not expand factors, so that the design matrix is exactly
+  what you declared).
+* `provider`, `patient`: identifiers, converted to character.
+* `n`: the trials column of a binomial outcome.
+
+### Survival outcomes
+
+A time-to-event outcome is given by its at-risk interval and event
+indicator instead of `y`:
+
+```{r}
+s <- sim_kecc(n_providers = 30, type = "survival", seed = 1)
+head(s)
+ps <- pp_data(s, x = c("x1", "x2", "x3"), provider = "provider", patient = "patient",
+              time = "stop", start = "start", event = "event", cutoff = 0)
+```
+
+`time` is the end of the interval, `start` its beginning (0 when absent:
+no left truncation), `event` 0/1. A patient's follow-up may be cut into
+several rows (counting-process form), for instance one per calendar year or
+one per provider the patient was attributed to. Two more columns are read
+by the Cox model only: `weights` (case weights) and `offset` (a known term
+of the linear predictor).
+
+## What `pp_data()` records
+
+```{r}
+pd
+head(pd$sizes)
+pd$vars
+```
+
+* `data`: the named columns, sorted by provider and then patient. The sort
+  is stable and in the C locale, so a patient's rows keep their input
+  order; sort by time within patient beforehand when the stabilized
+  variance will be used.
+* `sizes`: one row per provider with its number of rows and patients, and
+  three flags: `included`, `no_events`, `all_events`.
+* `vars`: the column names and the outcome type, which every later function
+  reads, so that nothing is declared twice.
+
+## The cutoff
+
+Providers with fewer than `cutoff` patients (rows, when there is no patient
+column) are kept in the data with `included = FALSE` and left out of model
+fitting: too little information to estimate an effect, and in the measures
+such providers are reported as "too few patients". The comparison is `>=`
+on the number of patients.
+
+For the two-stage survival models the convention is different: every
+provider enters the stratified fit (`cutoff = 0`) and the providers to
+report are chosen at the test stage (`test(fit, min_expected = 3)` and the
+`providers` argument).
+
+## Providers whose outcomes are all the same
+
+A provider with no events, or with an event in every row, has no finite
+maximum-likelihood effect: `no_events` and `all_events` mark them. Such
+providers are fitted at the bound of the parameter space (`bound` in
+`fit_logistic_fe()`, 10 on the logit scale around the median), they can be
+tested with the score or exact statistic but not with the Wald statistic,
+and the Firth penalty (`fit_logistic_fe(penalty = "firth")`) gives them a
+finite estimate.
+
+## Checks
+
+`pp_check()` runs first (`check = TRUE`): missing values in the named
+columns and constant risk factors are errors; near-constant risk factors,
+pairs of risk factors with correlation above 0.9 and variance inflation
+factors above 10 are warnings. It can be called on its own with other
+thresholds:
+
+```{r}
+pp_check(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider", cor_threshold = 0.8)
+```
+
+## Simulated data
+
+`sim_kecc()` simulates data of every outcome type with the structure of the
+measures: patients nested in providers, several rows per patient, a
+provider effect, a patient random effect that makes a patient's rows
+correlated, and a few risk factors. The true parameters are kept in
+`attr(d, "truth")`. The articles use it throughout; replace it with your
+data frame.

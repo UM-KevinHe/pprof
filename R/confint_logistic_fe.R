@@ -52,7 +52,7 @@ gamma_limits <- function(fit, m, type, idx, level, alternative, wald_variance = 
     se <- if (type == "wald") {
       sqrt(gamma_variance(fit, wald_variance))[idx]
     } else {
-      test_providers(fit, statistic = "wald", variance = "robust", providers = m$levels[idx])$se
+      test(fit, statistic = "wald", variance = "robust", providers = m$levels[idx])$se
     }
     q <- normal_quantile(level, alternative)
     lower <- if (alternative == "less") rep(-Inf, length(idx)) else gamma[idx] - q * se

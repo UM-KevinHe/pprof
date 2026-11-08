@@ -33,7 +33,7 @@ rows.}
 \item{providers}{optional subset of provider identifiers.}
 
 \item{gamma_se}{optional standard errors of the provider effects, named by
-provider (for instance the \code{se} column of a Wald \code{\link[=test_providers]{test_providers()}}
+provider (for instance the \code{se} column of a Wald \code{\link[=test]{test()}}
 result); with them the direct rate's standard error
 \eqn{\mathrm{numer\_se}/n_{pop} \times se(\hat\gamma_i)} is returned.}
 

@@ -1,0 +1,208 @@
+---
+title: "Risk-adjustment models"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5,
+                      dpi = 96)
+```
+
+The risk-adjustment model is where the provider effects come from. This
+page explains the choices the package offers (fixed, random or correlated
+random provider effects; logistic, linear or Cox models; the Firth
+penalty) and when each is the right one. Every fitter takes a `pp_data()`
+object and returns a fit that `summary()`, `standardize()`, `test()`,
+`confint()` and `plot()` understand.
+
+## Provider effects as fixed effects
+
+The model is $\eta_{ijk} = \gamma_i + Z_{ijk}^\top\beta$ with one free
+parameter $\gamma_i$ per provider. Two things follow.
+
+**The effects are never shrunk.** A random-effect model pulls every
+provider toward the average, by more for small providers; a fixed-effect
+model reports what the data say about each provider and lets the test
+express how uncertain that is. For a measure that reports the provider,
+the fixed-effect estimate is the estimand.
+
+**The pooled model is biased.** Dropping the provider effects and fitting
+$Z^\top\beta$ alone estimates not $\beta$ but, in the linear case,
+$\beta + \rho\,\sigma_\gamma / \sigma_Z$ when a risk factor is correlated
+at $\rho$ with the provider effect: a bias that does not vanish with the
+sample size. Case mix is related to the provider (geography, referral
+patterns, the patients' circumstances), so $\rho \ne 0$ is the normal
+state of affairs. For binary outcomes the bias need not vanish even at
+$\rho = 0$, because of the non-collapsibility of the logit link.
+
+With thousands of providers the fixed-effect model has thousands of
+parameters, which general-purpose software handles by expanding every
+provider into an indicator column. The package does not: the block of the
+information matrix that belongs to the provider effects is diagonal, so
+each effect is updated from its own provider's records (the serial
+block-wise inversion Newton algorithm, SerBIN, of Wu et al. 2022), and a
+fit with ten thousand providers takes seconds.
+
+## Binary and binomial outcomes: `fit_logistic_fe()`
+
+```{r}
+library(pprof)
+d <- sim_kecc(n_providers = 60, provider_size = c(15, 60), seed = 7)
+pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
+              patient = "patient", message = FALSE)
+fit <- fit_logistic_fe(pd)
+fit
+str(coef(fit))
+```
+
+* `algorithm = "SerBIN"` (default) or `"BAN"` (block ascent Newton, the
+  older alternating algorithm; slower, kept for reference).
+* `bound`: provider effects are kept within `median(gamma) ± bound` on
+  the logit scale (default 10), which is where providers with no events or
+  with all events end up.
+* A binomial outcome (events out of `n` trials per row, for instance
+  hospital days out of days at risk in a month) uses the same fitter once
+  `pp_data()` was given `n`; every later step accounts for the trials.
+
+The risk-factor coefficients with their tests:
+
+```{r}
+summary(fit)
+summary(fit, test = "robust_wald")
+```
+
+`summary()` offers the model-based Wald test, the patient-clustered robust
+Wald test, the likelihood-ratio test (a refit without the covariate) and
+the score test. The variance of the provider effects is `vcov(fit)`'s
+attribute `var_gamma`, and `gamma_variance()` returns the variance the
+Wald test uses (`"case_mix"`, the variance of the provider's fitted
+average linear predictor, or `"full"`, the variance of $\hat\gamma_i$
+alone; see [Tests of provider effects](testing.html)).
+
+### Providers whose outcomes are all the same: the Firth penalty
+
+A provider with no events has no finite maximum-likelihood effect (it sits
+at the lower bound). The Firth penalty, half the log determinant of the
+information, gives every provider a finite estimate and reduces the
+small-sample bias of the others (Firth 1993). The fit is a `logistic_fe`
+object like any other, so every test applies; the likelihood-ratio tests
+compare penalized likelihoods.
+
+```{r}
+firth <- fit_logistic_fe(pd, penalty = "firth")
+range(coef(fit)$gamma)
+range(coef(firth)$gamma)
+```
+
+The kernel follows ParaFLR (Shao and He): provider-level work on
+independent threads (`threads`), with the reductions arranged so that the
+result does not depend on the thread count.
+
+## Continuous outcomes: `fit_linear_fe()`
+
+A continuous outcome (a laboratory value, a length of stay) uses the linear
+fixed-effect model, fitted as a within-provider regression (every variable
+centred by provider), which never forms the provider indicators either.
+
+```{r}
+dc <- sim_kecc(n_providers = 40, type = "continuous", seed = 8)
+pc <- pp_data(dc, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
+              patient = "patient", message = FALSE)
+lin <- fit_linear_fe(pc)
+lin
+summary(lin)
+```
+
+The model-based tests of a linear fit use the $t$ distribution with
+$n - m - p$ degrees of freedom; the standardized measures are differences
+rather than ratios.
+
+## Random and correlated random effects
+
+For comparison with the fixed-effect fit, and for the settings where a
+shrunken estimate is wanted, the package wraps lme4:
+
+* `fit_logistic_re()`, `fit_linear_re()`: a random provider intercept,
+  $\gamma_i \sim N(0, \sigma^2)$; the reported effects are the predicted
+  (shrunken) values, `coefficients$alpha`, with conditional variances
+  `post_var`.
+* `fit_logistic_cre()`, `fit_linear_cre()`: correlated random effects
+  (Mundlak), which add every risk factor's provider mean to the fixed part
+  (`<x>_between`) next to its within-provider deviation (`<x>_within`), so
+  that the random effect is no longer assumed independent of the case mix.
+  The within coefficients equal the fixed-effect coefficients in the linear
+  case.
+
+```{r}
+re <- fit_logistic_re(pd)
+re
+cre <- fit_logistic_cre(pd)
+summary(cre)
+```
+
+`standardize()` of a random-effect fit offers `numerator = "observed"` or
+`"predicted"` (the predicted-to-expected ratio), and `test()` is the Wald
+test of the predicted effect.
+
+## Time-to-event outcomes: `fit_cox()`
+
+For a survival outcome (death, a first admission) or recurrent events
+counted on patient-records (admissions, transfusions) the model is a
+proportional-hazards model, and the provider effect is handled by
+**stratification**: each provider has its own baseline hazard, which
+absorbs its effect, and the risk-factor coefficients are estimated within
+providers. The national baseline is then the Breslow estimator over every
+record with the fitted linear predictor as an offset (the two-stage model
+of He and Schaubel 2014). The expected number of events of every record is
+$E = e^{\eta} [\Lambda_0(\text{stop}) - \Lambda_0(\text{start})]$, and
+the provider's measure is its observed-to-expected ratio.
+
+```{r}
+s <- sim_kecc(n_providers = 60, provider_size = c(15, 60), type = "survival", seed = 9)
+ps <- pp_data(s, x = c("x1", "x2", "x3"), provider = "provider", patient = "patient",
+              time = "stop", start = "start", event = "event", cutoff = 0, message = FALSE)
+cox <- fit_cox(ps)
+cox
+summary(cox, variance = "robust")
+head(standardize(cox))
+```
+
+* `strata = "provider"` (default) or `"none"` for the pooled baseline.
+* `x2`: covariates fitted in a second stage with the first-stage linear
+  predictor as offset (calendar-year indicators, say).
+* `ties = "breslow"` (default) or `"efron"`.
+* Case `weights` and an `offset` declared in `pp_data()` are used
+  (recurrent-event measures weight each record by its number of events and
+  carry a log-exposure offset).
+* The patient column is the cluster of the robust covariance.
+* `cutoff = 0`: every provider enters the stratified fit; the providers to
+  report are chosen by `test(cox, min_expected = 3)`.
+
+The discrete-time hazard model (one logistic hazard per period, with
+provider effects) is fitted by `var_select(ps, model = "discrete")`, see
+[Variable selection](selection.html).
+
+## Which model
+
+| Outcome | Fitter | The provider effect is | Measure |
+|---|---|---|---|
+| 0/1 per row, or events out of trials | `fit_logistic_fe()` | a log-odds | ratio or rate |
+| continuous | `fit_linear_fe()` | a difference of means | difference |
+| time to event, recurrent events | `fit_cox()` | absorbed in the provider's baseline | observed / expected |
+| any, when a shrunken estimate is wanted | `fit_*_re()`, `fit_*_cre()` | a predicted random effect | ratio, rate or difference |
+
+## References
+
+He K, Kalbfleisch JD, Li Y, Li Y (2013). Evaluating hospital readmission
+rates in dialysis facilities; adjusting for hospital effects. *Lifetime
+Data Analysis*, 19, 490-512.
+
+Wu W, Yang Y, Kang J, He K (2022). Improving large-scale estimation and
+inference for profiling health care providers. *Statistics in Medicine*,
+41(15), 2840-2853.
+
+Firth D (1993). Bias reduction of maximum likelihood estimates.
+*Biometrika*, 80(1), 27-38.
+
+He K, Schaubel DE (2014). Standardized mortality ratio for evaluating
+center-specific mortality: assessment and alternative. *Statistics in
+Biosciences*, 6(2), 1-19.

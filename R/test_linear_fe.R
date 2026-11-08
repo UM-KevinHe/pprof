@@ -26,15 +26,15 @@
 #' sandwich variance of \eqn{\bar Y_i - \bar Z_i^\top\hat\beta}.
 #'
 #' @return A data frame of class `pp_test` with the columns described in
-#'   [test_providers.logistic_fe()].
+#'   [test.logistic_fe()].
 #' @examples
 #' d <- sim_kecc(n_providers = 20, type = "continuous", seed = 1)
 #' pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 #'               patient = "patient", message = FALSE)
 #' fit <- fit_linear_fe(pd)
-#' test_providers(fit, variance = "robust")
+#' test(fit, variance = "robust")
 #' @export
-test_providers.linear_fe <- function(fit, variance = c("naive", "robust"), null = "median",
+test.linear_fe <- function(fit, variance = c("naive", "robust"), null = "median",
                                      providers = NULL, level = 0.95,
                                      alternative = c("two.sided", "greater", "less"),
                                      wald_variance = c("case_mix", "full"), null_model = NULL,

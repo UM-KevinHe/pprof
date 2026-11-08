@@ -37,7 +37,7 @@ confint.linear_re <- function(object, parm = NULL, level = 0.95,
 }
 
 confint_mixed <- function(object, parm, level, alternative) {
-  res <- test_providers(object, providers = parm, level = level, alternative = alternative)
+  res <- test(object, providers = parm, level = level, alternative = alternative)
   data.frame(provider = res$provider, estimate = res$estimate, lower = res$lower,
              upper = res$upper, stringsAsFactors = FALSE)
 }

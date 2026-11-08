@@ -41,6 +41,6 @@ fit <- fit_linear_fe(pd)
 fit
 }
 \seealso{
-\code{\link[=test_providers.linear_fe]{test_providers.linear_fe()}}, \code{\link[=test_covariates.linear_fe]{test_covariates.linear_fe()}},
+\code{\link[=test.linear_fe]{test.linear_fe()}}, \code{\link[=summary.linear_fe]{summary.linear_fe()}},
 \code{\link[=standardize.linear_fe]{standardize.linear_fe()}}, \code{\link[=confint.linear_fe]{confint.linear_fe()}}, \code{\link[=gamma_variance]{gamma_variance()}}
 }

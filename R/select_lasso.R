@@ -12,7 +12,9 @@
 #' cycle, warm starts along a decreasing sequence of \eqn{\lambda}, and an
 #' active-set strategy.
 #'
-#' @param data an object from [pp_data()] with a binary or binomial outcome.
+#' @param data an object from [pp_data()] with a binary, binomial or survival
+#'   outcome.
+#' @param penalty `"lasso"` (default) or `"group_lasso"`.
 #' @param penalize names of the covariates that carry a penalty; default all.
 #'   The others enter the model unpenalized.
 #' @param group for the group lasso, the group of each covariate: a vector of
@@ -38,6 +40,10 @@
 #'   does). Default `FALSE`.
 #' @param backtrack line search in the provider-effect step. Default `FALSE`.
 #' @param threads OpenMP threads for the provider-effect step.
+#' @param model for a survival outcome: `"cox"` (default; the Cox model
+#'   stratified by provider, whose baselines absorb the provider effects) or
+#'   `"discrete"` (the discrete-time hazard model, lasso only). `NULL` for
+#'   the other outcomes.
 #'
 #' @details Providers with fewer than the cutoff patients are excluded as in
 #' every fitter. The path starts from the fit with the unpenalized covariates
@@ -45,11 +51,35 @@
 #' \eqn{\lambda}. The deviance reported per \eqn{\lambda} is \eqn{-2\ell}
 #' without the constant term.
 #'
+#' With a survival outcome ([pp_data()] with `time` and `event`) the paths
+#' are those of `grplasso`'s `Strat.cox()` and `pp.DiscSurv()`:
+#' * `model = "cox"`: the weighted partial likelihood of the Cox model with
+#'   one baseline per provider, counting-process rows `(start, stop]`, case
+#'   weights and offsets as in [fit_cox()]; the provider effects are not
+#'   parameters (`gamma` is `NULL`) and the working weight is 1 (Breheny and
+#'   Huang's majorization for the Cox model). The covariates of a group are
+#'   orthonormalized as for the logistic model.
+#' * `model = "discrete"`: \eqn{\mathrm{logit}\, h_{jk} = \alpha_k + \gamma_i
+#'   + Z_j^\top\beta} for subject \eqn{j} of provider \eqn{i} in period
+#'   \eqn{k}, the periods being the distinct values of `time`; one row per
+#'   subject (no `start`, no weights), the subject at risk in every period up
+#'   to its own. The period effects \eqn{\alpha} and the provider effects
+#'   \eqn{\gamma} are unpenalized, \eqn{\gamma} identified by a zero median
+#'   (`grplasso` fixed the first provider at zero) and kept within
+#'   `+/- bound`; the likelihood is computed without expanding the data. The
+#'   IRLS weights \eqn{\sum_k h_{jk}(1 - h_{jk})} or, with `mm = TRUE`,
+#'   \eqn{t_j / 4}.
+#'
 #' @return An object of class `pp_lasso` (and `pp_group_lasso` for the group
 #'   lasso):
 #' \item{beta}{a matrix of covariate coefficients, one column per `lambda`.}
-#' \item{gamma}{a matrix of provider effects, one column per `lambda`.}
-#' \item{lambda, deviance, iter}{per value of `lambda`.}
+#' \item{gamma}{a matrix of provider effects, one column per `lambda`
+#'   (`NULL` for the stratified Cox model).}
+#' \item{alpha, time_grid}{the discrete-time model's period effects (one
+#'   column per `lambda`) and the periods' times.}
+#' \item{model}{`"logistic"`, `"cox"` or `"discrete"`.}
+#' \item{lambda, deviance, iter}{per value of `lambda` (the deviance of the
+#'   Cox model is minus twice its partial log-likelihood).}
 #' \item{n_selected}{number of penalized covariates with a nonzero
 #'   coefficient per `lambda`.}
 #' \item{penalized}{logical, per covariate.}
@@ -64,24 +94,71 @@
 #'
 #' Yang Y, Wu W, He K (2025+). Variable selection for provider profiling
 #' with high-dimensional fixed effects (the `grplasso` package).
-#' @seealso [cv_lasso()], [coef.pp_lasso()], [predict.pp_lasso()]
+#' @seealso [cv()], [coef.pp_lasso()], [predict.pp_lasso()]
 #' @examples
 #' d <- sim_kecc(n_providers = 20, n_covariates = 6, seed = 1)
 #' pd <- pp_data(d, y = "y", x = paste0("x", 1:6), provider = "provider",
 #'               patient = "patient", message = FALSE)
-#' path <- select_lasso(pd, n_lambda = 20)
+#' path <- var_select(pd, n_lambda = 20)
 #' path
 #' coef(path, lambda = path$lambda[10])$beta
-#' grp <- select_group_lasso(pd, group = c(1, 1, 2, 2, 3, 0), n_lambda = 20)
-#' @name select_lasso
+#' grp <- var_select(pd, penalty = "group_lasso", group = c(1, 1, 2, 2, 3, 0), n_lambda = 20)
+#' @name var_select
 NULL
 
-#' @rdname select_lasso
+#' @rdname var_select
 #' @export
-select_lasso <- function(data, penalize = NULL, multiplier = NULL, lambda = NULL, n_lambda = 100,
+var_select <- function(data, penalty = c("lasso", "group_lasso"), group = NULL, penalize = NULL,
+                       multiplier = NULL, lambda = NULL, n_lambda = 100, lambda_min_ratio = 1e-4,
+                       standardize = TRUE, bound = 10, tol = 1e-4, max_iter = 10000,
+                       active_set = TRUE, mm = FALSE, backtrack = FALSE, threads = 1,
+                       model = NULL) {
+  penalty <- match.arg(penalty)
+  if (penalty == "group_lasso" && is.null(group)) {
+    stop("penalty = \"group_lasso\" needs `group`.", call. = FALSE)
+  }
+  if (penalty == "lasso" && !is.null(group)) {
+    stop("`group` is only used with penalty = \"group_lasso\".", call. = FALSE)
+  }
+  out <- if (penalty == "lasso") {
+    fit_lasso_path(data, penalize = penalize, multiplier = multiplier, lambda = lambda,
+                   n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
+                   standardize = standardize, bound = bound, tol = tol, max_iter = max_iter,
+                   active_set = active_set, mm = mm, backtrack = backtrack, threads = threads,
+                   model = model)
+  } else {
+    fit_group_lasso_path(data, group = group, multiplier = multiplier, lambda = lambda,
+                         n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
+                         standardize = standardize, bound = bound, tol = tol,
+                         max_iter = max_iter, active_set = active_set, backtrack = backtrack,
+                         threads = threads, model = model)
+  }
+  out$settings <- list(penalty = penalty, group = group, penalize = penalize,
+                       multiplier = multiplier, standardize = standardize, bound = bound, tol = tol,
+                       max_iter = max_iter, active_set = active_set, mm = mm,
+                       backtrack = backtrack, threads = threads, model = model)
+  out$cutoff <- data$cutoff
+  out
+}
+
+fit_lasso_path <- function(data, penalize = NULL, multiplier = NULL, lambda = NULL, n_lambda = 100,
                          lambda_min_ratio = 1e-4, standardize = TRUE, bound = 10, tol = 1e-4,
                          max_iter = 10000, active_set = TRUE, mm = FALSE, backtrack = FALSE,
-                         threads = 1) {
+                         threads = 1, model = NULL) {
+  model <- survival_model(data, model)
+  if (identical(model, "cox")) {
+    return(cox_lasso(data, penalize = penalize, multiplier = multiplier, lambda = lambda,
+                     n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
+                     standardize = standardize, tol = tol, max_iter = max_iter,
+                     active_set = active_set))
+  }
+  if (identical(model, "discrete")) {
+    return(discrete_lasso(data, penalize = penalize, multiplier = multiplier, lambda = lambda,
+                          n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
+                          standardize = standardize, bound = bound, tol = tol,
+                          max_iter = max_iter, active_set = active_set, mm = mm,
+                          backtrack = backtrack))
+  }
   m <- selection_matrices(data)
   x <- data$vars$x
   if (is.null(penalize)) penalize <- x
@@ -116,12 +193,20 @@ select_lasso <- function(data, penalize = NULL, multiplier = NULL, lambda = NULL
   out
 }
 
-#' @rdname select_lasso
-#' @export
-select_group_lasso <- function(data, group, multiplier = NULL, lambda = NULL, n_lambda = 100,
+fit_group_lasso_path <- function(data, group, multiplier = NULL, lambda = NULL, n_lambda = 100,
                                lambda_min_ratio = 1e-4, standardize = TRUE, bound = 10,
                                tol = 1e-4, max_iter = 10000, active_set = TRUE,
-                               backtrack = FALSE, threads = 1) {
+                               backtrack = FALSE, threads = 1, model = NULL) {
+  model <- survival_model(data, model)
+  if (identical(model, "discrete")) {
+    stop("The discrete-time model has no group lasso; use model = \"cox\".", call. = FALSE)
+  }
+  if (identical(model, "cox")) {
+    return(cox_lasso(data, group = group, multiplier = multiplier, lambda = lambda,
+                     n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
+                     standardize = standardize, tol = tol, max_iter = max_iter,
+                     active_set = active_set))
+  }
   m <- selection_matrices(data)
   x <- data$vars$x
   if (!is.null(names(group))) {
@@ -158,7 +243,7 @@ select_group_lasso <- function(data, group, multiplier = NULL, lambda = NULL, n_
     lambda <- sort(as.numeric(lambda), decreasing = TRUE)
   }
   res <- group_lasso_path(m$n, m$y, ortho$z, m$n_prov, start$gamma, beta0,
-                          as.integer(ortho$unpenalized - 1), as.integer(ortho$col_first - 1),
+                          seq_along(ortho$unpenalized) - 1L, as.integer(ortho$col_first - 1),
                           as.integer(ortho$col_last - 1), mult, lambda, backtrack, bound, tol,
                           max(1L, as.integer(max_iter)), active_set, max(1L, as.integer(threads)))
   beta <- ortho$from_ortho(res$beta) / std$scale
@@ -169,6 +254,18 @@ select_group_lasso <- function(data, group, multiplier = NULL, lambda = NULL, n_
   out$group <- stats::setNames(ifelse(unpen, NA_character_, label), x)
   class(out) <- c("pp_group_lasso", "pp_lasso")
   out
+}
+
+# The survival model of a selection path ("cox" or "discrete"), or NULL for
+# the other outcomes.
+survival_model <- function(data, model) {
+  if (!inherits(data, "pp_data")) stop("`data` must come from pp_data().", call. = FALSE)
+  if (outcome_of(data) != "survival") {
+    if (!is.null(model)) stop("`model` is only used with a survival outcome.", call. = FALSE)
+    return(NULL)
+  }
+  if (is.null(model)) return("cox")
+  match.arg(model, c("cox", "discrete"))
 }
 
 # Included rows of a pp_data object as the matrices the paths read.
@@ -233,6 +330,9 @@ path_start <- function(data, m, std, unpenalized) {
 
 lambda_sequence <- function(lambda_max, n_lambda, lambda_min_ratio) {
   if (n_lambda < 2) stop("`n_lambda` must be at least 2.", call. = FALSE)
+  # nudged up so that every penalized coefficient is exactly zero at the first
+  # penalty despite the rounding of the score computed in R and in C++
+  lambda_max <- lambda_max * (1 + 1e-9)
   exp(seq(log(lambda_max), log(lambda_max * lambda_min_ratio), length.out = n_lambda))
 }
 
@@ -282,19 +382,25 @@ path_object <- function(data, m, std, beta, res, lambda, penalized, multiplier, 
                               ncol(res$gamma), byrow = TRUE)
   dimnames(beta) <- list(x, signif(lambda, 6))
   dimnames(gamma) <- list(m$levels, signif(lambda, 6))
-  list(beta = beta, gamma = gamma, lambda = lambda, deviance = as.numeric(res$deviance),
-       iter = as.integer(res$iter),
+  list(beta = beta, gamma = gamma, alpha = NULL, time_grid = NULL, lambda = lambda,
+       deviance = as.numeric(res$deviance), iter = as.integer(res$iter),
        n_selected = as.integer(colSums(beta[penalized, , drop = FALSE] != 0)),
        penalized = stats::setNames(penalized, x), multiplier = multiplier,
-       data = m$d, vars = data$vars, sizes = m$sizes, rows = m$n_prov, control = control)
+       data = m$d, vars = data$vars, sizes = m$sizes, rows = m$n_prov, control = control,
+       model = "logistic")
 }
 
 #' @export
 print.pp_lasso <- function(x, ...) {
   cat(if (inherits(x, "pp_group_lasso")) "Group-lasso" else "Lasso",
-      " path with unpenalized provider effects\n", sep = "")
-  cat("  ", nrow(x$data), " rows, ", nrow(x$gamma), " providers, ", nrow(x$beta),
-      " covariates (", sum(x$penalized), " penalized)\n", sep = "")
+      switch(path_model(x),
+             logistic = " path of the logistic model with unpenalized provider effects\n",
+             cox = " path of the Cox model stratified by provider\n",
+             discrete = " path of the discrete-time hazard model (period and provider effects)\n"),
+      sep = "")
+  cat("  ", nrow(x$data), " rows, ", nrow(x$sizes), " providers, ", nrow(x$beta),
+      " covariates (", sum(x$penalized), " penalized)",
+      if (!is.null(x$alpha)) paste0(", ", nrow(x$alpha), " periods"), "\n", sep = "")
   cat("  ", length(x$lambda), " values of lambda from ", format(max(x$lambda), digits = 4),
       " to ", format(min(x$lambda), digits = 4), "; selected covariates from ",
       min(x$n_selected), " to ", max(x$n_selected), "\n", sep = "")
@@ -303,20 +409,27 @@ print.pp_lasso <- function(x, ...) {
 
 #' Coefficients and predictions along a selection path
 #'
-#' @param object a path from [select_lasso()] or [select_group_lasso()].
+#' @param object a path from [var_select()] or [var_select()].
 #' @param lambda penalty values at which to report; values between two points
 #'   of the path are interpolated linearly.
 #' @param which alternatively, indices into `object$lambda`; default all.
 #' @param drop return vectors when a single value is requested.
 #' @param newdata a data frame with the covariate and provider columns of the
 #'   fit; default the fitted rows.
-#' @param type `"link"` (the linear predictor) or `"response"` (the
-#'   probability).
+#' @param type `"link"` (the linear predictor, including any offset) or
+#'   `"response"`: the probability for the logistic model, the relative
+#'   hazard \eqn{e^\eta} for the Cox model, and for the discrete-time model
+#'   the probability of the event by the row's time, \eqn{1 - \prod_k (1 -
+#'   h_{jk})} over the fit's periods up to that time (a time between two
+#'   periods counts up to the earlier one, a time before the first period
+#'   counts the first).
 #' @param unseen for providers of `newdata` that are not in the fit:
 #'   `"missing"` (default; `NA`) or `"median"` (the median provider effect).
+#'   Not used by the Cox model, which has no provider parameters.
 #' @param ... unused.
-#' @return `coef()`: a list with `gamma` and `beta` (matrices, or vectors with
-#'   `drop = TRUE` and one value of `lambda`). `predict()`: a matrix with one
+#' @return `coef()`: a list with `gamma` (`NULL` for the Cox model) and
+#'   `beta`, plus `alpha` for the discrete-time model (matrices, or vectors
+#'   with `drop = TRUE` and one value of `lambda`). `predict()`: a matrix with one
 #'   column per requested `lambda`. `selected_covariates()`: the names of the
 #'   penalized covariates with a nonzero coefficient, as a list over
 #'   `lambda`.
@@ -324,7 +437,7 @@ print.pp_lasso <- function(x, ...) {
 #' d <- sim_kecc(n_providers = 20, n_covariates = 6, seed = 1)
 #' pd <- pp_data(d, y = "y", x = paste0("x", 1:6), provider = "provider",
 #'               patient = "patient", message = FALSE)
-#' path <- select_lasso(pd, n_lambda = 20)
+#' path <- var_select(pd, n_lambda = 20)
 #' selected_covariates(path, which = c(5, 15))
 #' head(predict(path, which = 15, type = "response"))
 #' @name coef.pp_lasso
@@ -342,19 +455,27 @@ coef.pp_lasso <- function(object, lambda = NULL, which = NULL, drop = TRUE, ...)
     l <- floor(ind)
     r <- ceiling(ind)
     w <- ind %% 1
-    beta <- object$beta[, l, drop = FALSE] * (1 - w) + object$beta[, r, drop = FALSE] * w
-    gamma <- object$gamma[, l, drop = FALSE] * (1 - w) + object$gamma[, r, drop = FALSE] * w
-    colnames(beta) <- colnames(gamma) <- signif(lambda, 6)
+    pick <- function(mat) {
+      if (is.null(mat)) return(NULL)
+      out <- mat[, l, drop = FALSE] * (1 - w) + mat[, r, drop = FALSE] * w
+      colnames(out) <- signif(lambda, 6)
+      out
+    }
   } else {
     if (is.null(which)) which <- seq_along(object$lambda)
-    beta <- object$beta[, which, drop = FALSE]
-    gamma <- object$gamma[, which, drop = FALSE]
+    pick <- function(mat) if (is.null(mat)) NULL else mat[, which, drop = FALSE]
   }
+  beta <- pick(object$beta)
+  gamma <- pick(object$gamma)
+  alpha <- pick(object$alpha)
   if (drop && ncol(beta) == 1) {
     beta <- beta[, 1]
-    gamma <- gamma[, 1]
+    if (!is.null(gamma)) gamma <- gamma[, 1]
+    if (!is.null(alpha)) alpha <- alpha[, 1]
   }
-  list(gamma = gamma, beta = beta)
+  out <- list(gamma = gamma, beta = beta)
+  if (!is.null(alpha)) out$alpha <- alpha
+  out
 }
 
 #' @rdname coef.pp_lasso
@@ -373,18 +494,33 @@ predict.pp_lasso <- function(object, newdata = NULL, lambda = NULL, which = NULL
   }
   z <- as.matrix(newdata[, v$x, drop = FALSE])
   storage.mode(z) <- "double"
-  pos <- match(as.character(newdata[[v$provider]]), rownames(cf$gamma))
-  g <- cf$gamma[ifelse(is.na(pos), 1L, pos), , drop = FALSE]
-  if (anyNA(pos)) {
-    g[is.na(pos), ] <- if (unseen == "median") {
-      rep(apply(cf$gamma, 2, stats::median), each = sum(is.na(pos)))
-    } else {
-      NA_real_
-    }
+  model <- path_model(object)
+  offset <- if (!is.null(v$offset) && v$offset %in% names(newdata)) {
+    as.numeric(newdata[[v$offset]])
+  } else {
+    0
   }
-  eta <- z %*% cf$beta + g
+  eta <- z %*% cf$beta + offset
+  if (model != "cox") {
+    pos <- match(as.character(newdata[[v$provider]]), rownames(cf$gamma))
+    g <- cf$gamma[ifelse(is.na(pos), 1L, pos), , drop = FALSE]
+    if (anyNA(pos)) {
+      g[is.na(pos), ] <- if (unseen == "median") {
+        rep(apply(cf$gamma, 2, stats::median), each = sum(is.na(pos)))
+      } else {
+        NA_real_
+      }
+    }
+    eta <- eta + g
+  }
   dimnames(eta) <- list(NULL, colnames(cf$beta))
-  if (type == "response") stats::plogis(eta) else eta
+  if (type == "link") return(eta)
+  if (model == "logistic") return(stats::plogis(eta))
+  if (model == "cox") return(exp(eta))
+  ex <- discrete_expanded(object, newdata, lambda = lambda, which = which)
+  prob <- 1 - exp(rowsum(log1p(-ex$hazard), ex$row, reorder = TRUE))
+  dimnames(prob) <- dimnames(eta)
+  prob
 }
 
 #' @rdname coef.pp_lasso

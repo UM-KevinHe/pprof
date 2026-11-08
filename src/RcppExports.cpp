@@ -310,6 +310,117 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cox_residuals
+List cox_residuals(const arma::vec& event, const arma::vec& w, const arma::uvec& k_stop, const arma::uvec& k_start, const arma::uvec& row_first, const arma::uvec& row_last, const arma::uvec& grid_first, const arma::uvec& grid_count, const arma::vec& d_grid, const arma::vec& eta);
+RcppExport SEXP _pprof_cox_residuals(SEXP eventSEXP, SEXP wSEXP, SEXP k_stopSEXP, SEXP k_startSEXP, SEXP row_firstSEXP, SEXP row_lastSEXP, SEXP grid_firstSEXP, SEXP grid_countSEXP, SEXP d_gridSEXP, SEXP etaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type event(eventSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type k_stop(k_stopSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type k_start(k_startSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type row_first(row_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type row_last(row_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type grid_first(grid_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type grid_count(grid_countSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type d_grid(d_gridSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type eta(etaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cox_residuals(event, w, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, eta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cox_deviance
+arma::vec cox_deviance(const arma::vec& event, const arma::vec& w, const arma::uvec& k_stop, const arma::uvec& k_start, const arma::uvec& row_first, const arma::uvec& row_last, const arma::uvec& grid_first, const arma::uvec& grid_count, const arma::vec& d_grid, const arma::mat& eta);
+RcppExport SEXP _pprof_cox_deviance(SEXP eventSEXP, SEXP wSEXP, SEXP k_stopSEXP, SEXP k_startSEXP, SEXP row_firstSEXP, SEXP row_lastSEXP, SEXP grid_firstSEXP, SEXP grid_countSEXP, SEXP d_gridSEXP, SEXP etaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type event(eventSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type k_stop(k_stopSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type k_start(k_startSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type row_first(row_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type row_last(row_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type grid_first(grid_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type grid_count(grid_countSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type d_grid(d_gridSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type eta(etaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cox_deviance(event, w, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, eta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cox_lasso_path
+List cox_lasso_path(const arma::vec& event, const arma::vec& w, const arma::vec& offset, const arma::mat& Z, const arma::uvec& k_stop, const arma::uvec& k_start, const arma::uvec& row_first, const arma::uvec& row_last, const arma::uvec& grid_first, const arma::uvec& grid_count, const arma::vec& d_grid, arma::vec beta, const arma::uvec& unpenalized, const arma::uvec& group_first, const arma::uvec& group_last, const arma::vec& multiplier, const arma::vec& lambda, double tol, int max_iter, bool active_set);
+RcppExport SEXP _pprof_cox_lasso_path(SEXP eventSEXP, SEXP wSEXP, SEXP offsetSEXP, SEXP ZSEXP, SEXP k_stopSEXP, SEXP k_startSEXP, SEXP row_firstSEXP, SEXP row_lastSEXP, SEXP grid_firstSEXP, SEXP grid_countSEXP, SEXP d_gridSEXP, SEXP betaSEXP, SEXP unpenalizedSEXP, SEXP group_firstSEXP, SEXP group_lastSEXP, SEXP multiplierSEXP, SEXP lambdaSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP active_setSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type event(eventSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type k_stop(k_stopSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type k_start(k_startSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type row_first(row_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type row_last(row_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type grid_first(grid_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type grid_count(grid_countSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type d_grid(d_gridSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type unpenalized(unpenalizedSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group_first(group_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group_last(group_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type multiplier(multiplierSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< bool >::type active_set(active_setSEXP);
+    rcpp_result_gen = Rcpp::wrap(cox_lasso_path(event, w, offset, Z, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, beta, unpenalized, group_first, group_last, multiplier, lambda, tol, max_iter, active_set));
+    return rcpp_result_gen;
+END_RCPP
+}
+// discrete_hazards
+List discrete_hazards(const arma::uvec& t, const arma::vec& alpha, const arma::vec& eta);
+RcppExport SEXP _pprof_discrete_hazards(SEXP tSEXP, SEXP alphaSEXP, SEXP etaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type eta(etaSEXP);
+    rcpp_result_gen = Rcpp::wrap(discrete_hazards(t, alpha, eta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// discrete_lasso_path
+List discrete_lasso_path(const arma::uvec& t, const arma::vec& event, const arma::mat& Z, const arma::vec& offset, const arma::vec& n_prov, const arma::vec& d_period, arma::vec alpha, arma::vec gamma, arma::vec beta, const arma::uvec& penalized, const arma::vec& multiplier, const arma::vec& lambda, bool mm, bool backtrack, double bound, double tol, int max_iter, bool active_set);
+RcppExport SEXP _pprof_discrete_lasso_path(SEXP tSEXP, SEXP eventSEXP, SEXP ZSEXP, SEXP offsetSEXP, SEXP n_provSEXP, SEXP d_periodSEXP, SEXP alphaSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP penalizedSEXP, SEXP multiplierSEXP, SEXP lambdaSEXP, SEXP mmSEXP, SEXP backtrackSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP active_setSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type event(eventSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type offset(offsetSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type d_period(d_periodSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type penalized(penalizedSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type multiplier(multiplierSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< bool >::type mm(mmSEXP);
+    Rcpp::traits::input_parameter< bool >::type backtrack(backtrackSEXP);
+    Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< bool >::type active_set(active_setSEXP);
+    rcpp_result_gen = Rcpp::wrap(discrete_lasso_path(t, event, Z, offset, n_prov, d_period, alpha, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pprof_logis_fe_prov", (DL_FUNC) &_pprof_logis_fe_prov, 12},
@@ -328,6 +439,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pprof_penalized_lr", (DL_FUNC) &_pprof_penalized_lr, 9},
     {"_pprof_lasso_path", (DL_FUNC) &_pprof_lasso_path, 16},
     {"_pprof_group_lasso_path", (DL_FUNC) &_pprof_group_lasso_path, 17},
+    {"_pprof_cox_residuals", (DL_FUNC) &_pprof_cox_residuals, 10},
+    {"_pprof_cox_deviance", (DL_FUNC) &_pprof_cox_deviance, 10},
+    {"_pprof_cox_lasso_path", (DL_FUNC) &_pprof_cox_lasso_path, 20},
+    {"_pprof_discrete_hazards", (DL_FUNC) &_pprof_discrete_hazards, 3},
+    {"_pprof_discrete_lasso_path", (DL_FUNC) &_pprof_discrete_lasso_path, 18},
     {NULL, NULL, 0}
 };
 

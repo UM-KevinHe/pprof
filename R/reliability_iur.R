@@ -4,22 +4,25 @@
 #' true differences between providers rather than within-provider sampling
 #' noise, \eqn{\mathrm{IUR} = \sigma^2_b / (\sigma^2_b + \sigma^2_w / n')},
 #' from an ANOVA-type decomposition of the measure's variance (He et al.
-#' 2019). Three estimators:
-#' * `iur_direct()` uses provider-level estimates and their standard errors
+#' 2019). Three estimators, chosen by `method`:
+#' * `"direct"` uses provider-level estimates and their standard errors
 #'   (for instance a standardized rate and the `se_rate` of [standardize()]);
-#' * `iur_bootstrap()` resamples the rows of every provider with replacement
+#' * `"bootstrap"` resamples the rows of every provider with replacement
 #'   and takes the variance of the resampled measures as the within-provider
 #'   variance;
-#' * `iur_split_half()` splits every provider's rows into two random halves
+#' * `"split_half"` splits every provider's rows into two random halves
 #'   and converts the agreement of the two halves' measures across providers
 #'   into a reliability by the Spearman-Brown formula \eqn{2r / (1 + r)}; six
 #'   agreement coefficients are reported (weighted kappa, Kendall's tau and
 #'   Spearman's rho of the measures cut into ordered categories, and Pearson's
 #'   r, Kendall's tau and Spearman's rho of the measures themselves).
 #'
-#' @param estimate,se provider-level estimates and standard errors.
+#' @param method `"direct"`, `"bootstrap"` or `"split_half"`.
+#' @param estimate,se provider-level estimates and standard errors (direct
+#'   method).
 #' @param size number of observations per provider.
-#' @param obs,expected observed and expected outcome per row (patient).
+#' @param obs,expected observed and expected outcome per row (patient;
+#'   bootstrap and split-half methods).
 #' @param provider provider identifier per row.
 #' @param measure a function `(obs, expected, provider)` returning one value
 #'   per provider in sorted provider order; by default the ratio of sums
@@ -61,7 +64,8 @@
 #' fit <- fit_logistic_fe(pd)
 #' expected <- stats::median(coef(fit)$gamma) + fit$linear_predictor
 #' expected <- stats::plogis(expected)
-#' boot <- iur_bootstrap(fit$data$y, expected, fit$data$provider, n_boot = 50, seed = 1)
+#' boot <- iur("bootstrap", obs = fit$data$y, expected = expected,
+#'             provider = fit$data$provider, n_boot = 50, seed = 1)
 #' boot
 #' iur_curve(boot)
 #' @name iur
@@ -69,6 +73,27 @@ NULL
 
 #' @rdname iur
 #' @export
+iur <- function(method = c("direct", "bootstrap", "split_half"), estimate = NULL, se = NULL,
+                size = NULL, obs = NULL, expected = NULL, provider = NULL, n_boot = 100,
+                n_iter = 10, category_probs = c(0.1, 0.3, 0.7, 0.9), measure = NULL,
+                seed = NULL) {
+  method <- match.arg(method)
+  if (method == "direct") {
+    if (is.null(estimate) || is.null(se) || is.null(size)) {
+      stop("method = \"direct\" needs `estimate`, `se` and `size`.", call. = FALSE)
+    }
+    return(iur_direct(estimate, se, size))
+  }
+  if (is.null(obs) || is.null(expected) || is.null(provider)) {
+    stop("method = \"", method, "\" needs `obs`, `expected` and `provider`.", call. = FALSE)
+  }
+  if (method == "bootstrap") {
+    return(iur_bootstrap(obs, expected, provider, n_boot = n_boot, measure = measure, seed = seed))
+  }
+  iur_split_half(obs, expected, provider, n_iter = n_iter, category_probs = category_probs,
+                 measure = measure, seed = seed)
+}
+
 iur_direct <- function(estimate, se, size) {
   if (length(estimate) != length(se) || length(estimate) != length(size)) {
     stop("`estimate`, `se` and `size` must have one value per provider.", call. = FALSE)
@@ -79,8 +104,6 @@ iur_direct <- function(estimate, se, size) {
             class = "pp_iur")
 }
 
-#' @rdname iur
-#' @export
 iur_bootstrap <- function(obs, expected, provider, n_boot = 100, measure = NULL, seed = NULL) {
   d <- iur_rows(obs, expected, provider)
   fn <- if (is.null(measure)) ratio_measure else measure
@@ -105,8 +128,6 @@ iur_bootstrap <- function(obs, expected, provider, n_boot = 100, measure = NULL,
             class = "pp_iur")
 }
 
-#' @rdname iur
-#' @export
 iur_split_half <- function(obs, expected, provider, n_iter = 10,
                            category_probs = c(0.1, 0.3, 0.7, 0.9), measure = NULL, seed = NULL) {
   d <- iur_rows(obs, expected, provider)
@@ -236,13 +257,13 @@ iur_decomposition <- function(sizes, within_variance, measure) {
 #' n)} at the smallest size, the mean size of each quantile group of sizes
 #' and the largest size.
 #'
-#' @param x a `pp_iur` object from [iur_direct()] or [iur_bootstrap()].
+#' @param x a `pp_iur` object from [iur()].
 #' @param sizes sizes to group; default the providers' sizes.
 #' @param n_quantiles number of quantile groups. Default 10.
 #' @return A data frame with `size_group` (`"min"`, `"quantile 1"`, ...,
 #'   `"max"`), `size` and `iur`.
 #' @examples
-#' r <- iur_direct(estimate = c(0.2, 0.3, 0.25, 0.4), se = c(0.05, 0.04, 0.06, 0.03),
+#' r <- iur("direct", estimate = c(0.2, 0.3, 0.25, 0.4), se = c(0.05, 0.04, 0.06, 0.03),
 #'                 size = c(40, 60, 30, 90))
 #' iur_curve(r, n_quantiles = 2)
 #' @export
@@ -263,16 +284,16 @@ iur_curve <- function(x, sizes = NULL, n_quantiles = 10) {
 
 #' Reliability within strata of providers
 #'
-#' Repeats the variance decomposition of [iur_direct()] or [iur_bootstrap()]
+#' Repeats the variance decomposition of [iur()]
 #' within strata of providers.
 #'
-#' @param x a `pp_iur` object from [iur_direct()] or [iur_bootstrap()].
+#' @param x a `pp_iur` object from [iur()].
 #' @param by one stratification value per provider; default the sizes.
 #' @param cuts right-closed cut points of `by`; default its deciles.
 #' @return A data frame with one row for all providers and one per stratum:
 #'   `stratum`, `n_providers`, `iur`.
 #' @examples
-#' r <- iur_direct(estimate = c(0.2, 0.3, 0.25, 0.4, 0.1, 0.35),
+#' r <- iur("direct", estimate = c(0.2, 0.3, 0.25, 0.4, 0.1, 0.35),
 #'                 se = c(0.05, 0.04, 0.06, 0.03, 0.07, 0.03),
 #'                 size = c(40, 60, 30, 90, 20, 80))
 #' iur_stratified(r, cuts = 50)
@@ -307,7 +328,7 @@ iur_stratified <- function(x, by = NULL, cuts = NULL) {
 
 check_iur_components <- function(x) {
   if (!inherits(x, "pp_iur") || x$method == "split_half") {
-    stop("`x` must come from iur_direct() or iur_bootstrap().", call. = FALSE)
+    stop("`x` must come from iur() with the direct or bootstrap method.", call. = FALSE)
   }
   invisible(TRUE)
 }

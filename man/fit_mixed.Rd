@@ -82,6 +82,6 @@ Mundlak Y (1978). On the pooling of time series and cross section data.
 \emph{Econometrica}, 46(1), 69-85.
 }
 \seealso{
-\code{\link[=test_providers.logistic_re]{test_providers.logistic_re()}}, \code{\link[=standardize.logistic_re]{standardize.logistic_re()}},
-\code{\link[=confint.logistic_re]{confint.logistic_re()}}, \code{\link[=test_covariates.logistic_re]{test_covariates.logistic_re()}}
+\code{\link[=test.logistic_re]{test.logistic_re()}}, \code{\link[=standardize.logistic_re]{standardize.logistic_re()}},
+\code{\link[=confint.logistic_re]{confint.logistic_re()}}, \code{\link[=summary.logistic_re]{summary.logistic_re()}}
 }

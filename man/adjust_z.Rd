@@ -18,5 +18,5 @@ adjust_z(z, null)
 Adjust statistics with a null model
 }
 \examples{
-adjust_z(c(a = 2, b = -1), null_fixed(sd = 1.5))
+adjust_z(c(a = 2, b = -1), null_model("fixed", sd = 1.5))
 }

@@ -65,3 +65,23 @@ group_lasso_path <- function(N, Y, Z, n_prov, gamma, beta, unpenalized, group_fi
     .Call(`_pprof_group_lasso_path`, N, Y, Z, n_prov, gamma, beta, unpenalized, group_first, group_last, multiplier, lambda, backtrack, bound, tol, max_iter, active_set, threads)
 }
 
+cox_residuals <- function(event, w, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, eta) {
+    .Call(`_pprof_cox_residuals`, event, w, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, eta)
+}
+
+cox_deviance <- function(event, w, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, eta) {
+    .Call(`_pprof_cox_deviance`, event, w, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, eta)
+}
+
+cox_lasso_path <- function(event, w, offset, Z, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, beta, unpenalized, group_first, group_last, multiplier, lambda, tol, max_iter, active_set) {
+    .Call(`_pprof_cox_lasso_path`, event, w, offset, Z, k_stop, k_start, row_first, row_last, grid_first, grid_count, d_grid, beta, unpenalized, group_first, group_last, multiplier, lambda, tol, max_iter, active_set)
+}
+
+discrete_hazards <- function(t, alpha, eta) {
+    .Call(`_pprof_discrete_hazards`, t, alpha, eta)
+}
+
+discrete_lasso_path <- function(t, event, Z, offset, n_prov, d_period, alpha, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set) {
+    .Call(`_pprof_discrete_lasso_path`, t, event, Z, offset, n_prov, d_period, alpha, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set)
+}
+

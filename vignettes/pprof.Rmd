@@ -1,0 +1,252 @@
+---
+title: "Get started: the concepts and one complete analysis"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5,
+                      dpi = 96)
+```
+
+Provider profiling compares the outcomes of health care providers (dialysis
+facilities, hospitals, transplant centres, physician groups) after adjusting
+for the patients they treat. A profiling measure answers one question per
+provider: *are this provider's outcomes better, worse or no different from
+what its patients would have experienced at a typical provider?* The answer
+is a flag, and flags carry consequences: public reporting, payment, review.
+So the measure must be fair to the provider with sicker patients, honest
+about how uncertain a small provider's result is, and calibrated so that
+providers of ordinary quality are rarely flagged.
+
+**pprof** builds such measures from components, one per analysis step. This
+page explains the concepts behind each step and runs one analysis from data
+to report. Each step has its own article with the details.
+
+## The common framework
+
+Every measure in the package is built on the same linear predictor. For
+patient $j$ of provider $i$, observed on occasion $k$ (a patient-month, a
+discharge, a period at risk):
+
+$$\eta_{ijk} = \gamma_i + Z_{ijk}^\top \beta .$$
+
+* $\gamma_i$ is the **provider effect**: everything about provider $i$ that
+  the risk factors do not explain. The measure reports it, in one form or
+  another, and the tests are tests of it.
+* $Z_{ijk}$ are the **risk factors** (case mix) with coefficients $\beta$:
+  age, comorbidities, laboratory values. Adjusting for them is what makes the
+  comparison fair.
+* The outcome determines the model through which $\eta$ acts: a logistic
+  model for a binary or binomial outcome, a linear model for a continuous
+  one, a proportional-hazards model for a time to event.
+
+Two facts about this model shape everything else. Each observation belongs
+to exactly one provider, so the provider effects can be estimated one
+provider at a time even when there are thousands of them. And the number
+of observations per provider varies enormously, from a handful to
+thousands, so the question "is this provider different?" is asked with
+very different amounts of information from one provider to the next.
+
+### Observations are not independent
+
+A patient contributes many observations (months, discharges, periods), and
+those observations are correlated: a patient who is sicker than the risk
+factors say is sicker in every month. The package keeps track of the
+patient behind every row so that the tests can account for this
+correlation (the *robust* and *stabilized* variances of the testing step).
+
+## The steps
+
+```{r, echo = FALSE}
+steps <- data.frame(
+  step = c("Data", "Risk-adjustment model", "Standardized measure", "Test",
+           "Reference distribution", "Reliability", "Variable selection", "Plots"),
+  question = c("Which columns are the outcome, the risk factors, the provider, the patient?",
+               "What does each provider's effect look like after adjusting for its patients?",
+               "How does the provider's outcome compare with what was expected?",
+               "Is the provider's effect different from the reference, and in which direction?",
+               "Different from the reference, or unusual among providers of similar size?",
+               "How much of the variation between providers is signal rather than noise?",
+               "Which risk factors should the model carry?",
+               "What does the result look like?"),
+  functions = c("`pp_data()`, `pp_check()`",
+                "`fit_logistic_fe()`, `fit_linear_fe()`, `fit_cox()`, `fit_*_re()`, `fit_*_cre()`",
+                "`standardize()`, `test_measure()`",
+                "`test()`, `confint()`, `summary()`",
+                "`null_model()`, `calibrate()`",
+                "`iur()`",
+                "`var_select()`, `cv()`",
+                "`plot()`, `flag_stability()`"),
+  stringsAsFactors = FALSE)
+knitr::kable(steps, col.names = c("Step", "The question it answers", "Functions"))
+```
+
+### Risk adjustment with one effect per provider
+
+The provider effects are *fixed effects*: one free parameter per provider,
+never shrunk toward the average, because the effect is what the measure
+reports. Dropping them and fitting a pooled model biases the risk-factor
+coefficients whenever case mix is related to the provider (it almost
+always is); the fixed-effect fit is the standard the measures are built
+on. The package fits thousands of provider effects efficiently because the
+provider block of the information matrix is diagonal (the SerBIN
+algorithm), and offers a Firth-penalized fit for providers whose outcomes
+are all the same, random-effect and correlated-random-effect models for
+comparison, and the two-stage stratified Cox model for survival outcomes.
+See [Risk-adjustment models](models.html).
+
+### Standardized measures
+
+A standardized measure summarises the fit as one number per provider that
+can be compared across providers. **Indirect** standardization compares the
+provider's observed total with the total its *own* patients would have had
+at a reference provider: the observed-to-expected ratio $O_i / E_i$, or a
+difference. **Direct** standardization applies the provider's effect to
+*every* patient in the population: the rate the whole population would have
+had at this provider. The two answer slightly different questions and are
+both available; see [Standardized measures](standardization.html).
+
+### Testing every provider
+
+For each provider the null hypothesis is $\gamma_i = \gamma_0$, with
+$\gamma_0$ the median of the provider effects (a robust "typical
+provider"). The test has three ingredients that are chosen independently:
+
+* the **statistic**: Wald (estimate over standard error), score (the
+  estimating function at the null, which exists even when the estimate does
+  not) or exact (the finite-sample distribution of the provider's total);
+* the **variance**: naive (treating observations as independent), robust
+  (clustered by patient) or stabilized (clustered, with the within-patient
+  correlation pooled over all patients, for small providers);
+* the **reference distribution**: the theoretical $N(0, 1)$, or an
+  empirical null fitted to the bulk of the statistics within groups of
+  providers of similar size.
+
+See [Tests of provider effects](testing.html) and
+[Reference distributions](null.html).
+
+## One analysis from start to finish
+
+A binary outcome recorded once per patient-month, patients nested in
+providers, three risk factors. `sim_kecc()` simulates data of this shape;
+with real data the first line is `read.csv()`.
+
+```{r setup}
+library(pprof)
+d <- sim_kecc(n_providers = 120, provider_size = c(12, 80), rows_per_patient = c(1, 12),
+              seed = 2026)
+head(d)
+```
+
+### 1. Declare the columns
+
+```{r data}
+pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
+              patient = "patient", cutoff = 10)
+```
+
+Providers with fewer than `cutoff` patients stay in the data but are not
+fitted. Rows are sorted by provider and patient; a patient's rows keep
+their order.
+
+### 2. Fit the risk-adjustment model
+
+```{r fit}
+fit <- fit_logistic_fe(pd)
+fit
+summary(fit)
+```
+
+`summary()` gives the risk-factor coefficients with Wald tests; `coef(fit)`
+holds the provider effects `gamma` and the coefficients `beta`.
+
+### 3. Standardized measures
+
+```{r standardize}
+sm <- standardize(fit, type = "indirect")
+head(sm)
+direct <- standardize(fit, type = "direct")
+head(direct)
+```
+
+### 4. Test the provider effects
+
+The score statistic with the patient-clustered (robust) variance, against
+the median provider:
+
+```{r test}
+tst <- test(fit, statistic = "score", variance = "robust")
+tst
+table(tst$flag)
+```
+
+### 5. Calibrate with an empirical null
+
+The statistics of the providers are more spread out than $N(0, 1)$ because
+providers differ in ways the risk factors do not capture. An empirical null
+fitted within size groups asks whether a provider is unusual *among
+providers of its size*:
+
+```{r null}
+en <- null_model("empirical", tst, n_groups = 4)
+en
+cal <- calibrate(tst, en)
+table(theoretical = tst$flag, empirical = cal$flag)
+```
+
+The same in one call: `test(fit, statistic = "score", variance = "robust",
+null_model = "empirical")`.
+
+### 6. Reliability
+
+```{r iur}
+expected <- stats::plogis(stats::median(coef(fit)$gamma) + fit$linear_predictor)
+iur("bootstrap", obs = fit$data$y, expected = expected, provider = fit$data$provider,
+    n_boot = 50, seed = 1)
+```
+
+### 7. Plots
+
+```{r plots}
+plot(cal)
+plot(sm, type = "funnel", test = cal)
+plot(sm, test = cal)
+plot(en)
+```
+
+(A funnel plot with the test's own limits, `plot(tst, type = "funnel")`,
+needs a test with standard errors, a Wald-type test; for a score test the
+funnel is drawn on the observed-over-expected scale from the standardized
+measure.)
+
+### 8. Flags under the alternatives
+
+A measure report states how the flags depend on the choices made. Collect
+the flags of several tests:
+
+```{r stability}
+st <- flag_stability(
+  score            = tst,
+  score_empirical  = cal,
+  wald_robust      = test(fit, statistic = "wald", variance = "robust"),
+  exact            = test(fit, statistic = "exact"))
+st
+plot(st)
+```
+
+## Where to go next
+
+* [Data preparation](data.html): units, repeated observations, the cutoff,
+  survival columns, checks.
+* [Risk-adjustment models](models.html): logistic, linear and Cox models;
+  fixed, random and correlated random effects; Firth; the pooled shortcut.
+* [Variable selection](selection.html): lasso and group lasso with the
+  provider effects kept, cross-validation.
+* [Standardized measures](standardization.html): indirect and direct
+  standardization, ratios, rates and differences, standard errors,
+  measure-level tests.
+* [Tests of provider effects](testing.html): statistics, variances,
+  intervals, one-sided tests, Poisson tests for survival measures.
+* [Reference distributions](null.html): the theoretical and the empirical
+  null, calibration, decisions.
+* [Reliability](reliability.html): inter-unit reliability.
+* [Plots](plots.html): every display, with the data it needs.

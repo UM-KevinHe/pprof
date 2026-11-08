@@ -28,7 +28,7 @@
 \item{providers}{optional subset of provider identifiers.}
 
 \item{gamma_se}{optional standard errors of the provider effects, named by
-provider (for instance the \code{se} column of a \code{\link[=test_providers]{test_providers()}} result);
+provider (for instance the \code{se} column of a \code{\link[=test]{test()}} result);
 with them \code{se_difference} is returned.}
 
 \item{level}{if given, confidence limits of the difference are added,

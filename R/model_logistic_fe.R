@@ -78,7 +78,7 @@
 #' inference for profiling health care providers. *Statistics in Medicine*,
 #' 41(15), 2840-2853.
 #'
-#' @seealso [test_providers()], [test_covariates()], [standardize()],
+#' @seealso [test()], [summary()], [standardize()],
 #'   [confint.logistic_fe()]
 #' @examples
 #' d <- sim_kecc(n_providers = 20, seed = 1)
@@ -226,7 +226,7 @@ vcov.logistic_fe <- function(object, ...) {
 #' are available. The `"case_mix"` variance is that of \eqn{\hat\gamma_i +
 #' \bar x_i^\top\hat\beta}, the provider's outcome (log-odds or mean) at its
 #' own average case mix \eqn{\bar x_i}; it does not depend on where the
-#' covariates are centred and is the default of [test_providers()]. The
+#' covariates are centred and is the default of [test()]. The
 #' `"full"` variance is the \eqn{(\gamma_i,\gamma_i)} element of the inverse
 #' information, \eqn{1/I_{ii} + \bar z_i^\top \mathrm{Var}(\hat\beta)\bar
 #' z_i}; it is the variance of the outcome at \eqn{Z = 0} and changes with

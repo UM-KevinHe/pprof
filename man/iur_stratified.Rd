@@ -7,7 +7,7 @@
 iur_stratified(x, by = NULL, cuts = NULL)
 }
 \arguments{
-\item{x}{a \code{pp_iur} object from \code{\link[=iur_direct]{iur_direct()}} or \code{\link[=iur_bootstrap]{iur_bootstrap()}}.}
+\item{x}{a \code{pp_iur} object from \code{\link[=iur]{iur()}}.}
 
 \item{by}{one stratification value per provider; default the sizes.}
 
@@ -18,11 +18,11 @@ A data frame with one row for all providers and one per stratum:
 \code{stratum}, \code{n_providers}, \code{iur}.
 }
 \description{
-Repeats the variance decomposition of \code{\link[=iur_direct]{iur_direct()}} or \code{\link[=iur_bootstrap]{iur_bootstrap()}}
+Repeats the variance decomposition of \code{\link[=iur]{iur()}}
 within strata of providers.
 }
 \examples{
-r <- iur_direct(estimate = c(0.2, 0.3, 0.25, 0.4, 0.1, 0.35),
+r <- iur("direct", estimate = c(0.2, 0.3, 0.25, 0.4, 0.1, 0.35),
                 se = c(0.05, 0.04, 0.06, 0.03, 0.07, 0.03),
                 size = c(40, 60, 30, 90, 20, 80))
 iur_stratified(r, cuts = 50)

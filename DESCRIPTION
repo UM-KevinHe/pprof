@@ -21,21 +21,22 @@ Description: Components for profiling health care providers, organised by
     components. Supersedes 'pprof' 1.0.3, 'pprofR' and 'grplasso'.
 License: MIT + file LICENSE
 Encoding: UTF-8
-URL: https://github.com/UM-KevinHe/pprof
+URL: https://um-kevinhe.github.io/pprof, https://github.com/UM-KevinHe/pprof
 BugReports: https://github.com/UM-KevinHe/pprof/issues
 Depends:
     R (>= 4.1.0)
 Imports:
+    ggplot2,
     MASS,
     poibin,
     Rcpp,
+    rlang,
     stats,
     survival
 LinkingTo:
     Rcpp,
     RcppArmadillo
 Suggests:
-    ggplot2,
     knitr,
     lme4,
     rmarkdown,

@@ -49,8 +49,8 @@
 #'
 #' Mundlak Y (1978). On the pooling of time series and cross section data.
 #' *Econometrica*, 46(1), 69-85.
-#' @seealso [test_providers.logistic_re()], [standardize.logistic_re()],
-#'   [confint.logistic_re()], [test_covariates.logistic_re()]
+#' @seealso [test.logistic_re()], [standardize.logistic_re()],
+#'   [confint.logistic_re()], [summary.logistic_re()]
 #' @examples
 #' \donttest{
 #' d <- sim_kecc(n_providers = 20, seed = 1)

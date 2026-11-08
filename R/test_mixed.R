@@ -19,34 +19,34 @@
 #' @param ... unused.
 #'
 #' @return A data frame of class `pp_test` with the columns described in
-#'   [test_providers.logistic_fe()]; `estimate` is \eqn{\hat\alpha_i}.
+#'   [test.logistic_fe()]; `estimate` is \eqn{\hat\alpha_i}.
 #' @examples
 #' \donttest{
 #' d <- sim_kecc(n_providers = 20, seed = 1)
 #' pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 #'               patient = "patient", message = FALSE)
-#' test_providers(fit_logistic_re(pd))
+#' test(fit_logistic_re(pd))
 #' }
-#' @name test_providers_mixed
+#' @name test_mixed
 NULL
 
-#' @rdname test_providers_mixed
+#' @rdname test_mixed
 #' @export
-test_providers.logistic_re <- function(fit, null = "median", providers = NULL, level = 0.95,
+test.logistic_re <- function(fit, null = "median", providers = NULL, level = 0.95,
                                        alternative = c("two.sided", "greater", "less"),
                                        null_model = NULL, ...) {
-  test_providers_mixed(fit, null, providers, level, match.arg(alternative), null_model)
+  test_mixed(fit, null, providers, level, match.arg(alternative), null_model)
 }
 
-#' @rdname test_providers_mixed
+#' @rdname test_mixed
 #' @export
-test_providers.linear_re <- function(fit, null = "median", providers = NULL, level = 0.95,
+test.linear_re <- function(fit, null = "median", providers = NULL, level = 0.95,
                                      alternative = c("two.sided", "greater", "less"),
                                        null_model = NULL, ...) {
-  test_providers_mixed(fit, null, providers, level, match.arg(alternative), null_model)
+  test_mixed(fit, null, providers, level, match.arg(alternative), null_model)
 }
 
-test_providers_mixed <- function(fit, null, providers, level, alternative, null_model) {
+test_mixed <- function(fit, null, providers, level, alternative, null_model) {
   check_mixed(fit)
   check_level(level)
   alpha <- fit$coefficients$alpha

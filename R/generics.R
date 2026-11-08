@@ -22,16 +22,6 @@ standardize <- function(fit, ...) {
 #' @return A data frame with one row per provider and a fixed set of columns;
 #'   see the methods.
 #' @export
-test_providers <- function(fit, ...) {
-  UseMethod("test_providers")
-}
-
-#' Tests of the covariate coefficients
-#'
-#' @param fit a fitted provider model.
-#' @param ... arguments passed to the method.
-#' @return A data frame with one row per covariate; see the methods.
-#' @export
-test_covariates <- function(fit, ...) {
-  UseMethod("test_covariates")
+test <- function(fit, ...) {
+  UseMethod("test")
 }

@@ -10,8 +10,48 @@ template:
 
 navbar:
   structure:
-    left: [intro, reference, articles, news]
+    left: [intro, articles, reference, news]
     right: [search, lightswitch, github]
+  components:
+    intro:
+      text: Get started
+      href: articles/pprof.html
+    articles:
+      text: Articles
+      menu:
+      - text: Data preparation
+        href: articles/data.html
+      - text: Risk-adjustment models
+        href: articles/models.html
+      - text: Variable selection
+        href: articles/selection.html
+      - text: Standardized measures
+        href: articles/standardization.html
+      - text: Tests of provider effects
+        href: articles/testing.html
+      - text: Reference distributions
+        href: articles/null.html
+      - text: Reliability
+        href: articles/reliability.html
+      - text: Plots
+        href: articles/plots.html
+
+articles:
+- title: Get started
+  navbar: ~
+  contents:
+  - pprof
+- title: By analysis step
+  navbar: ~
+  contents:
+  - data
+  - models
+  - selection
+  - standardization
+  - testing
+  - "null"
+  - reliability
+  - plots
 
 reference:
 - title: Data
@@ -40,11 +80,11 @@ reference:
   - direct_expectation
 - title: Tests of provider effects
   contents:
-  - test_providers
-  - test_providers.logistic_fe
-  - test_providers.linear_fe
-  - test_providers_mixed
-  - test_providers.cox
+  - test
+  - test.logistic_fe
+  - test.linear_fe
+  - test_mixed
+  - test.cox
   - confint.logistic_fe
   - confint.linear_fe
   - confint_mixed
@@ -52,11 +92,11 @@ reference:
   - test_measure
 - title: Tests of covariates
   contents:
-  - test_covariates
-  - test_covariates.logistic_fe
-  - test_covariates.linear_fe
-  - test_covariates_mixed
-  - test_covariates.cox
+
+  - summary.logistic_fe
+  - summary.linear_fe
+  - summary_mixed
+  - summary.cox
 - title: Reference distributions
   desc: Theoretical, fixed and empirical nulls, and calibration of a test with one.
   contents:
@@ -72,9 +112,14 @@ reference:
 - title: Variable selection
   desc: Penalized covariate selection with unpenalized provider effects.
   contents:
-  - select_lasso
-  - cv_lasso
+  - var_select
+  - cv
   - coef.pp_lasso
+- title: Plots
+  desc: Caterpillar, funnel, observed-expected, forest, null-calibration, reliability, selection-path and flag-stability displays.
+  contents:
+  - plots
+  - flag_stability
 - title: Simulation
   contents:
   - sim_kecc

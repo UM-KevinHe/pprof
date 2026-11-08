@@ -25,7 +25,7 @@
 #'   empirical null fitted on the result does not see them). Default 0.
 #' @param null_model optional null model: a `pp_null` object or a function
 #'   of the result returning one, for instance
-#'   `function(t) null_empirical(t, size = t$person_time, grouping = "quantile")`
+#'   `function(t) null_model("empirical", t, size = t$person_time, grouping = "quantile")`
 #'   (the survival measures group providers by quartiles of person-time);
 #'   the result is then passed through [calibrate()]. Not available for the
 #'   exact test.
@@ -68,10 +68,10 @@
 #'               patient = "patient", time = "stop", start = "start",
 #'               event = "event", cutoff = 0, message = FALSE)
 #' fit <- fit_cox(ps)
-#' test_providers(fit)
-#' test_providers(fit, statistic = "wald", dispersion = "deviance")
+#' test(fit)
+#' test(fit, statistic = "wald", dispersion = "deviance")
 #' @export
-test_providers.cox <- function(fit, statistic = c("midp", "exact", "wald"),
+test.cox <- function(fit, statistic = c("midp", "exact", "wald"),
                                dispersion = c("none", "deviance"), providers = NULL,
                                level = 0.95, alternative = c("two.sided", "greater", "less"),
                                min_expected = 0, null_model = NULL, ...) {
@@ -246,13 +246,13 @@ deviance_dispersion <- function(fit, providers) {
 
 #' Confidence limits of the standardized ratios of a Cox fit
 #'
-#' The limits of [test_providers.cox()] for the ratio \eqn{O_j / E_j}.
+#' The limits of [test.cox()] for the ratio \eqn{O_j / E_j}.
 #'
 #' @param object a model fitted by [fit_cox()].
 #' @param parm optional subset of provider identifiers.
 #' @param level confidence level. Default 0.95.
 #' @param statistic,dispersion,alternative,min_expected,null_model as in
-#'   [test_providers.cox()].
+#'   [test.cox()].
 #' @param ... unused.
 #' @return A data frame with `provider`, `estimate` (the ratio), `lower`,
 #'   `upper`.
@@ -270,7 +270,7 @@ confint.cox <- function(object, parm = NULL, level = 0.95, statistic = c("midp",
   statistic <- match.arg(statistic)
   dispersion <- match.arg(dispersion)
   alternative <- match.arg(alternative)
-  tst <- test_providers(object, statistic = statistic, dispersion = dispersion, providers = parm,
+  tst <- test(object, statistic = statistic, dispersion = dispersion, providers = parm,
                         level = level, alternative = alternative, min_expected = min_expected,
                         null_model = null_model)
   data.frame(provider = tst$provider, estimate = tst$estimate, lower = tst$lower,

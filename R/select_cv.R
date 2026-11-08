@@ -1,16 +1,18 @@
 #' Cross-validation of a selection path
 #'
-#' Chooses the penalty of [select_lasso()] or [select_group_lasso()] by
-#' K-fold cross-validation of the binomial deviance. Folds are formed within
+#' Chooses the penalty of a [var_select()] path by
+#' K-fold cross-validation of the binomial deviance (for a survival outcome,
+#' the partial-likelihood deviance per event of the held-out rows within
+#' their own strata and risk sets for the Cox model, the binomial deviance
+#' per person-period for the discrete-time model). Folds are formed within
 #' every provider over its patients (rows when there is no patient column),
 #' so that each provider is present in every training set whenever it has at
 #' least two units; a provider held out entirely is predicted with the median
 #' provider effect of the training fit.
 #'
-#' @param data an object from [pp_data()].
-#' @param group for the group lasso, as in [select_group_lasso()].
-#' @param ... passed to [select_lasso()] or [select_group_lasso()] (for
-#'   instance `penalize`, `n_lambda`, `tol`).
+#' @param object a path from [var_select()]; every fold refits it with the
+#'   same settings and penalties.
+#' @param ... unused.
 #' @param n_folds number of folds. Default 10.
 #' @param folds optional fold membership (integers from 1) of the rows of
 #'   `data$data`; rows of excluded providers are ignored.
@@ -19,7 +21,8 @@
 #'
 #' @return An object of class `pp_cv`:
 #' \item{lambda}{the penalty sequence of the full-data path.}
-#' \item{cve, cvse}{the cross-validated deviance per row (mean over folds of
+#' \item{cve, cvse}{the cross-validated deviance per row, event or
+#'   person-period (mean over folds of
 #'   the fold means) and its standard error across folds.}
 #' \item{lambda_min, lambda_1se}{the penalty with the smallest `cve` and the
 #'   largest penalty whose `cve` is within one standard error of it.}
@@ -32,29 +35,33 @@
 #' d <- sim_kecc(n_providers = 20, n_covariates = 6, seed = 1)
 #' pd <- pp_data(d, y = "y", x = paste0("x", 1:6), provider = "provider",
 #'               patient = "patient", message = FALSE)
-#' cv <- cv_lasso(pd, n_lambda = 20, n_folds = 5, seed = 1)
-#' cv
-#' cv$selected_min
+#' cvp <- cv(var_select(pd, n_lambda = 20), n_folds = 5, seed = 1)
+#' cvp
+#' cvp$selected_min
 #' }
-#' @name cv_lasso
+#' @name cv
 NULL
 
-#' @rdname cv_lasso
+#' @rdname cv
 #' @export
-cv_lasso <- function(data, ..., n_folds = 10, folds = NULL, seed = NULL) {
-  cv_selection(data, select_lasso, list(...), n_folds, folds, seed)
+cv <- function(object, ...) {
+  UseMethod("cv")
 }
 
-#' @rdname cv_lasso
+#' @rdname cv
 #' @export
-cv_group_lasso <- function(data, group, ..., n_folds = 10, folds = NULL, seed = NULL) {
-  cv_selection(data, function(d, ...) select_group_lasso(d, group = group, ...), list(...),
-               n_folds, folds, seed)
+cv.pp_lasso <- function(object, n_folds = 10, folds = NULL, seed = NULL, ...) {
+  s <- object$settings
+  if (is.null(s)) stop("`object` must come from var_select().", call. = FALSE)
+  data <- structure(list(data = object$data, vars = object$vars, sizes = object$sizes,
+                         cutoff = if (is.null(object$cutoff)) 0 else object$cutoff),
+                    class = "pp_data")
+  cv_selection(data, var_select, s, n_folds, folds, seed, full = object)
 }
 
-cv_selection <- function(data, fitter, args, n_folds, folds, seed) {
-  full <- do.call(fitter, c(list(data), args))
-  m <- selection_matrices(data)
+cv_selection <- function(data, fitter, args, n_folds, folds, seed, full = NULL) {
+  if (is.null(full)) full <- do.call(fitter, c(list(data), args))
+  m <- if (outcome_of(data) == "survival") survival_matrices(data) else selection_matrices(data)
   included <- data$data$included
   if (is.null(folds)) {
     folds <- make_folds(data, n_folds, seed)
@@ -74,12 +81,10 @@ cv_selection <- function(data, fitter, args, n_folds, folds, seed) {
     if (length(test) == 0) next
     keep <- which(included)[train]
     fit_k <- do.call(fitter, c(list(pp_subset(data, keep)), args))
-    p <- predict(fit_k, newdata = m$d[test, , drop = FALSE], type = "response",
-                 unseen = "median")
-    p <- pmin(pmax(p, 1e-10), 1 - 1e-10)
-    dev <- -2 * (m$y[test] * log(p) + (m$n[test] - m$y[test]) * log(1 - p))
-    loss[k, ] <- colMeans(dev)
-    n_fold[k] <- length(test)
+    res <- cv_fold_loss(fit_k, m, test)
+    if (is.null(res)) next
+    loss[k, ] <- res$loss
+    n_fold[k] <- res$n
   }
   used <- n_fold > 0
   cve <- colSums(loss[used, , drop = FALSE] * n_fold[used]) / sum(n_fold)
@@ -93,6 +98,36 @@ cv_selection <- function(data, fitter, args, n_folds, folds, seed) {
                  selected_1se = selected_covariates(full, which = i_1se)[[1]],
                  fit = full, folds = folds, n_folds = n_folds),
             class = "pp_cv")
+}
+
+# The held-out loss of one fold, per value of lambda, and the number of
+# units it averages over: the binomial deviance per row (logistic), the
+# partial-likelihood deviance per weighted event within the held-out rows'
+# own strata and risk sets (Cox), or the binomial deviance per person-period
+# (discrete time). NULL when the fold has nothing to score.
+cv_fold_loss <- function(fit, m, test) {
+  model <- path_model(fit)
+  newdata <- m$d[test, , drop = FALSE]
+  if (model == "logistic") {
+    p <- predict(fit, newdata = newdata, type = "response", unseen = "median")
+    p <- pmin(pmax(p, 1e-10), 1 - 1e-10)
+    dev <- -2 * (m$y[test] * log(p) + (m$n[test] - m$y[test]) * log(1 - p))
+    return(list(loss = colMeans(dev), n = length(test)))
+  }
+  if (model == "cox") {
+    n_events <- sum(m$w[test] * m$event[test])
+    if (n_events == 0) return(NULL)
+    eta <- predict(fit, newdata = newdata, type = "link")
+    code <- match(m$prov[test], unique(m$prov[test]))
+    st <- cox_structure(m$start[test], m$stop[test], m$event[test], m$w[test], code)
+    dev <- cox_deviance(m$event[test], m$w[test], st$k_stop, st$k_start, st$row_first,
+                        st$row_last, st$grid_first, st$grid_count, st$d_grid, eta)
+    return(list(loss = as.numeric(dev) / n_events, n = n_events))
+  }
+  ex <- discrete_expanded(fit, newdata)
+  h <- pmin(pmax(ex$hazard, 1e-10), 1 - 1e-10)
+  dev <- -2 * (ex$y * log(h) + (1 - ex$y) * log(1 - h))
+  list(loss = colMeans(dev), n = length(ex$y))
 }
 
 # Fold membership of the included rows: within each provider, its units

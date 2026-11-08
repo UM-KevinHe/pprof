@@ -27,7 +27,7 @@ Two model-based variances of a fixed provider effect \eqn{\hat\gamma_i}
 are available. The \code{"case_mix"} variance is that of \eqn{\hat\gamma_i +
 \bar x_i^\top\hat\beta}, the provider's outcome (log-odds or mean) at its
 own average case mix \eqn{\bar x_i}; it does not depend on where the
-covariates are centred and is the default of \code{\link[=test_providers]{test_providers()}}. The
+covariates are centred and is the default of \code{\link[=test]{test()}}. The
 \code{"full"} variance is the \eqn{(\gamma_i,\gamma_i)} element of the inverse
 information, \eqn{1/I_{ii} + \bar z_i^\top \mathrm{Var}(\hat\beta)\bar
 z_i}; it is the variance of the outcome at \eqn{Z = 0} and changes with

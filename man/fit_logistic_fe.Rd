@@ -120,6 +120,6 @@ inference for profiling health care providers. \emph{Statistics in Medicine},
 41(15), 2840-2853.
 }
 \seealso{
-\code{\link[=test_providers]{test_providers()}}, \code{\link[=test_covariates]{test_covariates()}}, \code{\link[=standardize]{standardize()}},
+\code{\link[=test]{test()}}, \code{\link[=summary]{summary()}}, \code{\link[=standardize]{standardize()}},
 \code{\link[=confint.logistic_fe]{confint.logistic_fe()}}
 }

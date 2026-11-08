@@ -159,7 +159,7 @@ standardize.logistic_re <- function(fit, type = c("indirect", "direct"),
   attr(out, "n_pop") <- n_pop
   attr(out, "population_rate") <- population_rate
   attr(out, "level") <- level
-  out
+  as_pp_measure(out)
 }
 
 #' @rdname standardize_mixed
@@ -204,7 +204,7 @@ standardize.linear_re <- function(fit, type = c("indirect", "direct"),
   attr(out, "numerator") <- numerator
   attr(out, "null_value") <- a0
   attr(out, "level") <- level
-  out
+  as_pp_measure(out)
 }
 
 # Standard errors of the provider effects in the order of `levels`, from a

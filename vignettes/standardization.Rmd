@@ -1,0 +1,174 @@
+---
+title: "Standardized measures"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5,
+                      dpi = 96)
+```
+
+A standardized measure summarises the fitted model as one evaluation of
+each provider: how its outcomes compare with those expected under a
+national norm. `standardize()` computes the measures of every model class
+in the same form; `test_measure()` tests a measure against a reference
+value on its own scale.
+
+## Indirect and direct standardization
+
+Let $O_i$ be provider $i$'s observed total (its outcomes summed, or its
+number of events) and $E_i(a)$ the total its own patients would have had
+at a provider with effect $a$, given the fitted risk-factor coefficients:
+a sum of fitted means for a logistic or linear model, the fitted intensity
+accumulated over the periods at risk for a Cox model. The norm
+$\hat\mu$ is the median of the provider effects by default (robust to the
+outlying providers that are the object of the exercise), or their
+size-weighted mean, or a number.
+
+**Indirect** standardization compares the provider's observed total with
+the total its own patients would have had at the norm:
+
+$$\mathrm{ISR}_i = \frac{O_i}{E_i(\hat\mu)}, \qquad
+\mathrm{ISD}_i = \frac{O_i - E_i(\hat\mu)}{m_i} .$$
+
+The question is "did this provider's patients do better or worse than they
+would have at a typical provider?". The quantity tested is the provider
+effect itself.
+
+**Direct** standardization applies the provider's fitted effect to the
+patients of every provider, and compares the result with the norm applied
+to the same patients:
+
+$$\mathrm{DSR}_i = \frac{\sum_{i'} E_{i'}(\hat\gamma_i)}{\sum_{i'} E_{i'}(\hat\mu)}, \qquad
+\mathrm{DSD}_i = \frac{\sum_{i'} E_{i'}(\hat\gamma_i) - \sum_{i'} E_{i'}(\hat\mu)}{n} .$$
+
+The numerator divided by the total number of observations is the
+**directly standardized rate** of provider $i$: the rate the whole
+population would have had at this provider. Two providers' direct rates
+are comparable without further case-mix adjustment, which is why several
+measures report them. The estimand is then a population-average rate, a
+smooth monotone function of the provider effect, and testing it needs the
+transport described below.
+
+Ratios are used for counts and times to event, differences for continuous
+outcomes. A ratio above 1 or a difference above 0 means more of the
+outcome than expected.
+
+## `standardize()`
+
+```{r}
+library(pprof)
+d <- sim_kecc(n_providers = 60, provider_size = c(15, 60), seed = 7)
+pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
+              patient = "patient", message = FALSE)
+fit <- fit_logistic_fe(pd)
+ind <- standardize(fit, type = "indirect")
+head(ind)
+dir <- standardize(fit, type = "direct")
+head(dir)
+```
+
+The columns: `observed`, `expected`, `ratio`, `rate` (the ratio times the
+population rate, on the 0-1 scale) and `variance_expected` (indirect:
+$\sum N p_0(1 - p_0)$, the variance of the expected count under the
+null; direct: the delta-method numerator). Attributes record the type, the
+null value, the population size and rate.
+
+* `null`: `"median"` (default), `"mean"` (weighted by rows) or a number.
+* `n_pop`: the denominator of the rates; by default the number of trials
+  among the fitted rows.
+* `providers`: a subset to report; the norm and the expectations always
+  use every fitted row.
+
+### Confidence limits of the measures
+
+Limits of the ratio and the rate are mapped from limits of the provider
+effect, obtained by inverting one of the tests (`ci = "exact"`, `"score"`,
+`"wald"` or `"robust_wald"`):
+
+```{r}
+head(standardize(fit, type = "indirect", level = 0.95, ci = "score"))
+```
+
+### The standard error of a direct rate
+
+A direct rate is a function of one provider effect, so any standard error
+of $\hat\gamma_i$ transports to it by the delta method: `se_rate =
+numer_se / n_pop * se(gamma_i)`, with $\hat\beta$ held fixed. Give the
+standard errors of a Wald test as `gamma_se`:
+
+```{r}
+tst <- test(fit, statistic = "wald", variance = "robust")
+dir <- standardize(fit, type = "direct", gamma_se = stats::setNames(tst$se, tst$provider))
+head(dir[, c("provider", "rate", "se_rate")])
+```
+
+## Testing a direct measure: `test_measure()`
+
+The measures that report direct rates test the rate against the national
+rate on the rate scale (or on the logit scale), with the transported
+standard error. `test_measure()` is the measure-level z test
+$z_i = [g(M_i) - g(M_{ref})] / [g'(M_i)\, SE_i]$ with $g$ the identity,
+the logit or the log:
+
+```{r}
+mt <- test_measure(estimate = dir$rate, se = dir$se_rate,
+                   reference = attr(dir, "population_rate"), transform = "logit",
+                   providers = dir$provider)
+head(mt)
+table(mt$flag)
+```
+
+Its null distribution is $N(\text{location}, \text{scale}^2)$: the
+theoretical null by default, a known inflation such as `scale = 1.8`, or
+an empirical null through `null_model` (see
+[Reference distributions](null.html)). The intervals invert the test and
+are mapped back to the measure scale.
+
+## Continuous outcomes
+
+For a linear fit the measures are differences: indirect $(O_i -
+E_i)/m_i$, direct relative to the population mean of the effects.
+
+```{r}
+dc <- sim_kecc(n_providers = 40, type = "continuous", seed = 8)
+pc <- pp_data(dc, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
+              patient = "patient", message = FALSE)
+head(standardize(fit_linear_fe(pc)))
+```
+
+## Survival outcomes
+
+For a Cox fit the indirect measure is the observed-to-expected ratio
+$O_j / E_j$ with $E_j$ the events expected at the national baseline for
+the provider's own records, together with the person-time (the grouping
+variable of the survival measures' empirical null); the direct measure is
+$E^{(j)} / O$ with $E^{(j)}$ the events expected if every patient had
+provider $j$'s own baseline, computed from the risk-set sums.
+
+```{r}
+s <- sim_kecc(n_providers = 60, provider_size = c(15, 60), type = "survival", seed = 9)
+ps <- pp_data(s, x = c("x1", "x2", "x3"), provider = "provider", patient = "patient",
+              time = "stop", start = "start", event = "event", cutoff = 0, message = FALSE)
+cox <- fit_cox(ps)
+head(standardize(cox))
+head(standardize(cox, type = "direct"))
+```
+
+The ratios of a Cox fit are tested by `test(cox)`, which treats the
+observed count as Poisson with the expected count as its mean (see
+[Tests of provider effects](testing.html)).
+
+## An arbitrary standard population
+
+`direct_expectation()` evaluates the direct numerator for any provider
+effects and any standard population (a linear predictor and trials per
+row), for instance a national population from another year:
+
+```{r}
+direct_expectation(gamma = coef(fit)$gamma[1:3], linear_predictor = fit$linear_predictor)
+```
+
+## Reference
+
+He K (2019). Indirect and direct standardization for evaluating transplant
+centers. *Journal of Hospital Administration*, 8(1), 9-14.

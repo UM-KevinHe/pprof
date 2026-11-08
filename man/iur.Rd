@@ -2,27 +2,18 @@
 % Please edit documentation in R/reliability_iur.R
 \name{iur}
 \alias{iur}
-\alias{iur_direct}
-\alias{iur_bootstrap}
-\alias{iur_split_half}
 \alias{ratio_measure}
 \title{Inter-unit reliability of a provider measure}
 \usage{
-iur_direct(estimate, se, size)
-
-iur_bootstrap(
-  obs,
-  expected,
-  provider,
+iur(
+  method = c("direct", "bootstrap", "split_half"),
+  estimate = NULL,
+  se = NULL,
+  size = NULL,
+  obs = NULL,
+  expected = NULL,
+  provider = NULL,
   n_boot = 100,
-  measure = NULL,
-  seed = NULL
-)
-
-iur_split_half(
-  obs,
-  expected,
-  provider,
   n_iter = 10,
   category_probs = c(0.1, 0.3, 0.7, 0.9),
   measure = NULL,
@@ -32,15 +23,24 @@ iur_split_half(
 ratio_measure(obs, expected, provider)
 }
 \arguments{
-\item{estimate, se}{provider-level estimates and standard errors.}
+\item{method}{\code{"direct"}, \code{"bootstrap"} or \code{"split_half"}.}
+
+\item{estimate, se}{provider-level estimates and standard errors (direct
+method).}
 
 \item{size}{number of observations per provider.}
 
-\item{obs, expected}{observed and expected outcome per row (patient).}
+\item{obs, expected}{observed and expected outcome per row (patient;
+bootstrap and split-half methods).}
 
 \item{provider}{provider identifier per row.}
 
 \item{n_boot}{number of bootstrap replicates. Default 100.}
+
+\item{n_iter}{number of random splits. Default 10.}
+
+\item{category_probs}{quantile probabilities that cut the measures into
+ordered categories for the categorical coefficients.}
 
 \item{measure}{a function \verb{(obs, expected, provider)} returning one value
 per provider in sorted provider order; by default the ratio of sums
@@ -48,11 +48,6 @@ per provider in sorted provider order; by default the ratio of sums
 
 \item{seed}{optional seed; the session's random-number state is restored
 afterwards.}
-
-\item{n_iter}{number of random splits. Default 10.}
-
-\item{category_probs}{quantile probabilities that cut the measures into
-ordered categories for the categorical coefficients.}
 }
 \value{
 An object of class \code{pp_iur}: a list with \code{method}, \code{iur} (for the
@@ -69,14 +64,14 @@ The fraction of the variation of a provider-level measure that reflects
 true differences between providers rather than within-provider sampling
 noise, \eqn{\mathrm{IUR} = \sigma^2_b / (\sigma^2_b + \sigma^2_w / n')},
 from an ANOVA-type decomposition of the measure's variance (He et al.
-2019). Three estimators:
+2019). Three estimators, chosen by \code{method}:
 \itemize{
-\item \code{iur_direct()} uses provider-level estimates and their standard errors
+\item \code{"direct"} uses provider-level estimates and their standard errors
 (for instance a standardized rate and the \code{se_rate} of \code{\link[=standardize]{standardize()}});
-\item \code{iur_bootstrap()} resamples the rows of every provider with replacement
+\item \code{"bootstrap"} resamples the rows of every provider with replacement
 and takes the variance of the resampled measures as the within-provider
 variance;
-\item \code{iur_split_half()} splits every provider's rows into two random halves
+\item \code{"split_half"} splits every provider's rows into two random halves
 and converts the agreement of the two halves' measures across providers
 into a reliability by the Spearman-Brown formula \eqn{2r / (1 + r)}; six
 agreement coefficients are reported (weighted kappa, Kendall's tau and
@@ -103,7 +98,8 @@ pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
 fit <- fit_logistic_fe(pd)
 expected <- stats::median(coef(fit)$gamma) + fit$linear_predictor
 expected <- stats::plogis(expected)
-boot <- iur_bootstrap(fit$data$y, expected, fit$data$provider, n_boot = 50, seed = 1)
+boot <- iur("bootstrap", obs = fit$data$y, expected = expected,
+            provider = fit$data$provider, n_boot = 50, seed = 1)
 boot
 iur_curve(boot)
 }

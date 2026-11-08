@@ -9,7 +9,7 @@
 Components for profiling health care providers, organised by analysis
 step: data preparation (\code{\link[=pp_data]{pp_data()}}, \code{\link[=pp_check]{pp_check()}}), risk-adjustment
 models, standardized measures (\code{\link[=standardize]{standardize()}}), tests of provider effects
-(\code{\link[=test_providers]{test_providers()}}) and covariates (\code{\link[=test_covariates]{test_covariates()}}), reference
+(\code{\link[=test]{test()}}) and covariates (\code{\link[=summary]{summary()}}), reference
 distributions, reliability, variable selection and plots. Every quality
 measure is assembled from these components; nothing in the package is
 specific to one measure.

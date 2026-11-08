@@ -2,17 +2,12 @@
 % Please edit documentation in R/null_models.R
 \name{null_models}
 \alias{null_models}
-\alias{null_theoretical}
-\alias{null_fixed}
-\alias{null_empirical}
+\alias{null_model}
 \title{Null distributions for provider statistics}
 \usage{
-null_theoretical()
-
-null_fixed(mean = 0, sd = 1)
-
-null_empirical(
-  z,
+null_model(
+  kind = c("empirical", "theoretical", "fixed"),
+  z = NULL,
   size = NULL,
   groups = NULL,
   n_groups = 4,
@@ -24,16 +19,18 @@ null_empirical(
   common_mean = NULL,
   fit_mask = NULL,
   min_group_size = 3,
-  small_group = c("error", "theoretical")
+  small_group = c("error", "theoretical"),
+  mean = 0,
+  sd = 1
 )
 }
 \arguments{
-\item{mean, sd}{mean and standard deviation of a fixed null.}
+\item{kind}{\code{"empirical"} (default), \code{"theoretical"} or \code{"fixed"}.}
 
-\item{z}{the provider statistics: a numeric vector, optionally named by
-provider, or a test result from \code{\link[=test_providers]{test_providers()}} or \code{\link[=test_measure]{test_measure()}},
-whose statistic, provider identifiers and (for \code{\link[=test_providers]{test_providers()}})
-sizes are used.}
+\item{z}{for the empirical null, the provider statistics: a numeric
+vector, optionally named by provider, or a test result from \code{\link[=test]{test()}} or
+\code{\link[=test_measure]{test_measure()}}, whose statistic, provider identifiers and (for
+\code{\link[=test]{test()}}) sizes are used.}
 
 \item{size}{one size per provider used to form the groups (patients, say);
 taken from a test result when \code{z} is one. Ignored when \code{groups} is given.}
@@ -78,6 +75,8 @@ may have. Default 3.}
 
 \item{small_group}{\code{"error"} (default) or \code{"theoretical"} (a group below
 \code{min_group_size} gets the theoretical null, with a warning).}
+
+\item{mean, sd}{mean and standard deviation of a fixed null.}
 }
 \value{
 An object of class \code{pp_null}: a list with \code{kind}
@@ -96,15 +95,15 @@ exist: the theoretical null \eqn{N(0, 1)}, a fixed null with values given by
 the caller (for instance a known scale inflation), and the empirical null
 estimated robustly from the statistics themselves, overall or within
 groups of providers of similar size. Any of them can be handed to
-\code{\link[=calibrate]{calibrate()}}, \code{\link[=test_providers]{test_providers()}} or \code{\link[=test_measure]{test_measure()}}.
+\code{\link[=calibrate]{calibrate()}}, \code{\link[=test]{test()}} or \code{\link[=test_measure]{test_measure()}}.
 }
 \examples{
 d <- sim_kecc(n_providers = 40, seed = 1)
 pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
               patient = "patient", message = FALSE)
 fit <- fit_logistic_fe(pd)
-tst <- test_providers(fit, statistic = "score", variance = "robust")
-nul <- null_empirical(tst, n_groups = 2)
+tst <- test(fit, statistic = "score", variance = "robust")
+nul <- null_model("empirical", tst, n_groups = 2)
 nul
 head(calibrate(tst, nul))
 }

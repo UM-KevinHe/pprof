@@ -25,11 +25,11 @@
 #'
 #' @details Rows with `included = FALSE` are left out; set `cutoff = 0` in
 #' [pp_data()] to fit every provider, as the measures do, and choose the
-#' providers to report in [test_providers()].
+#' providers to report in [test()].
 #'
 #' When `data` has a patient column it is passed as `cluster` to
 #' [survival::coxph()], so that the robust (patient-clustered) covariance is
-#' available from [vcov.cox()] and [test_covariates()].
+#' available from [vcov.cox()] and [summary()].
 #'
 #' The expected number of events of every row is
 #' \eqn{E_i = \exp(\eta_i)\,[\Lambda_0(t_i) - \Lambda_0(s_i)]} with
@@ -63,8 +63,8 @@
 #' Liu D, Schaubel DE, Kalbfleisch JD (2012). Computationally efficient
 #' marginal models for clustered recurrent event data. *Biometrics*, 68(2),
 #' 637-647.
-#' @seealso [standardize.cox()], [test_providers.cox()],
-#'   [test_covariates.cox()]
+#' @seealso [standardize.cox()], [test.cox()],
+#'   [summary.cox()]
 #' @examples
 #' s <- sim_kecc(n_providers = 20, type = "survival", seed = 1)
 #' ps <- pp_data(s, x = c("x1", "x2", "x3"), provider = "provider",

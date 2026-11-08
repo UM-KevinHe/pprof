@@ -21,7 +21,7 @@
 selected_covariates(object, lambda = NULL, which = NULL)
 }
 \arguments{
-\item{object}{a path from \code{\link[=select_lasso]{select_lasso()}} or \code{\link[=select_group_lasso]{select_group_lasso()}}.}
+\item{object}{a path from \code{\link[=var_select]{var_select()}} or \code{\link[=var_select]{var_select()}}.}
 
 \item{lambda}{penalty values at which to report; values between two points
 of the path are interpolated linearly.}
@@ -35,15 +35,22 @@ of the path are interpolated linearly.}
 \item{newdata}{a data frame with the covariate and provider columns of the
 fit; default the fitted rows.}
 
-\item{type}{\code{"link"} (the linear predictor) or \code{"response"} (the
-probability).}
+\item{type}{\code{"link"} (the linear predictor, including any offset) or
+\code{"response"}: the probability for the logistic model, the relative
+hazard \eqn{e^\eta} for the Cox model, and for the discrete-time model
+the probability of the event by the row's time, \eqn{1 - \prod_k (1 -
+  h_{jk})} over the fit's periods up to that time (a time between two
+periods counts up to the earlier one, a time before the first period
+counts the first).}
 
 \item{unseen}{for providers of \code{newdata} that are not in the fit:
-\code{"missing"} (default; \code{NA}) or \code{"median"} (the median provider effect).}
+\code{"missing"} (default; \code{NA}) or \code{"median"} (the median provider effect).
+Not used by the Cox model, which has no provider parameters.}
 }
 \value{
-\code{coef()}: a list with \code{gamma} and \code{beta} (matrices, or vectors with
-\code{drop = TRUE} and one value of \code{lambda}). \code{predict()}: a matrix with one
+\code{coef()}: a list with \code{gamma} (\code{NULL} for the Cox model) and
+\code{beta}, plus \code{alpha} for the discrete-time model (matrices, or vectors
+with \code{drop = TRUE} and one value of \code{lambda}). \code{predict()}: a matrix with one
 column per requested \code{lambda}. \code{selected_covariates()}: the names of the
 penalized covariates with a nonzero coefficient, as a list over
 \code{lambda}.
@@ -55,7 +62,7 @@ Coefficients and predictions along a selection path
 d <- sim_kecc(n_providers = 20, n_covariates = 6, seed = 1)
 pd <- pp_data(d, y = "y", x = paste0("x", 1:6), provider = "provider",
               patient = "patient", message = FALSE)
-path <- select_lasso(pd, n_lambda = 20)
+path <- var_select(pd, n_lambda = 20)
 selected_covariates(path, which = c(5, 15))
 head(predict(path, which = 15, type = "response"))
 }
