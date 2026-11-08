@@ -16,7 +16,7 @@ null_empirical(
   size = NULL,
   groups = NULL,
   n_groups = 4,
-  grouping = c("rank", "quantile"),
+  grouping = c("rank", "quantile", "cut"),
   estimator = c("huber", "bisquare", "mm"),
   tuning = NULL,
   maxit = 20,
@@ -43,10 +43,14 @@ parameters.}
 
 \item{n_groups}{number of size groups. Default 4; 1 fits one overall null.}
 
-\item{grouping}{\code{"rank"} (default; the providers sorted by size are cut
-into \code{n_groups} consecutive blocks of as equal length as possible, as the
-KECC production code does) or \code{"quantile"} (groups by the empirical
-quantiles of \code{size}; a size equal to a break goes to the lower group).}
+\item{grouping}{\code{"rank"} (default; the providers sorted by size are dealt
+into \code{n_groups} consecutive blocks of \code{ceiling(n / n_groups)}, the last
+block holding the remainder, as the KECC production code for the PPPW and
+SFR measures and pprof_py do), \code{"quantile"} (groups by the empirical
+quantiles of \code{size}, a size equal to a break going to the lower group, as
+the production SMR and SHR code and \code{EmpiNull} do) or \code{"cut"} (the sorted
+providers cut by \code{\link[=cut]{cut()}} into \code{n_groups} intervals of equal length, the
+\code{Group_EN} of the KECC measures paper).}
 
 \item{estimator}{robust location-scale estimator of each group, all fitted
 with \code{\link[MASS:rlm]{MASS::rlm()}} on an intercept-only model: \code{"huber"} (default;

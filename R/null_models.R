@@ -19,10 +19,14 @@
 #' @param groups explicit group label per provider; missing labels get no
 #'   parameters.
 #' @param n_groups number of size groups. Default 4; 1 fits one overall null.
-#' @param grouping `"rank"` (default; the providers sorted by size are cut
-#'   into `n_groups` consecutive blocks of as equal length as possible, as the
-#'   KECC production code does) or `"quantile"` (groups by the empirical
-#'   quantiles of `size`; a size equal to a break goes to the lower group).
+#' @param grouping `"rank"` (default; the providers sorted by size are dealt
+#'   into `n_groups` consecutive blocks of `ceiling(n / n_groups)`, the last
+#'   block holding the remainder, as the KECC production code for the PPPW and
+#'   SFR measures and pprof_py do), `"quantile"` (groups by the empirical
+#'   quantiles of `size`, a size equal to a break going to the lower group, as
+#'   the production SMR and SHR code and `EmpiNull` do) or `"cut"` (the sorted
+#'   providers cut by [cut()] into `n_groups` intervals of equal length, the
+#'   `Group_EN` of the KECC measures paper).
 #' @param estimator robust location-scale estimator of each group, all fitted
 #'   with [MASS::rlm()] on an intercept-only model: `"huber"` (default;
 #'   Huber's psi with the MAD scale, the production choice), `"bisquare"`
@@ -90,7 +94,7 @@ null_fixed <- function(mean = 0, sd = 1) {
 #' @rdname null_models
 #' @export
 null_empirical <- function(z, size = NULL, groups = NULL, n_groups = 4,
-                           grouping = c("rank", "quantile"),
+                           grouping = c("rank", "quantile", "cut"),
                            estimator = c("huber", "bisquare", "mm"), tuning = NULL, maxit = 20,
                            acc = 1e-4, common_mean = NULL, fit_mask = NULL, min_group_size = 3,
                            small_group = c("error", "theoretical")) {
@@ -227,12 +231,12 @@ statistics_of <- function(z) {
 #'
 #' @param size one size per provider.
 #' @param n_groups number of groups.
-#' @param grouping `"rank"` or `"quantile"`, see [null_empirical()].
+#' @param grouping `"rank"`, `"quantile"` or `"cut"`, see [null_empirical()].
 #' @return Integer group labels `1, ..., n_groups`.
 #' @examples
 #' assign_groups(c(5, 50, 12, 30, 8, 100), n_groups = 3)
 #' @export
-assign_groups <- function(size, n_groups = 4, grouping = c("rank", "quantile")) {
+assign_groups <- function(size, n_groups = 4, grouping = c("rank", "quantile", "cut")) {
   grouping <- match.arg(grouping)
   if (!is.numeric(n_groups) || length(n_groups) != 1 || n_groups < 1 ||
         n_groups != round(n_groups)) {
@@ -243,6 +247,12 @@ assign_groups <- function(size, n_groups = 4, grouping = c("rank", "quantile")) 
   if (n == 0) return(integer(0))
   if (n_groups == 1) return(rep(1L, n))
   if (grouping == "rank") {
+    labels <- integer(n)
+    block <- ceiling(n / n_groups)
+    labels[order(size)] <- pmin((seq_len(n) - 1L) %/% block, n_groups - 1L) + 1L
+    return(labels)
+  }
+  if (grouping == "cut") {
     labels <- integer(n)
     labels[order(size)] <- cut(seq_len(n), breaks = n_groups, labels = FALSE)
     return(labels)

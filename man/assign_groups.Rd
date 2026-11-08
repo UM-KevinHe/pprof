@@ -4,14 +4,14 @@
 \alias{assign_groups}
 \title{Group providers by size}
 \usage{
-assign_groups(size, n_groups = 4, grouping = c("rank", "quantile"))
+assign_groups(size, n_groups = 4, grouping = c("rank", "quantile", "cut"))
 }
 \arguments{
 \item{size}{one size per provider.}
 
 \item{n_groups}{number of groups.}
 
-\item{grouping}{\code{"rank"} or \code{"quantile"}, see \code{\link[=null_empirical]{null_empirical()}}.}
+\item{grouping}{\code{"rank"}, \code{"quantile"} or \code{"cut"}, see \code{\link[=null_empirical]{null_empirical()}}.}
 }
 \value{
 Integer group labels \verb{1, ..., n_groups}.

@@ -72,9 +72,12 @@ frame with column names.
 ## Reference distributions and reliability (new; empirical null from the KECC production code and pprof_py)
 
 * Null models `null_theoretical()`, `null_fixed()`, `null_empirical()`: the empirical null is fitted
-  with `MASS::rlm` within size groups; the default (`grouping = "rank"`, `estimator = "huber"`, MASS
-  defaults, 4 groups) is the production `Group_EN`, and quantile groups, the bisquare, MM-estimation,
-  tuning constants, iteration settings, a common mean, a fit mask and small-group handling are the
+  with `MASS::rlm` within size groups. The default (`grouping = "rank"`: the providers sorted by size
+  dealt into blocks of `ceiling(n / 4)`; `estimator = "huber"` with MASS defaults) is what the
+  production PPPW and SFR code does; `grouping = "quantile"` with `estimator = "bisquare"`,
+  `maxit = 1000`, `acc = 1e-8` is the production SMR code (and `EmpiNull`), `"quantile"` with the
+  Huber default the production SHR code, and `grouping = "cut"` the `Group_EN` of the KECC measures
+  paper. MM-estimation, tuning constants, a common mean, a fit mask and small-group handling are the
   options of pprof_py's `EmpiricalNull`.
 * `calibrate()` refers a `test_providers()` or `test_measure()` result to a null model (adjusted
   statistics, p-values, flags and inverted limits); every `test_providers()` method and
