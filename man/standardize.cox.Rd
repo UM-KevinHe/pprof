@@ -61,7 +61,7 @@ head(standardize(fit))
 head(standardize(fit, type = "direct"))
 }
 \references{
-He K, Schaubel DE (2014). Standardized mortality ratio for
+He K, Schaubel DE (2015). Standardized mortality ratio for
 evaluating center-specific mortality: assessment and alternative.
-\emph{Statistics in Biosciences}, 6(2), 1-19.
+\emph{Statistics in Biosciences}, 7, 296-321.
 }

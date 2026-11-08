@@ -35,9 +35,9 @@
 #'   `observed`, `expected`, `ratio`, `person_time`. Direct: `provider`,
 #'   `observed` (the total \eqn{O}), `expected` (\eqn{E^{(j)}}), `ratio`,
 #'   `n_pop` (the number of fitted rows). Attribute `type`.
-#' @references He K, Schaubel DE (2014). Standardized mortality ratio for
+#' @references He K, Schaubel DE (2015). Standardized mortality ratio for
 #'   evaluating center-specific mortality: assessment and alternative.
-#'   *Statistics in Biosciences*, 6(2), 1-19.
+#'   *Statistics in Biosciences*, 7, 296-321.
 #' @examples
 #' s <- sim_kecc(n_providers = 20, type = "survival", seed = 1)
 #' ps <- pp_data(s, x = c("x1", "x2", "x3"), provider = "provider",

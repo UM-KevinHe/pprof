@@ -152,7 +152,7 @@ proportional-hazards model, and the provider effect is handled by
 absorbs its effect, and the risk-factor coefficients are estimated within
 providers. The national baseline is then the Breslow estimator over every
 record with the fitted linear predictor as an offset (the two-stage model
-of He and Schaubel 2014). The expected number of events of every record is
+of He and Schaubel 2015). The expected number of events of every record is
 $E = e^{\eta} [\Lambda_0(\text{stop}) - \Lambda_0(\text{start})]$, and
 the provider's measure is its observed-to-expected ratio.
 
@@ -203,6 +203,6 @@ inference for profiling health care providers. *Statistics in Medicine*,
 Firth D (1993). Bias reduction of maximum likelihood estimates.
 *Biometrika*, 80(1), 27-38.
 
-He K, Schaubel DE (2014). Standardized mortality ratio for evaluating
+He K, Schaubel DE (2015). Standardized mortality ratio for evaluating
 center-specific mortality: assessment and alternative. *Statistics in
-Biosciences*, 6(2), 1-19.
+Biosciences*, 7, 296-321.

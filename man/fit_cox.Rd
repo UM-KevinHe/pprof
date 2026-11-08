@@ -48,7 +48,7 @@ Fits the Cox proportional hazards model of the survival measures (SMR,
 SHR, STrR) through \code{\link[survival:coxph]{survival::coxph()}}. By default the provider is a
 stratification variable, so that each provider has its own baseline
 hazard and the covariate effects are estimated within providers (He and
-Schaubel 2014); the national baseline is then the Breslow estimator over
+Schaubel 2015); the national baseline is then the Breslow estimator over
 every row with the fitted linear predictor as an offset. This is the
 two-stage model of the KECC measures: stage one estimates the covariate
 effects in the stratified model, stage two estimates the optional
@@ -84,9 +84,9 @@ fit
 coef(fit)$beta
 }
 \references{
-He K, Schaubel DE (2014). Standardized mortality ratio for evaluating
+He K, Schaubel DE (2015). Standardized mortality ratio for evaluating
 center-specific mortality: assessment and alternative. \emph{Statistics in
-Biosciences}, 6(2), 1-19.
+Biosciences}, 7, 296-321.
 
 Liu D, Schaubel DE, Kalbfleisch JD (2012). Computationally efficient
 marginal models for clustered recurrent event data. \emph{Biometrics}, 68(2),
