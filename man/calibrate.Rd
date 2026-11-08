@@ -4,7 +4,14 @@
 \alias{calibrate}
 \title{Calibrate a test result with a null model}
 \usage{
-calibrate(x, null_model, level = NULL, alternative = NULL, critical = NULL)
+calibrate(
+  x,
+  null_model,
+  level = NULL,
+  alternative = NULL,
+  critical = NULL,
+  ci_location = NULL
+)
 }
 \arguments{
 \item{x}{a test result.}
@@ -16,6 +23,13 @@ calibrate(x, null_model, level = NULL, alternative = NULL, critical = NULL)
 
 \item{critical}{optional critical value for the flags and limits instead
 of the normal quantile for \code{level}.}
+
+\item{ci_location}{location at which the confidence limits are centred:
+\code{NULL} (default) uses the null mean, so that a limit excludes the null
+value exactly when the provider is flagged; a number or one value per
+provider centres the limits elsewhere, for instance \code{0} for limits of the
+form \eqn{\hat\theta \pm c\, \mathrm{null\_sd}\, se} that ignore the
+null location.}
 }
 \value{
 \code{x} with the columns \code{z_adjusted}, \code{null_mean}, \code{null_sd} and

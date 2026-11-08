@@ -47,6 +47,7 @@ test_measure <- function(estimate, se, reference, transform = c("identity", "log
                          providers = NULL, null_model = NULL) {
   transform <- match.arg(transform)
   alternative <- match.arg(alternative)
+  ci_given <- !missing(ci_location)
   n <- length(estimate)
   if (length(se) != n) stop("`se` must have one value per estimate.", call. = FALSE)
   for (arg in c("reference", "location", "scale", "ci_location")) {
@@ -106,6 +107,9 @@ test_measure <- function(estimate, se, reference, transform = c("identity", "log
   attr(out, "test") <- list(transform = transform, level = level, critical = critical,
                             alternative = alternative)
   class(out) <- c("pp_measure_test", "data.frame")
-  if (!is.null(null_model)) out <- calibrate(out, null_model, critical = critical)
+  if (!is.null(null_model)) {
+    out <- calibrate(out, null_model, critical = critical,
+                     ci_location = if (ci_given) ci_location else NULL)
+  }
   out
 }

@@ -378,6 +378,12 @@ adjust_z <- function(z, null) {
 #' @param level,alternative default to the settings of `x`.
 #' @param critical optional critical value for the flags and limits instead
 #'   of the normal quantile for `level`.
+#' @param ci_location location at which the confidence limits are centred:
+#'   `NULL` (default) uses the null mean, so that a limit excludes the null
+#'   value exactly when the provider is flagged; a number or one value per
+#'   provider centres the limits elsewhere, for instance `0` for limits of the
+#'   form \eqn{\hat\theta \pm c\, \mathrm{null\_sd}\, se} that ignore the
+#'   null location.
 #'
 #' @return `x` with the columns `z_adjusted`, `null_mean`, `null_sd` and
 #'   `null_group` added, `p` and `flag` recomputed from the adjusted statistic,
@@ -393,12 +399,14 @@ adjust_z <- function(z, null) {
 #' tst <- test(fit_logistic_fe(pd), statistic = "wald", variance = "robust")
 #' calibrate(tst, null_model("fixed", sd = 1.5))
 #' @export
-calibrate <- function(x, null_model, level = NULL, alternative = NULL, critical = NULL) {
+calibrate <- function(x, null_model, level = NULL, alternative = NULL, critical = NULL,
+                      ci_location = NULL) {
   UseMethod("calibrate")
 }
 
 #' @export
-calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, critical = NULL) {
+calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, critical = NULL,
+                              ci_location = NULL) {
   null <- resolve_null(null_model, x)
   settings <- attr(x, "test")
   if (is.null(level)) level <- settings$level
@@ -414,15 +422,16 @@ calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, c
   z_adj <- (x$statistic - p$mean) / p$sd
   decision <- null_decision(z_adj, level, alternative, critical)
   q <- if (is.null(critical)) normal_quantile(level, alternative) else critical
+  loc <- ci_centre(ci_location, p$mean, nrow(x))
   se <- x$se
   if (limits_kind == "midp") {
-    lim <- midp_limits(x$observed, x$expected, p$mean, p$sd, q, alternative)
+    lim <- midp_limits(x$observed, x$expected, loc, p$sd, q, alternative)
     lower <- lim$lower
     upper <- lim$upper
   } else {
     centre <- if (limits_kind == "log_wald") log(x$estimate) else x$estimate
-    lower <- centre - (p$mean + q * p$sd) * se
-    upper <- centre - (p$mean - q * p$sd) * se
+    lower <- centre - (loc + q * p$sd) * se
+    upper <- centre - (loc - q * p$sd) * se
     if (alternative == "greater") upper[!is.na(se)] <- Inf
     if (alternative == "less") lower[!is.na(se)] <- -Inf
     if (limits_kind == "log_wald") {
@@ -446,6 +455,7 @@ calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, c
   settings$level <- level
   settings$alternative <- alternative
   settings$critical <- critical
+  settings$ci_location <- ci_location
   settings$null_model <- describe_null(null)
   attr(out, "test") <- settings
   attr(out, "sizes") <- attrs$sizes
@@ -455,7 +465,7 @@ calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, c
 
 #' @export
 calibrate.pp_measure_test <- function(x, null_model, level = NULL, alternative = NULL,
-                                      critical = NULL) {
+                                      critical = NULL, ci_location = NULL) {
   null <- resolve_null(null_model, x)
   settings <- attr(x, "test")
   if (is.null(level)) level <- settings$level
@@ -467,9 +477,10 @@ calibrate.pp_measure_test <- function(x, null_model, level = NULL, alternative =
   z_adj <- (x$z - p$mean) / p$sd
   decision <- null_decision(z_adj, level, alternative, critical)
   q <- if (is.null(critical)) normal_quantile(level, alternative) else critical
+  loc <- ci_centre(ci_location, p$mean, nrow(x))
   back <- switch(settings$transform, identity = function(v) v, logit = stats::plogis, log = exp)
-  lower_t <- x$estimate_t - (p$mean + q * p$sd) * x$se_t
-  upper_t <- x$estimate_t - (p$mean - q * p$sd) * x$se_t
+  lower_t <- x$estimate_t - (loc + q * p$sd) * x$se_t
+  upper_t <- x$estimate_t - (loc - q * p$sd) * x$se_t
   if (alternative == "greater") upper_t <- rep(Inf, nrow(x))
   if (alternative == "less") lower_t <- rep(-Inf, nrow(x))
   out <- as.data.frame(x)
@@ -486,10 +497,20 @@ calibrate.pp_measure_test <- function(x, null_model, level = NULL, alternative =
   settings$level <- level
   settings$alternative <- alternative
   settings$critical <- critical
+  settings$ci_location <- ci_location
   settings$null_model <- describe_null(null)
   attr(out, "test") <- settings
   class(out) <- c("pp_measure_test", "data.frame")
   out
+}
+
+# Centre of the calibrated confidence limits: the null mean unless given.
+ci_centre <- function(ci_location, null_mean, n) {
+  if (is.null(ci_location)) return(null_mean)
+  if (!length(ci_location) %in% c(1L, n)) {
+    stop("`ci_location` must be one number or one value per provider.", call. = FALSE)
+  }
+  rep_len(as.numeric(ci_location), n)
 }
 
 # p-values and flags of adjusted statistics, by level or by a critical value.

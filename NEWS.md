@@ -81,7 +81,9 @@ frame with column names.
   options of pprof_py's `EmpiricalNull`.
 * `calibrate()` refers a `test()` or `test_measure()` result to a null model (adjusted
   statistics, p-values, flags and inverted limits); every `test()` method and
-  `test_measure()` take a `null_model`.
+  `test_measure()` take a `null_model`. `critical` sets the critical value of the flags and
+  limits; `ci_location` centres the limits elsewhere than the null mean (`0` gives limits of
+  the form estimate ± c · null_sd · se).
 * Inter-unit reliability translated from pprof_py: `iur()` with the direct, bootstrap and
   split-half methods, with `iur_curve()` and `iur_stratified()`.
 
