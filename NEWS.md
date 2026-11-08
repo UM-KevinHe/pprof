@@ -38,7 +38,9 @@ frame with column names.
   tests use the t distribution with `n - m - p` degrees of freedom for every model-based
   statistic (1.0.3 mixed normal and t references); a patient-clustered robust variance is new.
 * `fit_logistic_fe(penalty = "firth")` replaces `logis_firth()` and extends it to binomial
-  trials; the object is a `logistic_fe` fit, so every test and standardization applies.
+  trials; the object is a `logistic_fe` fit, so every test and standardization applies. The kernel
+  follows ParaFLR (UM-KevinHe/hpc-flr): per-provider work on independent threads, with the p x p
+  reductions as whole-data matrix products so that the result does not depend on the thread count.
 * `fit_logistic_re()`, `fit_logistic_cre()`, `fit_linear_re()`, `fit_linear_cre()` replace
   `logis_re()`, `logis_cre()`, `linear_re()`, `linear_cre()` (lme4 wrappers): the random effects
   are `coefficients$alpha`, their conditional variances `post_var`; the CRE decomposition names

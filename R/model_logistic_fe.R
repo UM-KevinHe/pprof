@@ -40,6 +40,10 @@
 #' \eqn{h_{ij}(\frac12 - p_{ij})} to each row's residual, with \eqn{h_{ij}}
 #' the row's leverage \eqn{N_{ij} p_{ij}(1 - p_{ij})\, x_{ij}^\top I^{-1}
 #' x_{ij}}. The estimates stay finite when a provider has no or all events.
+#' The computation follows ParaFLR (Shao and He, the `paraflr` package in
+#' UM-KevinHe/hpc-flr): the provider is the unit of parallel work, so the
+#' per-provider information blocks, leverages and scores are spread over
+#' `threads`; the results do not depend on the number of threads.
 #' `loglik`, `aic` and `bic` report the unpenalized log-likelihood at the
 #' penalized estimate; the penalized value is `penalized_loglik`.
 #'
@@ -62,6 +66,9 @@
 #' @references
 #' Firth D (1993). Bias reduction of maximum likelihood estimates.
 #' *Biometrika*, 80(1), 27-38.
+#'
+#' Shao Y, He K. ParaFLR: parallel Firth-corrected logistic regression with
+#' high-dimensional provider effects. <https://github.com/UM-KevinHe/hpc-flr>
 #'
 #' He K, Kalbfleisch JD, Li Y, Li Y (2013). Evaluating hospital readmission
 #' rates in dialysis facilities; adjusting for hospital effects. *Lifetime

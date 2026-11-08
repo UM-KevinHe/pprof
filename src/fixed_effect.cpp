@@ -750,44 +750,61 @@ arma::vec restricted_score(const arma::vec &N, const arma::vec &Y, const arma::m
 }
 
 // ---------------------------------------------------------------------------
-// Firth-penalized fit
+// Firth-penalized fit (ParaFLR: the provider is the unit of parallel work)
 // ---------------------------------------------------------------------------
 
 // Fixed provider effects logistic model with Firth's penalty
 // 0.5 * log det I(gamma, beta) (Jeffreys prior) and binomial trials N.
 // Each iteration is a joint Newton step on (gamma, beta) through the block
-// structure of the information, with the modified score: row j of provider i
-// contributes Y_j - N_j p_j + h_j (1/2 - p_j), where h_j is its leverage
-// N_j p_j (1 - p_j) x_j' I^{-1} x_j and x_j = (e_i, z_j). The stopping rules
-// read the penalized log-likelihood.
+// structure of the information, with Firth's modified score: row j of
+// provider i contributes Y_j - N_j p_j + h_j (1/2 - p_j), where h_j is its
+// leverage N_j p_j (1 - p_j) x_j' I^{-1} x_j and x_j = (e_i, z_j).
+//
+// Parallel design as in ParaFLR (UM-KevinHe/hpc-flr, paraflr): the per-provider
+// quantities (probabilities, information blocks, leverages, modified scores)
+// are computed provider by provider on independent threads. Unlike ParaFLR,
+// the p x p reductions (the Schur complement and the beta score) are matrix
+// products over the whole data instead of per-thread partial sums, so the
+// result does not depend on the number of threads. The stopping rules read
+// the penalized log-likelihood.
 // [[Rcpp::export]]
 List logis_firth_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_prov,
                       arma::vec gamma, arma::vec beta, const int &threads, double tol,
                       int max_iter, double bound, bool message, const std::string &stop) {
   const int m = n_prov.n_elem;
   const int p = Z.n_cols;
+  const arma::uword n = Z.n_rows;
   arma::uvec first(m), last(m);
-  int ind = 0;
+  arma::uword ind = 0;
   for (int i = 0; i < m; i++) {
     first(i) = ind;
     last(i) = ind + n_prov(i) - 1;
     ind += n_prov(i);
   }
-  if (message) Rcout << "Fitting the Firth-penalized fixed provider effects model ..." << std::endl;
+  omp_set_num_threads(threads);
+  if (message) {
+    Rcout << "Fitting the Firth-penalized fixed provider effects model (" << threads
+          << " threads) ..." << std::endl;
+  }
+  arma::vec eta(n), prob(n), pq(n), r(n), info_gamma(m), u_gamma(m);
+  arma::mat info_bg(p, m);
   int iter = 0;
   double crit = 1e9, crit_beta = 0, loglik = 0, loglik_pen = 0, loglik_pen_prev = 0,
          loglik_pen_init = 0;
   while (true) {
-    arma::vec gamma_obs = rep_vec(gamma, n_prov);
     arma::vec z_beta = Z * beta;
-    arma::vec prob = 1 / (1 + exp(-gamma_obs - z_beta));
-    prob = clamp(prob, 1e-10, 1 - 1e-10);
-    arma::vec pq = N % prob % (1 - prob);
-    arma::vec info_gamma(m);
-    arma::mat info_bg(p, m);
+    // per provider: probabilities and the information blocks I_ii, I_{beta, i}
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < m; i++) {
-      info_gamma(i) = sum(pq.subvec(first(i), last(i)));
-      info_bg.col(i) = Z.rows(first(i), last(i)).t() * pq.subvec(first(i), last(i));
+      const arma::uword a = first(i), b = last(i);
+      arma::vec e = gamma(i) + z_beta.subvec(a, b);
+      arma::vec pr = clamp(1 / (1 + exp(-e)), 1e-10, 1 - 1e-10);
+      arma::vec w = N.subvec(a, b) % pr % (1 - pr);
+      eta.subvec(a, b) = e;
+      prob.subvec(a, b) = pr;
+      pq.subvec(a, b) = w;
+      info_gamma(i) = sum(w);
+      info_bg.col(i) = Z.rows(a, b).t() * w;
     }
     arma::mat info_beta = info_beta_omp(Z, pq, threads);
     arma::mat J = info_bg.each_row() / info_gamma.t();
@@ -796,7 +813,7 @@ List logis_firth_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_pro
     if (!inv_sympd(S_inv, S)) S_inv = pinv(S);
     double logdet_s, sign;
     log_det(logdet_s, sign, S);
-    loglik = Loglkd(N, Y, z_beta, gamma_obs);
+    loglik = sum(Y % eta - N % (clamp(eta, 0.0, datum::inf) + log1p(exp(-abs(eta)))));
     loglik_pen = loglik + 0.5 * (sum(log(info_gamma)) + logdet_s);
     if (iter == 0) {
       loglik_pen_init = loglik_pen;
@@ -808,20 +825,23 @@ List logis_firth_prov(arma::vec &N, arma::vec &Y, arma::mat &Z, arma::vec &n_pro
     }
     loglik_pen_prev = loglik_pen;
 
-    // leverages h_j = pq_j * [ (1/I_ii + J_i' S^-1 J_i) - 2 z_j' S^-1 J_i + z_j' S^-1 z_j ]
-    arma::mat ZS = Z * S_inv;
-    arma::vec quad_z = sum(ZS % Z, 1);
-    arma::vec h(Y.n_elem);
+    // per provider: leverages h_j = pq_j [ (1/I_ii + J_i' S^-1 J_i) - 2 z_j' S^-1 J_i
+    // + z_j' S^-1 z_j ], modified residuals and the gamma scores
+    arma::mat SJ = S_inv * J;
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < m; i++) {
-      arma::vec sj = S_inv * J.col(i);
-      double a = 1.0 / info_gamma(i) + dot(J.col(i), sj);
-      arma::vec b = Z.rows(first(i), last(i)) * sj;
-      h.subvec(first(i), last(i)) =
-          pq.subvec(first(i), last(i)) % (a - 2 * b + quad_z.subvec(first(i), last(i)));
+      const arma::uword a = first(i), b = last(i);
+      const arma::mat Zi = Z.rows(a, b);
+      arma::mat ZiS = Zi * S_inv;
+      arma::vec quad = sum(ZiS % Zi, 1);
+      double c1 = 1.0 / info_gamma(i) + dot(J.col(i), SJ.col(i));
+      arma::vec c2 = Zi * SJ.col(i);
+      arma::vec h = pq.subvec(a, b) % (c1 - 2 * c2 + quad);
+      arma::vec ri = Y.subvec(a, b) - N.subvec(a, b) % prob.subvec(a, b) +
+                     h % (0.5 - prob.subvec(a, b));
+      r.subvec(a, b) = ri;
+      u_gamma(i) = sum(ri);
     }
-    arma::vec r = Y - N % prob + h % (0.5 - prob);
-    arma::vec u_gamma(m);
-    for (int i = 0; i < m; i++) u_gamma(i) = sum(r.subvec(first(i), last(i)));
     arma::vec u_beta = Z.t() * r;
     arma::vec d_beta = S_inv * (u_beta - J * u_gamma);
     arma::vec d_gamma = u_gamma / info_gamma - J.t() * d_beta;
