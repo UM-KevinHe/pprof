@@ -69,7 +69,20 @@ frame with column names.
   for numeric identifiers).
 * Discrete-time survival and stratified Cox selection move to the survival components.
 
+## Reference distributions and reliability (new; empirical null from the KECC production code and pprof_py)
+
+* Null models `null_theoretical()`, `null_fixed()`, `null_empirical()`: the empirical null is fitted
+  with `MASS::rlm` within size groups; the default (`grouping = "rank"`, `estimator = "huber"`, MASS
+  defaults, 4 groups) is the production `Group_EN`, and quantile groups, the bisquare, MM-estimation,
+  tuning constants, iteration settings, a common mean, a fit mask and small-group handling are the
+  options of pprof_py's `EmpiricalNull`.
+* `calibrate()` refers a `test_providers()` or `test_measure()` result to a null model (adjusted
+  statistics, p-values, flags and inverted limits); every `test_providers()` method and
+  `test_measure()` take a `null_model`.
+* Inter-unit reliability translated from pprof_py: `iur_direct()`, `iur_bootstrap()`,
+  `iur_split_half()`, with `iur_curve()` and `iur_stratified()`.
+
 ## Still to come (in this order)
 
-* Empirical null, inter-unit reliability, Cox O/E components.
+* Cox O/E components, discrete-time survival and stratified Cox selection.
 * Plots.

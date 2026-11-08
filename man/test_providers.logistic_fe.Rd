@@ -16,6 +16,7 @@
   score_type = c("modified", "restricted"),
   wald_variance = c("case_mix", "full"),
   n_resample = 10000,
+  null_model = NULL,
   ...
 )
 }
@@ -55,6 +56,11 @@ under the null; naive variance only).}
 \code{"case_mix"} (default) or \code{"full"}, see \code{\link[=gamma_variance]{gamma_variance()}}.}
 
 \item{n_resample}{number of draws for \code{exact_method = "bootstrap"}.}
+
+\item{null_model}{optional null model: a \code{pp_null} object or a function
+of the result returning one, for instance
+\code{function(t) null_empirical(t, n_groups = 4)}; the result is then passed
+through \code{\link[=calibrate]{calibrate()}}.}
 
 \item{...}{unused.}
 }

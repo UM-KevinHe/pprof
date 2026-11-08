@@ -15,7 +15,8 @@ test_measure(
   critical = NULL,
   ci_location = location,
   alternative = c("two.sided", "greater", "less"),
-  providers = NULL
+  providers = NULL,
+  null_model = NULL
 )
 }
 \arguments{
@@ -42,9 +43,14 @@ defaults to \code{location}.}
 \item{alternative}{\code{"two.sided"} (default), \code{"greater"} or \code{"less"}.}
 
 \item{providers}{optional provider identifiers for the output.}
+
+\item{null_model}{optional null model (a \code{pp_null} object or a function of
+the result returning one), applied through \code{\link[=calibrate]{calibrate()}}; it replaces
+\code{location} and \code{scale}.}
 }
 \value{
-A data frame with one row per provider: \code{provider} (if given),
+A data frame of class \code{pp_measure_test} with one row per provider:
+\code{provider} (if given),
 \code{estimate}, \code{se}, \code{reference}, \code{estimate_t}, \code{se_t}, \code{reference_t} (on
 the transformed scale), \code{z}, \code{p}, \code{flag} (\code{1} above the reference, \code{-1}
 below, \code{0} not different, \code{NA} when \code{z} is missing), \code{lower}, \code{upper}

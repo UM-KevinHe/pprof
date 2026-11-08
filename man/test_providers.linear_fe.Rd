@@ -12,6 +12,7 @@
   level = 0.95,
   alternative = c("two.sided", "greater", "less"),
   wald_variance = c("case_mix", "full"),
+  null_model = NULL,
   ...
 )
 }
@@ -33,6 +34,9 @@ fixed; needs a patient column in \code{\link[=pp_data]{pp_data()}}).}
 
 \item{wald_variance}{for \code{variance = "naive"}: \code{"case_mix"} (default) or
 \code{"full"}, see \code{\link[=gamma_variance]{gamma_variance()}}.}
+
+\item{null_model}{optional null model (a \code{pp_null} object or a function of
+the result returning one), applied through \code{\link[=calibrate]{calibrate()}}.}
 
 \item{...}{unused.}
 }

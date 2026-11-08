@@ -12,6 +12,7 @@
   providers = NULL,
   level = 0.95,
   alternative = c("two.sided", "greater", "less"),
+  null_model = NULL,
   ...
 )
 
@@ -21,6 +22,7 @@
   providers = NULL,
   level = 0.95,
   alternative = c("two.sided", "greater", "less"),
+  null_model = NULL,
   ...
 )
 }
@@ -37,6 +39,9 @@ intercept).}
 \item{level}{confidence level; the significance level is \code{1 - level}.}
 
 \item{alternative}{\code{"two.sided"} (default), \code{"greater"} or \code{"less"}.}
+
+\item{null_model}{optional null model (a \code{pp_null} object or a function of
+the result returning one), applied through \code{\link[=calibrate]{calibrate()}}.}
 
 \item{...}{unused.}
 }

@@ -14,6 +14,8 @@
 #' @param alternative `"two.sided"` (default), `"greater"` or `"less"`.
 #' @param wald_variance for `variance = "naive"`: `"case_mix"` (default) or
 #'   `"full"`, see [gamma_variance()].
+#' @param null_model optional null model (a `pp_null` object or a function of
+#'   the result returning one), applied through [calibrate()].
 #' @param ... unused.
 #'
 #' @details The naive statistic \eqn{(\hat\gamma_i - \gamma_0) / se_i} is
@@ -35,7 +37,8 @@
 test_providers.linear_fe <- function(fit, variance = c("naive", "robust"), null = "median",
                                      providers = NULL, level = 0.95,
                                      alternative = c("two.sided", "greater", "less"),
-                                     wald_variance = c("case_mix", "full"), ...) {
+                                     wald_variance = c("case_mix", "full"), null_model = NULL,
+                                     ...) {
   check_fit(fit, "linear_fe")
   variance <- match.arg(variance)
   alternative <- match.arg(alternative)
@@ -62,11 +65,14 @@ test_providers.linear_fe <- function(fit, variance = c("naive", "robust"), null 
   stat[!is.finite(stat)] <- NA_real_
   decision <- z_decision(stat, level, alternative, df)
   limits <- wald_limits(gamma[idx], se, level, alternative, df)
-  pp_test_frame(m$levels[idx], gamma[idx], se, g0, stat, decision, limits$lower, limits$upper,
+  out <- pp_test_frame(m$levels[idx], gamma[idx], se, g0, stat, decision, limits$lower,
+                       limits$upper,
                 test = list(statistic = "wald", variance = variance,
                             method = if (variance == "naive") wald_variance else NA,
                             null = null, null_value = g0, level = level,
                             alternative = alternative, df = df),
                 sizes = data.frame(provider = m$levels[idx], rows = m$n_prov[idx],
                                    patients = fit$sizes$patients[idx], stringsAsFactors = FALSE))
+  if (!is.null(null_model)) out <- calibrate(out, null_model)
+  out
 }

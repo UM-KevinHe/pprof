@@ -22,13 +22,17 @@
 #'   defaults to `location`.
 #' @param alternative `"two.sided"` (default), `"greater"` or `"less"`.
 #' @param providers optional provider identifiers for the output.
+#' @param null_model optional null model (a `pp_null` object or a function of
+#'   the result returning one), applied through [calibrate()]; it replaces
+#'   `location` and `scale`.
 #'
 #' @details The interval inverts the calibrated test:
 #' \eqn{g(M_i) - (\mathrm{ci\_location} \pm \mathrm{critical} \cdot
 #' \mathrm{scale})\, SE_i^{(g)}}, mapped back with \eqn{g^{-1}}. One-sided
 #' alternatives give one-sided intervals.
 #'
-#' @return A data frame with one row per provider: `provider` (if given),
+#' @return A data frame of class `pp_measure_test` with one row per provider:
+#'   `provider` (if given),
 #'   `estimate`, `se`, `reference`, `estimate_t`, `se_t`, `reference_t` (on
 #'   the transformed scale), `z`, `p`, `flag` (`1` above the reference, `-1`
 #'   below, `0` not different, `NA` when `z` is missing), `lower`, `upper`
@@ -40,7 +44,7 @@
 test_measure <- function(estimate, se, reference, transform = c("identity", "logit", "log"),
                          location = 0, scale = 1, level = 0.95, critical = NULL,
                          ci_location = location, alternative = c("two.sided", "greater", "less"),
-                         providers = NULL) {
+                         providers = NULL, null_model = NULL) {
   transform <- match.arg(transform)
   alternative <- match.arg(alternative)
   n <- length(estimate)
@@ -101,5 +105,7 @@ test_measure <- function(estimate, se, reference, transform = c("identity", "log
                                         stringsAsFactors = FALSE)
   attr(out, "test") <- list(transform = transform, level = level, critical = critical,
                             alternative = alternative)
+  class(out) <- c("pp_measure_test", "data.frame")
+  if (!is.null(null_model)) out <- calibrate(out, null_model, critical = critical)
   out
 }

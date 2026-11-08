@@ -14,6 +14,8 @@
 #' @param providers optional subset of provider identifiers to report.
 #' @param level confidence level; the significance level is `1 - level`.
 #' @param alternative `"two.sided"` (default), `"greater"` or `"less"`.
+#' @param null_model optional null model (a `pp_null` object or a function of
+#'   the result returning one), applied through [calibrate()].
 #' @param ... unused.
 #'
 #' @return A data frame of class `pp_test` with the columns described in
@@ -31,18 +33,20 @@ NULL
 #' @rdname test_providers_mixed
 #' @export
 test_providers.logistic_re <- function(fit, null = "median", providers = NULL, level = 0.95,
-                                       alternative = c("two.sided", "greater", "less"), ...) {
-  test_providers_mixed(fit, null, providers, level, match.arg(alternative))
+                                       alternative = c("two.sided", "greater", "less"),
+                                       null_model = NULL, ...) {
+  test_providers_mixed(fit, null, providers, level, match.arg(alternative), null_model)
 }
 
 #' @rdname test_providers_mixed
 #' @export
 test_providers.linear_re <- function(fit, null = "median", providers = NULL, level = 0.95,
-                                     alternative = c("two.sided", "greater", "less"), ...) {
-  test_providers_mixed(fit, null, providers, level, match.arg(alternative))
+                                     alternative = c("two.sided", "greater", "less"),
+                                       null_model = NULL, ...) {
+  test_providers_mixed(fit, null, providers, level, match.arg(alternative), null_model)
 }
 
-test_providers_mixed <- function(fit, null, providers, level, alternative) {
+test_providers_mixed <- function(fit, null, providers, level, alternative, null_model) {
   check_mixed(fit)
   check_level(level)
   alpha <- fit$coefficients$alpha
@@ -54,10 +58,13 @@ test_providers_mixed <- function(fit, null, providers, level, alternative) {
   stat[!is.finite(stat)] <- NA_real_
   decision <- z_decision(stat, level, alternative)
   limits <- wald_limits(alpha[idx], se, level, alternative)
-  pp_test_frame(levels[idx], alpha[idx], se, a0, stat, decision, limits$lower, limits$upper,
+  out <- pp_test_frame(levels[idx], alpha[idx], se, a0, stat, decision, limits$lower,
+                       limits$upper,
                 test = list(statistic = "wald", variance = "conditional", method = NA,
                             null = null, null_value = a0, level = level,
                             alternative = alternative),
                 sizes = data.frame(provider = levels[idx], rows = fit$rows[idx],
                                    patients = fit$sizes$patients[idx], stringsAsFactors = FALSE))
+  if (!is.null(null_model)) out <- calibrate(out, null_model)
+  out
 }

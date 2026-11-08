@@ -18,9 +18,10 @@ component; see `NEWS.md` for what exists today.
 | Models | `fit_logistic_fe()` (SerBIN/BAN, Firth), `fit_linear_fe()`, `fit_logistic_re()`, `fit_logistic_cre()`, `fit_linear_re()`, `fit_linear_cre()` |
 | Standardization | `standardize()` |
 | Tests | `test_providers()`, `test_covariates()`, `confint()`, `test_measure()` |
-| Reference distributions | (next) |
+| Reference distributions | `null_theoretical()`, `null_fixed()`, `null_empirical()`, `calibrate()` |
 | Selection | `select_lasso()`, `select_group_lasso()`, `cv_lasso()`, `cv_group_lasso()` |
-| Reliability, plots | (next) |
+| Reliability | `iur_direct()`, `iur_bootstrap()`, `iur_split_half()` |
+| Plots | (next) |
 
 ## Installation
 

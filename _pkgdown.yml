@@ -51,6 +51,18 @@ reference:
   - test_covariates.logistic_fe
   - test_covariates.linear_fe
   - test_covariates_mixed
+- title: Reference distributions
+  desc: Theoretical, fixed and empirical nulls, and calibration of a test with one.
+  contents:
+  - null_models
+  - assign_groups
+  - calibrate
+  - adjust_z
+- title: Reliability
+  contents:
+  - iur
+  - iur_curve
+  - iur_stratified
 - title: Variable selection
   desc: Penalized covariate selection with unpenalized provider effects.
   contents:

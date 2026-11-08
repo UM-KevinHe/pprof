@@ -29,6 +29,10 @@
 #' @param wald_variance for `statistic = "wald"` with the naive variance:
 #'   `"case_mix"` (default) or `"full"`, see [gamma_variance()].
 #' @param n_resample number of draws for `exact_method = "bootstrap"`.
+#' @param null_model optional null model: a `pp_null` object or a function
+#'   of the result returning one, for instance
+#'   `function(t) null_empirical(t, n_groups = 4)`; the result is then passed
+#'   through [calibrate()].
 #' @param ... unused.
 #'
 #' @details Row residuals \eqn{r_j = Y_j - N_j p_j} and variances
@@ -83,7 +87,7 @@ test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wal
                                        exact_method = c("poibin", "bootstrap"),
                                        score_type = c("modified", "restricted"),
                                        wald_variance = c("case_mix", "full"), n_resample = 10000,
-                                       ...) {
+                                       null_model = NULL, ...) {
   check_fit(fit)
   statistic <- match.arg(statistic)
   variance <- match.arg(variance)
@@ -203,6 +207,7 @@ test_providers.logistic_fe <- function(fit, statistic = c("exact", "score", "wal
   attr(out, "sizes") <- data.frame(provider = sel, rows = m$n_prov[idx],
                                    patients = fit$sizes$patients[idx], stringsAsFactors = FALSE)
   class(out) <- c("pp_test", "data.frame")
+  if (!is.null(null_model)) out <- calibrate(out, null_model)
   out
 }
 
