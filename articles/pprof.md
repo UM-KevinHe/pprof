@@ -36,24 +36,6 @@ them, or spares one that has.
     variation alone. A test decides whether the departure is more than
     chance; only a significant departure becomes a flag.
 
-Each step requires choices, and the defaults of general-purpose
-regression software fail at exactly the places that matter in profiling,
-silently: thousands of provider effects of wildly unequal size, which a
-pooled model drops (biased) and a random-effects model shrinks (the
-extremes are lost); two standardizations that answer different
-questions; a Wald test that cannot flag a provider whose outcomes are
-all identical; observations repeated within patients, so that the usual
-variance is too small; and a theoretical null that flags large providers
-for residual risk the claims data never measured. The articles on each
-step explain the failure and the choice that avoids it: [risk-adjustment
-models](https://um-kevinhe.github.io/pprof/articles/models.md),
-[standardized
-measures](https://um-kevinhe.github.io/pprof/articles/standardization.md),
-[tests of provider
-effects](https://um-kevinhe.github.io/pprof/articles/testing.md) and
-[reference
-distributions](https://um-kevinhe.github.io/pprof/articles/null.md).
-
 **pprof** builds measures from components, one per analysis step, with
 the choices as arguments. This page explains the concepts behind each
 step and runs one analysis from data to report.
@@ -83,15 +65,6 @@ And the number of observations per provider varies enormously, from a
 handful to thousands, so the question “is this provider different?” is
 asked with very different amounts of information from one provider to
 the next.
-
-### Observations are not independent
-
-A patient contributes many observations (months, discharges, periods),
-and those observations are correlated: a patient who is sicker than the
-risk factors say is sicker in every month. The package keeps track of
-the patient behind every row so that the tests can account for this
-correlation (the *robust* and *stabilized* variances of the testing
-step).
 
 ## The steps
 

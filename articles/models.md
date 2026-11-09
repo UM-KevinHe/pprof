@@ -185,21 +185,21 @@ re
 cre <- fit_logistic_cre(pd)
 summary(cre)
 #>               covariate   estimate         se  statistic            p
-#> (Intercept) (Intercept) -1.2762688 0.32942663 -3.8742127 1.069700e-04
-#> x1_within     x1_within  0.5076747 0.02962586 17.1361988 7.969324e-66
-#> x2_within     x2_within -0.4306189 0.05790826 -7.4362256 1.036948e-13
-#> x3_within     x3_within  0.2752906 0.02798701  9.8363682 7.849335e-23
-#> x1_between   x1_between  0.4545776 0.44587236  1.0195240 3.079543e-01
-#> x2_between   x2_between  0.1581450 0.81435872  0.1941958 8.460226e-01
-#> x3_between   x3_between -1.1958600 0.83841834 -1.4263286 1.537735e-01
+#> (Intercept) (Intercept) -1.2762688 0.32942294 -3.8742561 1.069509e-04
+#> x1_within     x1_within  0.5076747 0.02962586 17.1361990 7.969299e-66
+#> x2_within     x2_within -0.4306189 0.05790826 -7.4362249 1.036948e-13
+#> x3_within     x3_within  0.2752906 0.02798701  9.8363682 7.849328e-23
+#> x1_between   x1_between  0.4545776 0.44587189  1.0195250 3.079538e-01
+#> x2_between   x2_between  0.1581450 0.81434887  0.1941981 8.460208e-01
+#> x3_between   x3_between -1.1958600 0.83841751 -1.4263300 1.537731e-01
 #>                  lower      upper
-#> (Intercept) -1.9219331 -0.6306045
+#> (Intercept) -1.9219259 -0.6306117
 #> x1_within    0.4496091  0.5657403
 #> x2_within   -0.5441170 -0.3171208
 #> x3_within    0.2204370  0.3301441
-#> x1_between  -0.4193162  1.3284713
-#> x2_between  -1.4379688  1.7542588
-#> x3_between  -2.8391298  0.4474097
+#> x1_between  -0.4193153  1.3284704
+#> x2_between  -1.4379495  1.7542395
+#> x3_between  -2.8391281  0.4474081
 ```
 
 [`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md)

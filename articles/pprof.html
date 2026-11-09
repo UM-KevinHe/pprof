@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,16 +136,6 @@ arise by chance, and a small provider can depart widely through random
 variation alone. A test decides whether the departure is more than
 chance; only a significant departure becomes a flag.</li>
 </ol>
-<p>Each step requires choices, and the defaults of general-purpose
-regression software fail at exactly the places that matter in profiling,
-silently: thousands of provider effects of wildly unequal size, which a
-pooled model drops (biased) and a random-effects model shrinks (the
-extremes are lost); two standardizations that answer different
-questions; a Wald test that cannot flag a provider whose outcomes are
-all identical; observations repeated within patients, so that the usual
-variance is too small; and a theoretical null that flags large providers
-for residual risk the claims data never measured. The articles on each
-step explain the failure and the choice that avoids it: <a href="models.html">risk-adjustment models</a>, <a href="standardization.html">standardized measures</a>, <a href="testing.html">tests of provider effects</a> and <a href="null.html">reference distributions</a>.</p>
 <p><strong>pprof</strong> builds measures from components, one per
 analysis step, with the choices as arguments. This page explains the
 concepts behind each step and runs one analysis from data to report.</p>
@@ -179,16 +169,6 @@ And the number of observations per provider varies enormously, from a
 handful to thousands, so the question “is this provider different?” is
 asked with very different amounts of information from one provider to
 the next.</p>
-<div class="section level3">
-<h3 id="observations-are-not-independent">Observations are not independent<a class="anchor" aria-label="anchor" href="#observations-are-not-independent"></a>
-</h3>
-<p>A patient contributes many observations (months, discharges,
-periods), and those observations are correlated: a patient who is sicker
-than the risk factors say is sicker in every month. The package keeps
-track of the patient behind every row so that the tests can account for
-this correlation (the <em>robust</em> and <em>stabilized</em> variances
-of the testing step).</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="the-steps">The steps<a class="anchor" aria-label="anchor" href="#the-steps"></a>
