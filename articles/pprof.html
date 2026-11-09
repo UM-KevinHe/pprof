@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -408,27 +408,32 @@ tests; <code>coef(fit)</code> holds the provider effects
 <div class="section level3">
 <h3 id="test-the-provider-effects">4. Test the provider effects<a class="anchor" aria-label="anchor" href="#test-the-provider-effects"></a>
 </h3>
-<p>The Wald statistic with the patient-clustered (robust) variance,
-against the median provider; <code>statistic = "score"</code> gives the
-score test instead, which exists even for a provider whose outcomes are
-all the same:</p>
+<p>The score statistic with the patient-clustered (robust) variance,
+against the median provider:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"wald"</span>, variance <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">tst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"score"</span>, variance <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span></span>
 <span><span class="va">tst</span></span>
-<span><span class="co">#&gt; Provider tests: wald statistic, robust variance; null median = -1.046; two.sided, level 0.95</span></span>
-<span><span class="co">#&gt;   120 providers: 33 above, 28 below, 59 not different, 0 not tested</span></span>
-<span><span class="co">#&gt;  provider estimate     se null_value statistic         p flag  lower   upper</span></span>
-<span><span class="co">#&gt;      P001  -1.2381 0.1698     -1.046   -1.1302 2.584e-01    0 -1.571 -0.9052</span></span>
-<span><span class="co">#&gt;      P002  -1.9696 0.1839     -1.046   -5.0205 5.154e-07   -1 -2.330 -1.6091</span></span>
-<span><span class="co">#&gt;      P003  -1.4250 0.1690     -1.046   -2.2418 2.497e-02   -1 -1.756 -1.0938</span></span>
-<span><span class="co">#&gt;      P004  -1.4043 0.1668     -1.046   -2.1481 3.171e-02   -1 -1.731 -1.0775</span></span>
-<span><span class="co">#&gt;      P005  -0.9052 0.2567     -1.046    0.5489 5.831e-01    0 -1.408 -0.4021</span></span>
-<span><span class="co">#&gt;      P006  -1.2967 0.1630     -1.046   -1.5379 1.241e-01    0 -1.616 -0.9773</span></span>
+<span><span class="co">#&gt; Provider tests: score statistic, robust variance (modified); null median = -1.046; two.sided, level 0.95</span></span>
+<span><span class="co">#&gt;   120 providers: 29 above, 30 below, 61 not different, 0 not tested</span></span>
+<span><span class="co">#&gt;  provider estimate se null_value statistic         p flag lower upper observed</span></span>
+<span><span class="co">#&gt;      P001  -1.2381 NA     -1.046   -1.1748 2.401e-01    0    NA    NA       70</span></span>
+<span><span class="co">#&gt;      P002  -1.9696 NA     -1.046   -4.7327 2.216e-06   -1    NA    NA       36</span></span>
+<span><span class="co">#&gt;      P003  -1.4250 NA     -1.046   -2.4126 1.584e-02   -1    NA    NA       58</span></span>
+<span><span class="co">#&gt;      P004  -1.4043 NA     -1.046   -2.1870 2.874e-02   -1    NA    NA       76</span></span>
+<span><span class="co">#&gt;      P005  -0.9052 NA     -1.046    0.5358 5.921e-01    0    NA    NA       39</span></span>
+<span><span class="co">#&gt;      P006  -1.2967 NA     -1.046   -1.6307 1.029e-01    0    NA    NA       50</span></span>
+<span><span class="co">#&gt;  expected variance</span></span>
+<span><span class="co">#&gt;     80.27    76.41</span></span>
+<span><span class="co">#&gt;     76.89    74.63</span></span>
+<span><span class="co">#&gt;     77.23    63.56</span></span>
+<span><span class="co">#&gt;     98.82   108.88</span></span>
+<span><span class="co">#&gt;     35.50    42.57</span></span>
+<span><span class="co">#&gt;     60.25    39.53</span></span>
 <span><span class="co">#&gt;   ... 114 more rows</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">tst</span><span class="op">$</span><span class="va">flag</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -1  0  1 </span></span>
-<span><span class="co">#&gt; 28 59 33</span></span></code></pre></div>
+<span><span class="co">#&gt; 30 61 29</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="calibrate-with-an-empirical-null">5. Calibrate with an empirical null<a class="anchor" aria-label="anchor" href="#calibrate-with-an-empirical-null"></a>
@@ -442,21 +447,19 @@ size</em>:</p>
 <span><span class="va">en</span></span>
 <span><span class="co">#&gt; Empirical null: 4 group(s) by rank, huber estimator</span></span>
 <span><span class="co">#&gt;  group n_providers n_fitted min_size max_size null_mean null_sd converged</span></span>
-<span><span class="co">#&gt;      1          30       30       12       31    0.6672   2.165      TRUE</span></span>
-<span><span class="co">#&gt;      2          30       30       31       47   -0.4216   3.011      TRUE</span></span>
-<span><span class="co">#&gt;      3          30       30       47       64    1.3854   3.783      TRUE</span></span>
-<span><span class="co">#&gt;      4          30       30       64       80   -0.9628   2.886      TRUE</span></span>
+<span><span class="co">#&gt;      1          30       30       12       31    0.4493   1.864      TRUE</span></span>
+<span><span class="co">#&gt;      2          30       30       31       47   -0.4704   2.944      TRUE</span></span>
+<span><span class="co">#&gt;      3          30       30       47       64    0.9759   3.229      TRUE</span></span>
+<span><span class="co">#&gt;      4          30       30       64       80   -0.9959   2.858      TRUE</span></span>
 <span><span class="va">cal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/calibrate.html">calibrate</a></span><span class="op">(</span><span class="va">tst</span>, <span class="va">en</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span>theoretical <span class="op">=</span> <span class="va">tst</span><span class="op">$</span><span class="va">flag</span>, empirical <span class="op">=</span> <span class="va">cal</span><span class="op">$</span><span class="va">flag</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            empirical</span></span>
 <span><span class="co">#&gt; theoretical  0  1</span></span>
-<span><span class="co">#&gt;          -1 28  0</span></span>
-<span><span class="co">#&gt;          0  59  0</span></span>
-<span><span class="co">#&gt;          1  26  7</span></span></code></pre></div>
+<span><span class="co">#&gt;          -1 30  0</span></span>
+<span><span class="co">#&gt;          0  61  0</span></span>
+<span><span class="co">#&gt;          1  27  2</span></span></code></pre></div>
 <p>The same in one call:
-<code>test(fit, statistic = "wald", variance = "robust", null_model = "empirical")</code>.
-See <a href="null.html">Reference distributions</a> for the fitted null
-itself (<code>plot(en)</code>) and the choices it offers.</p>
+<code>test(fit, statistic = "score", variance = "robust", null_model = "empirical")</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="reliability">6. Reliability<a class="anchor" aria-label="anchor" href="#reliability"></a>
@@ -471,50 +474,53 @@ itself (<code>plot(en)</code>) and the choices it offers.</p>
 <div class="section level3">
 <h3 id="plots">7. Plots<a class="anchor" aria-label="anchor" href="#plots"></a>
 </h3>
-<p>Three views of the test of step 4: the provider effects in order with
-their confidence intervals, the funnel plot, and observed against
-expected events.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">tst</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cal</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/plots-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">tst</span>, type <span class="op">=</span> <span class="st">"funnel"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cal</span>, type <span class="op">=</span> <span class="st">"funnel"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/plots-2.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sm</span>, test <span class="op">=</span> <span class="va">tst</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sm</span>, test <span class="op">=</span> <span class="va">cal</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/plots-3.png" class="r-plt" alt="" width="672"></p>
-<p>The funnel plot draws the control limits of the test it shows, here
-<span class="math inline">\(\gamma_0 \pm c \cdot se\)</span> against the
-precision <span class="math inline">\(1 / se^2\)</span>, so a provider
-lies outside the limits exactly when it is flagged. The same calls draw
-a calibrated test (<code>plot(cal, type = "funnel")</code>, one set of
-limits per size group) and a score test (observed over expected events
-against <span class="math inline">\(E^2 / V\)</span>); see <a href="plots.html">Plots</a>.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">en</span><span class="op">)</span></span></code></pre></div>
+<p><img src="pprof_files/figure-html/plots-4.png" class="r-plt" alt="" width="672"></p>
+<p>The funnel plot draws the control limits of the test it shows, so a
+provider lies outside them exactly when it is flagged: for a Wald-type
+test on the precision <span class="math inline">\(1 / se^2\)</span> with
+limits <span class="math inline">\(\gamma_0 \pm c \cdot se\)</span>; for
+a score test on the precision <span class="math inline">\(E^2 /
+V\)</span>, with <span class="math inline">\(V\)</span> the variance the
+statistic was referred to, as observed over expected events with limits
+<span class="math inline">\(1 + (m \pm c\,
+s) / \sqrt{E^2 / V}\)</span>. A test calibrated with the empirical null
+gets one set of limits per size group, with that group’s location <span class="math inline">\(m\)</span> and scale <span class="math inline">\(s\)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="flags-under-the-alternatives">8. Flags under the alternatives<a class="anchor" aria-label="anchor" href="#flags-under-the-alternatives"></a>
 </h3>
 <p>A measure report states how the flags depend on the choices made.
 Collect the flags of several tests:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">st</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flag_stability.html">flag_stability</a></span><span class="op">(</span></span>
-<span>  wald_robust            <span class="op">=</span> <span class="va">tst</span>,</span>
-<span>  wald_robust_empirical  <span class="op">=</span> <span class="va">cal</span>,</span>
-<span>  score_robust           <span class="op">=</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"score"</span>, variance <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span>,</span>
-<span>  exact                  <span class="op">=</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  score            <span class="op">=</span> <span class="va">tst</span>,</span>
+<span>  score_empirical  <span class="op">=</span> <span class="va">cal</span>,</span>
+<span>  wald_robust      <span class="op">=</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"wald"</span>, variance <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span>,</span>
+<span>  exact            <span class="op">=</span> <span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">st</span></span>
-<span><span class="co">#&gt; Flags under 4 scenarios: 65 providers (7 flagged under every scenario)</span></span>
-<span><span class="co">#&gt;  provider wald_robust wald_robust_empirical score_robust exact n_flagged</span></span>
-<span><span class="co">#&gt;      P011           1                     1            1     1         4</span></span>
-<span><span class="co">#&gt;      P023           1                     1            1     1         4</span></span>
-<span><span class="co">#&gt;      P031           1                     1            1     1         4</span></span>
-<span><span class="co">#&gt;      P046           1                     1            1     1         4</span></span>
-<span><span class="co">#&gt;      P075           1                     1            1     1         4</span></span>
-<span><span class="co">#&gt;      P080           1                     1            1     1         4</span></span>
-<span><span class="co">#&gt;      P106           1                     1            1     1         4</span></span>
-<span><span class="co">#&gt;      P002          -1                     0           -1    -1         3</span></span>
-<span><span class="co">#&gt;      P003          -1                     0           -1    -1         3</span></span>
-<span><span class="co">#&gt;      P004          -1                     0           -1    -1         3</span></span>
+<span><span class="co">#&gt; Flags under 4 scenarios: 65 providers (2 flagged under every scenario)</span></span>
+<span><span class="co">#&gt;  provider score score_empirical wald_robust exact n_flagged</span></span>
+<span><span class="co">#&gt;      P023     1               1           1     1         4</span></span>
+<span><span class="co">#&gt;      P080     1               1           1     1         4</span></span>
+<span><span class="co">#&gt;      P002    -1               0          -1    -1         3</span></span>
+<span><span class="co">#&gt;      P003    -1               0          -1    -1         3</span></span>
+<span><span class="co">#&gt;      P004    -1               0          -1    -1         3</span></span>
+<span><span class="co">#&gt;      P007     1               0           1     1         3</span></span>
+<span><span class="co">#&gt;      P008    -1               0          -1    -1         3</span></span>
+<span><span class="co">#&gt;      P010     1               0           1     1         3</span></span>
+<span><span class="co">#&gt;      P011     1               0           1     1         3</span></span>
+<span><span class="co">#&gt;      P017    -1               0          -1    -1         3</span></span>
 <span><span class="co">#&gt;   ... 55 more rows</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">st</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/stability-1.png" class="r-plt" alt="" width="672"></p>
