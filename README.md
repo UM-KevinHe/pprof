@@ -6,15 +6,8 @@
 [![R ≥ 4.1](https://img.shields.io/badge/R-%E2%89%A5%204.1-276DC3?logo=r)](https://www.r-project.org/)
 <!-- badges: end -->
 
-**Provider profiling in R.** Risk adjustment with one effect per provider,
-standardized measures, hypothesis tests with the variance and the reference
-distribution the data call for, reliability, and the plots of a measure
-report. One function per analysis step, the same call for every outcome.
+**pprof** provides statistical methods for provider profiling, the comparison of health care providers on patient outcomes after adjustment for differences in case mix. The package implements each step of constructing a quality measure: Risk adjustment fits models with provider-specific fixed, random, or correlated random effects for binary, continuous, and time-to-event outcomes, with optional penalized selection of risk factors. Standardization computes indirectly and directly standardized ratios, rates, and differences. Inference tests each provider against a national norm using score and Wald statistics with model-based, robust, or stabilized variances, as well as exact and likelihood ratio tests, referred to either the theoretical null or an empirical null. The package also provides a comprehensive set of plots for provider profiling, including caterpillar and funnel plots, observed-versus-expected plots, the fitted reference distribution, reliability, and variable selection paths.
 
-<p align="center">
-  <img src="man/figures/readme-funnel.png" width="49%" alt="Funnel plot: standardized ratio against precision, with the limits of the test"/>
-  <img src="man/figures/readme-null.png" width="49%" alt="The empirical null by provider-size group against the theoretical N(0, 1)"/>
-</p>
 
 ## Installation
 
@@ -92,8 +85,8 @@ pp_data()                 data: declare the outcome, risk factors, provider and 
 ```
 
 <p align="center">
-  <img src="man/figures/readme-caterpillar.png" width="49%" alt="Caterpillar plot: provider effects in order, flagged providers in colour"/>
-  <img src="man/figures/readme-observed-expected.png" width="49%" alt="Observed against expected events per provider"/>
+  <img src="man/figures/readme-funnel.png" width="49%" alt="Funnel plot: standardized ratio against precision, with the limits of the test"/>
+  <img src="man/figures/readme-null.png" width="49%" alt="The empirical null by provider-size group against the theoretical N(0, 1)"/>
 </p>
 
 ## Learn more
