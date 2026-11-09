@@ -1,3 +1,18 @@
+# pprof 2.0.3
+
+* The funnel plot of a score test (`plot(test, type = "funnel")`) is drawn:
+  observed over expected events against the precision $E^2 / V$, with $V$
+  the variance the statistic was referred to (naive, robust or stabilized),
+  and the limits $1 + (m \pm c\, s) / \sqrt{E^2 / V}$ of its null (one set
+  per group after `calibrate()`), so that a provider lies outside the limits
+  exactly when it is flagged. `test()` results of the score and exact
+  statistics carry `observed`, `expected` and `variance` for it.
+* `plot(measure, type = "funnel", test = )` draws that test's funnel instead
+  of normal limits with the test's colours, which could show many providers
+  outside the limits and few flagged; a Wald-type test is refused there.
+* One-sided Wald funnels draw the limit on the flagged side.
+* README funnel figure redrawn with the test's own limits.
+
 # pprof 2.0.2
 
 * README and site home page shortened to the essentials, with the plots of the

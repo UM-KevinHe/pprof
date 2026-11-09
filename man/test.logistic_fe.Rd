@@ -71,8 +71,12 @@ A data frame of class \code{pp_test} with one row per tested provider:
 quantile of the mid-p, for \code{"lr"} the signed root of the chi-square
 statistic), \code{p}, \code{flag} (\code{1} above the null, \code{-1} below,
 \code{0} not different, \code{NA} not testable) and, for the Wald statistics,
-\code{lower} and \code{upper} limits for \eqn{\gamma_i}. Attributes \code{test} (the
-settings) and \code{sizes} (rows and patients per provider).
+\code{lower} and \code{upper} limits for \eqn{\gamma_i}. The score and exact
+statistics also carry \code{observed} (the provider's events), \code{expected}
+(under the null value) and \code{variance} (the variance the statistic is
+referred to; \code{NA} for the restricted score), which the funnel plot draws
+on. Attributes \code{test} (the settings) and \code{sizes} (rows and patients per
+provider).
 }
 \description{
 Tests \eqn{H_0: \gamma_i = \gamma_0} for every provider (or a subset) with

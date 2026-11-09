@@ -66,8 +66,12 @@
 #'   quantile of the mid-p, for `"lr"` the signed root of the chi-square
 #'   statistic), `p`, `flag` (`1` above the null, `-1` below,
 #'   `0` not different, `NA` not testable) and, for the Wald statistics,
-#'   `lower` and `upper` limits for \eqn{\gamma_i}. Attributes `test` (the
-#'   settings) and `sizes` (rows and patients per provider).
+#'   `lower` and `upper` limits for \eqn{\gamma_i}. The score and exact
+#'   statistics also carry `observed` (the provider's events), `expected`
+#'   (under the null value) and `variance` (the variance the statistic is
+#'   referred to; `NA` for the restricted score), which the funnel plot draws
+#'   on. Attributes `test` (the settings) and `sizes` (rows and patients per
+#'   provider).
 #'
 #' @references
 #' Wu W, Yang Y, Kang J, He K (2022). Improving large-scale estimation and
@@ -124,8 +128,12 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
   z <- rep(NA_real_, length(idx))
   lower <- upper <- rep(NA_real_, length(idx))
 
+  extra <- NULL
   if (statistic == "exact") {
     p0 <- stats::plogis(g0 + lp)
+    extra <- list(observed = as.numeric(rowsum(m$y, code, reorder = TRUE))[idx],
+                  expected = as.numeric(rowsum(m$n * p0, code, reorder = TRUE))[idx],
+                  variance = as.numeric(rowsum(m$n * p0 * (1 - p0), code, reorder = TRUE))[idx])
     rows_of <- split(seq_along(code), factor(code, levels = seq_along(m$levels)))[idx]
     res <- vapply(rows_of, function(r) {
       obs <- sum(m$y[r])
@@ -141,13 +149,17 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
   } else if (statistic == "score") {
     p0 <- stats::plogis(g0 + lp)
     r0 <- m$y - m$n * p0
+    obs_all <- as.numeric(rowsum(m$y, code, reorder = TRUE))
+    exp_all <- as.numeric(rowsum(m$n * p0, code, reorder = TRUE))
+    v0 <- as.numeric(rowsum(m$n * p0 * (1 - p0), code, reorder = TRUE))
     if (variance == "naive") {
       if (score_type == "modified") {
         u <- as.numeric(rowsum(r0, code, reorder = TRUE))
-        v0 <- as.numeric(rowsum(m$n * p0 * (1 - p0), code, reorder = TRUE))
         z <- (u / sqrt(v0))[idx]
+        v_all <- v0
       } else {
         z <- restricted_score(m$n, m$y, m$z, m$n_prov, gamma, beta, g0, idx)[idx]
+        v_all <- rep(NA_real_, length(m$levels))
       }
     } else {
       cl <- cluster_codes(m$prov, m$patient)
@@ -159,7 +171,9 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
         stabilized_variance(r0, m$n * p0 * (1 - p0), cl, prov_cl, length(m$levels))
       }
       z <- (s$U / sqrt(meat))[idx]
+      v_all <- as.numeric(meat)
     }
+    extra <- list(observed = obs_all[idx], expected = exp_all[idx], variance = v_all[idx])
     z[!is.finite(z)] <- NA_real_
     decision <- z_decision(z, level, alternative)
   } else if (statistic == "lr") {
@@ -195,6 +209,11 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
   out <- data.frame(provider = sel, estimate = unname(gamma[idx]), se = se, null_value = g0,
                     statistic = unname(z), p = decision$p, flag = decision$flag,
                     lower = unname(lower), upper = unname(upper), stringsAsFactors = FALSE)
+  if (!is.null(extra)) {
+    out$observed <- extra$observed
+    out$expected <- extra$expected
+    out$variance <- extra$variance
+  }
   attr(out, "test") <- list(statistic = statistic, variance = variance,
                             method = switch(statistic, exact = exact_method, score = score_type,
                                             wald = if (variance == "naive") wald_variance else NA,

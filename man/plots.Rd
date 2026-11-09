@@ -74,17 +74,24 @@ returned as ggplot objects to be printed, modified or saved:
 \item a \code{\link[=test]{test()}} result: \code{type = "caterpillar"} (every provider's estimate
 and interval in order of the estimate, coloured by flag),
 \code{"funnel"} (estimates against precision, with the control limits of
-the same test: on the precision axis \eqn{1 / se^2} for a test with
+the same test, so that a provider lies outside the limits exactly when
+it is flagged: on the precision axis \eqn{1 / se^2} for a test with
 standard errors, with limits \eqn{\theta_0 \pm c\, se}; on the
-expected-count axis for the Poisson tests of \code{\link[=test.cox]{test.cox()}}, with the
-counts the test flags at every expected count; one curve per group when
-the test was calibrated with an empirical null) or \code{"bar"} (the shares
-of providers flagged above, below and not different, by provider-size
-group);
+precision axis \eqn{E^2 / V} for a score test, the observed over
+expected events with limits \eqn{1 + (m \pm c\, s) / \sqrt{E^2 / V}}
+where \eqn{V} is the variance of that test (naive, robust or
+stabilized) and \eqn{(m, s)} its null; on the expected-count axis for
+the Poisson tests of \code{\link[=test.cox]{test.cox()}}, with the counts the test flags at
+every expected count; one curve per group when the test was calibrated
+with an empirical null) or \code{"bar"} (the shares of providers flagged
+above, below and not different, by provider-size group);
 \item a \code{\link[=standardize]{standardize()}} result: \code{type = "observed_expected"} (observed
-against expected with the diagonal) or \code{"funnel"} (the ratio against
-its precision \eqn{E^2 / V} with normal limits), coloured by the flags of
-a test when one is given;
+against expected with the diagonal, coloured by the flags of a test when
+one is given) or \code{"funnel"} (the ratio against its precision
+\eqn{E^2 / V}; without a test, the normal limits of the naive score
+statistic and no colours; with \verb{test =} a score test, that test's own
+funnel, so that the limits and the colours come from the same test. A
+Wald-type test is refused here: draw it with \code{plot(test, type = "funnel")});
 \item a \code{\link[=summary]{summary()}} result: a forest plot of the coefficients;
 \item an empirical \code{\link[=null_model]{null_model()}}: the statistics against the theoretical and
 the fitted null, one panel per group;

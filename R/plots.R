@@ -5,17 +5,25 @@
 #' * a [test()] result: `type = "caterpillar"` (every provider's estimate
 #'   and interval in order of the estimate, coloured by flag),
 #'   `"funnel"` (estimates against precision, with the control limits of
-#'   the same test: on the precision axis \eqn{1 / se^2} for a test with
+#'   the same test, so that a provider lies outside the limits exactly when
+#'   it is flagged: on the precision axis \eqn{1 / se^2} for a test with
 #'   standard errors, with limits \eqn{\theta_0 \pm c\, se}; on the
-#'   expected-count axis for the Poisson tests of [test.cox()], with the
-#'   counts the test flags at every expected count; one curve per group when
-#'   the test was calibrated with an empirical null) or `"bar"` (the shares
-#'   of providers flagged above, below and not different, by provider-size
-#'   group);
+#'   precision axis \eqn{E^2 / V} for a score test, the observed over
+#'   expected events with limits \eqn{1 + (m \pm c\, s) / \sqrt{E^2 / V}}
+#'   where \eqn{V} is the variance of that test (naive, robust or
+#'   stabilized) and \eqn{(m, s)} its null; on the expected-count axis for
+#'   the Poisson tests of [test.cox()], with the counts the test flags at
+#'   every expected count; one curve per group when the test was calibrated
+#'   with an empirical null) or `"bar"` (the shares of providers flagged
+#'   above, below and not different, by provider-size group);
 #' * a [standardize()] result: `type = "observed_expected"` (observed
-#'   against expected with the diagonal) or `"funnel"` (the ratio against
-#'   its precision \eqn{E^2 / V} with normal limits), coloured by the flags of
-#'   a test when one is given;
+#'   against expected with the diagonal, coloured by the flags of a test when
+#'   one is given) or `"funnel"` (the ratio against its precision
+#'   \eqn{E^2 / V}; without a test, the normal limits of the naive score
+#'   statistic and no colours; with `test =` a score test, that test's own
+#'   funnel, so that the limits and the colours come from the same test. A
+#'   Wald-type test is refused here: draw it with `plot(test, type =
+#'   "funnel")`);
 #' * a [summary()] result: a forest plot of the coefficients;
 #' * an empirical [null_model()]: the statistics against the theoretical and
 #'   the fitted null, one panel per group;
@@ -90,6 +98,14 @@ plot.pp_measure <- function(x, type = c("observed_expected", "funnel"), test = N
       ggplot2::labs(x = "Expected", y = "Observed", colour = NULL, shape = NULL) +
       theme_pp()
     return(label_points(p, d, highlight, "expected", "observed"))
+  }
+  if (!is.null(test)) {
+    if (!all(c("observed", "expected", "variance") %in% names(test)) ||
+          !identical(attr(test, "test")$statistic, "score")) {
+      stop("The limits of a funnel plot must come from the test that colours it: pass a score ",
+           "test, or draw a Wald-type test with plot(test, type = \"funnel\").", call. = FALSE)
+    }
+    return(funnel_plot_test(test, highlight, levels))
   }
   precision <- if ("variance_expected" %in% names(x) && any(is.finite(x$variance_expected))) {
     x$expected^2 / x$variance_expected
@@ -419,7 +435,44 @@ funnel_plot_test <- function(x, highlight, levels) {
     return(funnel_draw(d, "x", "estimate", null_value, curves, highlight, "Expected events",
                        "Observed / expected", log_scale = TRUE, facet = calibrated))
   }
+  if (identical(s$statistic, "score") && all(c("observed", "expected", "variance") %in% names(x))) {
+    return(funnel_score(x, d, highlight, levels))
+  }
   funnel_wald(x, d, highlight, levels, "Precision, 1 / se\u00b2", log_scale = FALSE)
+}
+
+# Funnel of a score test: observed over expected events against the precision
+# E^2 / V, with V the variance the statistic was referred to, so that the
+# limits 1 + (m +/- q s) / sqrt(E^2 / V) hold exactly the providers the test
+# flags (z = (O - E) / sqrt(V), referred to N(m, s^2)).
+funnel_score <- function(x, d, highlight, levels) {
+  s <- attr(x, "test")
+  ok <- is.finite(x$variance) & x$variance > 0 & is.finite(x$expected) & x$expected > 0
+  if (!any(ok)) {
+    stop("The funnel plot of a score test needs finite expected counts and variances ",
+         "(the restricted score test has none).", call. = FALSE)
+  }
+  calibrated <- "null_mean" %in% names(x)
+  d$estimate <- x$observed / x$expected
+  d$x <- x$expected^2 / x$variance
+  d <- d[ok, , drop = FALSE]
+  grid <- exp(seq(log(min(d$x)), log(max(d$x) * 1.05), length.out = 150))
+  groups <- if (calibrated) unique(x[ok, c("null_group", "null_mean", "null_sd")]) else
+    data.frame(null_group = NA_integer_, null_mean = 0, null_sd = 1)
+  curves <- do.call(rbind, lapply(seq_along(levels), function(k) {
+    l <- levels[k]
+    q <- if (k == 1 && !is.null(s$critical)) s$critical else normal_quantile(l, s$alternative)
+    do.call(rbind, lapply(seq_len(nrow(groups)), function(i) {
+      m <- groups$null_mean[i]
+      sd <- groups$null_sd[i]
+      data.frame(x = grid, lower = pmax(1 + (m - q * sd) / sqrt(grid), 0),
+                 upper = 1 + (m + q * sd) / sqrt(grid), level = l, group = groups$null_group[i])
+    }))
+  }))
+  if (s$alternative == "greater") curves$lower <- NA_real_
+  if (s$alternative == "less") curves$upper <- NA_real_
+  funnel_draw(d, "x", "estimate", 1, curves, highlight, "Precision, E\u00b2 / V",
+              "Observed / expected", facet = calibrated)
 }
 
 # Funnel of a test with standard errors: x = 1 / se^2 (or the observed
@@ -456,8 +509,8 @@ funnel_wald <- function(x, d, highlight, levels, x_label, log_scale) {
                  group = groups$null_group[i])
     }))
   }))
-  if (s$alternative == "greater") curves$upper <- NA_real_
-  if (s$alternative == "less") curves$lower <- NA_real_
+  if (s$alternative == "greater") curves$lower <- NA_real_
+  if (s$alternative == "less") curves$upper <- NA_real_
   funnel_draw(d, "x", "estimate", null_value, curves, highlight, x_label, estimate_label(x),
               log_scale = log_scale, facet = calibrated)
 }

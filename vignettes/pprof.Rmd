@@ -248,15 +248,18 @@ iur("bootstrap", obs = fit$data$y, expected = expected, provider = fit$data$prov
 
 ```{r plots}
 plot(cal)
-plot(sm, type = "funnel", test = cal)
+plot(cal, type = "funnel")
 plot(sm, test = cal)
 plot(en)
 ```
 
-(A funnel plot with the test's own limits, `plot(tst, type = "funnel")`,
-needs a test with standard errors, a Wald-type test; for a score test the
-funnel is drawn on the observed-over-expected scale from the standardized
-measure.)
+The funnel plot draws the control limits of the test it shows, so a provider
+lies outside them exactly when it is flagged: for a Wald-type test on the
+precision $1 / se^2$ with limits $\gamma_0 \pm c \cdot se$; for a score
+test on the precision $E^2 / V$, with $V$ the variance the statistic was
+referred to, as observed over expected events with limits $1 + (m \pm c\,
+s) / \sqrt{E^2 / V}$. A test calibrated with the empirical null gets one set
+of limits per size group, with that group's location $m$ and scale $s$.
 
 ### 8. Flags under the alternatives
 

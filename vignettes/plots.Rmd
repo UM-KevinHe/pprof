@@ -76,13 +76,16 @@ plot(tst, type = "bar")
 
 A `standardize()` result draws the observed total against the expected one
 with the diagonal; pass the test to colour the providers. `type =
-"funnel"` draws the ratio against its precision $E^2 / V$ with normal
-limits.
+"funnel"` draws the ratio against its precision $E^2 / V$: without a test,
+with the normal limits of the naive score statistic; with a score test, that
+test's own funnel, so that the limits and the colours come from the same
+test (a Wald-type test is drawn with `plot(test, type = "funnel")`, above).
 
 ```{r}
 sm <- standardize(fit)
 plot(sm, test = tst)
-plot(sm, type = "funnel", test = tst)
+plot(sm, type = "funnel")
+plot(sm, type = "funnel", test = test(fit, statistic = "score", variance = "robust"))
 ```
 
 ## Forest plot of the coefficients
