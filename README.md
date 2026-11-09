@@ -32,8 +32,7 @@ fit <- fit_logistic_fe(pd)                            # logistic model, one effe
 summary(fit)                                          # the risk-factor coefficients
 
 sm  <- standardize(fit, type = "indirect")            # observed / expected per provider
-tst <- test(fit, statistic = "score", variance = "robust",   # one test per provider,
-            null_model = "empirical")                 # calibrated by an empirical null
+tst <- test(fit, statistic = "score")                 # one score test per provider
 tst                                                   # flags: 1 above, -1 below, 0 not different
 
 plot(tst)                                             # caterpillar plot
@@ -85,8 +84,8 @@ pp_data()                 data: declare the outcome, risk factors, provider and 
 ```
 
 <p align="center">
-  <img src="man/figures/readme-funnel.png" width="49%" alt="Funnel plot: standardized ratio against precision, with the limits of the test"/>
-  <img src="man/figures/readme-null.png" width="49%" alt="The empirical null by provider-size group against the theoretical N(0, 1)"/>
+  <img src="man/figures/readme-funnel.png" width="49%" alt="Funnel plot: observed over expected events against precision, with the limits of the score test"/>
+  <img src="man/figures/readme-observed-expected.png" width="49%" alt="Observed against expected events per provider, coloured by the flags of the score test"/>
 </p>
 
 ## Learn more

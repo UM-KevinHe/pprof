@@ -2,7 +2,7 @@ Package: pprof
 Type: Package
 Title: Provider Profiling: Risk Adjustment, Standardized Measures, Hypothesis
     Tests and Reference Distributions
-Version: 2.0.3
+Version: 2.0.4
 Date: 2026-11-07
 Authors@R: c(
     person("Yubo", "Shao", email = "ybshao@umich.edu", role = c("aut", "cre")),

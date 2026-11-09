@@ -1,3 +1,8 @@
+# pprof 2.0.4
+
+* README: the ten-line example and its figures use the plain score test under the
+  theoretical null.
+
 # pprof 2.0.3
 
 * The funnel plot of a score test (`plot(test, type = "funnel")`) is drawn:
