@@ -210,11 +210,12 @@ head(direct)
 
 ### 4. Test the provider effects
 
-The score statistic with the patient-clustered (robust) variance, against
-the median provider:
+The Wald statistic with the patient-clustered (robust) variance, against
+the median provider; `statistic = "score"` gives the score test instead,
+which exists even for a provider whose outcomes are all the same:
 
 ```{r test}
-tst <- test(fit, statistic = "score", variance = "robust")
+tst <- test(fit, statistic = "wald", variance = "robust")
 tst
 table(tst$flag)
 ```
@@ -233,8 +234,9 @@ cal <- calibrate(tst, en)
 table(theoretical = tst$flag, empirical = cal$flag)
 ```
 
-The same in one call: `test(fit, statistic = "score", variance = "robust",
-null_model = "empirical")`.
+The same in one call: `test(fit, statistic = "wald", variance = "robust",
+null_model = "empirical")`. See [Reference distributions](null.html) for
+the fitted null itself (`plot(en)`) and the choices it offers.
 
 ### 6. Reliability
 
@@ -246,20 +248,21 @@ iur("bootstrap", obs = fit$data$y, expected = expected, provider = fit$data$prov
 
 ### 7. Plots
 
+Three views of the test of step 4: the provider effects in order with their
+confidence intervals, the funnel plot, and observed against expected events.
+
 ```{r plots}
-plot(cal)
-plot(cal, type = "funnel")
-plot(sm, test = cal)
-plot(en)
+plot(tst)
+plot(tst, type = "funnel")
+plot(sm, test = tst)
 ```
 
-The funnel plot draws the control limits of the test it shows, so a provider
-lies outside them exactly when it is flagged: for a Wald-type test on the
-precision $1 / se^2$ with limits $\gamma_0 \pm c \cdot se$; for a score
-test on the precision $E^2 / V$, with $V$ the variance the statistic was
-referred to, as observed over expected events with limits $1 + (m \pm c\,
-s) / \sqrt{E^2 / V}$. A test calibrated with the empirical null gets one set
-of limits per size group, with that group's location $m$ and scale $s$.
+The funnel plot draws the control limits of the test it shows, here
+$\gamma_0 \pm c \cdot se$ against the precision $1 / se^2$, so a provider
+lies outside the limits exactly when it is flagged. The same calls draw a
+calibrated test (`plot(cal, type = "funnel")`, one set of limits per size
+group) and a score test (observed over expected events against $E^2 / V$);
+see [Plots](plots.html).
 
 ### 8. Flags under the alternatives
 
@@ -268,10 +271,10 @@ the flags of several tests:
 
 ```{r stability}
 st <- flag_stability(
-  score            = tst,
-  score_empirical  = cal,
-  wald_robust      = test(fit, statistic = "wald", variance = "robust"),
-  exact            = test(fit, statistic = "exact"))
+  wald_robust            = tst,
+  wald_robust_empirical  = cal,
+  score_robust           = test(fit, statistic = "score", variance = "robust"),
+  exact                  = test(fit, statistic = "exact"))
 st
 plot(st)
 ```

@@ -1,3 +1,10 @@
+# pprof 2.0.5
+
+* Get started: the analysis tests with the robust Wald statistic, so the
+  caterpillar plot carries intervals; the plots section shows one plain test
+  (caterpillar, funnel, observed against expected) and the empirical-null
+  figure moves to the Reference distributions article.
+
 # pprof 2.0.4
 
 * README: the ten-line example and its figures use the plain score test under the
