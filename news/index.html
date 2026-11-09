@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,14 @@
       <small>Source: <a href="https://github.com/UM-KevinHe/pprof/blob/Yubo/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.5" id="pprof-205">pprof 2.0.5<a class="anchor" aria-label="anchor" href="#pprof-205"></a></h2>
+<ul><li>Get started: the analysis tests with the robust Wald statistic, so the caterpillar plot carries intervals; the plots section shows one plain test (caterpillar, funnel, observed against expected) and the empirical-null figure moves to the Reference distributions article.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.4" id="pprof-204">pprof 2.0.4<a class="anchor" aria-label="anchor" href="#pprof-204"></a></h2>
+<ul><li>README: the ten-line example and its figures use the plain score test under the theoretical null.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.3" id="pprof-203">pprof 2.0.3<a class="anchor" aria-label="anchor" href="#pprof-203"></a></h2>
 <ul><li>The funnel plot of a score test (<code>plot(test, type = "funnel")</code>) is drawn: observed over expected events against the precision <span class="math inline">\(E^2 / V\)</span>, with <span class="math inline">\(V\)</span> the variance the statistic was referred to (naive, robust or stabilized), and the limits <span class="math inline">\(1 + (m \pm c\, s) / \sqrt{E^2 / V}\)</span> of its null (one set per group after <code><a href="../reference/calibrate.html">calibrate()</a></code>), so that a provider lies outside the limits exactly when it is flagged. <code><a href="../reference/test.html">test()</a></code> results of the score and exact statistics carry <code>observed</code>, <code>expected</code> and <code>variance</code> for it.</li>
