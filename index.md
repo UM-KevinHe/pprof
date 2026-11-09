@@ -1,15 +1,20 @@
 # pprof
 
-**Provider profiling in R.** Risk adjustment with one effect per
-provider, standardized measures, hypothesis tests with the variance and
-the reference distribution the data call for, reliability, and the plots
-of a measure report. One function per analysis step, the same call for
-every outcome.
-
-![Funnel plot: standardized ratio against precision, with the limits of
-the test](reference/figures/readme-funnel.png)![The empirical null by
-provider-size group against the theoretical N(0,
-1)](reference/figures/readme-null.png)
+**pprof** provides statistical methods for provider profiling, the
+comparison of health care providers on patient outcomes after adjustment
+for differences in case mix. The package implements each step of
+constructing a quality measure: Risk adjustment fits models with
+provider-specific fixed, random, or correlated random effects for
+binary, continuous, and time-to-event outcomes, with optional penalized
+selection of risk factors. Standardization computes indirectly and
+directly standardized ratios, rates, and differences. Inference tests
+each provider against a national norm using score and Wald statistics
+with model-based, robust, or stabilized variances, as well as exact and
+likelihood ratio tests, referred to either the theoretical null or an
+empirical null. The package also provides a comprehensive set of plots
+for provider profiling, including caterpillar and funnel plots,
+observed-versus-expected plots, the fitted reference distribution,
+reliability, and variable selection paths.
 
 ## Installation
 
@@ -86,10 +91,10 @@ variant, and a measure is the chain of these steps.
         │                     forest of the coefficients; the fitted null; reliability; selection path and cv
         └── flag_stability()  the flags under alternative choices
 
-![Caterpillar plot: provider effects in order, flagged providers in
-colour](reference/figures/readme-caterpillar.png)![Observed against
-expected events per
-provider](reference/figures/readme-observed-expected.png)
+![Funnel plot: standardized ratio against precision, with the limits of
+the test](reference/figures/readme-funnel.png)![The empirical null by
+provider-size group against the theoretical N(0,
+1)](reference/figures/readme-null.png)
 
 ## Learn more
 
