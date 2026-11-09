@@ -21,6 +21,7 @@ test(
   wald_variance = c("case_mix", "full"),
   n_resample = 10000,
   null_model = NULL,
+  interval = TRUE,
   ...
 )
 ```
@@ -96,6 +97,13 @@ test(
   then passed through
   [`calibrate()`](https://um-kevinhe.github.io/pprof/reference/calibrate.md).
 
+- interval:
+
+  for the score statistics, compute the confidence limits of
+  \\\gamma_i\\ by inverting the test (default `TRUE`; `FALSE` saves the
+  root finding on very large data). The Wald statistics always carry
+  their limits.
+
 - ...:
 
   unused.
@@ -107,12 +115,13 @@ A data frame of class `pp_test` with one row per tested provider:
 `null_value`, `statistic` (a z statistic; for the exact test the normal
 quantile of the mid-p, for `"lr"` the signed root of the chi-square
 statistic), `p`, `flag` (`1` above the null, `-1` below, `0` not
-different, `NA` not testable) and, for the Wald statistics, `lower` and
-`upper` limits for \\\gamma_i\\. The score and exact statistics also
-carry `observed` (the provider's events), `expected` (under the null
-value) and `variance` (the variance the statistic is referred to; `NA`
-for the restricted score), which the funnel plot draws on. Attributes
-`test` (the settings) and `sizes` (rows and patients per provider).
+different, `NA` not testable) and, for the Wald and (with
+`interval = TRUE`) the modified score statistics, `lower` and `upper`
+limits for \\\gamma_i\\. The score and exact statistics also carry
+`observed` (the provider's events), `expected` (under the null value)
+and `variance` (the variance the statistic is referred to; `NA` for the
+restricted score), which the funnel plot draws on. Attributes `test`
+(the settings) and `sizes` (rows and patients per provider).
 
 ## Details
 
@@ -149,6 +158,19 @@ data, so sort by time within patient before
 [`pp_data()`](https://um-kevinhe.github.io/pprof/reference/pp_data.md).
 A patient with more than 5,000 rows stops the stabilized statistics.
 
+The limits of a score statistic invert the test: with \\z_i(g)\\ the
+statistic at the null value \\g\\ (the same residuals and variance,
+naive, robust or stabilized, evaluated at \\g\\; the correlation matrix
+of the stabilized variance is held at the test's null), the interval is
+the set of \\g\\ with \\-c \le z_i(g) \le c\\, so it excludes the null
+value exactly when the provider is flagged. A provider with no events
+has no finite lower limit, one with all events no finite upper limit,
+and a patient-clustered statistic, which is bounded by the square root
+of the number of events (non-events), can leave a limit infinite for a
+provider with very few of them.
+[`calibrate()`](https://um-kevinhe.github.io/pprof/reference/calibrate.md)
+inverts the calibrated statistic the same way.
+
 ## References
 
 Wu W, Yang Y, Kang J, He K (2022). Improving large-scale estimation and
@@ -165,19 +187,19 @@ fit <- fit_logistic_fe(pd)
 test(fit, statistic = "score", variance = "robust")
 #> Provider tests: score statistic, robust variance (modified); null median = -1.08; two.sided, level 0.95
 #>   20 providers: 5 above, 3 below, 12 not different, 0 not tested
-#>  provider  estimate se null_value statistic         p flag lower upper observed
-#>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0    NA    NA       11
-#>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1    NA    NA       31
-#>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1    NA    NA       21
-#>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1    NA    NA       63
-#>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0    NA    NA       34
-#>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0    NA    NA       42
-#>  expected variance
-#>     16.05    7.982
-#>     43.30   26.392
-#>     11.12   18.268
-#>     38.55   43.259
-#>     30.80   23.271
-#>     51.42   38.770
+#>  provider  estimate se null_value statistic         p flag   lower   upper
+#>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0 -2.5245 -1.0209
+#>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1 -1.9638 -1.1647
+#>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1 -0.8075  0.7553
+#>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1 -0.6257  0.0210
+#>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0 -1.4430 -0.5364
+#>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0 -1.8155 -0.9975
+#>  observed expected variance
+#>        11    16.05    7.982
+#>        31    43.30   26.392
+#>        21    11.12   18.268
+#>        63    38.55   43.259
+#>        34    30.80   23.271
+#>        42    51.42   38.770
 #>   ... 14 more rows
 ```

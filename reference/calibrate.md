@@ -66,6 +66,15 @@ on the ratio scale, the mid-p limits by root finding); the settings are
 recorded in the `test` attribute. The exact Poisson test cannot be
 calibrated.
 
+## Details
+
+For a Wald-type test the limits are \\\hat\theta - (\mathrm{null\\mean}
+\pm c\\ \mathrm{null\\sd})\\ se\\; for a modified score test of
+[`test.logistic_fe()`](https://um-kevinhe.github.io/pprof/reference/test.logistic_fe.md)
+they invert the calibrated statistic (the set of null values at which
+the adjusted statistic lies within \\\pm c\\), for a mid-p test the
+calibrated mid-p rule; the exact Poisson test cannot be calibrated.
+
 ## Examples
 
 ``` r

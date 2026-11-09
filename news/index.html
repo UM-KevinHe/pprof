@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,10 @@
       <small>Source: <a href="https://github.com/UM-KevinHe/pprof/blob/Yubo/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.6" id="pprof-206">pprof 2.0.6<a class="anchor" aria-label="anchor" href="#pprof-206"></a></h2>
+<ul><li>Score tests carry confidence limits: <code><a href="../reference/test.html">test()</a></code> inverts the modified score statistic (naive, robust or stabilized variance) for every provider, so the interval excludes the null value exactly when the provider is flagged, and the caterpillar plot of a score test shows intervals. <code><a href="../reference/calibrate.html">calibrate()</a></code> inverts the calibrated statistic the same way. <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> gains <code>type = "robust_score"</code> and <code>"stabilized_score"</code>. <code>interval = FALSE</code> in <code><a href="../reference/test.html">test()</a></code> skips the root finding.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.5" id="pprof-205">pprof 2.0.5<a class="anchor" aria-label="anchor" href="#pprof-205"></a></h2>
 <ul><li>Get started: the analysis tests with the robust Wald statistic, so the caterpillar plot carries intervals; the plots section shows one plain test (caterpillar, funnel, observed against expected) and the empirical-null figure moves to the Reference distributions article.</li>

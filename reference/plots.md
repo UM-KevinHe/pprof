@@ -6,15 +6,17 @@ objects to be printed, modified or saved:
 
 - a [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md)
   result: `type = "caterpillar"` (every provider's estimate and interval
-  in order of the estimate, coloured by flag), `"funnel"` (estimates
-  against precision, with the control limits of the same test, so that a
-  provider lies outside the limits exactly when it is flagged: on the
-  precision axis \\1 / se^2\\ for a test with standard errors, with
-  limits \\\theta_0 \pm c\\ se\\; on the precision axis \\E^2 / V\\ for
-  a score test, the observed over expected events with limits \\1 + (m
-  \pm c\\ s) / \sqrt{E^2 / V}\\ where \\V\\ is the variance of that test
-  (naive, robust or stabilized) and \\(m, s)\\ its null; on the
-  expected-count axis for the Poisson tests of
+  in order of the estimate, coloured by flag; a score test's intervals
+  invert the test, see
+  [`test.logistic_fe()`](https://um-kevinhe.github.io/pprof/reference/test.logistic_fe.md)),
+  `"funnel"` (estimates against precision, with the control limits of
+  the same test, so that a provider lies outside the limits exactly when
+  it is flagged: on the precision axis \\1 / se^2\\ for a test with
+  standard errors, with limits \\\theta_0 \pm c\\ se\\; on the precision
+  axis \\E^2 / V\\ for a score test, the observed over expected events
+  with limits \\1 + (m \pm c\\ s) / \sqrt{E^2 / V}\\ where \\V\\ is the
+  variance of that test (naive, robust or stabilized) and \\(m, s)\\ its
+  null; on the expected-count axis for the Poisson tests of
   [`test.cox()`](https://um-kevinhe.github.io/pprof/reference/test.cox.md),
   with the counts the test flags at every expected count; one curve per
   group when the test was calibrated with an empirical null) or `"bar"`

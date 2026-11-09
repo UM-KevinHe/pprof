@@ -1,9 +1,10 @@
 # Confidence intervals for the provider effects of a logistic fixed-effect fit
 
 Intervals for \\\gamma_i\\ obtained by inverting a test: the exact
-Poisson-binomial test, the score test with \\\hat\beta\\ held fixed, or
-a Wald test with the naive or patient-clustered standard error.
-Intervals for standardized measures are produced by
+Poisson-binomial test, the score test with \\\hat\beta\\ held fixed
+(naive, robust or stabilized variance), or a Wald test with the naive or
+patient-clustered standard error. Intervals for standardized measures
+are produced by
 [`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md),
 which maps these limits through the standardization.
 
@@ -15,7 +16,7 @@ confint(
   object,
   parm = NULL,
   level = 0.95,
-  type = c("exact", "score", "wald", "robust_wald"),
+  type = c("exact", "score", "robust_score", "stabilized_score", "wald", "robust_wald"),
   wald_variance = c("case_mix", "full"),
   alternative = c("two.sided", "greater", "less"),
   ...
@@ -39,7 +40,8 @@ confint(
 
 - type:
 
-  `"exact"` (default), `"score"`, `"wald"` or `"robust_wald"`.
+  `"exact"` (default), `"score"`, `"robust_score"`,
+  `"stabilized_score"`, `"wald"` or `"robust_wald"`.
 
 - wald_variance:
 
@@ -62,9 +64,14 @@ A data frame with `provider`, `estimate`, `lower`, `upper`.
 ## Details
 
 Providers with no events have no finite lower limit and providers with
-all events no finite upper limit; their finite limit is one-sided at
-level `1 - level`. The exact inversion works on the individual Bernoulli
-trials and is slow for providers with very many trials.
+all events no finite upper limit; for `"exact"` and `"score"` their
+finite limit is one-sided at level `1 - level` (the convention of pprof
+1.0), while `"robust_score"` and `"stabilized_score"` (and the limits
+that [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md)
+attaches to its score statistics) use the two-sided threshold
+throughout, so that a limit excludes the null value exactly when the
+provider is flagged. The exact inversion works on the individual
+Bernoulli trials and is slow for providers with very many trials.
 
 ## Examples
 

@@ -55,20 +55,20 @@ tst <- test(fit, statistic = "score", variance = "stabilized")
 tst
 #> Provider tests: score statistic, stabilized variance (modified); null median = -0.9478; two.sided, level 0.95
 #>   80 providers: 15 above, 20 below, 45 not different, 0 not tested
-#>  provider estimate se null_value statistic         p flag lower upper observed
-#>      P001  -0.3947 NA    -0.9478    1.7121 8.687e-02    0    NA    NA       21
-#>      P002  -0.1281 NA    -0.9478    4.3560 1.325e-05    1    NA    NA       71
-#>      P003  -0.3444 NA    -0.9478    2.6875 7.198e-03    1    NA    NA       46
-#>      P004  -0.6544 NA    -0.9478    1.4487 1.474e-01    0    NA    NA       57
-#>      P005  -1.0141 NA    -0.9478   -0.3859 6.996e-01    0    NA    NA       72
-#>      P006  -0.6903 NA    -0.9478    0.8584 3.907e-01    0    NA    NA       24
-#>  expected variance
-#>     14.77    13.22
-#>     42.78    41.96
-#>     31.15    30.54
-#>     47.31    44.75
-#>     75.24    70.42
-#>     20.20    19.60
+#>  provider estimate se null_value statistic         p flag   lower    upper
+#>      P001  -0.3947 NA    -0.9478    1.7121 8.687e-02    0 -1.0259  0.23538
+#>      P002  -0.1281 NA    -0.9478    4.3560 1.325e-05    1 -0.5043  0.24907
+#>      P003  -0.3444 NA    -0.9478    2.6875 7.198e-03    1 -0.7872  0.09848
+#>      P004  -0.6544 NA    -0.9478    1.4487 1.474e-01    0 -1.0504 -0.25860
+#>      P005  -1.0141 NA    -0.9478   -0.3859 6.996e-01    0 -1.3498 -0.67883
+#>      P006  -0.6903 NA    -0.9478    0.8584 3.907e-01    0 -1.2709 -0.10408
+#>  observed expected variance
+#>        21    14.77    13.22
+#>        71    42.78    41.96
+#>        46    31.15    30.54
+#>        57    47.31    44.75
+#>        72    75.24    70.42
+#>        24    20.20    19.60
 #>   ... 74 more rows
 ```
 

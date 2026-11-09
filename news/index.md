@@ -1,5 +1,20 @@
 # Changelog
 
+## pprof 2.0.6
+
+- Score tests carry confidence limits:
+  [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md)
+  inverts the modified score statistic (naive, robust or stabilized
+  variance) for every provider, so the interval excludes the null value
+  exactly when the provider is flagged, and the caterpillar plot of a
+  score test shows intervals.
+  [`calibrate()`](https://um-kevinhe.github.io/pprof/reference/calibrate.md)
+  inverts the calibrated statistic the same way.
+  [`confint()`](https://rdrr.io/r/stats/confint.html) gains
+  `type = "robust_score"` and `"stabilized_score"`. `interval = FALSE`
+  in [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md)
+  skips the root finding.
+
 ## pprof 2.0.5
 
 - Get started: the analysis tests with the robust Wald statistic, so the

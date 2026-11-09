@@ -17,7 +17,7 @@ the null value."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,6 +89,7 @@ the null value.</p>
 <span>  wald_variance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_mix"</span>, <span class="st">"full"</span><span class="op">)</span>,</span>
 <span>  n_resample <span class="op">=</span> <span class="fl">10000</span>,</span>
 <span>  null_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  interval <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -162,6 +163,13 @@ of the result returning one, for instance
 through <code><a href="calibrate.html">calibrate()</a></code>.</p></dd>
 
 
+<dt id="arg-interval">interval<a class="anchor" aria-label="anchor" href="#arg-interval"></a></dt>
+<dd><p>for the score statistics, compute the confidence limits of
+\(\gamma_i\) by inverting the test (default <code>TRUE</code>; <code>FALSE</code> saves the
+root finding on very large data). The Wald statistics always carry
+their limits.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>unused.</p></dd>
 
@@ -173,8 +181,9 @@ through <code><a href="calibrate.html">calibrate()</a></code>.</p></dd>
 <code>null_value</code>, <code>statistic</code> (a z statistic; for the exact test the normal
 quantile of the mid-p, for <code>"lr"</code> the signed root of the chi-square
 statistic), <code>p</code>, <code>flag</code> (<code>1</code> above the null, <code>-1</code> below,
-<code>0</code> not different, <code>NA</code> not testable) and, for the Wald statistics,
-<code>lower</code> and <code>upper</code> limits for \(\gamma_i\). The score and exact
+<code>0</code> not different, <code>NA</code> not testable) and, for the Wald and (with
+<code>interval = TRUE</code>) the modified score statistics, <code>lower</code> and <code>upper</code>
+limits for \(\gamma_i\). The score and exact
 statistics also carry <code>observed</code> (the provider's events), <code>expected</code>
 (under the null value) and <code>variance</code> (the variance the statistic is
 referred to; <code>NA</code> for the restricted score), which the funnel plot draws
@@ -205,6 +214,17 @@ square root, so that two-sided p-values equal the chi-square tail.</p></li>
 </ul><p>The stabilized statistics take a patient's rows in their order in the
 data, so sort by time within patient before <code><a href="pp_data.html">pp_data()</a></code>. A patient with
 more than 5,000 rows stops the stabilized statistics.</p>
+<p>The limits of a score statistic invert the test: with \(z_i(g)\) the
+statistic at the null value \(g\) (the same residuals and variance,
+naive, robust or stabilized, evaluated at \(g\); the correlation matrix
+of the stabilized variance is held at the test's null), the interval is the
+set of \(g\) with \(-c \le z_i(g) \le c\), so it excludes the null
+value exactly when the provider is flagged. A provider with no events has
+no finite lower limit, one with all events no finite upper limit, and a
+patient-clustered statistic, which is bounded by the square root of the
+number of events (non-events), can leave a limit infinite for a provider
+with very few of them. <code><a href="calibrate.html">calibrate()</a></code> inverts the calibrated statistic the
+same way.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -222,20 +242,20 @@ inference for profiling health care providers. <em>Statistics in Medicine</em>,
 <span class="r-in"><span><span class="fu"><a href="test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"score"</span>, variance <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Provider tests: score statistic, robust variance (modified); null median = -1.08; two.sided, level 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   20 providers: 5 above, 3 below, 12 not different, 0 not tested</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  provider  estimate se null_value statistic         p flag lower upper observed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0    NA    NA       11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1    NA    NA       31</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1    NA    NA       21</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1    NA    NA       63</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0    NA    NA       34</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0    NA    NA       42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  expected variance</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     16.05    7.982</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     43.30   26.392</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     11.12   18.268</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     38.55   43.259</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     30.80   23.271</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     51.42   38.770</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  provider  estimate se null_value statistic         p flag   lower   upper</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0 -2.5245 -1.0209</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1 -1.9638 -1.1647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1 -0.8075  0.7553</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1 -0.6257  0.0210</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0 -1.4430 -0.5364</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0 -1.8155 -0.9975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  observed expected variance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        11    16.05    7.982</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        31    43.30   26.392</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        21    11.12   18.268</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        63    38.55   43.259</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        34    30.80   23.271</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        42    51.42   38.770</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ... 14 more rows</span>
 </code></pre></div>
     </div>

@@ -25,7 +25,7 @@ flagged."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,6 +137,15 @@ and <code>lower</code>/<code>upper</code> recomputed where a standard error is a
 log-ratio Wald and mid-p tests of <code><a href="test.cox.html">test.cox()</a></code> on the ratio
 scale, the mid-p limits by root finding); the settings are recorded in
 the <code>test</code> attribute. The exact Poisson test cannot be calibrated.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For a Wald-type test the limits are
+\(\hat\theta - (\mathrm{null\_mean} \pm c\, \mathrm{null\_sd})\, se\); for a
+modified score test of <code><a href="test.logistic_fe.html">test.logistic_fe()</a></code> they invert the calibrated
+statistic (the set of null values at which the adjusted statistic lies
+within \(\pm c\)), for a mid-p test the calibrated mid-p rule; the exact
+Poisson test cannot be calibrated.</p>
     </div>
 
     <div class="section level2">
