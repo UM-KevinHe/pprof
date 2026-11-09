@@ -1,3 +1,8 @@
+# pprof 2.0.7
+
+* Get started shortened: the paragraph on the failures of general-purpose
+  software and the section on correlated observations removed.
+
 # pprof 2.0.6
 
 * Score tests carry confidence limits: `test()` inverts the modified score
