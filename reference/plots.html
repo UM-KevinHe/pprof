@@ -10,17 +10,24 @@ returned as ggplot objects to be printed, modified or saved:
 a test() result: type = &quot;caterpillar&quot; (every provider's estimate
 and interval in order of the estimate, coloured by flag),
 &quot;funnel&quot; (estimates against precision, with the control limits of
-the same test: on the precision axis \(1 / se^2\) for a test with
+the same test, so that a provider lies outside the limits exactly when
+it is flagged: on the precision axis \(1 / se^2\) for a test with
 standard errors, with limits \(\theta_0 \pm c\, se\); on the
-expected-count axis for the Poisson tests of test.cox(), with the
-counts the test flags at every expected count; one curve per group when
-the test was calibrated with an empirical null) or &quot;bar&quot; (the shares
-of providers flagged above, below and not different, by provider-size
-group);
+precision axis \(E^2 / V\) for a score test, the observed over
+expected events with limits \(1 + (m \pm c\, s) / \sqrt{E^2 / V}\)
+where \(V\) is the variance of that test (naive, robust or
+stabilized) and \((m, s)\) its null; on the expected-count axis for
+the Poisson tests of test.cox(), with the counts the test flags at
+every expected count; one curve per group when the test was calibrated
+with an empirical null) or &quot;bar&quot; (the shares of providers flagged
+above, below and not different, by provider-size group);
 a standardize() result: type = &quot;observed_expected&quot; (observed
-against expected with the diagonal) or &quot;funnel&quot; (the ratio against
-its precision \(E^2 / V\) with normal limits), coloured by the flags of
-a test when one is given;
+against expected with the diagonal, coloured by the flags of a test when
+one is given) or &quot;funnel&quot; (the ratio against its precision
+\(E^2 / V\); without a test, the normal limits of the naive score
+statistic and no colours; with test = a score test, that test's own
+funnel, so that the limits and the colours come from the same test. A
+Wald-type test is refused here: draw it with plot(test, type = &quot;funnel&quot;));
 a summary() result: a forest plot of the coefficients;
 an empirical null_model(): the statistics against the theoretical and
 the fitted null, one panel per group;
@@ -33,17 +40,24 @@ returned as ggplot objects to be printed, modified or saved:
 a test() result: type = &quot;caterpillar&quot; (every provider's estimate
 and interval in order of the estimate, coloured by flag),
 &quot;funnel&quot; (estimates against precision, with the control limits of
-the same test: on the precision axis \(1 / se^2\) for a test with
+the same test, so that a provider lies outside the limits exactly when
+it is flagged: on the precision axis \(1 / se^2\) for a test with
 standard errors, with limits \(\theta_0 \pm c\, se\); on the
-expected-count axis for the Poisson tests of test.cox(), with the
-counts the test flags at every expected count; one curve per group when
-the test was calibrated with an empirical null) or &quot;bar&quot; (the shares
-of providers flagged above, below and not different, by provider-size
-group);
+precision axis \(E^2 / V\) for a score test, the observed over
+expected events with limits \(1 + (m \pm c\, s) / \sqrt{E^2 / V}\)
+where \(V\) is the variance of that test (naive, robust or
+stabilized) and \((m, s)\) its null; on the expected-count axis for
+the Poisson tests of test.cox(), with the counts the test flags at
+every expected count; one curve per group when the test was calibrated
+with an empirical null) or &quot;bar&quot; (the shares of providers flagged
+above, below and not different, by provider-size group);
 a standardize() result: type = &quot;observed_expected&quot; (observed
-against expected with the diagonal) or &quot;funnel&quot; (the ratio against
-its precision \(E^2 / V\) with normal limits), coloured by the flags of
-a test when one is given;
+against expected with the diagonal, coloured by the flags of a test when
+one is given) or &quot;funnel&quot; (the ratio against its precision
+\(E^2 / V\); without a test, the normal limits of the naive score
+statistic and no colours; with test = a score test, that test's own
+funnel, so that the limits and the colours come from the same test. A
+Wald-type test is refused here: draw it with plot(test, type = &quot;funnel&quot;));
 a summary() result: a forest plot of the coefficients;
 an empirical null_model(): the statistics against the theoretical and
 the fitted null, one panel per group;
@@ -59,7 +73,7 @@ cross-validation curve.
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,17 +128,24 @@ cross-validation curve.
 returned as ggplot objects to be printed, modified or saved:</p><ul><li><p>a <code><a href="test.html">test()</a></code> result: <code>type = "caterpillar"</code> (every provider's estimate
 and interval in order of the estimate, coloured by flag),
 <code>"funnel"</code> (estimates against precision, with the control limits of
-the same test: on the precision axis \(1 / se^2\) for a test with
+the same test, so that a provider lies outside the limits exactly when
+it is flagged: on the precision axis \(1 / se^2\) for a test with
 standard errors, with limits \(\theta_0 \pm c\, se\); on the
-expected-count axis for the Poisson tests of <code><a href="test.cox.html">test.cox()</a></code>, with the
-counts the test flags at every expected count; one curve per group when
-the test was calibrated with an empirical null) or <code>"bar"</code> (the shares
-of providers flagged above, below and not different, by provider-size
-group);</p></li>
+precision axis \(E^2 / V\) for a score test, the observed over
+expected events with limits \(1 + (m \pm c\, s) / \sqrt{E^2 / V}\)
+where \(V\) is the variance of that test (naive, robust or
+stabilized) and \((m, s)\) its null; on the expected-count axis for
+the Poisson tests of <code><a href="test.cox.html">test.cox()</a></code>, with the counts the test flags at
+every expected count; one curve per group when the test was calibrated
+with an empirical null) or <code>"bar"</code> (the shares of providers flagged
+above, below and not different, by provider-size group);</p></li>
 <li><p>a <code><a href="standardize.html">standardize()</a></code> result: <code>type = "observed_expected"</code> (observed
-against expected with the diagonal) or <code>"funnel"</code> (the ratio against
-its precision \(E^2 / V\) with normal limits), coloured by the flags of
-a test when one is given;</p></li>
+against expected with the diagonal, coloured by the flags of a test when
+one is given) or <code>"funnel"</code> (the ratio against its precision
+\(E^2 / V\); without a test, the normal limits of the naive score
+statistic and no colours; with <code>test =</code> a score test, that test's own
+funnel, so that the limits and the colours come from the same test. A
+Wald-type test is refused here: draw it with <code>plot(test, type = "funnel")</code>);</p></li>
 <li><p>a <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> result: a forest plot of the coefficients;</p></li>
 <li><p>an empirical <code><a href="null_models.html">null_model()</a></code>: the statistics against the theoretical and
 the fitted null, one panel per group;</p></li>

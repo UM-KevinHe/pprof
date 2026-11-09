@@ -258,13 +258,20 @@ tst <- test(fit, statistic = "score", variance = "robust")
 tst
 #> Provider tests: score statistic, robust variance (modified); null median = -1.046; two.sided, level 0.95
 #>   120 providers: 29 above, 30 below, 61 not different, 0 not tested
-#>  provider estimate se null_value statistic         p flag lower upper
-#>      P001  -1.2381 NA     -1.046   -1.1748 2.401e-01    0    NA    NA
-#>      P002  -1.9696 NA     -1.046   -4.7327 2.216e-06   -1    NA    NA
-#>      P003  -1.4250 NA     -1.046   -2.4126 1.584e-02   -1    NA    NA
-#>      P004  -1.4043 NA     -1.046   -2.1870 2.874e-02   -1    NA    NA
-#>      P005  -0.9052 NA     -1.046    0.5358 5.921e-01    0    NA    NA
-#>      P006  -1.2967 NA     -1.046   -1.6307 1.029e-01    0    NA    NA
+#>  provider estimate se null_value statistic         p flag lower upper observed
+#>      P001  -1.2381 NA     -1.046   -1.1748 2.401e-01    0    NA    NA       70
+#>      P002  -1.9696 NA     -1.046   -4.7327 2.216e-06   -1    NA    NA       36
+#>      P003  -1.4250 NA     -1.046   -2.4126 1.584e-02   -1    NA    NA       58
+#>      P004  -1.4043 NA     -1.046   -2.1870 2.874e-02   -1    NA    NA       76
+#>      P005  -0.9052 NA     -1.046    0.5358 5.921e-01    0    NA    NA       39
+#>      P006  -1.2967 NA     -1.046   -1.6307 1.029e-01    0    NA    NA       50
+#>  expected variance
+#>     80.27    76.41
+#>     76.89    74.63
+#>     77.23    63.56
+#>     98.82   108.88
+#>     35.50    42.57
+#>     60.25    39.53
 #>   ... 114 more rows
 table(tst$flag)
 #> 
@@ -323,7 +330,7 @@ plot(cal)
 
 ``` r
 
-plot(sm, type = "funnel", test = cal)
+plot(cal, type = "funnel")
 ```
 
 ![](pprof_files/figure-html/plots-2.png)
@@ -342,10 +349,14 @@ plot(en)
 
 ![](pprof_files/figure-html/plots-4.png)
 
-(A funnel plot with the test’s own limits, `plot(tst, type = "funnel")`,
-needs a test with standard errors, a Wald-type test; for a score test
-the funnel is drawn on the observed-over-expected scale from the
-standardized measure.)
+The funnel plot draws the control limits of the test it shows, so a
+provider lies outside them exactly when it is flagged: for a Wald-type
+test on the precision \\1 / se^2\\ with limits \\\gamma_0 \pm c \cdot
+se\\; for a score test on the precision \\E^2 / V\\, with \\V\\ the
+variance the statistic was referred to, as observed over expected events
+with limits \\1 + (m \pm c\\ s) / \sqrt{E^2 / V}\\. A test calibrated
+with the empirical null gets one set of limits per size group, with that
+group’s location \\m\\ and scale \\s\\.
 
 ### 8. Flags under the alternatives
 

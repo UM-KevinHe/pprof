@@ -98,7 +98,11 @@ A
 [`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md)
 result draws the observed total against the expected one with the
 diagonal; pass the test to colour the providers. `type = "funnel"` draws
-the ratio against its precision \\E^2 / V\\ with normal limits.
+the ratio against its precision \\E^2 / V\\: without a test, with the
+normal limits of the naive score statistic; with a score test, that
+test’s own funnel, so that the limits and the colours come from the same
+test (a Wald-type test is drawn with `plot(test, type = "funnel")`,
+above).
 
 ``` r
 
@@ -110,10 +114,17 @@ plot(sm, test = tst)
 
 ``` r
 
-plot(sm, type = "funnel", test = tst)
+plot(sm, type = "funnel")
 ```
 
 ![](plots_files/figure-html/unnamed-chunk-6-2.png)
+
+``` r
+
+plot(sm, type = "funnel", test = test(fit, statistic = "score", variance = "robust"))
+```
+
+![](plots_files/figure-html/unnamed-chunk-6-3.png)
 
 ## Forest plot of the coefficients
 

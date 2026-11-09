@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -415,13 +415,20 @@ against the median provider:</p>
 <span><span class="va">tst</span></span>
 <span><span class="co">#&gt; Provider tests: score statistic, robust variance (modified); null median = -1.046; two.sided, level 0.95</span></span>
 <span><span class="co">#&gt;   120 providers: 29 above, 30 below, 61 not different, 0 not tested</span></span>
-<span><span class="co">#&gt;  provider estimate se null_value statistic         p flag lower upper</span></span>
-<span><span class="co">#&gt;      P001  -1.2381 NA     -1.046   -1.1748 2.401e-01    0    NA    NA</span></span>
-<span><span class="co">#&gt;      P002  -1.9696 NA     -1.046   -4.7327 2.216e-06   -1    NA    NA</span></span>
-<span><span class="co">#&gt;      P003  -1.4250 NA     -1.046   -2.4126 1.584e-02   -1    NA    NA</span></span>
-<span><span class="co">#&gt;      P004  -1.4043 NA     -1.046   -2.1870 2.874e-02   -1    NA    NA</span></span>
-<span><span class="co">#&gt;      P005  -0.9052 NA     -1.046    0.5358 5.921e-01    0    NA    NA</span></span>
-<span><span class="co">#&gt;      P006  -1.2967 NA     -1.046   -1.6307 1.029e-01    0    NA    NA</span></span>
+<span><span class="co">#&gt;  provider estimate se null_value statistic         p flag lower upper observed</span></span>
+<span><span class="co">#&gt;      P001  -1.2381 NA     -1.046   -1.1748 2.401e-01    0    NA    NA       70</span></span>
+<span><span class="co">#&gt;      P002  -1.9696 NA     -1.046   -4.7327 2.216e-06   -1    NA    NA       36</span></span>
+<span><span class="co">#&gt;      P003  -1.4250 NA     -1.046   -2.4126 1.584e-02   -1    NA    NA       58</span></span>
+<span><span class="co">#&gt;      P004  -1.4043 NA     -1.046   -2.1870 2.874e-02   -1    NA    NA       76</span></span>
+<span><span class="co">#&gt;      P005  -0.9052 NA     -1.046    0.5358 5.921e-01    0    NA    NA       39</span></span>
+<span><span class="co">#&gt;      P006  -1.2967 NA     -1.046   -1.6307 1.029e-01    0    NA    NA       50</span></span>
+<span><span class="co">#&gt;  expected variance</span></span>
+<span><span class="co">#&gt;     80.27    76.41</span></span>
+<span><span class="co">#&gt;     76.89    74.63</span></span>
+<span><span class="co">#&gt;     77.23    63.56</span></span>
+<span><span class="co">#&gt;     98.82   108.88</span></span>
+<span><span class="co">#&gt;     35.50    42.57</span></span>
+<span><span class="co">#&gt;     60.25    39.53</span></span>
 <span><span class="co">#&gt;   ... 114 more rows</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">tst</span><span class="op">$</span><span class="va">flag</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -471,7 +478,7 @@ size</em>:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cal</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/plots-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sm</span>, type <span class="op">=</span> <span class="st">"funnel"</span>, test <span class="op">=</span> <span class="va">cal</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cal</span>, type <span class="op">=</span> <span class="st">"funnel"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/plots-2.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sm</span>, test <span class="op">=</span> <span class="va">cal</span><span class="op">)</span></span></code></pre></div>
@@ -479,10 +486,16 @@ size</em>:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">en</span><span class="op">)</span></span></code></pre></div>
 <p><img src="pprof_files/figure-html/plots-4.png" class="r-plt" alt="" width="672"></p>
-<p>(A funnel plot with the test’s own limits,
-<code>plot(tst, type = "funnel")</code>, needs a test with standard
-errors, a Wald-type test; for a score test the funnel is drawn on the
-observed-over-expected scale from the standardized measure.)</p>
+<p>The funnel plot draws the control limits of the test it shows, so a
+provider lies outside them exactly when it is flagged: for a Wald-type
+test on the precision <span class="math inline">\(1 / se^2\)</span> with
+limits <span class="math inline">\(\gamma_0 \pm c \cdot se\)</span>; for
+a score test on the precision <span class="math inline">\(E^2 /
+V\)</span>, with <span class="math inline">\(V\)</span> the variance the
+statistic was referred to, as observed over expected events with limits
+<span class="math inline">\(1 + (m \pm c\,
+s) / \sqrt{E^2 / V}\)</span>. A test calibrated with the empirical null
+gets one set of limits per size group, with that group’s location <span class="math inline">\(m\)</span> and scale <span class="math inline">\(s\)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="flags-under-the-alternatives">8. Flags under the alternatives<a class="anchor" aria-label="anchor" href="#flags-under-the-alternatives"></a>

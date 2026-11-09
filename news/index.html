@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,14 @@
       <small>Source: <a href="https://github.com/UM-KevinHe/pprof/blob/Yubo/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="2.0.3" id="pprof-203">pprof 2.0.3<a class="anchor" aria-label="anchor" href="#pprof-203"></a></h2>
+<ul><li>The funnel plot of a score test (<code>plot(test, type = "funnel")</code>) is drawn: observed over expected events against the precision <span class="math inline">\(E^2 / V\)</span>, with <span class="math inline">\(V\)</span> the variance the statistic was referred to (naive, robust or stabilized), and the limits <span class="math inline">\(1 + (m \pm c\, s) / \sqrt{E^2 / V}\)</span> of its null (one set per group after <code><a href="../reference/calibrate.html">calibrate()</a></code>), so that a provider lies outside the limits exactly when it is flagged. <code><a href="../reference/test.html">test()</a></code> results of the score and exact statistics carry <code>observed</code>, <code>expected</code> and <code>variance</code> for it.</li>
+<li>
+<code>plot(measure, type = "funnel", test = )</code> draws that test’s funnel instead of normal limits with the test’s colours, which could show many providers outside the limits and few flagged; a Wald-type test is refused there.</li>
+<li>One-sided Wald funnels draw the limit on the flagged side.</li>
+<li>README funnel figure redrawn with the test’s own limits.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="2.0.2" id="pprof-202">pprof 2.0.2<a class="anchor" aria-label="anchor" href="#pprof-202"></a></h2>
 <ul><li>README and site home page shortened to the essentials, with the plots of the Get started analysis (<code>man/figures/</code>).</li>

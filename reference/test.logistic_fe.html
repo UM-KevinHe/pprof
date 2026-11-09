@@ -17,7 +17,7 @@ the null value."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -174,8 +174,12 @@ through <code><a href="calibrate.html">calibrate()</a></code>.</p></dd>
 quantile of the mid-p, for <code>"lr"</code> the signed root of the chi-square
 statistic), <code>p</code>, <code>flag</code> (<code>1</code> above the null, <code>-1</code> below,
 <code>0</code> not different, <code>NA</code> not testable) and, for the Wald statistics,
-<code>lower</code> and <code>upper</code> limits for \(\gamma_i\). Attributes <code>test</code> (the
-settings) and <code>sizes</code> (rows and patients per provider).</p>
+<code>lower</code> and <code>upper</code> limits for \(\gamma_i\). The score and exact
+statistics also carry <code>observed</code> (the provider's events), <code>expected</code>
+(under the null value) and <code>variance</code> (the variance the statistic is
+referred to; <code>NA</code> for the restricted score), which the funnel plot draws
+on. Attributes <code>test</code> (the settings) and <code>sizes</code> (rows and patients per
+provider).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -218,13 +222,20 @@ inference for profiling health care providers. <em>Statistics in Medicine</em>,
 <span class="r-in"><span><span class="fu"><a href="test.html">test</a></span><span class="op">(</span><span class="va">fit</span>, statistic <span class="op">=</span> <span class="st">"score"</span>, variance <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Provider tests: score statistic, robust variance (modified); null median = -1.08; two.sided, level 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   20 providers: 5 above, 3 below, 12 not different, 0 not tested</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  provider  estimate se null_value statistic         p flag lower upper</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0    NA    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1    NA    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1    NA    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1    NA    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0    NA    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0    NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  provider  estimate se null_value statistic         p flag lower upper observed</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0    NA    NA       11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1    NA    NA       31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1    NA    NA       21</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1    NA    NA       63</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0    NA    NA       34</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0    NA    NA       42</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  expected variance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     16.05    7.982</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     43.30   26.392</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     11.12   18.268</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     38.55   43.259</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     30.80   23.271</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     51.42   38.770</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ... 14 more rows</span>
 </code></pre></div>
     </div>

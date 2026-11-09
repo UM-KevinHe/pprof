@@ -108,8 +108,11 @@ A data frame of class `pp_test` with one row per tested provider:
 quantile of the mid-p, for `"lr"` the signed root of the chi-square
 statistic), `p`, `flag` (`1` above the null, `-1` below, `0` not
 different, `NA` not testable) and, for the Wald statistics, `lower` and
-`upper` limits for \\\gamma_i\\. Attributes `test` (the settings) and
-`sizes` (rows and patients per provider).
+`upper` limits for \\\gamma_i\\. The score and exact statistics also
+carry `observed` (the provider's events), `expected` (under the null
+value) and `variance` (the variance the statistic is referred to; `NA`
+for the restricted score), which the funnel plot draws on. Attributes
+`test` (the settings) and `sizes` (rows and patients per provider).
 
 ## Details
 
@@ -162,12 +165,19 @@ fit <- fit_logistic_fe(pd)
 test(fit, statistic = "score", variance = "robust")
 #> Provider tests: score statistic, robust variance (modified); null median = -1.08; two.sided, level 0.95
 #>   20 providers: 5 above, 3 below, 12 not different, 0 not tested
-#>  provider  estimate se null_value statistic         p flag lower upper
-#>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0    NA    NA
-#>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1    NA    NA
-#>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1    NA    NA
-#>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1    NA    NA
-#>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0    NA    NA
-#>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0    NA    NA
+#>  provider  estimate se null_value statistic         p flag lower upper observed
+#>      P001 -1.586735 NA      -1.08   -1.7858 0.0741319    0    NA    NA       11
+#>      P002 -1.524872 NA      -1.08   -2.3947 0.0166351   -1    NA    NA       31
+#>      P003  0.006187 NA      -1.08    2.3114 0.0208110    1    NA    NA       21
+#>      P004 -0.298864 NA      -1.08    3.7175 0.0002012    1    NA    NA       63
+#>      P005 -0.935401 NA      -1.08    0.6637 0.5068676    0    NA    NA       34
+#>      P006 -1.362773 NA      -1.08   -1.5127 0.1303440    0    NA    NA       42
+#>  expected variance
+#>     16.05    7.982
+#>     43.30   26.392
+#>     11.12   18.268
+#>     38.55   43.259
+#>     30.80   23.271
+#>     51.42   38.770
 #>   ... 14 more rows
 ```
