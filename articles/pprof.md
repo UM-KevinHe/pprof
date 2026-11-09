@@ -249,34 +249,28 @@ head(direct)
 
 ### 4. Test the provider effects
 
-The score statistic with the patient-clustered (robust) variance,
-against the median provider:
+The Wald statistic with the patient-clustered (robust) variance, against
+the median provider; `statistic = "score"` gives the score test instead,
+which exists even for a provider whose outcomes are all the same:
 
 ``` r
 
-tst <- test(fit, statistic = "score", variance = "robust")
+tst <- test(fit, statistic = "wald", variance = "robust")
 tst
-#> Provider tests: score statistic, robust variance (modified); null median = -1.046; two.sided, level 0.95
-#>   120 providers: 29 above, 30 below, 61 not different, 0 not tested
-#>  provider estimate se null_value statistic         p flag lower upper observed
-#>      P001  -1.2381 NA     -1.046   -1.1748 2.401e-01    0    NA    NA       70
-#>      P002  -1.9696 NA     -1.046   -4.7327 2.216e-06   -1    NA    NA       36
-#>      P003  -1.4250 NA     -1.046   -2.4126 1.584e-02   -1    NA    NA       58
-#>      P004  -1.4043 NA     -1.046   -2.1870 2.874e-02   -1    NA    NA       76
-#>      P005  -0.9052 NA     -1.046    0.5358 5.921e-01    0    NA    NA       39
-#>      P006  -1.2967 NA     -1.046   -1.6307 1.029e-01    0    NA    NA       50
-#>  expected variance
-#>     80.27    76.41
-#>     76.89    74.63
-#>     77.23    63.56
-#>     98.82   108.88
-#>     35.50    42.57
-#>     60.25    39.53
+#> Provider tests: wald statistic, robust variance; null median = -1.046; two.sided, level 0.95
+#>   120 providers: 33 above, 28 below, 59 not different, 0 not tested
+#>  provider estimate     se null_value statistic         p flag  lower   upper
+#>      P001  -1.2381 0.1698     -1.046   -1.1302 2.584e-01    0 -1.571 -0.9052
+#>      P002  -1.9696 0.1839     -1.046   -5.0205 5.154e-07   -1 -2.330 -1.6091
+#>      P003  -1.4250 0.1690     -1.046   -2.2418 2.497e-02   -1 -1.756 -1.0938
+#>      P004  -1.4043 0.1668     -1.046   -2.1481 3.171e-02   -1 -1.731 -1.0775
+#>      P005  -0.9052 0.2567     -1.046    0.5489 5.831e-01    0 -1.408 -0.4021
+#>      P006  -1.2967 0.1630     -1.046   -1.5379 1.241e-01    0 -1.616 -0.9773
 #>   ... 114 more rows
 table(tst$flag)
 #> 
 #> -1  0  1 
-#> 30 61 29
+#> 28 59 33
 ```
 
 ### 5. Calibrate with an empirical null
@@ -292,21 +286,24 @@ en <- null_model("empirical", tst, n_groups = 4)
 en
 #> Empirical null: 4 group(s) by rank, huber estimator
 #>  group n_providers n_fitted min_size max_size null_mean null_sd converged
-#>      1          30       30       12       31    0.4493   1.864      TRUE
-#>      2          30       30       31       47   -0.4704   2.944      TRUE
-#>      3          30       30       47       64    0.9759   3.229      TRUE
-#>      4          30       30       64       80   -0.9959   2.858      TRUE
+#>      1          30       30       12       31    0.6672   2.165      TRUE
+#>      2          30       30       31       47   -0.4216   3.011      TRUE
+#>      3          30       30       47       64    1.3854   3.783      TRUE
+#>      4          30       30       64       80   -0.9628   2.886      TRUE
 cal <- calibrate(tst, en)
 table(theoretical = tst$flag, empirical = cal$flag)
 #>            empirical
 #> theoretical  0  1
-#>          -1 30  0
-#>          0  61  0
-#>          1  27  2
+#>          -1 28  0
+#>          0  59  0
+#>          1  26  7
 ```
 
 The same in one call:
-`test(fit, statistic = "score", variance = "robust", null_model = "empirical")`.
+`test(fit, statistic = "wald", variance = "robust", null_model = "empirical")`.
+See [Reference
+distributions](https://um-kevinhe.github.io/pprof/articles/null.md) for
+the fitted null itself (`plot(en)`) and the choices it offers.
 
 ### 6. Reliability
 
@@ -321,42 +318,38 @@ iur("bootstrap", obs = fit$data$y, expected = expected, provider = fit$data$prov
 
 ### 7. Plots
 
+Three views of the test of step 4: the provider effects in order with
+their confidence intervals, the funnel plot, and observed against
+expected events.
+
 ``` r
 
-plot(cal)
+plot(tst)
 ```
 
 ![](pprof_files/figure-html/plots-1.png)
 
 ``` r
 
-plot(cal, type = "funnel")
+plot(tst, type = "funnel")
 ```
 
 ![](pprof_files/figure-html/plots-2.png)
 
 ``` r
 
-plot(sm, test = cal)
+plot(sm, test = tst)
 ```
 
 ![](pprof_files/figure-html/plots-3.png)
 
-``` r
-
-plot(en)
-```
-
-![](pprof_files/figure-html/plots-4.png)
-
-The funnel plot draws the control limits of the test it shows, so a
-provider lies outside them exactly when it is flagged: for a Wald-type
-test on the precision \\1 / se^2\\ with limits \\\gamma_0 \pm c \cdot
-se\\; for a score test on the precision \\E^2 / V\\, with \\V\\ the
-variance the statistic was referred to, as observed over expected events
-with limits \\1 + (m \pm c\\ s) / \sqrt{E^2 / V}\\. A test calibrated
-with the empirical null gets one set of limits per size group, with that
-group’s location \\m\\ and scale \\s\\.
+The funnel plot draws the control limits of the test it shows, here
+\\\gamma_0 \pm c \cdot se\\ against the precision \\1 / se^2\\, so a
+provider lies outside the limits exactly when it is flagged. The same
+calls draw a calibrated test (`plot(cal, type = "funnel")`, one set of
+limits per size group) and a score test (observed over expected events
+against \\E^2 / V\\); see
+[Plots](https://um-kevinhe.github.io/pprof/articles/plots.md).
 
 ### 8. Flags under the alternatives
 
@@ -366,23 +359,23 @@ Collect the flags of several tests:
 ``` r
 
 st <- flag_stability(
-  score            = tst,
-  score_empirical  = cal,
-  wald_robust      = test(fit, statistic = "wald", variance = "robust"),
-  exact            = test(fit, statistic = "exact"))
+  wald_robust            = tst,
+  wald_robust_empirical  = cal,
+  score_robust           = test(fit, statistic = "score", variance = "robust"),
+  exact                  = test(fit, statistic = "exact"))
 st
-#> Flags under 4 scenarios: 65 providers (2 flagged under every scenario)
-#>  provider score score_empirical wald_robust exact n_flagged
-#>      P023     1               1           1     1         4
-#>      P080     1               1           1     1         4
-#>      P002    -1               0          -1    -1         3
-#>      P003    -1               0          -1    -1         3
-#>      P004    -1               0          -1    -1         3
-#>      P007     1               0           1     1         3
-#>      P008    -1               0          -1    -1         3
-#>      P010     1               0           1     1         3
-#>      P011     1               0           1     1         3
-#>      P017    -1               0          -1    -1         3
+#> Flags under 4 scenarios: 65 providers (7 flagged under every scenario)
+#>  provider wald_robust wald_robust_empirical score_robust exact n_flagged
+#>      P011           1                     1            1     1         4
+#>      P023           1                     1            1     1         4
+#>      P031           1                     1            1     1         4
+#>      P046           1                     1            1     1         4
+#>      P075           1                     1            1     1         4
+#>      P080           1                     1            1     1         4
+#>      P106           1                     1            1     1         4
+#>      P002          -1                     0           -1    -1         3
+#>      P003          -1                     0           -1    -1         3
+#>      P004          -1                     0           -1    -1         3
 #>   ... 55 more rows
 plot(st)
 ```
