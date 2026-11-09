@@ -198,6 +198,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// stabilized_pooled_matrix
+arma::mat stabilized_pooled_matrix(const arma::vec& r, const arma::vec& v, const arma::uvec& cluster);
+RcppExport SEXP _pprof_stabilized_pooled_matrix(SEXP rSEXP, SEXP vSEXP, SEXP clusterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type r(rSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type cluster(clusterSEXP);
+    rcpp_result_gen = Rcpp::wrap(stabilized_pooled_matrix(r, v, cluster));
+    return rcpp_result_gen;
+END_RCPP
+}
 // restricted_score
 arma::vec restricted_score(const arma::vec& N, const arma::vec& Y, const arma::mat& Z, const arma::vec& n_prov, const arma::vec& gamma, const arma::vec& beta, double gamma_null, const arma::uvec& parm_indices);
 RcppExport SEXP _pprof_restricted_score(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP gamma_nullSEXP, SEXP parm_indicesSEXP) {
@@ -434,6 +447,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pprof_computeDirectExp", (DL_FUNC) &_pprof_computeDirectExp, 4},
     {"_pprof_cluster_sums", (DL_FUNC) &_pprof_cluster_sums, 5},
     {"_pprof_stabilized_meat", (DL_FUNC) &_pprof_stabilized_meat, 5},
+    {"_pprof_stabilized_pooled_matrix", (DL_FUNC) &_pprof_stabilized_pooled_matrix, 3},
     {"_pprof_restricted_score", (DL_FUNC) &_pprof_restricted_score, 8},
     {"_pprof_logis_firth_prov", (DL_FUNC) &_pprof_logis_firth_prov, 12},
     {"_pprof_penalized_lr", (DL_FUNC) &_pprof_penalized_lr, 9},

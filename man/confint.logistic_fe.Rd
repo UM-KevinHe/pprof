@@ -8,7 +8,7 @@
   object,
   parm = NULL,
   level = 0.95,
-  type = c("exact", "score", "wald", "robust_wald"),
+  type = c("exact", "score", "robust_score", "stabilized_score", "wald", "robust_wald"),
   wald_variance = c("case_mix", "full"),
   alternative = c("two.sided", "greater", "less"),
   ...
@@ -21,7 +21,8 @@
 
 \item{level}{confidence level. Default 0.95.}
 
-\item{type}{\code{"exact"} (default), \code{"score"}, \code{"wald"} or \code{"robust_wald"}.}
+\item{type}{\code{"exact"} (default), \code{"score"}, \code{"robust_score"},
+\code{"stabilized_score"}, \code{"wald"} or \code{"robust_wald"}.}
 
 \item{wald_variance}{for \code{type = "wald"}: \code{"case_mix"} (default) or
 \code{"full"}, see \code{\link[=gamma_variance]{gamma_variance()}}.}
@@ -36,15 +37,20 @@ A data frame with \code{provider}, \code{estimate}, \code{lower}, \code{upper}.
 }
 \description{
 Intervals for \eqn{\gamma_i} obtained by inverting a test: the exact
-Poisson-binomial test, the score test with \eqn{\hat\beta} held fixed, or
-a Wald test with the naive or patient-clustered standard error. Intervals
-for standardized measures are produced by \code{\link[=standardize]{standardize()}}, which maps
-these limits through the standardization.
+Poisson-binomial test, the score test with \eqn{\hat\beta} held fixed
+(naive, robust or stabilized variance), or a Wald test with the naive or
+patient-clustered standard error. Intervals for standardized measures are
+produced by \code{\link[=standardize]{standardize()}}, which maps these limits through the
+standardization.
 }
 \details{
 Providers with no events have no finite lower limit and providers
-with all events no finite upper limit; their finite limit is one-sided at
-level \code{1 - level}. The exact inversion works on the individual Bernoulli
+with all events no finite upper limit; for \code{"exact"} and \code{"score"} their
+finite limit is one-sided at level \code{1 - level} (the convention of pprof
+1.0), while \code{"robust_score"} and \code{"stabilized_score"} (and the limits that
+\code{\link[=test]{test()}} attaches to its score statistics) use the two-sided threshold
+throughout, so that a limit excludes the null value exactly when the
+provider is flagged. The exact inversion works on the individual Bernoulli
 trials and is slow for providers with very many trials.
 }
 \examples{

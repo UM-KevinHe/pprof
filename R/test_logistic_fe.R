@@ -33,6 +33,10 @@
 #'   of the result returning one, for instance
 #'   `function(t) null_model("empirical", t, n_groups = 4)`; the result is then passed
 #'   through [calibrate()].
+#' @param interval for the score statistics, compute the confidence limits of
+#'   \eqn{\gamma_i} by inverting the test (default `TRUE`; `FALSE` saves the
+#'   root finding on very large data). The Wald statistics always carry
+#'   their limits.
 #' @param ... unused.
 #'
 #' @details Row residuals \eqn{r_j = Y_j - N_j p_j} and variances
@@ -60,13 +64,26 @@
 #' data, so sort by time within patient before [pp_data()]. A patient with
 #' more than 5,000 rows stops the stabilized statistics.
 #'
+#' The limits of a score statistic invert the test: with \eqn{z_i(g)} the
+#' statistic at the null value \eqn{g} (the same residuals and variance,
+#' naive, robust or stabilized, evaluated at \eqn{g}; the correlation matrix
+#' of the stabilized variance is held at the test's null), the interval is the
+#' set of \eqn{g} with \eqn{-c \le z_i(g) \le c}, so it excludes the null
+#' value exactly when the provider is flagged. A provider with no events has
+#' no finite lower limit, one with all events no finite upper limit, and a
+#' patient-clustered statistic, which is bounded by the square root of the
+#' number of events (non-events), can leave a limit infinite for a provider
+#' with very few of them. [calibrate()] inverts the calibrated statistic the
+#' same way.
+#'
 #' @return A data frame of class `pp_test` with one row per tested provider:
 #'   `provider`, `estimate` (\eqn{\hat\gamma_i}), `se` (Wald statistics only),
 #'   `null_value`, `statistic` (a z statistic; for the exact test the normal
 #'   quantile of the mid-p, for `"lr"` the signed root of the chi-square
 #'   statistic), `p`, `flag` (`1` above the null, `-1` below,
-#'   `0` not different, `NA` not testable) and, for the Wald statistics,
-#'   `lower` and `upper` limits for \eqn{\gamma_i}. The score and exact
+#'   `0` not different, `NA` not testable) and, for the Wald and (with
+#'   `interval = TRUE`) the modified score statistics, `lower` and `upper`
+#'   limits for \eqn{\gamma_i}. The score and exact
 #'   statistics also carry `observed` (the provider's events), `expected`
 #'   (under the null value) and `variance` (the variance the statistic is
 #'   referred to; `NA` for the restricted score), which the funnel plot draws
@@ -91,7 +108,7 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
                                        exact_method = c("poibin", "bootstrap"),
                                        score_type = c("modified", "restricted"),
                                        wald_variance = c("case_mix", "full"), n_resample = 10000,
-                                       null_model = NULL, ...) {
+                                       null_model = NULL, interval = TRUE, ...) {
   check_fit(fit)
   statistic <- match.arg(statistic)
   variance <- match.arg(variance)
@@ -129,6 +146,7 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
   lower <- upper <- rep(NA_real_, length(idx))
 
   extra <- NULL
+  inversion <- NULL
   if (statistic == "exact") {
     p0 <- stats::plogis(g0 + lp)
     extra <- list(observed = as.numeric(rowsum(m$y, code, reorder = TRUE))[idx],
@@ -176,6 +194,21 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
     extra <- list(observed = obs_all[idx], expected = exp_all[idx], variance = v_all[idx])
     z[!is.finite(z)] <- NA_real_
     decision <- z_decision(z, level, alternative)
+    if (score_type == "modified") {
+      pooled <- if (variance == "stabilized") {
+        stabilized_pooled_matrix(r0, m$n * p0 * (1 - p0), cl$code)
+      } else {
+        NULL
+      }
+      inversion <- list(fit = fit, variance = variance, pooled = pooled)
+      if (isTRUE(interval)) {
+        q <- normal_quantile(level, alternative)
+        tg <- inversion_targets(rep(0, length(idx)), rep(1, length(idx)), q, alternative)
+        lim <- score_limits(fit, variance, idx, tg$z_lower, tg$z_upper, pooled)
+        lower <- lim$lower
+        upper <- lim$upper
+      }
+    }
   } else if (statistic == "lr") {
     firth <- identical(fit$control$penalty, "firth")
     lr <- penalized_lr(m$n, m$y, m$z, m$n_prov, gamma, beta, g0, idx, firth)[idx]
@@ -225,6 +258,7 @@ test.logistic_fe <- function(fit, statistic = c("exact", "score", "wald", "lr"),
                             null = null, null_value = g0, level = level, alternative = alternative)
   attr(out, "sizes") <- data.frame(provider = sel, rows = m$n_prov[idx],
                                    patients = fit$sizes$patients[idx], stringsAsFactors = FALSE)
+  if (!is.null(inversion)) attr(out, "inversion") <- inversion
   class(out) <- c("pp_test", "data.frame")
   if (!is.null(null_model)) out <- calibrate(out, null_model)
   out

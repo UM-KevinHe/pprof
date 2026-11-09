@@ -72,7 +72,8 @@ A ggplot object.
 returned as ggplot objects to be printed, modified or saved:
 \itemize{
 \item a \code{\link[=test]{test()}} result: \code{type = "caterpillar"} (every provider's estimate
-and interval in order of the estimate, coloured by flag),
+and interval in order of the estimate, coloured by flag; a score test's
+intervals invert the test, see \code{\link[=test.logistic_fe]{test.logistic_fe()}}),
 \code{"funnel"} (estimates against precision, with the control limits of
 the same test, so that a provider lies outside the limits exactly when
 it is flagged: on the precision axis \eqn{1 / se^2} for a test with

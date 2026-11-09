@@ -17,6 +17,7 @@
   wald_variance = c("case_mix", "full"),
   n_resample = 10000,
   null_model = NULL,
+  interval = TRUE,
   ...
 )
 }
@@ -62,6 +63,11 @@ of the result returning one, for instance
 \code{function(t) null_model("empirical", t, n_groups = 4)}; the result is then passed
 through \code{\link[=calibrate]{calibrate()}}.}
 
+\item{interval}{for the score statistics, compute the confidence limits of
+\eqn{\gamma_i} by inverting the test (default \code{TRUE}; \code{FALSE} saves the
+root finding on very large data). The Wald statistics always carry
+their limits.}
+
 \item{...}{unused.}
 }
 \value{
@@ -70,8 +76,9 @@ A data frame of class \code{pp_test} with one row per tested provider:
 \code{null_value}, \code{statistic} (a z statistic; for the exact test the normal
 quantile of the mid-p, for \code{"lr"} the signed root of the chi-square
 statistic), \code{p}, \code{flag} (\code{1} above the null, \code{-1} below,
-\code{0} not different, \code{NA} not testable) and, for the Wald statistics,
-\code{lower} and \code{upper} limits for \eqn{\gamma_i}. The score and exact
+\code{0} not different, \code{NA} not testable) and, for the Wald and (with
+\code{interval = TRUE}) the modified score statistics, \code{lower} and \code{upper}
+limits for \eqn{\gamma_i}. The score and exact
 statistics also carry \code{observed} (the provider's events), \code{expected}
 (under the null value) and \code{variance} (the variance the statistic is
 referred to; \code{NA} for the restricted score), which the funnel plot draws
@@ -110,6 +117,18 @@ square root, so that two-sided p-values equal the chi-square tail.
 The stabilized statistics take a patient's rows in their order in the
 data, so sort by time within patient before \code{\link[=pp_data]{pp_data()}}. A patient with
 more than 5,000 rows stops the stabilized statistics.
+
+The limits of a score statistic invert the test: with \eqn{z_i(g)} the
+statistic at the null value \eqn{g} (the same residuals and variance,
+naive, robust or stabilized, evaluated at \eqn{g}; the correlation matrix
+of the stabilized variance is held at the test's null), the interval is the
+set of \eqn{g} with \eqn{-c \le z_i(g) \le c}, so it excludes the null
+value exactly when the provider is flagged. A provider with no events has
+no finite lower limit, one with all events no finite upper limit, and a
+patient-clustered statistic, which is bounded by the square root of the
+number of events (non-events), can leave a limit infinite for a provider
+with very few of them. \code{\link[=calibrate]{calibrate()}} inverts the calibrated statistic the
+same way.
 }
 \examples{
 d <- sim_kecc(n_providers = 20, seed = 1)

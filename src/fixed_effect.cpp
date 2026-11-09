@@ -693,6 +693,41 @@ arma::vec stabilized_meat(const arma::vec &r, const arma::vec &v, const arma::uv
   return meat;
 }
 
+// The pooled correlation matrix S of the stabilized variance (the first half
+// of stabilized_meat), returned so that a score test can be inverted with S
+// held fixed at the null value of the test.
+// [[Rcpp::export]]
+arma::mat stabilized_pooled_matrix(const arma::vec &r, const arma::vec &v, const arma::uvec &cluster) {
+  const arma::uword n = r.n_elem;
+  const arma::uword K = cluster.max();
+  arma::uvec start(K + 1, arma::fill::zeros);
+  for (arma::uword i = 0; i < n; ++i) start(cluster(i))++;
+  for (arma::uword c = 0; c < K; ++c) start(c + 1) += start(c);
+  arma::uvec rows(n), next = start.head(K);
+  for (arma::uword i = 0; i < n; ++i) rows(next(cluster(i) - 1)++) = i;
+  arma::uword dim = 0;
+  for (arma::uword c = 0; c < K; ++c) dim = std::max(dim, start(c + 1) - start(c));
+  arma::vec e(n);
+  for (arma::uword i = 0; i < n; ++i) e(i) = v(i) > 0 ? r(i) / std::sqrt(v(i)) : 0.0;
+  arma::mat S(dim, dim, arma::fill::zeros);
+  arma::vec n_ge(dim, arma::fill::zeros);
+  for (arma::uword c = 0; c < K; ++c) {
+    const arma::uword b = start(c), s = start(c + 1) - b;
+    for (arma::uword k = 0; k < s; ++k) {
+      const double ek = e(rows(b + k));
+      for (arma::uword l = 0; l < s; ++l) S(k, l) += ek * e(rows(b + l));
+      n_ge(k) += 1.0;
+    }
+  }
+  for (arma::uword k = 0; k < dim; ++k) {
+    for (arma::uword l = 0; l < dim; ++l) {
+      const double d = n_ge(std::max(k, l));
+      S(k, l) = d > 0 ? S(k, l) / d : 0.0;
+    }
+  }
+  return S;
+}
+
 // ---------------------------------------------------------------------------
 // Restricted score test of H0: gamma_i = gamma_null for the requested providers
 // (1-based `parm_indices`): the score of gamma_i at the null divided by the

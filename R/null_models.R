@@ -385,6 +385,12 @@ adjust_z <- function(z, null) {
 #'   form \eqn{\hat\theta \pm c\, \mathrm{null\_sd}\, se} that ignore the
 #'   null location.
 #'
+#' @details For a Wald-type test the limits are
+#' \eqn{\hat\theta - (\mathrm{null\_mean} \pm c\, \mathrm{null\_sd})\, se}; for a
+#' modified score test of [test.logistic_fe()] they invert the calibrated
+#' statistic (the set of null values at which the adjusted statistic lies
+#' within \eqn{\pm c}), for a mid-p test the calibrated mid-p rule; the exact
+#' Poisson test cannot be calibrated.
 #' @return `x` with the columns `z_adjusted`, `null_mean`, `null_sd` and
 #'   `null_group` added, `p` and `flag` recomputed from the adjusted statistic,
 #'   and `lower`/`upper` recomputed where a standard error is available (for
@@ -424,8 +430,18 @@ calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, c
   q <- if (is.null(critical)) normal_quantile(level, alternative) else critical
   loc <- ci_centre(ci_location, p$mean, nrow(x))
   se <- x$se
+  inversion <- attr(x, "inversion")
   if (limits_kind == "midp") {
     lim <- midp_limits(x$observed, x$expected, loc, p$sd, q, alternative)
+    lower <- lim$lower
+    upper <- lim$upper
+  } else if (identical(settings$statistic, "score") && !is.null(inversion) &&
+               any(is.finite(x$lower) | is.finite(x$upper))) {
+    # the calibrated score test inverted: null values where the adjusted statistic is within +/- q
+    idx <- provider_positions(x$provider, inversion$fit$sizes$provider)
+    tg <- inversion_targets(loc, p$sd, q, alternative)
+    lim <- score_limits(inversion$fit, inversion$variance, idx, tg$z_lower, tg$z_upper,
+                        inversion$pooled)
     lower <- lim$lower
     upper <- lim$upper
   } else {
@@ -459,6 +475,7 @@ calibrate.pp_test <- function(x, null_model, level = NULL, alternative = NULL, c
   settings$null_model <- describe_null(null)
   attr(out, "test") <- settings
   attr(out, "sizes") <- attrs$sizes
+  if (!is.null(inversion)) attr(out, "inversion") <- inversion
   class(out) <- c("pp_test", "data.frame")
   out
 }

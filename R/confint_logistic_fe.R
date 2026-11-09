@@ -1,15 +1,17 @@
 #' Confidence intervals for the provider effects of a logistic fixed-effect fit
 #'
 #' Intervals for \eqn{\gamma_i} obtained by inverting a test: the exact
-#' Poisson-binomial test, the score test with \eqn{\hat\beta} held fixed, or
-#' a Wald test with the naive or patient-clustered standard error. Intervals
-#' for standardized measures are produced by [standardize()], which maps
-#' these limits through the standardization.
+#' Poisson-binomial test, the score test with \eqn{\hat\beta} held fixed
+#' (naive, robust or stabilized variance), or a Wald test with the naive or
+#' patient-clustered standard error. Intervals for standardized measures are
+#' produced by [standardize()], which maps these limits through the
+#' standardization.
 #'
 #' @param object a model fitted by [fit_logistic_fe()].
 #' @param parm optional subset of provider identifiers.
 #' @param level confidence level. Default 0.95.
-#' @param type `"exact"` (default), `"score"`, `"wald"` or `"robust_wald"`.
+#' @param type `"exact"` (default), `"score"`, `"robust_score"`,
+#'   `"stabilized_score"`, `"wald"` or `"robust_wald"`.
 #' @param wald_variance for `type = "wald"`: `"case_mix"` (default) or
 #'   `"full"`, see [gamma_variance()].
 #' @param alternative `"two.sided"` (default), `"greater"` (lower limit
@@ -17,8 +19,12 @@
 #' @param ... unused.
 #'
 #' @details Providers with no events have no finite lower limit and providers
-#' with all events no finite upper limit; their finite limit is one-sided at
-#' level `1 - level`. The exact inversion works on the individual Bernoulli
+#' with all events no finite upper limit; for `"exact"` and `"score"` their
+#' finite limit is one-sided at level `1 - level` (the convention of pprof
+#' 1.0), while `"robust_score"` and `"stabilized_score"` (and the limits that
+#' [test()] attaches to its score statistics) use the two-sided threshold
+#' throughout, so that a limit excludes the null value exactly when the
+#' provider is flagged. The exact inversion works on the individual Bernoulli
 #' trials and is slow for providers with very many trials.
 #'
 #' @return A data frame with `provider`, `estimate`, `lower`, `upper`.
@@ -30,7 +36,8 @@
 #' confint(fit, type = "score")
 #' @export
 confint.logistic_fe <- function(object, parm = NULL, level = 0.95,
-                                type = c("exact", "score", "wald", "robust_wald"),
+                                type = c("exact", "score", "robust_score", "stabilized_score",
+                                         "wald", "robust_wald"),
                                 wald_variance = c("case_mix", "full"),
                                 alternative = c("two.sided", "greater", "less"), ...) {
   check_fit(object)
@@ -39,7 +46,13 @@ confint.logistic_fe <- function(object, parm = NULL, level = 0.95,
   alternative <- match.arg(alternative)
   m <- fit_matrices(object)
   idx <- provider_positions(parm, m$levels)
-  limits <- gamma_limits(object, m, type, idx, level, alternative, wald_variance)
+  limits <- if (type %in% c("robust_score", "stabilized_score")) {
+    r <- test(object, statistic = "score", variance = sub("_score$", "", type),
+              providers = m$levels[idx], level = level, alternative = alternative)
+    list(lower = r$lower, upper = r$upper)
+  } else {
+    gamma_limits(object, m, type, idx, level, alternative, wald_variance)
+  }
   data.frame(provider = m$levels[idx], estimate = unname(object$coefficients$gamma[idx]),
              lower = limits$lower, upper = limits$upper, stringsAsFactors = FALSE)
 }

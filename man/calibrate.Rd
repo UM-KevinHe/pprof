@@ -49,6 +49,14 @@ flags, and the confidence limits are those of the inverted calibrated test,
 so that a limit excludes the null value exactly when the provider is
 flagged.
 }
+\details{
+For a Wald-type test the limits are
+\eqn{\hat\theta - (\mathrm{null\_mean} \pm c\, \mathrm{null\_sd})\, se}; for a
+modified score test of \code{\link[=test.logistic_fe]{test.logistic_fe()}} they invert the calibrated
+statistic (the set of null values at which the adjusted statistic lies
+within \eqn{\pm c}), for a mid-p test the calibrated mid-p rule; the exact
+Poisson test cannot be calibrated.
+}
 \examples{
 d <- sim_kecc(n_providers = 40, seed = 1)
 pd <- pp_data(d, y = "y", x = c("x1", "x2", "x3"), provider = "provider",
