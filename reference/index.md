@@ -58,7 +58,7 @@ provider effects unpenalized.
   [`selected_covariates()`](https://um-kevinhe.github.io/pprof/reference/coef.pp_lasso.md)
   : Coefficients and predictions along a selection path
 
-## Standardized measures
+## Standardization
 
 - [`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md)
   : Standardized measures of a fitted provider model
@@ -74,10 +74,10 @@ provider effects unpenalized.
 - [`direct_expectation()`](https://um-kevinhe.github.io/pprof/reference/direct_expectation.md)
   : Direct standardization over an arbitrary standard population
 
-## Testing
+## Inference
 
-One test per provider, intervals, the reference distribution the
-statistics are judged against, and the test of a standardized measure.
+One test per provider, intervals, the test of a standardized measure,
+and the reference distribution the statistics are judged against.
 
 - [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md) :
   Tests of the provider effects

@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,9 +49,9 @@
     <li><a class="dropdown-item" href="articles/models.html">Risk-adjustment models</a></li>
     <li><a class="dropdown-item" href="articles/selection.html">Variable selection</a></li>
     <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item" href="articles/standardization.html">Standardized measures</a></li>
+    <li><a class="dropdown-item" href="articles/standardization.html">Standardization</a></li>
     <li><hr class="dropdown-divider"></li>
-    <li><h6 class="dropdown-header" data-toc-skip>Testing</h6></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Inference</h6></li>
     <li><a class="dropdown-item" href="articles/testing.html">Tests of provider effects</a></li>
     <li><a class="dropdown-item" href="articles/null.html">Reference distributions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -60,7 +60,6 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
-<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -87,7 +86,9 @@
 </h1></div>
 <!-- badges: start -->
 
-<p><strong>pprof</strong> provides statistical methods for provider profiling, the comparison of health care providers on patient outcomes after adjustment for differences in case mix. The package implements each step of constructing a quality measure: Risk adjustment fits models with provider-specific fixed, random, or correlated random effects for binary, continuous, and time-to-event outcomes, with optional penalized selection of risk factors. Standardization computes indirectly and directly standardized ratios, rates, and differences. Inference tests each provider against a national norm using score and Wald statistics with model-based, robust, or stabilized variances, as well as exact and likelihood ratio tests, referred to either the theoretical null or an empirical null. The package also provides a comprehensive set of plots for provider profiling, including caterpillar and funnel plots, observed-versus-expected plots, the fitted reference distribution, reliability, and variable selection paths.</p>
+<p><strong>pprof</strong> provides statistical methods for provider profiling, the comparison of health care providers on patient outcomes after adjustment for differences in case mix. The package implements each step of constructing a quality measure: <strong><em>Risk adjustment</em></strong> fits models with provider-specific fixed, random, or correlated random effects for binary, continuous, and time-to-event outcomes, with optional penalized selection of risk factors. <strong><em>Standardization</em></strong> computes indirectly and directly standardized ratios, rates, and differences. <strong><em>Inference</em></strong> tests each provider against a national norm using score and Wald statistics with model-based, robust, or stabilized variances, as well as exact and likelihood ratio tests, referred to either the theoretical null or an empirical null. The package also provides a comprehensive set of plots for provider profiling, including caterpillar and funnel plots, observed-versus-expected plots, the fitted reference distribution, reliability, and variable selection paths.</p>
+<p align="center">
+<img src="reference/figures/readme-steps.svg" width="100%" alt="The analysis steps: risk adjustment, standardization, inference, plots"></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -133,12 +134,12 @@
 │   └── var_select(data, penalty = "lasso" | "group_lasso"),  cv(),  selected_covariates()
 │                                        risk-factor selection with the provider effects unpenalized
 │
-├── standardized measures
+├── standardization
 │   ├── standardize(fit, type = "indirect" | "direct")
 │   │                                    one ratio, rate or difference per provider, with observed and expected
 │   └── direct_expectation()             the direct standardization for effects supplied by hand
 │
-├── testing               is a provider different from the reference?
+├── inference             is a provider different from the reference?
 │   ├── test(fit, statistic, variance, null_model)        one test per provider, flag 1 / 0 / -1
 │   │     logistic   statistic = exact | score | wald | lr    variance = naive | robust | stabilized
 │   │     linear     statistic = wald                         variance = naive | robust

@@ -27,14 +27,14 @@ them, or spares one that has.
     mistaken for differences in quality. The risk-adjustment model
     separates the two; the provider effects it yields are the input to
     everything after.
-2.  **Standardized measures.** After adjustment, each provider is held
-    against a national norm on one interpretable scale: the ratio or the
+2.  **Standardization.** After adjustment, each provider is held against
+    a national norm on one interpretable scale: the ratio or the
     difference between the outcome under the provider’s care and the
     outcome expected under the norm for the provider’s own patients.
-3.  **Hypothesis testing.** A departure from the norm can arise by
-    chance, and a small provider can depart widely through random
-    variation alone. A test decides whether the departure is more than
-    chance; only a significant departure becomes a flag.
+3.  **Inference.** A departure from the norm can arise by chance, and a
+    small provider can depart widely through random variation alone. A
+    test decides whether the departure is more than chance; only a
+    significant departure becomes a flag.
 
 **pprof** builds measures from components, one per analysis step, with
 the choices as arguments. This page explains the concepts behind each
@@ -71,15 +71,13 @@ the next.
 | Step | The question it answers | Functions |
 |:---|:---|:---|
 | Data | Which columns are the outcome, the risk factors, the provider, the patient? | [`pp_data()`](https://um-kevinhe.github.io/pprof/reference/pp_data.md), [`pp_check()`](https://um-kevinhe.github.io/pprof/reference/pp_check.md) |
-| Risk-adjustment model | What does each provider’s effect look like after adjusting for its patients? | [`fit_logistic_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_logistic_fe.md), [`fit_linear_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_linear_fe.md), [`fit_cox()`](https://um-kevinhe.github.io/pprof/reference/fit_cox.md), `fit_*_re()`, `fit_*_cre()` |
-| Standardized measure | How does the provider’s outcome compare with what was expected? | [`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md), [`test_measure()`](https://um-kevinhe.github.io/pprof/reference/test_measure.md) |
-| Test | Is the provider’s effect different from the reference, and in which direction? | [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md), [`confint()`](https://rdrr.io/r/stats/confint.html), [`summary()`](https://rdrr.io/r/base/summary.html) |
-| Reference distribution | Different from the reference, or unusual among providers of similar size? | [`null_model()`](https://um-kevinhe.github.io/pprof/reference/null_models.md), [`calibrate()`](https://um-kevinhe.github.io/pprof/reference/calibrate.md) |
+| Risk adjustment | What is each provider’s effect after adjusting for its patients, and which risk factors should the model carry? | [`fit_logistic_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_logistic_fe.md), [`fit_linear_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_linear_fe.md), [`fit_cox()`](https://um-kevinhe.github.io/pprof/reference/fit_cox.md), `fit_*_re()`, `fit_*_cre()`, [`summary()`](https://rdrr.io/r/base/summary.html), [`var_select()`](https://um-kevinhe.github.io/pprof/reference/var_select.md), [`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md) |
+| Standardization | How does the provider’s outcome compare with what was expected? | [`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md) |
+| Inference | Is the provider different from the reference, and in which direction, judged against the theoretical null or an empirical null? | [`test()`](https://um-kevinhe.github.io/pprof/reference/test.md), [`confint()`](https://rdrr.io/r/stats/confint.html), [`test_measure()`](https://um-kevinhe.github.io/pprof/reference/test_measure.md), [`null_model()`](https://um-kevinhe.github.io/pprof/reference/null_models.md), [`calibrate()`](https://um-kevinhe.github.io/pprof/reference/calibrate.md) |
 | Reliability | How much of the variation between providers is signal rather than noise? | [`iur()`](https://um-kevinhe.github.io/pprof/reference/iur.md) |
-| Variable selection | Which risk factors should the model carry? | [`var_select()`](https://um-kevinhe.github.io/pprof/reference/var_select.md), [`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md) |
 | Plots | What does the result look like? | [`plot()`](https://rdrr.io/r/graphics/plot.default.html), [`flag_stability()`](https://um-kevinhe.github.io/pprof/reference/flag_stability.md) |
 
-### Risk adjustment with one effect per provider
+### Risk adjustment
 
 The provider effects are *fixed effects*: one free parameter per
 provider, never shrunk toward the average, because the effect is what
@@ -94,7 +92,17 @@ models for comparison, and the two-stage stratified Cox model for
 survival outcomes. See [Risk-adjustment
 models](https://um-kevinhe.github.io/pprof/articles/models.md).
 
-### Standardized measures
+Variable selection is part of the same step. When the risk factors are
+not fixed in advance,
+[`var_select()`](https://um-kevinhe.github.io/pprof/reference/var_select.md)
+fits a lasso or group-lasso path with the provider effects left
+unpenalized, and
+[`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md) chooses the
+penalty by cross-validation; the selected risk factors then enter the
+model above. See [Variable
+selection](https://um-kevinhe.github.io/pprof/articles/selection.md).
+
+### Standardization
 
 A standardized measure summarises the fit as one number per provider
 that can be compared across providers. **Indirect** standardization
@@ -106,7 +114,7 @@ whole population would have had at this provider. The two answer
 slightly different questions and are both available; see [Standardized
 measures](https://um-kevinhe.github.io/pprof/articles/standardization.md).
 
-### Testing every provider
+### Inference
 
 For each provider the null hypothesis is \\\gamma_i = \gamma_0\\, with
 \\\gamma_0\\ the median of the provider effects (a robust “typical

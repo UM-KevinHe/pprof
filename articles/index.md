@@ -17,12 +17,12 @@
 - [Variable
   selection](https://um-kevinhe.github.io/pprof/articles/selection.md):
 
-### Standardized measures
+### Standardization
 
 - [Standardized
   measures](https://um-kevinhe.github.io/pprof/articles/standardization.md):
 
-### Testing
+### Inference
 
 - [Tests of provider
   effects](https://um-kevinhe.github.io/pprof/articles/testing.md):
