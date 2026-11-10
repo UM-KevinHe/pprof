@@ -10,7 +10,7 @@ template:
 
 navbar:
   structure:
-    left: [intro, articles, reference, news]
+    left: [intro, articles, reference]
     right: [search, lightswitch, github]
   components:
     intro:
@@ -28,10 +28,10 @@ navbar:
       - text: Variable selection
         href: articles/selection.html
       - text: -------
-      - text: Standardized measures
+      - text: Standardization
         href: articles/standardization.html
       - text: -------
-      - text: Testing
+      - text: Inference
       - text: Tests of provider effects
         href: articles/testing.html
       - text: Reference distributions
@@ -56,11 +56,11 @@ articles:
   contents:
   - models
   - selection
-- title: Standardized measures
+- title: Standardization
   navbar: ~
   contents:
   - standardization
-- title: Testing
+- title: Inference
   navbar: ~
   contents:
   - testing
@@ -99,7 +99,7 @@ reference:
   - var_select
   - cv
   - coef.pp_lasso
-- title: Standardized measures
+- title: Standardization
   contents:
   - standardize
   - standardize.logistic_fe
@@ -107,8 +107,8 @@ reference:
   - standardize_mixed
   - standardize.cox
   - direct_expectation
-- title: Testing
-  desc: One test per provider, intervals, the reference distribution the statistics are judged against, and the test of a standardized measure.
+- title: Inference
+  desc: One test per provider, intervals, the test of a standardized measure, and the reference distribution the statistics are judged against.
   contents:
   - test
   - test.logistic_fe

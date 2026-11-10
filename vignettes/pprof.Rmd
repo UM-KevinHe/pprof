@@ -33,11 +33,11 @@ them, or spares one that has.
    it is, and without adjustment differences in patient mix are mistaken
    for differences in quality. The risk-adjustment model separates the
    two; the provider effects it yields are the input to everything after.
-2. **Standardized measures.** After adjustment, each provider is held
+2. **Standardization.** After adjustment, each provider is held
    against a national norm on one interpretable scale: the ratio or the
    difference between the outcome under the provider's care and the
    outcome expected under the norm for the provider's own patients.
-3. **Hypothesis testing.** A departure from the norm can arise by chance,
+3. **Inference.** A departure from the norm can arise by chance,
    and a small provider can depart widely through random variation alone.
    A test decides whether the departure is more than chance; only a
    significant departure becomes a flag.
@@ -75,29 +75,27 @@ very different amounts of information from one provider to the next.
 
 ```{r, echo = FALSE}
 steps <- data.frame(
-  step = c("Data", "Risk-adjustment model", "Standardized measure", "Test",
-           "Reference distribution", "Reliability", "Variable selection", "Plots"),
+  step = c("Data", "Risk adjustment", "Standardization", "Inference", "Reliability", "Plots"),
   question = c("Which columns are the outcome, the risk factors, the provider, the patient?",
-               "What does each provider's effect look like after adjusting for its patients?",
+               paste("What is each provider's effect after adjusting for its patients,",
+                     "and which risk factors should the model carry?"),
                "How does the provider's outcome compare with what was expected?",
-               "Is the provider's effect different from the reference, and in which direction?",
-               "Different from the reference, or unusual among providers of similar size?",
+               paste("Is the provider different from the reference, and in which direction,",
+                     "judged against the theoretical null or an empirical null?"),
                "How much of the variation between providers is signal rather than noise?",
-               "Which risk factors should the model carry?",
                "What does the result look like?"),
   functions = c("`pp_data()`, `pp_check()`",
-                "`fit_logistic_fe()`, `fit_linear_fe()`, `fit_cox()`, `fit_*_re()`, `fit_*_cre()`",
-                "`standardize()`, `test_measure()`",
-                "`test()`, `confint()`, `summary()`",
-                "`null_model()`, `calibrate()`",
+                paste("`fit_logistic_fe()`, `fit_linear_fe()`, `fit_cox()`, `fit_*_re()`,",
+                      "`fit_*_cre()`, `summary()`, `var_select()`, `cv()`"),
+                "`standardize()`",
+                "`test()`, `confint()`, `test_measure()`, `null_model()`, `calibrate()`",
                 "`iur()`",
-                "`var_select()`, `cv()`",
                 "`plot()`, `flag_stability()`"),
   stringsAsFactors = FALSE)
 knitr::kable(steps, col.names = c("Step", "The question it answers", "Functions"))
 ```
 
-### Risk adjustment with one effect per provider
+### Risk adjustment
 
 The provider effects are *fixed effects*: one free parameter per provider,
 never shrunk toward the average, because the effect is what the measure
@@ -111,7 +109,13 @@ are all the same, random-effect and correlated-random-effect models for
 comparison, and the two-stage stratified Cox model for survival outcomes.
 See [Risk-adjustment models](models.html).
 
-### Standardized measures
+Variable selection is part of the same step. When the risk factors are not
+fixed in advance, `var_select()` fits a lasso or group-lasso path with the
+provider effects left unpenalized, and `cv()` chooses the penalty by
+cross-validation; the selected risk factors then enter the model above. See
+[Variable selection](selection.html).
+
+### Standardization
 
 A standardized measure summarises the fit as one number per provider that
 can be compared across providers. **Indirect** standardization compares the
@@ -122,7 +126,7 @@ difference. **Direct** standardization applies the provider's effect to
 had at this provider. The two answer slightly different questions and are
 both available; see [Standardized measures](standardization.html).
 
-### Testing every provider
+### Inference
 
 For each provider the null hypothesis is $\gamma_i = \gamma_0$, with
 $\gamma_0$ the median of the provider effects (a robust "typical

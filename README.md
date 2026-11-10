@@ -6,7 +6,11 @@
 [![R ≥ 4.1](https://img.shields.io/badge/R-%E2%89%A5%204.1-276DC3?logo=r)](https://www.r-project.org/)
 <!-- badges: end -->
 
-**pprof** provides statistical methods for provider profiling, the comparison of health care providers on patient outcomes after adjustment for differences in case mix. The package implements each step of constructing a quality measure: Risk adjustment fits models with provider-specific fixed, random, or correlated random effects for binary, continuous, and time-to-event outcomes, with optional penalized selection of risk factors. Standardization computes indirectly and directly standardized ratios, rates, and differences. Inference tests each provider against a national norm using score and Wald statistics with model-based, robust, or stabilized variances, as well as exact and likelihood ratio tests, referred to either the theoretical null or an empirical null. The package also provides a comprehensive set of plots for provider profiling, including caterpillar and funnel plots, observed-versus-expected plots, the fitted reference distribution, reliability, and variable selection paths.
+**pprof** provides statistical methods for provider profiling, the comparison of health care providers on patient outcomes after adjustment for differences in case mix. The package implements each step of constructing a quality measure: ***Risk adjustment*** fits models with provider-specific fixed, random, or correlated random effects for binary, continuous, and time-to-event outcomes, with optional penalized selection of risk factors. ***Standardization*** computes indirectly and directly standardized ratios, rates, and differences. ***Inference*** tests each provider against a national norm using score and Wald statistics with model-based, robust, or stabilized variances, as well as exact and likelihood ratio tests, referred to either the theoretical null or an empirical null. The package also provides a comprehensive set of plots for provider profiling, including caterpillar and funnel plots, observed-versus-expected plots, the fitted reference distribution, reliability, and variable selection paths.
+
+<p align="center">
+  <img src="man/figures/readme-steps.svg" width="100%" alt="The analysis steps: risk adjustment, standardization, inference, plots"/>
+</p>
 
 
 ## Installation
@@ -59,12 +63,12 @@ pp_data()                 data: declare the outcome, risk factors, provider and 
 │   └── var_select(data, penalty = "lasso" | "group_lasso"),  cv(),  selected_covariates()
 │                                        risk-factor selection with the provider effects unpenalized
 │
-├── standardized measures
+├── standardization
 │   ├── standardize(fit, type = "indirect" | "direct")
 │   │                                    one ratio, rate or difference per provider, with observed and expected
 │   └── direct_expectation()             the direct standardization for effects supplied by hand
 │
-├── testing               is a provider different from the reference?
+├── inference             is a provider different from the reference?
 │   ├── test(fit, statistic, variance, null_model)        one test per provider, flag 1 / 0 / -1
 │   │     logistic   statistic = exact | score | wald | lr    variance = naive | robust | stabilized
 │   │     linear     statistic = wald                         variance = naive | robust
