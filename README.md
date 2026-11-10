@@ -1,7 +1,7 @@
 # pprof
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/UM-KevinHe/pprof/actions/workflows/R-CMD-check.yaml/badge.svg?branch=Yubo)](https://github.com/UM-KevinHe/pprof/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/UM-KevinHe/pprof/actions/workflows/R-CMD-check.yaml/badge.svg?branch=pprof-main)](https://github.com/UM-KevinHe/pprof/actions/workflows/R-CMD-check.yaml)
 [![Documentation](https://img.shields.io/badge/docs-um--kevinhe.github.io%2Fpprof-27588F)](https://um-kevinhe.github.io/pprof/)
 [![R ≥ 4.1](https://img.shields.io/badge/R-%E2%89%A5%204.1-276DC3?logo=r)](https://www.r-project.org/)
 <!-- badges: end -->
@@ -17,7 +17,7 @@
 
 ```r
 # install.packages("remotes")
-remotes::install_github("UM-KevinHe/pprof", ref = "Yubo")
+remotes::install_github("UM-KevinHe/pprof")
 ```
 
 A C++17 compiler is needed (Rtools on Windows, the Xcode command-line tools

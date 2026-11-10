@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [main, Yubo]
+    branches: [pprof-main]
   pull_request:
 
 name: R-CMD-check
