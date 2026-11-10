@@ -24,7 +24,7 @@ plots](reference/figures/readme-steps.svg)
 ``` r
 
 # install.packages("remotes")
-remotes::install_github("UM-KevinHe/pprof", ref = "Yubo")
+remotes::install_github("UM-KevinHe/pprof")
 ```
 
 A C++17 compiler is needed (Rtools on Windows, the Xcode command-line
