@@ -95,9 +95,6 @@ fit_mixed <- function(data, family, decompose, ...) {
   } else {
     check_model_data(data, c("continuous", "binary", "binomial"), "The linear model")
   }
-  if (!requireNamespace("lme4", quietly = TRUE)) {
-    stop("Package lme4 is needed for the random-effect models.", call. = FALSE)
-  }
   v <- data$vars
   d <- data$data[data$data$included, , drop = FALSE]
   if (nrow(d) == 0) stop("No provider reaches the cutoff.", call. = FALSE)

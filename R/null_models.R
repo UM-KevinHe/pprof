@@ -282,9 +282,6 @@ assign_groups <- function(size, n_groups = 4, grouping = c("rank", "quantile", "
 
 # Intercept-only MASS::rlm fit: location, scale, convergence.
 robust_location_scale <- function(values, estimator, tuning, maxit, acc) {
-  if (!requireNamespace("MASS", quietly = TRUE)) {
-    stop("Package MASS is needed for the empirical null.", call. = FALSE)
-  }
   args <- list(x = matrix(1, length(values), 1), y = values,
                method = if (estimator == "mm") "MM" else "M",
                psi = if (estimator == "huber") MASS::psi.huber else MASS::psi.bisquare,

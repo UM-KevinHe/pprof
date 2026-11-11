@@ -2,8 +2,8 @@ Package: pprof
 Type: Package
 Title: Provider Profiling: Risk Adjustment, Standardized Measures, Hypothesis
     Tests and Reference Distributions
-Version: 2.0.9
-Date: 2026-11-07
+Version: 2.0.10
+Date: 2026-11-11
 Authors@R: c(
     person("Yubo", "Shao", email = "ybshao@umich.edu", role = c("aut", "cre")),
     person("Kevin", "He", email = "kevinhe@umich.edu", role = "aut"))
@@ -27,6 +27,7 @@ Depends:
     R (>= 4.1.0)
 Imports:
     ggplot2,
+    lme4,
     MASS,
     poibin,
     Rcpp,
@@ -38,9 +39,7 @@ LinkingTo:
     RcppArmadillo
 Suggests:
     knitr,
-    lme4,
     rmarkdown,
-    statmod,
     testthat (>= 3.0.0)
 SystemRequirements: C++17, GNU make
 Roxygen: list(markdown = TRUE)
