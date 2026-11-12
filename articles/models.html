@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -339,9 +339,61 @@ record by its number of events and carry a log-exposure offset).</li>
 the providers to report are chosen by
 <code>test(cox, min_expected = 3)</code>.</li>
 </ul>
-<p>The discrete-time hazard model (one logistic hazard per period, with
-provider effects) is fitted by
-<code>var_select(ps, model = "discrete")</code>, see <a href="selection.html">Variable selection</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="discrete-time-to-event-fit_discrete_fe">Discrete time to event: <code>fit_discrete_fe()</code><a class="anchor" aria-label="anchor" href="#discrete-time-to-event-fit_discrete_fe"></a>
+</h2>
+<p>When time is counted in periods (months, say), the hazard of the
+event in period <span class="math inline">\(k\)</span> is modelled on
+the logit scale with one effect per period and one per provider, <span class="math inline">\(\mathrm{logit}\, h_{ijk} = \alpha_k + \gamma_i +
+Z_{ij}^\top\beta\)</span>. The data keep one row per subject:
+<code>time</code> is the last period (the event period, or the last one
+observed without the event). The person-periods are looped over inside
+the fit and never stored, and every result equals that of the logistic
+model on the person-period data. <code><a href="../reference/test.html">test()</a></code> offers the score
+and Wald statistics with the naive or the patient-clustered variance;
+<code><a href="../reference/standardize.html">standardize()</a></code> compares the provider’s events with those
+expected over its periods at risk.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_kecc.html">sim_kecc</a></span><span class="op">(</span>n_providers <span class="op">=</span> <span class="fl">60</span>, provider_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">15</span>, <span class="fl">60</span><span class="op">)</span>, rows_per_patient <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>               type <span class="op">=</span> <span class="st">"survival"</span>, seed <span class="op">=</span> <span class="fl">9</span><span class="op">)</span></span>
+<span><span class="va">sd</span><span class="op">$</span><span class="va">month</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmin</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">ceiling</a></span><span class="op">(</span><span class="va">sd</span><span class="op">$</span><span class="va">stop</span> <span class="op">*</span> <span class="fl">12</span><span class="op">)</span>, <span class="fl">12</span><span class="op">)</span>      <span class="co"># follow-up in months, ending at 12</span></span>
+<span><span class="va">sd</span><span class="op">$</span><span class="va">event</span><span class="op">[</span><span class="va">sd</span><span class="op">$</span><span class="va">stop</span> <span class="op">*</span> <span class="fl">12</span> <span class="op">&gt;</span> <span class="fl">12</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
+<span><span class="va">pdd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pp_data.html">pp_data</a></span><span class="op">(</span><span class="va">sd</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x1"</span>, <span class="st">"x2"</span>, <span class="st">"x3"</span><span class="op">)</span>, provider <span class="op">=</span> <span class="st">"provider"</span>, patient <span class="op">=</span> <span class="st">"patient"</span>,</span>
+<span>               time <span class="op">=</span> <span class="st">"month"</span>, event <span class="op">=</span> <span class="st">"event"</span>, cutoff <span class="op">=</span> <span class="fl">0</span>, message <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">dfit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fit_discrete_fe.html">fit_discrete_fe</a></span><span class="op">(</span><span class="va">pdd</span><span class="op">)</span></span>
+<span><span class="va">dfit</span></span>
+<span><span class="co">#&gt; Discrete-time hazard model with fixed provider effects</span></span>
+<span><span class="co">#&gt;   2325 subjects, 20746 person-periods, 60 providers, 12 event periods, 3 covariates</span></span>
+<span><span class="co">#&gt;   log-likelihood -3377.69; iterations 5</span></span>
+<span><span class="co">#&gt;   provider effects: median -2.989, range -4.423 to -2.063</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/test.html">test</a></span><span class="op">(</span><span class="va">dfit</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Provider tests: score statistic, naive variance (modified); null median = -2.989; two.sided, level 0.95</span></span>
+<span><span class="co">#&gt;   6 providers: 0 above, 0 below, 6 not different, 0 not tested</span></span>
+<span><span class="co">#&gt;  provider estimate se null_value statistic      p flag  lower  upper observed</span></span>
+<span><span class="co">#&gt;      P001   -2.979 NA     -2.989    0.0263 0.9790    0 -3.719 -2.239        7</span></span>
+<span><span class="co">#&gt;      P002   -3.318 NA     -2.989   -1.0281 0.3039    0 -3.939 -2.698       10</span></span>
+<span><span class="co">#&gt;      P003   -2.934 NA     -2.989    0.1987 0.8425    0 -3.472 -2.396       14</span></span>
+<span><span class="co">#&gt;      P004   -3.130 NA     -2.989   -0.3369 0.7362    0 -3.931 -2.330        6</span></span>
+<span><span class="co">#&gt;      P005   -2.728 NA     -2.989    0.8395 0.4012    0 -3.330 -2.127       11</span></span>
+<span><span class="co">#&gt;      P006   -2.934 NA     -2.989    0.2298 0.8182    0 -3.397 -2.472       19</span></span>
+<span><span class="co">#&gt;  expected variance</span></span>
+<span><span class="co">#&gt;     6.932    6.641</span></span>
+<span><span class="co">#&gt;    13.717   13.072</span></span>
+<span><span class="co">#&gt;    13.302   12.362</span></span>
+<span><span class="co">#&gt;     6.855    6.447</span></span>
+<span><span class="co">#&gt;     8.600    8.174</span></span>
+<span><span class="co">#&gt;    18.057   16.832</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/standardize.html">standardize</a></span><span class="op">(</span><span class="va">dfit</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   provider observed  expected     ratio       rate variance_expected</span></span>
+<span><span class="co">#&gt; 1     P001        7  6.932234 1.0097756 0.04215105          6.641047</span></span>
+<span><span class="co">#&gt; 2     P002       10 13.717113 0.7290164 0.03043132         13.072418</span></span>
+<span><span class="co">#&gt; 3     P003       14 13.301521 1.0525112 0.04393496         12.362270</span></span>
+<span><span class="co">#&gt; 4     P004        6  6.855468 0.8752138 0.03653404          6.446676</span></span>
+<span><span class="co">#&gt; 5     P005       11  8.599996 1.2790704 0.05339222          8.173806</span></span>
+<span><span class="co">#&gt; 6     P006       19 18.057070 1.0522194 0.04392278         16.832108</span></span></code></pre></div>
+<p>Selection of the covariates for this model is
+<code>var_select(pdd, model = "discrete")</code>, see <a href="selection.html">Variable selection</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="which-model">Which model<a class="anchor" aria-label="anchor" href="#which-model"></a>
@@ -379,6 +431,12 @@ provider effects) is fitted by
 <td>observed / expected</td>
 </tr>
 <tr class="even">
+<td>time to event in periods</td>
+<td><code><a href="../reference/fit_discrete_fe.html">fit_discrete_fe()</a></code></td>
+<td>a log-odds of the hazard</td>
+<td>observed / expected</td>
+</tr>
+<tr class="odd">
 <td>any, when a shrunken estimate is wanted</td>
 <td>
 <code>fit_*_re()</code>, <code>fit_*_cre()</code>

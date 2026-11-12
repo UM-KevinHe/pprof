@@ -30,7 +30,7 @@
 
     <a class="navbar-brand me-2" href="index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -130,6 +130,7 @@
 │   │     binary / binomial outcome      fit_logistic_fe()    fit_logistic_re()    fit_logistic_cre()
 │   │     continuous outcome             fit_linear_fe()      fit_linear_re()      fit_linear_cre()
 │   │     time to event                  fit_cox()            stratified by provider; two-stage with x2
+│   │     discrete time to event         fit_discrete_fe()
 │   ├── coef()  vcov()  summary()        coefficients, their variances, tests of the risk factors
 │   └── var_select(data, penalty = "lasso" | "group_lasso"),  cv(),  selected_covariates()
 │                                        risk-factor selection with the provider effects unpenalized

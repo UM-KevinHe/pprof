@@ -15,6 +15,9 @@ value is an external constant stated in the same coding.
 ## Usage
 
 ``` r
+# S3 method for class 'discrete_fe'
+gamma_variance(fit, type = c("case_mix", "full"), ...)
+
 # S3 method for class 'linear_fe'
 gamma_variance(fit, type = c("case_mix", "full"), ...)
 

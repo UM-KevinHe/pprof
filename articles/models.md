@@ -259,9 +259,66 @@ head(standardize(cox))
 - `cutoff = 0`: every provider enters the stratified fit; the providers
   to report are chosen by `test(cox, min_expected = 3)`.
 
-The discrete-time hazard model (one logistic hazard per period, with
-provider effects) is fitted by `var_select(ps, model = "discrete")`, see
-[Variable
+## Discrete time to event: `fit_discrete_fe()`
+
+When time is counted in periods (months, say), the hazard of the event
+in period \\k\\ is modelled on the logit scale with one effect per
+period and one per provider, \\\mathrm{logit}\\ h\_{ijk} = \alpha_k +
+\gamma_i + Z\_{ij}^\top\beta\\. The data keep one row per subject:
+`time` is the last period (the event period, or the last one observed
+without the event). The person-periods are looped over inside the fit
+and never stored, and every result equals that of the logistic model on
+the person-period data.
+[`test()`](https://um-kevinhe.github.io/pprof/reference/test.md) offers
+the score and Wald statistics with the naive or the patient-clustered
+variance;
+[`standardize()`](https://um-kevinhe.github.io/pprof/reference/standardize.md)
+compares the provider’s events with those expected over its periods at
+risk.
+
+``` r
+
+sd <- sim_kecc(n_providers = 60, provider_size = c(15, 60), rows_per_patient = c(1, 1),
+               type = "survival", seed = 9)
+sd$month <- pmin(ceiling(sd$stop * 12), 12)      # follow-up in months, ending at 12
+sd$event[sd$stop * 12 > 12] <- 0
+pdd <- pp_data(sd, x = c("x1", "x2", "x3"), provider = "provider", patient = "patient",
+               time = "month", event = "event", cutoff = 0, message = FALSE)
+dfit <- fit_discrete_fe(pdd)
+dfit
+#> Discrete-time hazard model with fixed provider effects
+#>   2325 subjects, 20746 person-periods, 60 providers, 12 event periods, 3 covariates
+#>   log-likelihood -3377.69; iterations 5
+#>   provider effects: median -2.989, range -4.423 to -2.063
+head(test(dfit))
+#> Provider tests: score statistic, naive variance (modified); null median = -2.989; two.sided, level 0.95
+#>   6 providers: 0 above, 0 below, 6 not different, 0 not tested
+#>  provider estimate se null_value statistic      p flag  lower  upper observed
+#>      P001   -2.979 NA     -2.989    0.0263 0.9790    0 -3.719 -2.239        7
+#>      P002   -3.318 NA     -2.989   -1.0281 0.3039    0 -3.939 -2.698       10
+#>      P003   -2.934 NA     -2.989    0.1987 0.8425    0 -3.472 -2.396       14
+#>      P004   -3.130 NA     -2.989   -0.3369 0.7362    0 -3.931 -2.330        6
+#>      P005   -2.728 NA     -2.989    0.8395 0.4012    0 -3.330 -2.127       11
+#>      P006   -2.934 NA     -2.989    0.2298 0.8182    0 -3.397 -2.472       19
+#>  expected variance
+#>     6.932    6.641
+#>    13.717   13.072
+#>    13.302   12.362
+#>     6.855    6.447
+#>     8.600    8.174
+#>    18.057   16.832
+head(standardize(dfit))
+#>   provider observed  expected     ratio       rate variance_expected
+#> 1     P001        7  6.932234 1.0097756 0.04215105          6.641047
+#> 2     P002       10 13.717113 0.7290164 0.03043132         13.072418
+#> 3     P003       14 13.301521 1.0525112 0.04393496         12.362270
+#> 4     P004        6  6.855468 0.8752138 0.03653404          6.446676
+#> 5     P005       11  8.599996 1.2790704 0.05339222          8.173806
+#> 6     P006       19 18.057070 1.0522194 0.04392278         16.832108
+```
+
+Selection of the covariates for this model is
+`var_select(pdd, model = "discrete")`, see [Variable
 selection](https://um-kevinhe.github.io/pprof/articles/selection.md).
 
 ## Which model
@@ -271,6 +328,7 @@ selection](https://um-kevinhe.github.io/pprof/articles/selection.md).
 | 0/1 per row, or events out of trials | [`fit_logistic_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_logistic_fe.md) | a log-odds | ratio or rate |
 | continuous | [`fit_linear_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_linear_fe.md) | a difference of means | difference |
 | time to event, recurrent events | [`fit_cox()`](https://um-kevinhe.github.io/pprof/reference/fit_cox.md) | absorbed in the provider’s baseline | observed / expected |
+| time to event in periods | [`fit_discrete_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_discrete_fe.md) | a log-odds of the hazard | observed / expected |
 | any, when a shrunken estimate is wanted | `fit_*_re()`, `fit_*_cre()` | a predicted random effect | ratio, rate or difference |
 
 ## References

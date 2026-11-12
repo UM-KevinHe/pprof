@@ -66,6 +66,7 @@ variant, and a measure is the chain of these steps.
     │   │     binary / binomial outcome      fit_logistic_fe()    fit_logistic_re()    fit_logistic_cre()
     │   │     continuous outcome             fit_linear_fe()      fit_linear_re()      fit_linear_cre()
     │   │     time to event                  fit_cox()            stratified by provider; two-stage with x2
+    │   │     discrete time to event         fit_discrete_fe()
     │   ├── coef()  vcov()  summary()        coefficients, their variances, tests of the risk factors
     │   └── var_select(data, penalty = "lasso" | "group_lasso"),  cv(),  selected_covariates()
     │                                        risk-factor selection with the provider effects unpenalized
@@ -153,12 +154,16 @@ provider effects unpenalized.
   : Fit random-effect and correlated-random-effect provider models
 - [`fit_cox()`](https://um-kevinhe.github.io/pprof/reference/fit_cox.md)
   : Cox model with provider strata or a pooled baseline
+- [`fit_discrete_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_discrete_fe.md)
+  : Fit the discrete-time hazard model with fixed provider effects
 - [`vcov(`*`<logistic_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/vcov.logistic_fe.md)
   : Model-based variance of a logistic fixed-effect fit
 - [`vcov(`*`<linear_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/vcov.linear_fe.md)
   : Model-based variance of a linear fixed-effect fit
 - [`vcov(`*`<cox>`*`)`](https://um-kevinhe.github.io/pprof/reference/vcov.cox.md)
   : Covariance of the covariate effects of a Cox fit
+- [`vcov(`*`<discrete_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/vcov.discrete_fe.md)
+  : Model-based variance of a discrete-time fixed-effect fit
 - [`gamma_variance()`](https://um-kevinhe.github.io/pprof/reference/gamma_variance.md)
   : Variance of the provider effects for a Wald test
 
@@ -173,6 +178,8 @@ provider effects unpenalized.
   : Tests of the fixed effects of a random-effect fit
 - [`summary(`*`<cox>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.cox.md)
   : Tests of the covariate coefficients of a Cox fit
+- [`summary(`*`<discrete_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/summary.discrete_fe.md)
+  : Tests of the covariates of a discrete-time fixed-effect fit
 
 ### Variable selection
 
@@ -198,6 +205,8 @@ provider effects unpenalized.
   : Standardized measures of a random-effect fit
 - [`standardize(`*`<cox>`*`)`](https://um-kevinhe.github.io/pprof/reference/standardize.cox.md)
   : Standardized ratios of a Cox fit
+- [`standardize(`*`<discrete_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/standardize.discrete_fe.md)
+  : Standardized ratios and rates of a discrete-time fixed-effect fit
 - [`direct_expectation()`](https://um-kevinhe.github.io/pprof/reference/direct_expectation.md)
   : Direct standardization over an arbitrary standard population
 
@@ -217,6 +226,8 @@ and the reference distribution the statistics are judged against.
   : Tests of the provider effects of a random-effect fit
 - [`test(`*`<cox>`*`)`](https://um-kevinhe.github.io/pprof/reference/test.cox.md)
   : Tests of the standardized ratios of a Cox fit
+- [`test(`*`<discrete_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/test.discrete_fe.md)
+  : Tests of the provider effects of a discrete-time fixed-effect fit
 - [`confint(`*`<logistic_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/confint.logistic_fe.md)
   : Confidence intervals for the provider effects of a logistic
   fixed-effect fit
@@ -228,6 +239,8 @@ and the reference distribution the statistics are judged against.
   : Confidence intervals for the provider effects of a random-effect fit
 - [`confint(`*`<cox>`*`)`](https://um-kevinhe.github.io/pprof/reference/confint.cox.md)
   : Confidence limits of the standardized ratios of a Cox fit
+- [`confint(`*`<discrete_fe>`*`)`](https://um-kevinhe.github.io/pprof/reference/confint.discrete_fe.md)
+  : Confidence intervals for the provider effects of a discrete-time fit
 - [`test_measure()`](https://um-kevinhe.github.io/pprof/reference/test_measure.md)
   : Test standardized measures against a reference value
 
