@@ -59,6 +59,7 @@ pp_data()                 data: declare the outcome, risk factors, provider and 
 │   │     binary / binomial outcome      fit_logistic_fe()    fit_logistic_re()    fit_logistic_cre()
 │   │     continuous outcome             fit_linear_fe()      fit_linear_re()      fit_linear_cre()
 │   │     time to event                  fit_cox()            stratified by provider; two-stage with x2
+│   │     discrete time to event         fit_discrete_fe()
 │   ├── coef()  vcov()  summary()        coefficients, their variances, tests of the risk factors
 │   └── var_select(data, penalty = "lasso" | "group_lasso"),  cv(),  selected_covariates()
 │                                        risk-factor selection with the provider effects unpenalized

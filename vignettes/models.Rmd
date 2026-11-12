@@ -177,9 +177,34 @@ head(standardize(cox))
 * `cutoff = 0`: every provider enters the stratified fit; the providers to
   report are chosen by `test(cox, min_expected = 3)`.
 
-The discrete-time hazard model (one logistic hazard per period, with
-provider effects) is fitted by `var_select(ps, model = "discrete")`, see
-[Variable selection](selection.html).
+## Discrete time to event: `fit_discrete_fe()`
+
+When time is counted in periods (months, say), the hazard of the event in
+period $k$ is modelled on the logit scale with one effect per period and
+one per provider, $\mathrm{logit}\, h_{ijk} = \alpha_k + \gamma_i +
+Z_{ij}^\top\beta$. The data keep one row per subject: `time` is the last
+period (the event period, or the last one observed without the event).
+The person-periods are looped over inside the fit and never stored, and
+every result equals that of the logistic model on the person-period data.
+`test()` offers the score and Wald statistics with the naive or the
+patient-clustered variance; `standardize()` compares the provider's events
+with those expected over its periods at risk.
+
+```{r}
+sd <- sim_kecc(n_providers = 60, provider_size = c(15, 60), rows_per_patient = c(1, 1),
+               type = "survival", seed = 9)
+sd$month <- pmin(ceiling(sd$stop * 12), 12)      # follow-up in months, ending at 12
+sd$event[sd$stop * 12 > 12] <- 0
+pdd <- pp_data(sd, x = c("x1", "x2", "x3"), provider = "provider", patient = "patient",
+               time = "month", event = "event", cutoff = 0, message = FALSE)
+dfit <- fit_discrete_fe(pdd)
+dfit
+head(test(dfit))
+head(standardize(dfit))
+```
+
+Selection of the covariates for this model is `var_select(pdd, model =
+"discrete")`, see [Variable selection](selection.html).
 
 ## Which model
 
@@ -188,6 +213,7 @@ provider effects) is fitted by `var_select(ps, model = "discrete")`, see
 | 0/1 per row, or events out of trials | `fit_logistic_fe()` | a log-odds | ratio or rate |
 | continuous | `fit_linear_fe()` | a difference of means | difference |
 | time to event, recurrent events | `fit_cox()` | absorbed in the provider's baseline | observed / expected |
+| time to event in periods | `fit_discrete_fe()` | a log-odds of the hazard | observed / expected |
 | any, when a shrunken estimate is wanted | `fit_*_re()`, `fit_*_cre()` | a predicted random effect | ratio, rate or difference |
 
 ## References

@@ -11,6 +11,92 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// discrete_fe_fit
+List discrete_fe_fit(const arma::uvec& t, const arma::vec& event, const arma::mat& Z, const arma::vec& n_prov, arma::vec alpha, arma::vec gamma, arma::vec beta, double tol, int max_iter, double bound, bool backtrack, bool message);
+RcppExport SEXP _pprof_discrete_fe_fit(SEXP tSEXP, SEXP eventSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP alphaSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP backtrackSEXP, SEXP messageSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type event(eventSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
+    Rcpp::traits::input_parameter< bool >::type backtrack(backtrackSEXP);
+    Rcpp::traits::input_parameter< bool >::type message(messageSEXP);
+    rcpp_result_gen = Rcpp::wrap(discrete_fe_fit(t, event, Z, n_prov, alpha, gamma, beta, tol, max_iter, bound, backtrack, message));
+    return rcpp_result_gen;
+END_RCPP
+}
+// discrete_fe_info
+List discrete_fe_info(const arma::uvec& t, const arma::vec& event, const arma::mat& Z, const arma::vec& n_prov, const arma::vec& alpha, const arma::vec& gamma, const arma::vec& beta);
+RcppExport SEXP _pprof_discrete_fe_info(SEXP tSEXP, SEXP eventSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP alphaSEXP, SEXP gammaSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type event(eventSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(discrete_fe_info(t, event, Z, n_prov, alpha, gamma, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// discrete_fe_theta_meat
+arma::mat discrete_fe_theta_meat(const arma::uvec& t, const arma::vec& event, const arma::mat& Z, const arma::vec& n_prov, const arma::uvec& cluster, const arma::vec& alpha, const arma::vec& gamma, const arma::vec& beta, const arma::mat& J);
+RcppExport SEXP _pprof_discrete_fe_theta_meat(SEXP tSEXP, SEXP eventSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP clusterSEXP, SEXP alphaSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP JSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type event(eventSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type n_prov(n_provSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type cluster(clusterSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type J(JSEXP);
+    rcpp_result_gen = Rcpp::wrap(discrete_fe_theta_meat(t, event, Z, n_prov, cluster, alpha, gamma, beta, J));
+    return rcpp_result_gen;
+END_RCPP
+}
+// discrete_subject_sums
+List discrete_subject_sums(const arma::uvec& t, const arma::vec& alpha, const arma::vec& eta);
+RcppExport SEXP _pprof_discrete_subject_sums(SEXP tSEXP, SEXP alphaSEXP, SEXP etaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type eta(etaSEXP);
+    rcpp_result_gen = Rcpp::wrap(discrete_subject_sums(t, alpha, eta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// discrete_direct
+arma::mat discrete_direct(const arma::vec& gamma, const arma::uvec& t, const arma::vec& alpha, const arma::vec& zb, int threads);
+RcppExport SEXP _pprof_discrete_direct(SEXP gammaSEXP, SEXP tSEXP, SEXP alphaSEXP, SEXP zbSEXP, SEXP threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type t(tSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type zb(zbSEXP);
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(discrete_direct(gamma, t, alpha, zb, threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 // logis_fe_prov
 List logis_fe_prov(arma::vec& N, arma::vec& Y, arma::mat& Z, arma::vec& n_prov, arma::vec gamma, arma::vec beta, bool backtrack, int max_iter, double bound, double tol, bool message, std::string stop);
 RcppExport SEXP _pprof_logis_fe_prov(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP backtrackSEXP, SEXP max_iterSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP messageSEXP, SEXP stopSEXP) {
@@ -436,6 +522,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_pprof_discrete_fe_fit", (DL_FUNC) &_pprof_discrete_fe_fit, 12},
+    {"_pprof_discrete_fe_info", (DL_FUNC) &_pprof_discrete_fe_info, 7},
+    {"_pprof_discrete_fe_theta_meat", (DL_FUNC) &_pprof_discrete_fe_theta_meat, 9},
+    {"_pprof_discrete_subject_sums", (DL_FUNC) &_pprof_discrete_subject_sums, 3},
+    {"_pprof_discrete_direct", (DL_FUNC) &_pprof_discrete_direct, 5},
     {"_pprof_logis_fe_prov", (DL_FUNC) &_pprof_logis_fe_prov, 12},
     {"_pprof_logis_BIN_fe_prov", (DL_FUNC) &_pprof_logis_BIN_fe_prov, 13},
     {"_pprof_logis_fe_var", (DL_FUNC) &_pprof_logis_fe_var, 5},

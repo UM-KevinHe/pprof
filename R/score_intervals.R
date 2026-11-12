@@ -16,6 +16,9 @@
 # events, and either limit of a patient-clustered statistic, which is bounded
 # by the square root of the number of events (non-events).
 score_limits <- function(fit, variance, idx, z_lower, z_upper, pooled = NULL) {
+  if (inherits(fit, "discrete_fe")) {
+    return(score_limits_discrete(fit, variance, idx, z_lower, z_upper))
+  }
   m <- fit_matrices(fit)
   gamma <- fit$coefficients$gamma
   lp <- fit$linear_predictor

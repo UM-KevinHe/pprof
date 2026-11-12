@@ -4,9 +4,10 @@
 // on the covariates, and (2) the discrete-time hazard model
 //   logit h(k | i, j) = alpha_k + gamma_i + Z_j' beta
 // with unpenalized period effects alpha and provider effects gamma and a
-// lasso penalty on beta. Ported from grplasso 1.0 (Strat.cox, pp.DiscSurv)
-// with these changes: counting-process rows (start, stop], case weights and
-// offsets in the Cox model; a cyclic (deterministic) update order; the
+// lasso penalty on beta. Ported from grplasso 1.0 (Strat.cox, pp.DiscSurv;
+// case weights as there) with these changes: counting-process rows
+// (start, stop], tied times sharing one risk set (Breslow) and offsets in the
+// Cox model; a cyclic (deterministic) update order; the
 // discrete-time provider effects identified by a zero median (grplasso fixed
 // the first provider at zero); convergence judged on every parameter block.
 //

@@ -84,9 +84,11 @@ reference:
   - fit_linear_fe
   - fit_mixed
   - fit_cox
+  - fit_discrete_fe
   - vcov.logistic_fe
   - vcov.linear_fe
   - vcov.cox
+  - vcov.discrete_fe
   - gamma_variance
 - subtitle: Tests of the risk factors
   contents:
@@ -94,6 +96,7 @@ reference:
   - summary.linear_fe
   - summary_mixed
   - summary.cox
+  - summary.discrete_fe
 - subtitle: Variable selection
   contents:
   - var_select
@@ -106,6 +109,7 @@ reference:
   - standardize.linear_fe
   - standardize_mixed
   - standardize.cox
+  - standardize.discrete_fe
   - direct_expectation
 - title: Inference
   desc: One test per provider, intervals, the test of a standardized measure, and the reference distribution the statistics are judged against.
@@ -115,10 +119,12 @@ reference:
   - test.linear_fe
   - test_mixed
   - test.cox
+  - test.discrete_fe
   - confint.logistic_fe
   - confint.linear_fe
   - confint_mixed
   - confint.cox
+  - confint.discrete_fe
   - test_measure
 - subtitle: Reference distributions
   desc: Theoretical, fixed and empirical nulls, and calibration of a test with one.
