@@ -25,8 +25,8 @@ var_select(
 )
 }
 \arguments{
-\item{data}{an object from \code{\link[=pp_data]{pp_data()}} with a binary, binomial or survival
-outcome.}
+\item{data}{an object from \code{\link[=pp_data]{pp_data()}} with a binary, binomial, continuous
+or survival outcome.}
 
 \item{penalty}{\code{"lasso"} (default) or \code{"group_lasso"}.}
 
@@ -81,7 +81,7 @@ lasso):
 (\code{NULL} for the stratified Cox model).}
 \item{alpha, time_grid}{the discrete-time model's period effects (one
 column per \code{lambda}) and the periods' times.}
-\item{model}{\code{"logistic"}, \code{"cox"} or \code{"discrete"}.}
+\item{model}{\code{"logistic"}, \code{"linear"}, \code{"cox"} or \code{"discrete"}.}
 \item{lambda, deviance, iter}{per value of \code{lambda} (the deviance of the
 Cox model is minus twice its partial log-likelihood).}
 \item{n_selected}{number of penalized covariates with a nonzero
@@ -93,7 +93,8 @@ coefficient per \code{lambda}.}
 }
 \description{
 Lasso and group-lasso paths for the logistic model with fixed provider
-effects, \eqn{\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta}, where
+effects, \eqn{\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta} (and,
+by the outcome, the linear, Cox and discrete-time models below), where
 the provider effects (and any covariate named in \code{penalize}'s complement)
 are never penalized. The objective at penalty \eqn{\lambda} is
 \deqn{-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
@@ -101,8 +102,9 @@ are never penalized. The objective at penalty \eqn{\lambda} is
 \sum_g m_g \|\beta_g\|_2,}
 solved by coordinate descent on standardized covariates (each penalized
 group orthonormalized) with one Newton step on the provider effects per
-cycle, warm starts along a decreasing sequence of \eqn{\lambda}, and an
-active-set strategy.
+cycle (for the logistic model; the linear model profiles them out in
+closed form, see Details), warm starts along a decreasing sequence of
+\eqn{\lambda}, and an active-set strategy.
 }
 \details{
 Providers with fewer than the cutoff patients are excluded as in
@@ -110,6 +112,23 @@ every fitter. The path starts from the fit with the unpenalized covariates
 only (or the provider-only model), whose residuals give the largest
 \eqn{\lambda}. The deviance reported per \eqn{\lambda} is \eqn{-2\ell}
 without the constant term.
+
+With a continuous outcome the model is the linear model \eqn{y_{ij} =
+\gamma_i + Z_{ij}^\top\beta + \varepsilon_{ij}} and the objective
+\eqn{\frac{1}{2n}\sum (y - \gamma - Z\beta)^2} plus the penalty. For
+any \eqn{\beta} the best \eqn{\gamma_i} is the provider's mean of \eqn{y -
+Z\beta}, so the provider effects are profiled out exactly by centring the
+outcome and the covariates within providers, once, with no iteration on
+\eqn{\gamma}: a Newton step on \eqn{\gamma} would land on this minimizer
+in one step. The path is coordinate descent on \eqn{\beta} over the Gram
+matrix of the centred data (each update costs \eqn{O(p)} whatever the
+number of rows). Standardization and the orthonormalization
+of groups are those of the logistic model; a group's step is majorized by
+the largest eigenvalue of its block of the centred Gram matrix. The
+deviance is the residual sum of squares, and the end of a long path is the
+within-provider regression of \code{\link[=fit_linear_fe]{fit_linear_fe()}}. A covariate constant
+within every provider is absorbed by the provider effects and refused.
+\code{bound}, \code{mm}, \code{backtrack} and \code{threads} are not used.
 
 With a survival outcome (\code{\link[=pp_data]{pp_data()}} with \code{time} and \code{event}) the paths
 are those of \code{grplasso}'s \code{Strat.cox()} and \code{pp.DiscSurv()}:

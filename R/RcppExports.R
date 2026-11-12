@@ -81,6 +81,10 @@ penalized_lr <- function(N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices,
     .Call(`_pprof_penalized_lr`, N, Y, Z, n_prov, gamma, beta, gamma_null, parm_indices, firth)
 }
 
+linear_lasso_path <- function(G, c, yy, n, beta, unpenalized, group_first, group_last, multiplier, lambda, tol, max_iter, active_set) {
+    .Call(`_pprof_linear_lasso_path`, G, c, yy, n, beta, unpenalized, group_first, group_last, multiplier, lambda, tol, max_iter, active_set)
+}
+
 lasso_path <- function(N, Y, Z, n_prov, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set, threads) {
     .Call(`_pprof_lasso_path`, N, Y, Z, n_prov, gamma, beta, penalized, multiplier, lambda, mm, backtrack, bound, tol, max_iter, active_set, threads)
 }

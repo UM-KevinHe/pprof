@@ -36,7 +36,8 @@ of the path are interpolated linearly.}
 fit; default the fitted rows.}
 
 \item{type}{\code{"link"} (the linear predictor, including any offset) or
-\code{"response"}: the probability for the logistic model, the relative
+\code{"response"}: the probability for the logistic model, the mean for the
+linear model (the same as \code{"link"}), the relative
 hazard \eqn{e^\eta} for the Cox model, and for the discrete-time model
 the probability of the event by the row's time, \eqn{1 - \prod_k (1 -
   h_{jk})} over the fit's periods up to that time (a time between two

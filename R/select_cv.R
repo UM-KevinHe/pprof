@@ -1,7 +1,8 @@
 #' Cross-validation of a selection path
 #'
 #' Chooses the penalty of a [var_select()] path by
-#' K-fold cross-validation of the binomial deviance (for a survival outcome,
+#' K-fold cross-validation of the binomial deviance (the squared error for a
+#' continuous outcome; for a survival outcome,
 #' the partial-likelihood deviance per event of the held-out rows within
 #' their own strata and risk sets for the Cox model, the binomial deviance
 #' per person-period for the discrete-time model). Folds are formed within
@@ -101,13 +102,18 @@ cv_selection <- function(data, fitter, args, n_folds, folds, seed, full = NULL) 
 }
 
 # The held-out loss of one fold, per value of lambda, and the number of
-# units it averages over: the binomial deviance per row (logistic), the
+# units it averages over: the squared error per row (linear), the binomial
+# deviance per row (logistic), the
 # partial-likelihood deviance per weighted event within the held-out rows'
 # own strata and risk sets (Cox), or the binomial deviance per person-period
 # (discrete time). NULL when the fold has nothing to score.
 cv_fold_loss <- function(fit, m, test) {
   model <- path_model(fit)
   newdata <- m$d[test, , drop = FALSE]
+  if (model == "linear") {
+    mu <- predict(fit, newdata = newdata, unseen = "median")
+    return(list(loss = colMeans((m$y[test] - mu)^2), n = length(test)))
+  }
   if (model == "logistic") {
     p <- predict(fit, newdata = newdata, type = "response", unseen = "median")
     p <- pmin(pmax(p, 1e-10), 1 - 1e-10)

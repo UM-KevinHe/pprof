@@ -38,7 +38,8 @@ penalties.}
 }
 \description{
 Chooses the penalty of a \code{\link[=var_select]{var_select()}} path by
-K-fold cross-validation of the binomial deviance (for a survival outcome,
+K-fold cross-validation of the binomial deviance (the squared error for a
+continuous outcome; for a survival outcome,
 the partial-likelihood deviance per event of the held-out rows within
 their own strata and risk sets for the Cox model, the binomial deviance
 per person-period for the discrete-time model). Folds are formed within

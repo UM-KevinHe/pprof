@@ -356,6 +356,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// linear_lasso_path
+List linear_lasso_path(const arma::mat& G, const arma::vec& c, double yy, double n, arma::vec beta, const arma::uvec& unpenalized, const arma::uvec& group_first, const arma::uvec& group_last, const arma::vec& multiplier, const arma::vec& lambda, double tol, int max_iter, bool active_set);
+RcppExport SEXP _pprof_linear_lasso_path(SEXP GSEXP, SEXP cSEXP, SEXP yySEXP, SEXP nSEXP, SEXP betaSEXP, SEXP unpenalizedSEXP, SEXP group_firstSEXP, SEXP group_lastSEXP, SEXP multiplierSEXP, SEXP lambdaSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP active_setSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type c(cSEXP);
+    Rcpp::traits::input_parameter< double >::type yy(yySEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type unpenalized(unpenalizedSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group_first(group_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group_last(group_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type multiplier(multiplierSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< bool >::type active_set(active_setSEXP);
+    rcpp_result_gen = Rcpp::wrap(linear_lasso_path(G, c, yy, n, beta, unpenalized, group_first, group_last, multiplier, lambda, tol, max_iter, active_set));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lasso_path
 List lasso_path(const arma::vec& N, const arma::vec& Y, const arma::mat& Z, const arma::vec& n_prov, arma::vec gamma, arma::vec beta, const arma::uvec& penalized, const arma::vec& multiplier, const arma::vec& lambda, bool mm, bool backtrack, double bound, double tol, int max_iter, bool active_set, int threads);
 RcppExport SEXP _pprof_lasso_path(SEXP NSEXP, SEXP YSEXP, SEXP ZSEXP, SEXP n_provSEXP, SEXP gammaSEXP, SEXP betaSEXP, SEXP penalizedSEXP, SEXP multiplierSEXP, SEXP lambdaSEXP, SEXP mmSEXP, SEXP backtrackSEXP, SEXP boundSEXP, SEXP tolSEXP, SEXP max_iterSEXP, SEXP active_setSEXP, SEXP threadsSEXP) {
@@ -542,6 +565,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pprof_restricted_score", (DL_FUNC) &_pprof_restricted_score, 8},
     {"_pprof_logis_firth_prov", (DL_FUNC) &_pprof_logis_firth_prov, 12},
     {"_pprof_penalized_lr", (DL_FUNC) &_pprof_penalized_lr, 9},
+    {"_pprof_linear_lasso_path", (DL_FUNC) &_pprof_linear_lasso_path, 13},
     {"_pprof_lasso_path", (DL_FUNC) &_pprof_lasso_path, 16},
     {"_pprof_group_lasso_path", (DL_FUNC) &_pprof_group_lasso_path, 17},
     {"_pprof_cox_residuals", (DL_FUNC) &_pprof_cox_residuals, 10},

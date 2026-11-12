@@ -1,7 +1,8 @@
 #' Variable selection with unpenalized provider effects
 #'
 #' Lasso and group-lasso paths for the logistic model with fixed provider
-#' effects, \eqn{\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta}, where
+#' effects, \eqn{\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta} (and,
+#' by the outcome, the linear, Cox and discrete-time models below), where
 #' the provider effects (and any covariate named in `penalize`'s complement)
 #' are never penalized. The objective at penalty \eqn{\lambda} is
 #' \deqn{-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
@@ -9,11 +10,12 @@
 #' \sum_g m_g \|\beta_g\|_2,}
 #' solved by coordinate descent on standardized covariates (each penalized
 #' group orthonormalized) with one Newton step on the provider effects per
-#' cycle, warm starts along a decreasing sequence of \eqn{\lambda}, and an
-#' active-set strategy.
+#' cycle (for the logistic model; the linear model profiles them out in
+#' closed form, see Details), warm starts along a decreasing sequence of
+#' \eqn{\lambda}, and an active-set strategy.
 #'
-#' @param data an object from [pp_data()] with a binary, binomial or survival
-#'   outcome.
+#' @param data an object from [pp_data()] with a binary, binomial, continuous
+#'   or survival outcome.
 #' @param penalty `"lasso"` (default) or `"group_lasso"`.
 #' @param penalize names of the covariates that carry a penalty; default all.
 #'   The others enter the model unpenalized.
@@ -51,6 +53,23 @@
 #' \eqn{\lambda}. The deviance reported per \eqn{\lambda} is \eqn{-2\ell}
 #' without the constant term.
 #'
+#' With a continuous outcome the model is the linear model \eqn{y_{ij} =
+#' \gamma_i + Z_{ij}^\top\beta + \varepsilon_{ij}} and the objective
+#' \eqn{\frac{1}{2n}\sum (y - \gamma - Z\beta)^2} plus the penalty. For
+#' any \eqn{\beta} the best \eqn{\gamma_i} is the provider's mean of \eqn{y -
+#' Z\beta}, so the provider effects are profiled out exactly by centring the
+#' outcome and the covariates within providers, once, with no iteration on
+#' \eqn{\gamma}: a Newton step on \eqn{\gamma} would land on this minimizer
+#' in one step. The path is coordinate descent on \eqn{\beta} over the Gram
+#' matrix of the centred data (each update costs \eqn{O(p)} whatever the
+#' number of rows). Standardization and the orthonormalization
+#' of groups are those of the logistic model; a group's step is majorized by
+#' the largest eigenvalue of its block of the centred Gram matrix. The
+#' deviance is the residual sum of squares, and the end of a long path is the
+#' within-provider regression of [fit_linear_fe()]. A covariate constant
+#' within every provider is absorbed by the provider effects and refused.
+#' `bound`, `mm`, `backtrack` and `threads` are not used.
+#'
 #' With a survival outcome ([pp_data()] with `time` and `event`) the paths
 #' are those of `grplasso`'s `Strat.cox()` and `pp.DiscSurv()`:
 #' * `model = "cox"`: the weighted partial likelihood of the Cox model with
@@ -77,7 +96,7 @@
 #'   (`NULL` for the stratified Cox model).}
 #' \item{alpha, time_grid}{the discrete-time model's period effects (one
 #'   column per `lambda`) and the periods' times.}
-#' \item{model}{`"logistic"`, `"cox"` or `"discrete"`.}
+#' \item{model}{`"logistic"`, `"linear"`, `"cox"` or `"discrete"`.}
 #' \item{lambda, deviance, iter}{per value of `lambda` (the deviance of the
 #'   Cox model is minus twice its partial log-likelihood).}
 #' \item{n_selected}{number of penalized covariates with a nonzero
@@ -159,6 +178,12 @@ fit_lasso_path <- function(data, penalize = NULL, multiplier = NULL, lambda = NU
                           max_iter = max_iter, active_set = active_set, mm = mm,
                           backtrack = backtrack))
   }
+  if (outcome_of(data) == "continuous") {
+    return(linear_lasso(data, penalize = penalize, multiplier = multiplier, lambda = lambda,
+                        n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
+                        standardize = standardize, tol = tol, max_iter = max_iter,
+                        active_set = active_set))
+  }
   m <- selection_matrices(data)
   x <- data$vars$x
   if (is.null(penalize)) penalize <- x
@@ -206,6 +231,12 @@ fit_group_lasso_path <- function(data, group, multiplier = NULL, lambda = NULL, 
                      n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
                      standardize = standardize, tol = tol, max_iter = max_iter,
                      active_set = active_set))
+  }
+  if (outcome_of(data) == "continuous") {
+    return(linear_lasso(data, group = group, multiplier = multiplier, lambda = lambda,
+                        n_lambda = n_lambda, lambda_min_ratio = lambda_min_ratio,
+                        standardize = standardize, tol = tol, max_iter = max_iter,
+                        active_set = active_set))
   }
   m <- selection_matrices(data)
   x <- data$vars$x
@@ -270,7 +301,7 @@ survival_model <- function(data, model) {
 
 # Included rows of a pp_data object as the matrices the paths read.
 selection_matrices <- function(data) {
-  check_model_data(data, c("binary", "binomial"), "Variable selection")
+  check_model_data(data, c("binary", "binomial", "continuous"), "Variable selection")
   v <- data$vars
   d <- data$data[data$data$included, , drop = FALSE]
   if (nrow(d) == 0) stop("No provider reaches the cutoff.", call. = FALSE)
@@ -395,6 +426,7 @@ print.pp_lasso <- function(x, ...) {
   cat(if (inherits(x, "pp_group_lasso")) "Group-lasso" else "Lasso",
       switch(path_model(x),
              logistic = " path of the logistic model with unpenalized provider effects\n",
+             linear = " path of the linear model with unpenalized provider effects\n",
              cox = " path of the Cox model stratified by provider\n",
              discrete = " path of the discrete-time hazard model (period and provider effects)\n"),
       sep = "")
@@ -417,7 +449,8 @@ print.pp_lasso <- function(x, ...) {
 #' @param newdata a data frame with the covariate and provider columns of the
 #'   fit; default the fitted rows.
 #' @param type `"link"` (the linear predictor, including any offset) or
-#'   `"response"`: the probability for the logistic model, the relative
+#'   `"response"`: the probability for the logistic model, the mean for the
+#'   linear model (the same as `"link"`), the relative
 #'   hazard \eqn{e^\eta} for the Cox model, and for the discrete-time model
 #'   the probability of the event by the row's time, \eqn{1 - \prod_k (1 -
 #'   h_{jk})} over the fit's periods up to that time (a time between two
@@ -514,7 +547,7 @@ predict.pp_lasso <- function(object, newdata = NULL, lambda = NULL, which = NULL
     eta <- eta + g
   }
   dimnames(eta) <- list(NULL, colnames(cf$beta))
-  if (type == "link") return(eta)
+  if (type == "link" || model == "linear") return(eta)
   if (model == "logistic") return(stats::plogis(eta))
   if (model == "cox") return(exp(eta))
   ex <- discrete_expanded(object, newdata, lambda = lambda, which = which)
