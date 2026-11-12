@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,9 +103,9 @@ while the risk factors are selected. Selecting on a pooled model
 omitted provider effect acts as a confounder shared by every risk factor
 correlated with it.</p>
 <p><code><a href="../reference/var_select.html">var_select()</a></code> fits the lasso or group-lasso path of the
-fixed-effect model with the provider effects kept, for binary, binomial
-and survival outcomes; <code><a href="../reference/cv.html">cv()</a></code> chooses the penalty by
-cross-validation.</p>
+fixed-effect model with the provider effects kept, for binary, binomial,
+continuous and survival outcomes; <code><a href="../reference/cv.html">cv()</a></code> chooses the penalty
+by cross-validation.</p>
 <div class="section level2">
 <h2 id="the-objective">The objective<a class="anchor" aria-label="anchor" href="#the-objective"></a>
 </h2>
@@ -123,7 +123,8 @@ active-set strategy, so that the provider effects are updated in closed
 form from their own records and never form indicator columns (the
 multi-layer algorithm of the KECC measures paper;
 <code>grplasso</code>’s <code>pp.lasso</code> and
-<code>grp.lasso</code>).</p>
+<code>grp.lasso</code>). The linear model needs no step on the provider
+effects at all (see Continuous outcomes).</p>
 </div>
 <div class="section level2">
 <h2 id="a-lasso-path">A lasso path<a class="anchor" aria-label="anchor" href="#a-lasso-path"></a>
@@ -236,6 +237,29 @@ selected set:</p>
 <span><span class="co">#&gt; 5  0.08383743</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="continuous-outcomes">Continuous outcomes<a class="anchor" aria-label="anchor" href="#continuous-outcomes"></a>
+</h2>
+<p>For a continuous outcome the model is the linear model <span class="math inline">\(y_{ij} = \gamma_i +
+Z_{ij}^\top\beta + \varepsilon_{ij}\)</span> with the squared-error loss
+<span class="math inline">\(\frac{1}{2n}\sum (y - \gamma -
+Z\beta)^2\)</span>. Here the provider effects need no iteration: for any
+<span class="math inline">\(\beta\)</span> the best <span class="math inline">\(\gamma_i\)</span> is the provider’s mean of <span class="math inline">\(y - Z\beta\)</span>, so they are profiled out in
+closed form by centring the outcome and the covariates within providers,
+and the path is coordinate descent on <span class="math inline">\(\beta\)</span> alone over the Gram matrix of the
+centred data. The end of a long path is the within-provider regression
+of <code><a href="../reference/fit_linear_fe.html">fit_linear_fe()</a></code>; <code><a href="../reference/cv.html">cv()</a></code> scores the held-out
+squared error.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_kecc.html">sim_kecc</a></span><span class="op">(</span>n_providers <span class="op">=</span> <span class="fl">60</span>, type <span class="op">=</span> <span class="st">"continuous"</span>, n_covariates <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>               beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.4</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="va">pdc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pp_data.html">pp_data</a></span><span class="op">(</span><span class="va">dc</span>, y <span class="op">=</span> <span class="st">"y"</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>, provider <span class="op">=</span> <span class="st">"provider"</span>,</span>
+<span>               patient <span class="op">=</span> <span class="st">"patient"</span>, message <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">lin_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/var_select.html">var_select</a></span><span class="op">(</span><span class="va">pdc</span>, n_lambda <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="va">lin_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv.html">cv</a></span><span class="op">(</span><span class="va">lin_path</span>, n_folds <span class="op">=</span> <span class="fl">5</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">lin_cv</span><span class="op">$</span><span class="va">selected_min</span></span>
+<span><span class="co">#&gt; [1] "x1" "x2" "x3" "x6"</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="survival-outcomes">Survival outcomes<a class="anchor" aria-label="anchor" href="#survival-outcomes"></a>
 </h2>
 <p>On a survival <code><a href="../reference/pp_data.html">pp_data()</a></code> object the same calls fit:</p>
@@ -255,7 +279,7 @@ and provider effects and the lasso on <span class="math inline">\(\beta\)</span>
 expanding the data into person-periods. The provider effects are
 identified by a zero median.</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sim_kecc.html">sim_kecc</a></span><span class="op">(</span>n_providers <span class="op">=</span> <span class="fl">40</span>, rows_per_patient <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"survival"</span>,</span>
 <span>              n_covariates <span class="op">=</span> <span class="fl">6</span>, beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.6</span>, <span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.4</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, seed <span class="op">=</span> <span class="fl">41</span><span class="op">)</span></span>
 <span><span class="va">ps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pp_data.html">pp_data</a></span><span class="op">(</span><span class="va">s</span>, x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>, provider <span class="op">=</span> <span class="st">"provider"</span>, patient <span class="op">=</span> <span class="st">"patient"</span>,</span>

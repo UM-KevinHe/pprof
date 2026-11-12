@@ -2,14 +2,15 @@
 
 Chooses the penalty of a
 [`var_select()`](https://um-kevinhe.github.io/pprof/reference/var_select.md)
-path by K-fold cross-validation of the binomial deviance (for a survival
-outcome, the partial-likelihood deviance per event of the held-out rows
-within their own strata and risk sets for the Cox model, the binomial
-deviance per person-period for the discrete-time model). Folds are
-formed within every provider over its patients (rows when there is no
-patient column), so that each provider is present in every training set
-whenever it has at least two units; a provider held out entirely is
-predicted with the median provider effect of the training fit.
+path by K-fold cross-validation of the binomial deviance (the squared
+error for a continuous outcome; for a survival outcome, the
+partial-likelihood deviance per event of the held-out rows within their
+own strata and risk sets for the Cox model, the binomial deviance per
+person-period for the discrete-time model). Folds are formed within
+every provider over its patients (rows when there is no patient column),
+so that each provider is present in every training set whenever it has
+at least two units; a provider held out entirely is predicted with the
+median provider effect of the training fit.
 
 ## Usage
 

@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -117,7 +117,8 @@ fit; default the fitted rows.</p></dd>
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p><code>"link"</code> (the linear predictor, including any offset) or
-<code>"response"</code>: the probability for the logistic model, the relative
+<code>"response"</code>: the probability for the logistic model, the mean for the
+linear model (the same as <code>"link"</code>), the relative
 hazard \(e^\eta\) for the Cox model, and for the discrete-time model
 the probability of the event by the row's time, \(1 - \prod_k (1 -
   h_{jk})\) over the fit's periods up to that time (a time between two

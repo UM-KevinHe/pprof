@@ -6,7 +6,8 @@
     }
   };
 </script><script src="../lightswitch.js"></script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Source_Sans_3-0.4.10/font.css" rel="stylesheet"><link href="../deps/JetBrains_Mono-0.4.10/font.css" rel="stylesheet"><link href="../deps/Source_Serif_4-0.4.10/font.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Variable selection with unpenalized provider effects — var_select"><meta name="description" content="Lasso and group-lasso paths for the logistic model with fixed provider
-effects, \(\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta\), where
+effects, \(\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta\) (and,
+by the outcome, the linear, Cox and discrete-time models below), where
 the provider effects (and any covariate named in penalize's complement)
 are never penalized. The objective at penalty \(\lambda\) is
 $$-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
@@ -14,9 +15,11 @@ $$-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
 \sum_g m_g \|\beta_g\|_2,$$
 solved by coordinate descent on standardized covariates (each penalized
 group orthonormalized) with one Newton step on the provider effects per
-cycle, warm starts along a decreasing sequence of \(\lambda\), and an
-active-set strategy."><meta property="og:description" content="Lasso and group-lasso paths for the logistic model with fixed provider
-effects, \(\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta\), where
+cycle (for the logistic model; the linear model profiles them out in
+closed form, see Details), warm starts along a decreasing sequence of
+\(\lambda\), and an active-set strategy."><meta property="og:description" content="Lasso and group-lasso paths for the logistic model with fixed provider
+effects, \(\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta\) (and,
+by the outcome, the linear, Cox and discrete-time models below), where
 the provider effects (and any covariate named in penalize's complement)
 are never penalized. The objective at penalty \(\lambda\) is
 $$-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
@@ -24,8 +27,9 @@ $$-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
 \sum_g m_g \|\beta_g\|_2,$$
 solved by coordinate descent on standardized covariates (each penalized
 group orthonormalized) with one Newton step on the provider effects per
-cycle, warm starts along a decreasing sequence of \(\lambda\), and an
-active-set strategy."></head><body>
+cycle (for the logistic model; the linear model profiles them out in
+closed form, see Details), warm starts along a decreasing sequence of
+\(\lambda\), and an active-set strategy."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -33,7 +37,7 @@ active-set strategy."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">pprof</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,7 +88,8 @@ active-set strategy."></head><body>
 
     <div class="ref-description section level2">
     <p>Lasso and group-lasso paths for the logistic model with fixed provider
-effects, \(\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta\), where
+effects, \(\mathrm{logit}\, p_{ij} = \gamma_i + Z_{ij}^\top\beta\) (and,
+by the outcome, the linear, Cox and discrete-time models below), where
 the provider effects (and any covariate named in <code>penalize</code>'s complement)
 are never penalized. The objective at penalty \(\lambda\) is
 $$-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
@@ -92,8 +97,9 @@ $$-\frac{1}{n}\,\ell(\gamma, \beta) + \lambda \sum_j m_j |\beta_j|
 \sum_g m_g \|\beta_g\|_2,$$
 solved by coordinate descent on standardized covariates (each penalized
 group orthonormalized) with one Newton step on the provider effects per
-cycle, warm starts along a decreasing sequence of \(\lambda\), and an
-active-set strategy.</p>
+cycle (for the logistic model; the linear model profiles them out in
+closed form, see Details), warm starts along a decreasing sequence of
+\(\lambda\), and an active-set strategy.</p>
     </div>
 
     <div class="section level2">
@@ -124,8 +130,8 @@ active-set strategy.</p>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>an object from <code><a href="pp_data.html">pp_data()</a></code> with a binary, binomial or survival
-outcome.</p></dd>
+<dd><p>an object from <code><a href="pp_data.html">pp_data()</a></code> with a binary, binomial, continuous
+or survival outcome.</p></dd>
 
 
 <dt id="arg-penalty">penalty<a class="anchor" aria-label="anchor" href="#arg-penalty"></a></dt>
@@ -219,7 +225,7 @@ lasso):</p>
 column per <code>lambda</code>) and the periods' times.</p></dd>
 
 <dt>model</dt>
-<dd><p><code>"logistic"</code>, <code>"cox"</code> or <code>"discrete"</code>.</p></dd>
+<dd><p><code>"logistic"</code>, <code>"linear"</code>, <code>"cox"</code> or <code>"discrete"</code>.</p></dd>
 
 <dt>lambda, deviance, iter</dt>
 <dd><p>per value of <code>lambda</code> (the deviance of the
@@ -249,6 +255,22 @@ every fitter. The path starts from the fit with the unpenalized covariates
 only (or the provider-only model), whose residuals give the largest
 \(\lambda\). The deviance reported per \(\lambda\) is \(-2\ell\)
 without the constant term.</p>
+<p>With a continuous outcome the model is the linear model \(y_{ij} =
+\gamma_i + Z_{ij}^\top\beta + \varepsilon_{ij}\) and the objective
+\(\frac{1}{2n}\sum (y - \gamma - Z\beta)^2\) plus the penalty. For
+any \(\beta\) the best \(\gamma_i\) is the provider's mean of \(y -
+Z\beta\), so the provider effects are profiled out exactly by centring the
+outcome and the covariates within providers, once, with no iteration on
+\(\gamma\): a Newton step on \(\gamma\) would land on this minimizer
+in one step. The path is coordinate descent on \(\beta\) over the Gram
+matrix of the centred data (each update costs \(O(p)\) whatever the
+number of rows). Standardization and the orthonormalization
+of groups are those of the logistic model; a group's step is majorized by
+the largest eigenvalue of its block of the centred Gram matrix. The
+deviance is the residual sum of squares, and the end of a long path is the
+within-provider regression of <code><a href="fit_linear_fe.html">fit_linear_fe()</a></code>. A covariate constant
+within every provider is absorbed by the provider effects and refused.
+<code>bound</code>, <code>mm</code>, <code>backtrack</code> and <code>threads</code> are not used.</p>
 <p>With a survival outcome (<code><a href="pp_data.html">pp_data()</a></code> with <code>time</code> and <code>event</code>) the paths
 are those of <code>grplasso</code>'s <code>Strat.cox()</code> and <code>pp.DiscSurv()</code>:</p><ul><li><p><code>model = "cox"</code>: the weighted partial likelihood of the Cox model with
 one baseline per provider, counting-process rows <code>(start, stop]</code>, case

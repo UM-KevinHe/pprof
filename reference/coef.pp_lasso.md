@@ -56,11 +56,12 @@ selected_covariates(object, lambda = NULL, which = NULL)
 - type:
 
   `"link"` (the linear predictor, including any offset) or `"response"`:
-  the probability for the logistic model, the relative hazard \\e^\eta\\
-  for the Cox model, and for the discrete-time model the probability of
-  the event by the row's time, \\1 - \prod_k (1 - h\_{jk})\\ over the
-  fit's periods up to that time (a time between two periods counts up to
-  the earlier one, a time before the first period counts the first).
+  the probability for the logistic model, the mean for the linear model
+  (the same as `"link"`), the relative hazard \\e^\eta\\ for the Cox
+  model, and for the discrete-time model the probability of the event by
+  the row's time, \\1 - \prod_k (1 - h\_{jk})\\ over the fit's periods
+  up to that time (a time between two periods counts up to the earlier
+  one, a time before the first period counts the first).
 
 - unseen:
 

@@ -1,15 +1,18 @@
 # Variable selection with unpenalized provider effects
 
 Lasso and group-lasso paths for the logistic model with fixed provider
-effects, \\\mathrm{logit}\\ p\_{ij} = \gamma_i + Z\_{ij}^\top\beta\\,
+effects, \\\mathrm{logit}\\ p\_{ij} = \gamma_i + Z\_{ij}^\top\beta\\
+(and, by the outcome, the linear, Cox and discrete-time models below),
 where the provider effects (and any covariate named in `penalize`'s
 complement) are never penalized. The objective at penalty \\\lambda\\ is
 \$\$-\frac{1}{n}\\\ell(\gamma, \beta) + \lambda \sum_j m_j \|\beta_j\|
 \qquad \text{or} \qquad -\frac{1}{n}\\\ell(\gamma, \beta) + \lambda
 \sum_g m_g \\\beta_g\\\_2,\$\$ solved by coordinate descent on
 standardized covariates (each penalized group orthonormalized) with one
-Newton step on the provider effects per cycle, warm starts along a
-decreasing sequence of \\\lambda\\, and an active-set strategy.
+Newton step on the provider effects per cycle (for the logistic model;
+the linear model profiles them out in closed form, see Details), warm
+starts along a decreasing sequence of \\\lambda\\, and an active-set
+strategy.
 
 ## Usage
 
@@ -41,7 +44,7 @@ var_select(
 
   an object from
   [`pp_data()`](https://um-kevinhe.github.io/pprof/reference/pp_data.md)
-  with a binary, binomial or survival outcome.
+  with a binary, binomial, continuous or survival outcome.
 
 - penalty:
 
@@ -139,7 +142,7 @@ lasso):
 
 - model:
 
-  `"logistic"`, `"cox"` or `"discrete"`.
+  `"logistic"`, `"linear"`, `"cox"` or `"discrete"`.
 
 - lambda, deviance, iter:
 
@@ -175,6 +178,25 @@ fitter. The path starts from the fit with the unpenalized covariates
 only (or the provider-only model), whose residuals give the largest
 \\\lambda\\. The deviance reported per \\\lambda\\ is \\-2\ell\\ without
 the constant term.
+
+With a continuous outcome the model is the linear model \\y\_{ij} =
+\gamma_i + Z\_{ij}^\top\beta + \varepsilon\_{ij}\\ and the objective
+\\\frac{1}{2n}\sum (y - \gamma - Z\beta)^2\\ plus the penalty. For any
+\\\beta\\ the best \\\gamma_i\\ is the provider's mean of \\y -
+Z\beta\\, so the provider effects are profiled out exactly by centring
+the outcome and the covariates within providers, once, with no iteration
+on \\\gamma\\: a Newton step on \\\gamma\\ would land on this minimizer
+in one step. The path is coordinate descent on \\\beta\\ over the Gram
+matrix of the centred data (each update costs \\O(p)\\ whatever the
+number of rows). Standardization and the orthonormalization of groups
+are those of the logistic model; a group's step is majorized by the
+largest eigenvalue of its block of the centred Gram matrix. The deviance
+is the residual sum of squares, and the end of a long path is the
+within-provider regression of
+[`fit_linear_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_linear_fe.md).
+A covariate constant within every provider is absorbed by the provider
+effects and refused. `bound`, `mm`, `backtrack` and `threads` are not
+used.
 
 With a survival outcome
 ([`pp_data()`](https://um-kevinhe.github.io/pprof/reference/pp_data.md)

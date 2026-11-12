@@ -11,9 +11,9 @@ correlated with it.
 
 [`var_select()`](https://um-kevinhe.github.io/pprof/reference/var_select.md)
 fits the lasso or group-lasso path of the fixed-effect model with the
-provider effects kept, for binary, binomial and survival outcomes;
-[`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md) chooses the
-penalty by cross-validation.
+provider effects kept, for binary, binomial, continuous and survival
+outcomes; [`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md)
+chooses the penalty by cross-validation.
 
 ## The objective
 
@@ -28,7 +28,8 @@ warm starts along a decreasing sequence of \\\lambda\\ and an active-set
 strategy, so that the provider effects are updated in closed form from
 their own records and never form indicator columns (the multi-layer
 algorithm of the KECC measures paper; `grplasso`’s `pp.lasso` and
-`grp.lasso`).
+`grp.lasso`). The linear model needs no step on the provider effects at
+all (see Continuous outcomes).
 
 ## A lasso path
 
@@ -148,6 +149,33 @@ summary(fit_logistic_fe(pd_sel))
 #> 3  0.45102480
 #> 4  0.08385430
 #> 5  0.08383743
+```
+
+## Continuous outcomes
+
+For a continuous outcome the model is the linear model \\y\_{ij} =
+\gamma_i + Z\_{ij}^\top\beta + \varepsilon\_{ij}\\ with the
+squared-error loss \\\frac{1}{2n}\sum (y - \gamma - Z\beta)^2\\. Here
+the provider effects need no iteration: for any \\\beta\\ the best
+\\\gamma_i\\ is the provider’s mean of \\y - Z\beta\\, so they are
+profiled out in closed form by centring the outcome and the covariates
+within providers, and the path is coordinate descent on \\\beta\\ alone
+over the Gram matrix of the centred data. The end of a long path is the
+within-provider regression of
+[`fit_linear_fe()`](https://um-kevinhe.github.io/pprof/reference/fit_linear_fe.md);
+[`cv()`](https://um-kevinhe.github.io/pprof/reference/cv.md) scores the
+held-out squared error.
+
+``` r
+
+dc <- sim_kecc(n_providers = 60, type = "continuous", n_covariates = 6,
+               beta = c(0.6, -0.5, 0.4, 0, 0, 0), seed = 5)
+pdc <- pp_data(dc, y = "y", x = paste0("x", 1:6), provider = "provider",
+               patient = "patient", message = FALSE)
+lin_path <- var_select(pdc, n_lambda = 30)
+lin_cv <- cv(lin_path, n_folds = 5, seed = 1)
+lin_cv$selected_min
+#> [1] "x1" "x2" "x3" "x6"
 ```
 
 ## Survival outcomes
